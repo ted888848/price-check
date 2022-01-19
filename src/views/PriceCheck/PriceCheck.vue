@@ -121,7 +121,7 @@
                     </td>
                 </div>
             </div>
-            <table v-if="searchJSONFiltered.length" class="bg-gray-700 text-center mt-1 text-white text-sm">
+            <table v-if="searchJSONStatsFiltered.length" class="bg-gray-700 text-center mt-1 text-white text-sm">
                 <thead class="bg-green-600" @click="modTbodyToggle=!modTbodyToggle">
                     <tr class="text-lg">
                         <td class="w-6 text-center hover:cursor-default">查</td>
@@ -132,7 +132,7 @@
                     </tr>
                 </thead>
                 <tbody v-show="modTbodyToggle" class="modsTbody" style="">
-                    <tr v-for="mod in searchJSONFiltered" :key="mod.id"
+                    <tr v-for="mod in searchJSONStatsFiltered" :key="mod.id"
                         class=" border-b-2 border-gray-400">
                         <td @click="mod.disabled=!mod.disabled" class="text-base">
                             <i v-if="!mod.disabled" class="fas fa-check-circle text-green-600 text-lg"></i>
@@ -556,7 +556,7 @@ export default {
             else
                 return this.searchResult
         },
-        searchJSONFiltered(){
+        searchJSONStatsFiltered(){
             return this.searchJSON.query.stats[0].filters.filter(ele => !(ele.id.endsWith('_influence') || ele.id.endsWith('stat_3624393862')))
         },
         maxAmout(){

@@ -133,6 +133,7 @@ function cleanupJSON(itemSearchJson){
 	// 	if(_.isEmpty(itemSearchJson.query.filters[key].filters))  delete itemSearchJson.query.filters[key]
 	// }
 	if(!isUnique) delete itemSearchJson.query.name
+	if(_.isNull(itemSearchJson.query.name)) delete itemSearchJson.query.name
 	return itemSearchJson
 } 
 export async function searchItem(itemSearchJson, league){

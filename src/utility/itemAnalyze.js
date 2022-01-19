@@ -68,6 +68,7 @@ export function itemAnalyze(item){
         case '匕首':
         case '法杖':
         case '單手劍':
+        case '細劍':
         case '單手斧':
         case '單手錘':
         case '權杖':
@@ -146,6 +147,7 @@ function parseItemName(section){
         匕首: 'weapon.dagger',
         法杖: 'weapon.wand',
         單手劍: 'weapon.onesword',
+        細劍: 'weapon.onesword',
         單手斧: 'weapon.oneaxe',
         單手錘: 'weapon.onemace',
         權杖: 'weapon.sceptre',
@@ -254,30 +256,38 @@ function parseMutilineMod(regSection, section, type){
     let temp=[]
     for(let i = 0; i < regSection.length ; ++i){
         let matchMod = APImods[type].mutiLines.filter( s => regSection[i].test(s.text[0]))
-        if(matchMod.length){
+        outer:
+        for(let mMod of matchMod){
             let flag=true
-            for(let [ index, mline ] of matchMod[0].text.entries()){
-                if((i+index)>=regSection.length || !regSection[i+index].test(mline))  {
+            for(let index in mMod.text){
+                if((i+(+index))>=regSection.length || !regSection[i+(+index)].test(mMod.text[+index]))  {
                     flag=false
                     break
                 }
             }
             if(flag){
-                let matchReg=matchMod[0].text.map(mod => new RegExp(mod.replace(/#/g,String.raw`[+-]?(\d+(?:\.\d+)?)`).replace(' (部分)','').replace(/減少|增加/,String.raw`(?:減少|增加)`)))
-                let tempGroup={...matchMod[0]}
+                let matchReg=mMod.text.map(mod => new RegExp(mod.replace(/#/g,String.raw`[+-]?(\d+(?:\.\d+)?)`).replace(' (部分)','').replace(/減少|增加/,String.raw`(?:減少|增加)`)))
+                let tempGroup={...mMod}
                 let tempValue=0
-                matchReg.forEach((mReg, ind) =>{
-                    let regGroup=section[i+ind].match(mReg)
+                let valueCount=0
+                for(let ind in matchReg){
+                    let regGroup=section[i+(+ind)].match(matchReg[ind])
+                    if(!regGroup) continue outer
                     regGroup.shift()
-                    if (regGroup.length) tempValue=regGroup.reduce((pre, ele) => pre + Number(ele), 0) / regGroup.length + tempValue
-                })
+                    if (regGroup.length) tempValue = regGroup.reduce((pre, ele) => { valueCount++ ; return pre + Number(ele) }, tempValue)
+                }
                 section.splice(i,tempGroup.text.length)
-                temp.push({...tempGroup, value:{min: tempValue}, disabled: true})
+                regSection.splice(i,tempGroup.text.length)
+                i -= tempGroup.text.length
+                i = i < 0 ? -1 : i
+                if(tempValue)
+                    temp.push({...tempGroup, value: {min: tempValue/valueCount} , disabled: true})
+                else
+                    temp.push({...tempGroup, disabled: true})
             }
         }
     }
     if(temp.length){
-        // if(!itemParsed[type]) itemParsed[type]=[]
         itemParsed[type]=temp
     }
 }
@@ -289,13 +299,12 @@ function parseMod(section, type){
         let matchMod=APImods[type].entries.filter( s => line.test(s.text))
         if(matchMod.length > 1){
             if(itemParsed.isWeaponOrArmor && matchMod.find(ele => ele.text.endsWith(' (部分)')))
-                matchMod=matchMod.filter( mod => mod.text.endsWith(' (部分)'))
+            matchMod=matchMod.filter( mod => mod.text.endsWith(' (部分)'))
             else{
                 matchMod=matchMod.filter( mod => !mod.text.endsWith(' (部分)'))
                 let regTemp=section[index].match(/增加|減少/)?.[0]
-                console.log(regTemp)
                 if(regTemp)
-                    matchMod=matchMod.filter(mod=> mod.text.includes(regTemp))
+                matchMod=matchMod.filter(mod=> mod.text.includes(regTemp))
             }
         }
         if(!matchMod.length) return false
@@ -306,6 +315,8 @@ function parseMod(section, type){
         if(['implicit','fractured'].includes(type)) isDisabled=false
         if(regGroup?.length) temp.push({...matchMod[0], value: {min: regGroup.reduce((pre, ele) => pre + Number(ele),0)/regGroup.length}, disabled: isDisabled})
         else temp.push({...matchMod[0], disabled: isDisabled})
+        if(temp[temp.length-1].value && (matchMod[0].text.match(/減少|增加/)?.[0] !== section[index].match(/減少|增加/)?.[0])) 
+            temp[temp.length-1].value.min = -temp[temp.length-1].value.min
     })
     if(temp.length){
         if(!itemParsed[type]) itemParsed[type]=[]
@@ -539,18 +550,14 @@ function parseClusterJewel(item){
             case '小型星團珠寶':
                 itemParsed.enchant[0].value.max = itemParsed.enchant[0].value.min
                 break
-            case '中型型星團珠寶':
+            case '中型星團珠寶':
                 temp = itemParsed.enchant[0].value.min
                 itemParsed.enchant[0].value.min = temp === 6 ? 6 : 4
                 itemParsed.enchant[0].value.max = temp === 6 ? 6 : 5
                 break
         }
-        if(itemParsed.baseType === '中型星團珠寶'){
-            temp = itemParsed.enchant[0].value.min
-            itemParsed.enchant[0].value.min = temp === 6 ? 6 : 4
-        }
-        
-        temp=item[0].find(ele=>ele.startsWith('附加的小型天賦給予：')).substring(10, item[0][0].indexOf(' (enchant)'))
+        temp=item[0].find(ele=>ele.startsWith('附加的小型天賦給予：'))
+        temp=temp.substring(10, temp.indexOf(' (enchant)'))
         temp=APImods.clusterJewel.entries.find(mod => mod.text.includes(temp))
         itemParsed.enchant.push({ id: "enchant.stat_3948993189", text: temp.text.split('\n'), value: { option: temp.id}, type: '附魔', disabled: false})
         itemParsed.enchant.forEach(ele=> ele.disabled = false)
@@ -644,6 +651,9 @@ function parseMap(item){
                 }
             }
         }
+    }
+    for(let section of item){
+        if(parseIdentify(section)===PARSE_ITEM_SKIP) break
     }
 }
 
