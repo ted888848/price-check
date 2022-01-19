@@ -1,0 +1,53 @@
+<template>
+    <div v-if="windowShowHide" class="absolute top-0 left-0 m-0 w-screen h-screen bg-gray-400 bg-opacity-30" 
+        @click.self="closeOverlay">
+        <button class="absolute top-10 left-10 bg-blue-600 hover:bg-gray-900 rounded-xl px-1 py-0.5" 
+            @click="settingWindowShow=!settingWindowShow"><i class="fas fa-cog text-4xl text-red-600"></i></button>
+        <button class="absolute top-28  left-10 bg-red-600 hover:bg-gray-900 rounded-xl px-1 py-0.5" 
+            @click="reloadAPIdata"><i class="fas fa-sync text-4xl text-blue-600"></i></button>
+        <setting-window  v-if="settingWindowShow" @close-settingWindow="closeSettingWindow" />
+    </div>
+</template>
+<script>
+import {ipcRenderer} from 'electron'
+import IPC from '@/ipc/ipcChannel'
+import SettingWindow from '../SettingWindow/SettingWindow.vue'
+import Store from 'electron-store'
+import { checkAPIdata } from '@/utility/setupAPI'
+export default {
+    name: 'overlay',
+    components:{
+        SettingWindow 
+    },
+    data(){
+        return{
+            windowShowHide: false,
+            settingWindowShow: false
+        }
+    },
+    created(){
+        ipcRenderer.on(IPC.OVERLAY_SHOW,()=>{ this.windowShowHide=true })
+        ipcRenderer.on(IPC.POE_ACTIVE,()=>{ 
+            this.windowShowHide=false;
+            this.closeSettingWindow()
+        })
+    },
+    methods:{
+        closeSettingWindow(){
+            this.settingWindowShow = false
+        },
+        closeOverlay(){
+            this.windowShowHide = false
+            this.closeSettingWindow()
+            ipcRenderer.send(IPC.FORCE_POE, true)
+        },
+        async reloadAPIdata(){
+            let store=new Store()
+            store.clear()
+            await checkAPIdata()
+            this.$emit('reloadLeagues')
+        }
+    }
+
+}
+</script>
