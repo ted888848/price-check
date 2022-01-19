@@ -1,5 +1,5 @@
 <template>
-    <div v-if="windowShowHide" class="absolute top-0 left-0 w-screen h-screen" @click.self="closePriceCheck" >
+    <div v-if="windowShowHide" class="absolute top-0 left-0 w-screen h-screen priceCheckRoot bg-gray-400 bg-opacity-25" @click.self="closePriceCheck" >
         <div  class="bg-gray-900 priceCheck absolute h-screen flex flex-col" :style="priceCheckPos">
             <div class="bg-gray-800 flex justify-center">
                 <span class="text-white text-2xl font-bold absolute left-1 hover:cursor-default">普通查價 </span>
@@ -208,7 +208,7 @@ export default {
     data(){
         return{
             priceCheckPos: {
-                right: '665px',
+                right: '0px',
             },
             windowShowHide: false,
             item: undefined,
@@ -334,7 +334,8 @@ export default {
         }
     },
     created(){
-        ipcRenderer.on(IPC.PRICE_CHECK_SHOW,(e,clip)=>{
+        ipcRenderer.on(IPC.PRICE_CHECK_SHOW,(e,clip, pos)=>{
+            this.priceCheckPos.right = pos
             this.windowShowHide=true
             this.resetSearchData()
             this.isSearchByBaseType=true
@@ -347,7 +348,6 @@ export default {
         })
         ipcRenderer.on(IPC.POE_ACTIVE,()=>{
             this.windowShowHide=false
-            this.priceCheckPos.right='665px'
         })
         this.loadLeagues()
     },
@@ -448,8 +448,7 @@ export default {
         },
         closePriceCheck(){
             this.windowShowHide = false
-            this.priceCheckPos.right='665px'
-            ipcRenderer.send(IPC.FORCE_POE, false)
+            ipcRenderer.send(IPC.FORCE_POE)
         },
         modTextColor(type){
             switch(type){
@@ -572,6 +571,9 @@ export default {
 
 </script>
 <style>
+div.priceCheckRoot{
+    overflow-x: hidden;
+}
 div.priceCheck{
     width: 500px;
     

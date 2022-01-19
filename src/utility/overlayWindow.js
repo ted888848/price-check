@@ -1,25 +1,22 @@
 import { BrowserWindow, ipcMain, BrowserView, dialog } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib';
-import { overlayWindow } from 'electron-overlay-window';
+import { OverlayWindow } from 'electron-overlay-window';
 import { PoeWindow } from './POEWindow'
 import IPC from '../ipc/ipcChannel'
 import { overlayEvent, priceCheckEvent} from '../ipc/ipcHandler'
-// let overlaySH = false
-// let priceCheckSH = false
+
 export let win;
 let BVwin
 export async function createWindow() {
     win = new BrowserWindow({
         width: 800,
         height: 600,
-        ...overlayWindow.WINDOW_OPTS,
+        ...OverlayWindow.WINDOW_OPTS,
         icon: `${__static}/MavenOrb256.ico`,
-        //backgroundColor: '#00000008',
         webPreferences: {
             nodeIntegration: true,
             contextIsolation: false,
             webSecurity: false,
-            //preload: path.join(__dirname, 'preload.js')
         },
     });
     if (process.env.WEBPACK_DEV_SERVER_URL) {
@@ -30,8 +27,7 @@ export async function createWindow() {
         createProtocol('app')
         await win.loadURL('app://./index.html')
     }
-    //win.setIgnoreMouseEvents(false);
-    ipcMain.on(IPC.FORCE_POE,() => { //true overlay ,false priceCheck
+    ipcMain.on(IPC.FORCE_POE,() => { 
         forcePOE()
     })
     ipcMain.on(IPC.BROWSER_VIEW,(e, url)=>{
@@ -40,10 +36,6 @@ export async function createWindow() {
     PoeWindow.attach(win, 'Path of Exile')
     PoeWindow.on('poeActiveChange',handlePoeActive)
     win.webContents.on('before-input-event',handleBIEvent)
-    // ipcMain.on('vueError',(e, name, message)=>{
-    //     dialog.showErrorBox(name, message)
-    // })
-    //forcePOE()
 
 }
 
@@ -80,13 +72,12 @@ export function toggleOverlay(){
 }
 
 export function togglePriceCheck(clip = null){
-    priceCheckEvent(clip)
+    priceCheckEvent(clip, PoeWindow.priceCheckPos)
     forceOverlay()
 }
 export function forceOverlay(){
     PoeWindow.isActive = false
-    //win.setIgnoreMouseEvents(false);
-    overlayWindow.activateOverlay()
+    OverlayWindow.activateOverlay()
 }
 export function forcePOE(){
     PoeWindow.isActive = true
@@ -94,6 +85,5 @@ export function forcePOE(){
         win.removeBrowserView(BVwin)
         BVwin.webContents.loadURL('about:blank')
     }
-    //win.setIgnoreMouseEvents(true);
-    overlayWindow.focusTarget()
+    OverlayWindow.focusTarget()
 }

@@ -1,11 +1,16 @@
-import { overlayWindow } from 'electron-overlay-window';
+import { OverlayWindow } from 'electron-overlay-window';
 import { EventEmitter } from 'events'
 class POEWindowClass extends EventEmitter{
     constructor(){
         super()
         this._isActive = true
     }
-    
+    get bounds(){
+        return OverlayWindow.bounds
+    }
+    get priceCheckPos(){
+        return `${Math.round(this.bounds.height*(37/60)-1)}px`
+    }
     set isActive(flag){
         if(this._isActive !== flag){
             this._isActive = flag
@@ -16,9 +21,9 @@ class POEWindowClass extends EventEmitter{
         return this._isActive
     }
     attach(win) {
-        overlayWindow.on('focus',() => this.isActive = true)
-        overlayWindow.on('blur',() => this.isActive = false)
-        overlayWindow.attachTo(win, 'Path of Exile')
+        OverlayWindow.events.on('focus',() => this.isActive = true)
+        OverlayWindow.events.on('blur',() => this.isActive = false)
+        OverlayWindow.attachTo(win, 'Path of Exile')
     }
 }
 

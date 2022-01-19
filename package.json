@@ -1,6 +1,6 @@
 {
   "name": "price-check",
-  "version": "0.1.5",
+  "version": "0.1.7",
   "private": true,
   "author": {
     "name": "周士達"
@@ -17,13 +17,12 @@
   },
   "main": "background.js",
   "dependencies": {
-    "@chenfengyuan/vue-countdown": "^2.0.0-rc",
     "@tailwindcss/postcss7-compat": "^2.2.17",
     "autoprefixer": "^9",
     "axios": "^0.24.0",
     "core-js": "^3.6.5",
     "electron": "^16.0.5",
-    "electron-overlay-window": "^2.0.1",
+    "electron-overlay-window": "^3.0.0-beta.1",
     "electron-store": "^8.0.1",
     "lodash": "^4.17.21",
     "postcss": "^7",
