@@ -24,9 +24,9 @@ let parseFuns=[
     parseItemLevel,
     parseInfluence,
     parseCorrupt,
+    parseImplicitMod,
     parseIdentify,
     parseEnchantMod,
-    parseImplicitMod,
     parseExplicitMod,
 ]
 function findUnique(type, isFinded){
@@ -60,7 +60,7 @@ export function itemAnalyze(item){
             return section
         }
     },itemSection[0])
-    if(parseItemName(itemSection[0]) === PARSE_SECTION_FAIL) return null
+    if(parseItemName(itemSection[0], itemSection) === PARSE_SECTION_FAIL) return null
     itemSection.shift()
     let isFindUnique={flag: false}
     switch(itemParsed.type.text){
@@ -141,7 +141,11 @@ export function itemAnalyze(item){
     if(itemParsed.baseType==='阿茲瓦特史記') parseTample(itemSection)
     return _.cloneDeep(itemParsed)
 }
-function parseItemName(section){
+function parseItemName(section, itemSection){
+    if(section[2]==="你無法使用這項裝備，它的數值將被忽略"){
+        section.pop()
+        section.push(...(itemSection.splice(1,1)[0]))
+    }
     let typeTrans={
         爪: 'weapon.claw',
         匕首: 'weapon.dagger',

@@ -113,7 +113,7 @@
                     <selecter class="text-sm style-chooser w-24" :options="rarityOptions" v-model="raritySelected" 
                          label="label" :filterable="false" :clearable="false"  />
                 </div>
-                <div class="flex items-center justify-center py-1" @click="twoWeekOffline=!twoWeekOffline">
+                <div class="flex items-center justify-center py-1 hover:cursor-pointer" @click="twoWeekOffline=!twoWeekOffline">
                     <span class="mx-1 text-white hover:cursor-default">2周離線</span>
                     <td class="text-base">
                         <i v-if="twoWeekOffline" class="fas fa-check-circle text-green-600 text-xl"></i>
@@ -389,10 +389,13 @@ export default {
             deep: true
         },
         influencesSelected: function(value,preValue){
+            console.log(value, preValue)
             if(value.length>preValue.length)
                 this.searchJSON.query.stats[0].filters.push(..._.clone(value.slice(preValue.length,value.length)))
             else if(value.length<preValue.length){
-                this.searchJSON.query.stats[0].filters.splice(this.searchJSON.query.stats[0].filters.findIndex(ele=>ele.id===preValue[value.length]),1)
+                let temp=this.searchJSON.query.stats[0].filters.findIndex(ele=>ele.id===preValue[value.length])
+                if(temp>-1)
+                    this.searchJSON.query.stats[0].filters.splice(this.searchJSON.query.stats[0].filters.findIndex(temp, 1))
             }
         },
         elderMapSelected: function(value){
@@ -438,6 +441,11 @@ export default {
             this.modTbodyToggle=true
             this.isSearching=false
             this.searchID=''
+            this.elderMapSelected=undefined
+            this.influencesSelected=[]
+            this.raritySelected=undefined
+            this.corruptedState=undefined
+            this.identifyState=undefined
         },
         loadLeagues(){
             let store = new Store()
