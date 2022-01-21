@@ -36,7 +36,6 @@ export async function createWindow() {
     PoeWindow.attach(win, 'Path of Exile')
     PoeWindow.on('poeActiveChange',handlePoeActive)
     win.webContents.on('before-input-event',handleBIEvent)
-
 }
 
 function setupBV(url){
@@ -49,6 +48,7 @@ function setupBV(url){
 function handlePoeActive(isActive){
     if(isActive){
         win.webContents.send(IPC.POE_ACTIVE)
+        forcePOE()
     }
 }
 function handleBIEvent(event,input){

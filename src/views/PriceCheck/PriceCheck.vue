@@ -187,7 +187,7 @@
             </div>
 
             <!-- <span v-if="isSearching" class="text-xl text-white m-2 text-center">查詢中</span> -->
-            <span v-if="rateTimeLimit.flag.value" class="text-white bg-red-600 text-xl text-center my-2 hover:cursor-default">{{rateTimeLimit.second.value}} 秒後再回來  </span>
+            <span v-if="rateTimeLimit.flag.value" class="text-white bg-red-600 text-xl text-center my-2 hover:cursor-default">API次數限制 {{rateTimeLimit.second.value}} 秒後再回來  </span>
             <!-- <button class="mx-2 bg-blue-800 text-white rounded px-4" @click="isRateTimeLimit=!isRateTimeLimit">count test</button> -->
         </div>
     </div>
@@ -338,16 +338,16 @@ export default {
             this.priceCheckPos.right = pos
             this.windowShowHide=true
             this.resetSearchData()
-            this.isSearchByBaseType=true
+            this.resetItemData()
             this.item = itemAnalyze(clip)
             console.log(this.item)
             this.searchJSON=getSearchJSON(this.item)
             console.log(this.searchJSON)
-            this.twoWeekOffline = false
             this.setupJSONdata()
         })
         ipcRenderer.on(IPC.POE_ACTIVE,()=>{
             this.windowShowHide=false
+            this.resetItemData()
         })
         this.loadLeagues()
     },
@@ -389,16 +389,17 @@ export default {
             deep: true
         },
         influencesSelected: function(value,preValue){
-            console.log(value, preValue)
             if(value.length>preValue.length)
                 this.searchJSON.query.stats[0].filters.push(..._.clone(value.slice(preValue.length,value.length)))
             else if(value.length<preValue.length){
-                let temp=this.searchJSON.query.stats[0].filters.findIndex(ele=>ele.id===preValue[value.length])
+                let diff=_.differenceBy(preValue, value, 'id')[0]
+                let temp=this.searchJSON.query.stats[0].filters.findIndex(ele => ele.id === diff.id)
                 if(temp>-1)
-                    this.searchJSON.query.stats[0].filters.splice(this.searchJSON.query.stats[0].filters.findIndex(temp, 1))
+                    this.searchJSON.query.stats[0].filters.splice(temp, 1)
             }
         },
         elderMapSelected: function(value){
+            if(!value) return
             let foundMod=this.searchJSON.query.stats[0].filters.find(ele=>ele.id==="implicit.stat_3624393862")
             foundMod.value.option=value.id
         },
@@ -411,7 +412,7 @@ export default {
             }
         },
         raritySelected: function(value){
-            if(value.id)
+            if(value?.id)
                 this.searchJSON.query.filters.type_filters.filters.rarity = { option: value.id }
             else
                 delete this.searchJSON.query.filters.type_filters.filters.rarity
@@ -429,9 +430,6 @@ export default {
         }
         
 	},
-    // mounted(){
-    //     this.loadLeagues()
-    // },
     methods:{
         resetSearchData(){
             this.searchResult=[]
@@ -441,11 +439,15 @@ export default {
             this.modTbodyToggle=true
             this.isSearching=false
             this.searchID=''
-            this.elderMapSelected=undefined
+        },
+        resetItemData(){
             this.influencesSelected=[]
+            this.elderMapSelected=undefined
             this.raritySelected=undefined
             this.corruptedState=undefined
             this.identifyState=undefined
+            this.twoWeekOffline = false
+            this.isSearchByBaseType=true
         },
         loadLeagues(){
             let store = new Store()
@@ -456,6 +458,7 @@ export default {
         },
         closePriceCheck(){
             this.windowShowHide = false
+            this.resetItemData()
             ipcRenderer.send(IPC.FORCE_POE)
         },
         modTextColor(type){
@@ -495,6 +498,7 @@ export default {
         },
         openBrowerView(){
             this.priceCheckPos.right='0px'
+            console.log(this.searchID)
             ipcRenderer.send(IPC.BROWSER_VIEW,`${this.leagueSelect}/${this.searchID}`)
         },
         openBrower(){
