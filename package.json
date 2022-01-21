@@ -1,6 +1,6 @@
 {
   "name": "price-check",
-  "version": "0.1.8",
+  "version": "1.0.0",
   "private": true,
   "author": {
     "name": "周士達"
@@ -45,6 +45,9 @@
     "eslint-plugin-vue": "^7.0.0",
     "vue-cli-plugin-electron-builder": "^2.1.1",
     "vue-cli-plugin-tailwind": "~2.2.18"
+  },
+  "engines": {
+    "node": ">=14"
   },
   "eslintConfig": {
     "root": true,
