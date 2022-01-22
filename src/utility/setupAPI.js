@@ -8,7 +8,8 @@ import axios from 'axios'
 // import path from 'path'
 // import { win } from './overlayWindow'
 import Store from 'electron-store'
-import _ from 'lodash'
+import _, { result } from 'lodash'
+import { app, dialog, shell, BrowserWindow } from 'electron'
 // const fetch = require('node-fetch')
 
 const baseURL = 'https://web.poe.garena.tw/api'
@@ -208,4 +209,27 @@ export async function checkAPIdata(){
         await getCurrencyImageName()
     }
 }
-// export {APIitems, APImods, leagues}
+export function checkForUpdate(){
+    axios.get('https://api.github.com/repos/ted888848/price-check/releases/latest')
+    .then(response=>{
+        let latestVer=response.data.tag_name.substring(1)
+        if(latestVer!==app.getVersion()){
+            dialog.showMessageBox(new BrowserWindow({
+                show: false,
+                alwaysOnTop: true
+              }),{
+                title: '有新版本',
+                type: 'info',
+                message: `目前版本: ${app.getVersion()}\n新版本: ${latestVer}`,
+                buttons: ['打開下載網址', '好'],
+                defaultId: 0
+            })
+            .then(result=>{
+                if(result.response===0){
+                    shell.openExternal('https://github.com/ted888848/price-check/releases/latest')
+                }
+            })
+            .catch(err => console.log(err))
+        }
+    })
+}

@@ -1,5 +1,5 @@
-import { Tray, Menu, app } from "electron";
-import { forcePOE, win } from './overlayWindow'
+import { Tray, Menu, app, shell } from "electron";
+import { win } from './overlayWindow'
 import path from 'path'
 let tray 
 
@@ -7,10 +7,17 @@ export function setupTray(){
     tray = new Tray(path.join(__static,'MavenOrb256.ico'))
     const trayMenu = Menu.buildFromTemplate([
         {
-            label: 'open DevTool',
+            label: 'DevTool',
             type: 'normal',
             click(){
                 win.webContents.openDevTools({ mode: 'detach', activate: false })
+            }
+        },
+        {
+            label: '最新版本',
+            type: 'normal',
+            click(){
+                shell.openExternal('https://github.com/ted888848/price-check/releases/latest')
             }
         },
         {
