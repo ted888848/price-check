@@ -1,6 +1,6 @@
 <template>
     <div v-if="windowShowHide" class="absolute top-0 left-0 w-screen h-screen priceCheckRoot bg-gray-400 bg-opacity-25" @click.self="closePriceCheck" >
-        <div  class="bg-gray-900 priceCheck absolute h-screen flex flex-col" :style="priceCheckPos">
+        <div  class="bg-gray-900 priceCheck absolute h-full flex flex-col" :style="priceCheckPos">
             <div class="bg-gray-800 flex justify-center">
                 <span class="text-white text-2xl font-bold absolute left-1 hover:cursor-default">普通查價 </span>
                 <div class="flex items-center">
@@ -145,23 +145,36 @@
                                 <span v-for="t in mod.text" :key="t">{{t}}<br></span>
                             </div>
                         </td>
-                        <td><input v-if="mod.value" @dblclick="delete mod.value.min" type="number" v-model="mod.value.min" 
+                        <td><input v-if="mod.value" @dblclick="delete mod.value.min" type="number" v-model.number="mod.value.min" 
                         class="w-8 appearance-none rounded bg-gray-400 text-center text-black font-bold"></td>
-                        <td><input v-if="mod.value" @dblclick="delete mod.value.max" type="number" v-model="mod.value.max" 
+                        <td><input v-if="mod.value" @dblclick="delete mod.value.max" type="number" v-model.number="mod.value.max" 
                         class="w-8 appearance-none rounded bg-gray-400 text-center text-black font-bold"></td>
                     </tr>
                 </tbody>
             </table>
+            <div class="my-2 justify-center flex text-xl" v-if="!isSearching" >
+                <button @click="searchBtn" 
+                class="mx-2 bg-gray-500 text-white rounded px-1 hover:bg-gray-400 disabled:cursor-default disabled:opacity-60 disabled:bg-gray-500" 
+                :disabled="rateTimeLimit.flag" >Search</button>
+                <div v-if="isSearched">
+                    <button class="mx-2 bg-green-400 text-black rounded px-1 hover:bg-green-300 disabled:cursor-default disabled:opacity-60 disabled:bg-green-400" 
+                    @click="fetchMore" :disabled="rateTimeLimit.flag || searchedNumber >= ( searchTotal >= 100 ? 100 : searchTotal)">在搜50筆</button>
+                    <button class="mx-2 bg-blue-800 text-white rounded px-4 hover:bg-blue-700 disabled:cursor-default disabled:opacity-60 disabled:bg-blue-800" 
+                    @click="openBrower" :disabled="rateTimeLimit.flag">B</button>
+                </div>
+                <button class="mx-2 bg-blue-800 text-white rounded px-4 hover:bg-blue-700 disabled:cursor-default disabled:opacity-60 disabled:bg-blue-800" 
+                @click="openBrowerView" :disabled="rateTimeLimit.flag">BV</button>
+            </div>
             <table v-if="searchResultSorted.length" class="bg-blue-500 text-center text-white text-sm my-1 mx-5 w-1/2 self-center">
-                <thead>
-                    <tr>
+                <thead class="">
+                    <tr class=" border-b-2 border-red-500 text-base">
                         <td class=" hover:cursor-default">價格</td>
                         <td class=" hover:cursor-default">數量</td>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="">
                     <tr v-for="ele in searchResultSorted" :key="ele" class=" border-b-2 border-gray-600" 
-                    :class="{'text-red-500 text-xl bg-indigo-600': ele.amount===maxAmout.amount}">
+                    :class="{'text-red-500 text-xl bg-indigo-600 font-bold': ele.amount===maxAmout.amount}">
                         <td class="flex justify-center items-center">{{ele.price}}<img :src="ele.image" class=" w-7 h-7"></td>
                         <td>{{ele.amount}}</td>
                     </tr>
@@ -169,26 +182,10 @@
             </table>
             <span v-if="isSearchFail" class="text-white text-4xl text-center hover:cursor-default">fail</span>
             <span v-if="isSearched" class="text-white text-2xl text-center hover:cursor-default">共{{searchTotal}}筆,顯示{{searchedNumber}}</span>
-            <div class="my-2 justify-center flex text-xl" v-if="!isSearching" >
-                <button @click="searchBtn" 
-                class="mx-2 bg-gray-500 text-white rounded px-1 hover:bg-gray-400 disabled:cursor-default disabled:opacity-60 disabled:bg-gray-500" 
-                :disabled="rateTimeLimit.flag.value" >Search</button>
-                <div v-if="isSearched">
-                    <button class="mx-2 bg-green-400 text-black rounded px-1 hover:bg-green-300 disabled:cursor-default disabled:opacity-60 disabled:bg-green-400" 
-                    @click="fetchMore" :disabled="rateTimeLimit.flag.value || searchedNumber >= ( searchTotal >= 100 ? 100 : searchTotal)">在搜50筆</button>
-                    <button class="mx-2 bg-blue-800 text-white rounded px-4 hover:bg-blue-700 disabled:cursor-default disabled:opacity-60 disabled:bg-blue-800" 
-                    @click="openBrower" :disabled="rateTimeLimit.flag.value">B</button>
-                </div>
-                <button class="mx-2 bg-blue-800 text-white rounded px-4 hover:bg-blue-700 disabled:cursor-default disabled:opacity-60 disabled:bg-blue-800" 
-                @click="openBrowerView" :disabled="rateTimeLimit.flag.value">BV</button>
-            </div>
             <div v-if="isSearching" class=" text-8xl text-white my-5 text-center flex justify-center">
                 <i class="fas fa-sync fa-spin"></i>
             </div>
-
-            <!-- <span v-if="isSearching" class="text-xl text-white m-2 text-center">查詢中</span> -->
-            <span v-if="rateTimeLimit.flag.value" class="text-white bg-red-600 text-xl text-center my-2 hover:cursor-default">API次數限制 {{rateTimeLimit.second.value}} 秒後再回來  </span>
-            <!-- <button class="mx-2 bg-blue-800 text-white rounded px-4" @click="isRateTimeLimit=!isRateTimeLimit">count test</button> -->
+            <span v-if="rateTimeLimit.flag" class="text-white bg-red-600 text-xl text-center my-2 hover:cursor-default">API次數限制 {{rateTimeLimit.second}} 秒後再回來  </span>
         </div>
     </div>
 </template>
@@ -367,24 +364,32 @@ export default {
         'searchJSON.query.filters.misc_filters.filters.ilvl':{
             handler(value){
                 if(!value) return
-                if(value.min==='') value.min=undefined
-                if(value.max==='') value.max=undefined
+                if(value.min==='') delete value.min
+                if(value.max==='') delete value.max
             },
             deep: true
         },
         'searchJSON.query.filters.misc_filters.filters.gem_level':{
             handler(value){
                 if(!value) return
-                if(value.min==='') value.min=undefined
-                if(value.max==='') value.max=undefined
+                if(value.min==='') delete value.min
+                if(value.max==='') delete value.max
             },
             deep: true
         },
         'searchJSON.query.filters.misc_filters.filters.quality':{
             handler(value){
                 if(!value) return
-                if(value.min==='') value.min=undefined
-                if(value.max==='') value.max=undefined
+                if(value.min==='') delete value.min
+                if(value.max==='') delete value.max
+            },
+            deep: true
+        },
+        'searchJSON.query.filters.map_filters.filters.map_tier':{
+            handler(value){
+                if(!value) return
+                if(value.min==='') delete value.min
+                if(value.max==='') delete value.max
             },
             deep: true
         },
@@ -426,9 +431,7 @@ export default {
                 delete this.searchJSON.query.filters.trade_filters.filters.indexed
                 this.searchJSON.query.status.option="online"
             }
-
-        }
-        
+        }   
 	},
     methods:{
         resetSearchData(){
@@ -458,7 +461,6 @@ export default {
         },
         closePriceCheck(){
             this.windowShowHide = false
-            this.resetItemData()
             ipcRenderer.send(IPC.FORCE_POE)
         },
         modTextColor(type){
@@ -484,7 +486,7 @@ export default {
             if(this.item.elderMap){
                 this.elderMapSelected=this.elderMapOptions[this.item.elderMap.value.option-1]
             }
-            this.influencesSelected=this.influencesOptions.filter( ele => this.searchJSON.query.stats[0].filters.find(inf => inf.id===ele.id))
+            this.influencesSelected=_.intersectionBy(this.influencesOptions, this.searchJSON.query.stats[0].filters, 'id')
             this.searchJSON.query.stats[0].filters=this.searchJSON.query.stats[0].filters.filter(ele => !(ele.id.endsWith('_influence')))
             if(['普通', '魔法', '稀有'].includes(this.item.rarity)){
                 this.raritySelected = this.rarityOptions[5]
@@ -498,7 +500,6 @@ export default {
         },
         openBrowerView(){
             this.priceCheckPos.right='0px'
-            console.log(this.searchID)
             ipcRenderer.send(IPC.BROWSER_VIEW,`${this.leagueSelect}/${this.searchID}`)
         },
         openBrower(){

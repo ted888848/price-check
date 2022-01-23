@@ -7,11 +7,13 @@ import { overlayEvent, priceCheckEvent} from '../ipc/ipcHandler'
 
 export let win;
 let BVwin
+let isOverlayOpen
 export async function createWindow() {
     win = new BrowserWindow({
         width: 800,
         height: 600,
         ...OverlayWindow.WINDOW_OPTS,
+        // eslint-disable-next-line no-undef
         icon: `${__static}/MavenOrb256.ico`,
         webPreferences: {
             nodeIntegration: true,
@@ -19,6 +21,11 @@ export async function createWindow() {
             webSecurity: false,
         },
     });
+    await win.webContents.session.getCacheSize()
+    .then(size => {
+        if((size >>> 20) >= 100)
+            win.webContents.session.clearCache()
+    })
     if (process.env.WEBPACK_DEV_SERVER_URL) {
         await win.loadURL(process.env.WEBPACK_DEV_SERVER_URL)
         win.webContents.openDevTools({ mode: 'detach', activate: false })
@@ -46,9 +53,9 @@ function setupBV(url){
     BVwin.webContents.on('before-input-event',handleBIEvent)
 }
 function handlePoeActive(isActive){
-    if(isActive){
+    if(isOverlayOpen ) forceOverlay()
+    else if(isActive){
         win.webContents.send(IPC.POE_ACTIVE)
-        forcePOE()
     }
 }
 function handleBIEvent(event,input){
@@ -76,10 +83,12 @@ export function togglePriceCheck(clip = null){
     forceOverlay()
 }
 export function forceOverlay(){
+    isOverlayOpen=true
     PoeWindow.isActive = false
     OverlayWindow.activateOverlay()
 }
 export function forcePOE(){
+    isOverlayOpen=false
     PoeWindow.isActive = true
     if(BVwin) {
         win.removeBrowserView(BVwin)

@@ -96,19 +96,19 @@ let rateTimeLimitArr={
 }
 export let rateTimeLimit
 export function getIsCounting(){
-	rateTimeLimit=toRefs(reactive({flag: false, second: 0}))
+	rateTimeLimit=reactive({flag: false, second: 0})
 	return { rateTimeLimit }
 }
 
 function startCountdown(time){
-	if(time<rateTimeLimit.second.value) return null
+	if(time<rateTimeLimit.second) return null
 	let f
 	if(f) clearInterval(f)
-	rateTimeLimit.flag.value=true
-	rateTimeLimit.second.value=time
+	rateTimeLimit.flag=true
+	rateTimeLimit.second=time
 	f=setInterval(()=>{
-		if((--rateTimeLimit.second.value)<0) {
-			rateTimeLimit.flag.value=false
+		if((--rateTimeLimit.second)<0) {
+			rateTimeLimit.flag=false
 			clearInterval(f)
 		}
 	},1000)
@@ -128,17 +128,20 @@ function parseRateTime(header){
 }
 
 
-function cleanupJSON(itemSearchJson){
-	// for(let [key, index] of  Object.entries(itemSearchJson.query.filters)){
-	// 	if(_.isEmpty(itemSearchJson.query.filters[key].filters))  delete itemSearchJson.query.filters[key]
-	// }
-	if(!isUnique) delete itemSearchJson.query.name
-	if(_.isNull(itemSearchJson.query.name)) delete itemSearchJson.query.name
-	return itemSearchJson
+function cleanupJSON(searchJson){
+	if(!isUnique) delete searchJson.query.name
+	if(_.isNull(searchJson.query.name)) delete searchJson.query.name
+	searchJson.query.stats[0].filters.forEach(ele=>{
+		if(ele.value){
+			if(!_.isNumber(ele.value.min)) delete ele.value.min
+			if(!_.isNumber(ele.value.max)) delete ele.value.max
+		}
+	})
+	return searchJson
 } 
-export async function searchItem(itemSearchJson, league){
+export async function searchItem(searchJson, league){
 	searchResult=null
-	itemSearchJson=cleanupJSON(itemSearchJson)
+	searchJson=cleanupJSON(searchJson)
 	let searchID=''
 	let errData
 	await axios({
@@ -149,7 +152,7 @@ export async function searchItem(itemSearchJson, league){
 			'Content-Type': 'application/json'
 			//'Cookie': 'POESESSID=ed40963cf49f66e758b54da23316f274'
 		},
-		data: JSON.stringify(itemSearchJson),
+		data: JSON.stringify(searchJson),
 		// rejectUnauthorized: false,
 		// requestCert: false,
 		// agent: false,
@@ -162,11 +165,11 @@ export async function searchItem(itemSearchJson, league){
 		searchResult.nowSearched = 0
 	})
 	.catch((err)=>{
-		errData=err.response.data
+		errData=err.response
+		console.log(err.response)
 		if(err.response.status===429){
 			startCountdown(parseInt(err.response.headers['retry-after']))
 		}
-		console.log(err.response)
 	})
 	if(errData) return {data: errData, err: true}
 	return {result: await fetchItem(),total: searchResult.total, err: false, searchID: searchID }
