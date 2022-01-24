@@ -49,42 +49,46 @@
                     </div>
                 </div>
                 <div class="flex">
-                    <div v-if="searchJSON.query.filters.misc_filters.filters.ilvl" class="flex p-2 items-center justify-center">
-                        <span class="mx-1 text-white hover:cursor-default">物品等級:</span>
+                    <div v-if="itemILVL.show" class="flex p-2 items-center justify-center " :class="{'opacity-30': itemILVL.disabled}" 
+                    @click.self="itemILVL.disabled=!itemILVL.disabled">
+                        <span class="mx-1 text-white hover:cursor-default" @click.self="itemILVL.disabled=!itemILVL.disabled">物品等級:</span>
                         <input class="w-8 appearance-none rounded bg-gray-400 text-center mx-1 font-bold" type="number" 
-                        v-model.number="searchJSON.query.filters.misc_filters.filters.ilvl.min" 
-                        @dblclick="delete searchJSON.query.filters.misc_filters.filters.ilvl.min">
+                        v-model.number="itemILVL.min" :disabled="itemILVL.disabled" 
+                        @dblclick.stop="itemILVL.min=''">
                         <input class="w-8 appearance-none rounded bg-gray-400 text-center font-bold" type="number" 
-                        v-model.number="searchJSON.query.filters.misc_filters.filters.ilvl.max" 
-                        @dblclick="delete searchJSON.query.filters.misc_filters.filters.ilvl.max">
+                        v-model.number="itemILVL.max" :disabled="itemILVL.disabled" 
+                        @dblclick="itemILVL.max=''">
                     </div>
-                    <div v-else-if="searchJSON.query.filters.misc_filters.filters.gem_level" class="flex p-2 items-center justify-center">
-                        <span class="mx-1 text-white hover:cursor-default">寶石等級:</span>
+                    <div v-else-if="gemLVL.show" class="flex p-2 items-center justify-center" :class="{'opacity-30': gemLVL.disabled}" 
+                    @click.self="gemLVL.disabled=!gemLVL.disabled">
+                        <span class="mx-1 text-white hover:cursor-default" @click.self="gemLVL.disabled=!gemLVL.disabled">寶石等級:</span>
                         <input class="w-8 appearance-none rounded bg-gray-400 text-center mx-1 font-bold" type="number" 
-                        v-model.number="searchJSON.query.filters.misc_filters.filters.gem_level.min" 
-                        @dblclick="delete searchJSON.query.filters.misc_filters.filters.gem_level.min">
+                        v-model.number="gemLVL.min" :disabled="gemLVL.disabled" 
+                        @dblclick="gemLVL.min=''">
                         <input class="w-8 appearance-none rounded bg-gray-400 text-center font-bold" type="number" 
-                        v-model.number="searchJSON.query.filters.misc_filters.filters.gem_level.max" 
-                        @dblclick="delete searchJSON.query.filters.misc_filters.filters.gem_level.max">
+                        v-model.number="gemLVL.max" :disabled="gemLVL.disabled" 
+                        @dblclick="gemLVL.max=''">
                     </div>
-                    <div v-else-if="searchJSON.query.filters.map_filters.filters.map_tier" class="flex p-2 items-center justify-center">
-                        <span class="mx-1 text-white hover:cursor-default">地圖階級:</span>
+                    <div v-else-if="mapTier.show" class="flex p-2 items-center justify-center" :class="{'opacity-30': mapTier.disabled}" 
+                    @click.self="mapTier.disabled=!mapTier.disabled">
+                        <span class="mx-1 text-white hover:cursor-default" @click.self="mapTier.disabled=!mapTier.disabled">地圖階級:</span>
                         <input class="w-8 appearance-none rounded bg-gray-400 text-center mx-1 font-bold" type="number" 
-                        v-model.number="searchJSON.query.filters.map_filters.filters.map_tier.min" 
-                        @dblclick="delete searchJSON.query.filters.map_filters.filters.map_tier.min">
+                        v-model.number="mapTier.min" :disabled="mapTier.disabled" 
+                        @dblclick="mapTier.min=''">
                         <input class="w-8 appearance-none rounded bg-gray-400 text-center font-bold" type="number" 
-                        v-model.number="searchJSON.query.filters.map_filters.filters.map_tier.max" 
-                        @dblclick="delete searchJSON.query.filters.map_filters.filters.map_tier.max">
+                        v-model.number="mapTier.max" :disabled="mapTier.disabled" 
+                        @dblclick="mapTier.max=''">
                     </div>
                 </div>
-                <div class="flex p-2 items-center justify-center">
-                    <span class="mx-1 text-white hover:cursor-default">品質:</span>
+                <div class="flex p-2 items-center justify-center" :class="{'opacity-30': itemQuality.disabled}" 
+                    @click.self="itemQuality.disabled=!itemQuality.disabled">
+                    <span class="mx-1 text-white hover:cursor-default" @click.self="itemQuality.disabled=!itemQuality.disabled">品質:</span>
                     <input class="w-8 appearance-none rounded bg-gray-400 text-center mx-1 font-bold" type="number" 
-                    v-model.number="searchJSON.query.filters.misc_filters.filters.quality.min" 
-                    @dblclick="delete searchJSON.query.filters.misc_filters.filters.quality.min">
+                    v-model.number="itemQuality.min" :disabled="itemQuality.disabled" 
+                    @dblclick="itemQuality.min=''">
                     <input class="w-8 appearance-none rounded bg-gray-400 text-center font-bold" type="number" 
-                    v-model.number="searchJSON.query.filters.misc_filters.filters.quality.max" 
-                    @dblclick="delete searchJSON.query.filters.misc_filters.filters.quality.max">
+                    v-model.number="itemQuality.max" :disabled="itemQuality.disabled" 
+                    @dblclick="itemQuality.max=''">
                 </div>
                 <div v-if="item.elderMap" class="flex col-span-2 items-center justify-center">
                     <span class="mx-1 text-white hover:cursor-default">尊師守衛:</span>
@@ -328,6 +332,10 @@ export default {
             exaltedToChaos: 0,
             exaltedChaosImage: [],
             twoWeekOffline: false,
+            itemILVL:   {disabled: true, min: undefined, max: undefined, show: false},
+            gemLVL:     {disabled: true, min: undefined, max: undefined, show: false},
+            itemQuality: {disabled: true, min: undefined, max: undefined, show: true},
+            mapTier:    {disabled: true, min: undefined, max: undefined, show: false},
         }
     },
     created(){
@@ -361,35 +369,43 @@ export default {
             else
                 this.searchJSON.query.filters.misc_filters.filters.identified={ option: value }
         },
-        'searchJSON.query.filters.misc_filters.filters.ilvl':{
+        itemILVL:{
             handler(value){
-                if(!value) return
-                if(value.min==='') delete value.min
-                if(value.max==='') delete value.max
+                if(!value.show || (_.isUndefined(value.min) && _.isUndefined(value.max))) return
+                if(value.disabled) delete this.searchJSON.query.filters.misc_filters.filters.ilvl
+                else this.searchJSON.query.filters.misc_filters.filters.ilvl={min: value.min, max: value.max}
+                if(value.min==='') delete this.searchJSON.query.filters.misc_filters.filters.ilvl?.min
+                if(value.max==='') delete this.searchJSON.query.filters.misc_filters.filters.ilvl?.max
             },
             deep: true
         },
-        'searchJSON.query.filters.misc_filters.filters.gem_level':{
+        gemLVL:{
             handler(value){
-                if(!value) return
-                if(value.min==='') delete value.min
-                if(value.max==='') delete value.max
+                if(!value.show || (_.isUndefined(value.min) && _.isUndefined(value.max))) return
+                if(value.disabled) delete this.searchJSON.query.filters.misc_filters.filters.gem_level
+                else this.searchJSON.query.filters.misc_filters.filters.gem_level={min: value.min, max: value.max}
+                if(value.min==='') delete this.searchJSON.query.filters.misc_filters.filters.gem_level?.min
+                if(value.max==='') delete this.searchJSON.query.filters.misc_filters.filters.gem_level?.max
             },
             deep: true
         },
-        'searchJSON.query.filters.misc_filters.filters.quality':{
+        itemQuality:{
             handler(value){
-                if(!value) return
-                if(value.min==='') delete value.min
-                if(value.max==='') delete value.max
+                if(!value.show || (_.isUndefined(value.min) && _.isUndefined(value.max))) return
+                if(value.disabled) delete this.searchJSON.query.filters.misc_filters.filters.quality
+                else this.searchJSON.query.filters.misc_filters.filters.quality={min: value.min, max: value.max}
+                if(value.min==='') delete this.searchJSON.query.filters.misc_filters.filters.quality?.min
+                if(value.max==='') delete this.searchJSON.query.filters.misc_filters.filters.quality?.max
             },
             deep: true
         },
-        'searchJSON.query.filters.map_filters.filters.map_tier':{
+        mapTier:{
             handler(value){
-                if(!value) return
-                if(value.min==='') delete value.min
-                if(value.max==='') delete value.max
+                if(!value.show || (_.isUndefined(value.min) && _.isUndefined(value.max))) return
+                if(value.disabled) delete this.searchJSON.query.filters.map_filters.filters.map_tier
+                else this.searchJSON.query.filters.map_filters.filters.map_tier={min: value.min, max: value.max}
+                if(value.min==='') delete this.searchJSON.query.filters.map_filters.filters.map_tier?.min
+                if(value.max==='') delete this.searchJSON.query.filters.map_filters.filters.map_tier?.max
             },
             deep: true
         },
@@ -451,6 +467,10 @@ export default {
             this.identifyState=undefined
             this.twoWeekOffline = false
             this.isSearchByBaseType=true
+            this.itemILVL={disabled: true, min: undefined, max: undefined, show: false}
+            this.gemLVL={disabled: true, min: undefined, max: undefined, show: false}
+            this.itemQuality={disabled: true, min: undefined, max: undefined, show: true}
+            this.mapTier={disabled: true, min: undefined, max: undefined, show: false}
         },
         loadLeagues(){
             let store = new Store()
@@ -497,6 +517,28 @@ export default {
             else{
                 this.raritySelected = this.rarityOptions[0]
             }
+
+            if(this.searchJSON.query.filters.misc_filters.filters.ilvl) {
+                this.itemILVL.show=true
+                this.itemILVL.min=this.searchJSON.query.filters.misc_filters.filters.ilvl.min
+                this.itemILVL.max=this.searchJSON.query.filters.misc_filters.filters.ilvl.max
+            }
+            else if(this.searchJSON.query.filters.misc_filters.filters.gem_level) {
+                this.gemLVL.show=true
+                this.gemLVL.min=this.searchJSON.query.filters.misc_filters.filters.gem_level.min
+                this.gemLVL.max=this.searchJSON.query.filters.misc_filters.filters.gem_level.max
+            }
+            else if(this.searchJSON.query.filters.map_filters.filters.map_tier) {
+                this.mapTier.show=true
+                this.mapTier.min=this.searchJSON.query.filters.map_filters.filters.map_tier.min
+                this.mapTier.max=this.searchJSON.query.filters.map_filters.filters.map_tier.max
+            }
+            if(this.searchJSON.query.filters.misc_filters.filters.quality) {
+                this.itemQuality.show=true
+                this.itemQuality.min=this.searchJSON.query.filters.misc_filters.filters.quality.min
+                this.itemQuality.max=this.searchJSON.query.filters.misc_filters.filters.quality.max
+            }
+        
         },
         openBrowerView(){
             this.priceCheckPos.right='0px'

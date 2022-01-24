@@ -8,7 +8,7 @@ import axios from 'axios'
 // import path from 'path'
 // import { win } from './overlayWindow'
 import Store from 'electron-store'
-import _, { result } from 'lodash'
+import _ from 'lodash'
 import { app, dialog, shell, BrowserWindow } from 'electron'
 // const fetch = require('node-fetch')
 

@@ -316,7 +316,6 @@ function parseMod(section, type){
         let regGroup=section[index].match(matchReg)
         regGroup?.shift()
         let isDisabled = true
-        if(['implicit','fractured'].includes(type)) isDisabled=false
         if(regGroup?.length) temp.push({...matchMod[0], value: {min: regGroup.reduce((pre, ele) => pre + Number(ele),0)/regGroup.length}, disabled: isDisabled})
         else temp.push({...matchMod[0], disabled: isDisabled})
         if(temp[temp.length-1].value && (matchMod[0].text.match(/減少|增加/)?.[0] !== section[index].match(/減少|增加/)?.[0])) 

@@ -217,10 +217,14 @@ async function fetchExaltedToChaos(searchUrl,id){
 			//'Cookie': 'POESESSID=ed40963cf49f66e758b54da23316f274'
 		}})
 	.then((res)=>{
+		parseRateTime(res.headers)
 		ret=res.data.result
 	})
 	.catch(err=>{
 		console.log(err)
+		if(err.response.status===429){
+			startCountdown(parseInt(err.response.headers['retry-after']))
+		}
 	})
 	return ret
 }
@@ -240,6 +244,7 @@ export async function getExaltedToChaos(league){
 		// requestCert: false,
 		// agent: false,
 	}).then((response)=>{
+		parseRateTime(response.headers)
 		return response.data
 	}).then(async(data)=>{
 		let temp=await fetchExaltedToChaos(data.result.slice(0,5),data.result.id)
@@ -248,6 +253,9 @@ export async function getExaltedToChaos(league){
 	})
 	.catch((err)=>{
 		console.log(err)
+		if(err.response.status===429){
+			startCountdown(parseInt(err.response.headers['retry-after']))
+		}
 	})
 	return chaos.toFixed(0)
 }
