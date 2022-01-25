@@ -29,7 +29,7 @@ function registShortcut() {
         toggleOverlay()
     })
     globalShortcut.register('F5',()=>pasteTextToChat('/hideout'))
-    globalShortcut.register('F4',()=>pasteTextToChat(`/kick ${config.get('characterName')}`))
+    globalShortcut.register('F4',()=>pasteTextToChat(`/kick ${config.get('config.characterName')}`))
     globalShortcut.register('F3',()=>pasteTextToChat('%TY'))
     globalShortcut.register('F2',()=>pasteTextToChat('/invite ',true))
 }

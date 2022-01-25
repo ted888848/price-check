@@ -1,6 +1,6 @@
 import axios from 'axios'
 import _ from 'lodash'
-import { toRefs, reactive } from 'vue'
+import { reactive } from 'vue'
 let searchJSONSample = {
 	"query": {
 		"status": {
@@ -99,17 +99,20 @@ export function getIsCounting(){
 	rateTimeLimit=reactive({flag: false, second: 0})
 	return { rateTimeLimit }
 }
-
+let interval
 function startCountdown(time){
 	if(time<rateTimeLimit.second) return null
-	let f
-	if(f) clearInterval(f)
+	if(interval) {
+		clearInterval(interval)
+		interval=null
+	}
 	rateTimeLimit.flag=true
 	rateTimeLimit.second=time
-	f=setInterval(()=>{
+	interval=setInterval(()=>{
 		if((--rateTimeLimit.second)<0) {
 			rateTimeLimit.flag=false
-			clearInterval(f)
+			clearInterval(interval)
+			interval=null
 		}
 	},1000)
 }

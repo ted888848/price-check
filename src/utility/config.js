@@ -10,7 +10,6 @@ export function setupConfig(){
         characterName: '',
     })
     ipcMain.on(IPC.SET_CONFIG,(e, configData)=>{
-        console.log(configData)
         config.set('config',configData)
     })
     ipcMain.handle(IPC.GET_CONFIG,(e)=>{
