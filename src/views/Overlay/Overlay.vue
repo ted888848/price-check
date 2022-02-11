@@ -43,7 +43,9 @@ export default {
         },
         async reloadAPIdata(){
             let store=new Store()
+            let configTemp=store.get('config')
             store.clear()
+            store.set('config',configTemp)
             await checkAPIdata()
             this.$emit('reloadLeagues')
         }

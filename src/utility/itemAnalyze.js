@@ -625,6 +625,29 @@ function parseMap(item){
             }
         ]
     }
+    let conquerorMap={
+        id: "implicit.stat_2563183002",
+        text: "地圖含有 # 的壁壘",
+        type: "implicit",
+        options: [
+            {
+                id: 1,
+                text: "巴倫"
+            },
+            {
+                id: 2,
+                text: "維羅提尼亞"
+            },
+            {
+                id: 3,
+                text: "奧赫茲明"
+            },
+            {
+                id: 4,
+                text: "圖拉克斯"
+            }
+        ]
+    }
     item[0].forEach(line =>{
         if(line.startsWith('地圖階級: ')){
             itemParsed.mapTier=parseInt(line.match(/地圖階級: (\d+)/)[1])
@@ -649,6 +672,16 @@ function parseMap(item){
             if(match){
                 itemParsed.elderMap= {
                     id: "implicit.stat_3624393862",
+                    value: { option: match.id },
+                    disabled: false
+                }
+            }
+        }
+        else if(section[0].startsWith('地圖含有') && section.length>1){
+            let match=conquerorMap.options.filter(ele=> section[0].includes(`地圖含有${ele.text}的壁壘`))[0]
+            if(match){
+                itemParsed.conquerorMap= {
+                    id: "implicit.stat_2563183002",
                     value: { option: match.id },
                     disabled: false
                 }

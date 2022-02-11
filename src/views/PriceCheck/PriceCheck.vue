@@ -95,6 +95,11 @@
                     <selecter class="text-sm style-chooser-inf " :options="elderMapOptions" v-model="elderMapSelected" 
                          label="label" :filterable="false" :clearable="false"/>
                 </div>
+                <div v-if="item.conquerorMap" class="flex col-span-2 items-center justify-center">
+                    <span class="mx-1 text-white hover:cursor-default">征服者:</span>
+                    <selecter class="text-sm style-chooser-inf " :options="conquerorMapOptions" v-model="conquerorMapSelected" 
+                         label="label" :filterable="false" :clearable="false"/>
+                </div>
                 <div v-else-if="item.blightedMap" class="flex items-center justify-center">
                     <span class="mx-1 text-white hover:cursor-default">凋落圖</span>
                 </div>
@@ -289,6 +294,25 @@ export default {
             }
             ],
             elderMapSelected: undefined,
+            conquerorMapOptions: [
+            {
+                id: 1,
+                label: "巴倫"
+            },
+            {
+                id: 2,
+                label: "維羅提尼亞"
+            },
+            {
+                id: 3,
+                label: "奧赫茲明"
+            },
+            {
+                id: 4,
+                label: "圖拉克斯"
+            }
+            ],
+            conquerorMapSelected: undefined,
             rarityOptions: [
             {
                 id: undefined,
@@ -424,6 +448,11 @@ export default {
             let foundMod=this.searchJSON.query.stats[0].filters.find(ele=>ele.id==="implicit.stat_3624393862")
             foundMod.value.option=value.id
         },
+        conquerorMapSelected: function(value){
+            if(!value) return
+            let foundMod=this.searchJSON.query.stats[0].filters.find(ele=>ele.id==="implicit.stat_2563183002")
+            foundMod.value.option=value.id
+        },
         isSearchByBaseType: function(value){
             if(value){
                 this.searchJSON.query.type=this.item.baseType
@@ -462,6 +491,7 @@ export default {
         resetItemData(){
             this.influencesSelected=[]
             this.elderMapSelected=undefined
+            this.conquerorMapSelected=undefined
             this.raritySelected=undefined
             this.corruptedState=undefined
             this.identifyState=undefined
@@ -505,6 +535,9 @@ export default {
             this.identifyState = temp?.option
             if(this.item.elderMap){
                 this.elderMapSelected=this.elderMapOptions[this.item.elderMap.value.option-1]
+            }
+            if(this.item.conquerorMap){
+                this.conquerorMapSelected=this.conquerorMapOptions[this.item.conquerorMap.value.option-1]
             }
             this.influencesSelected=_.intersectionBy(this.influencesOptions, this.searchJSON.query.stats[0].filters, 'id')
             this.searchJSON.query.stats[0].filters=this.searchJSON.query.stats[0].filters.filter(ele => !(ele.id.endsWith('_influence')))
@@ -611,7 +644,7 @@ export default {
                 return this.searchResult
         },
         searchJSONStatsFiltered(){
-            return this.searchJSON.query.stats[0].filters.filter(ele => !(ele.id.endsWith('_influence') || ele.id.endsWith('stat_3624393862')))
+            return this.searchJSON.query.stats[0].filters.filter(ele => !(ele.id.endsWith('_influence') || ele.id.endsWith('stat_3624393862') || ele.id.endsWith('stat_2563183002')))
         },
         maxAmout(){
             return _.maxBy(this.searchResult, ele => ele.amount)

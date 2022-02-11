@@ -65,6 +65,7 @@ export function getSearchJSON(item){
     if(!_.isUndefined(item.blightedMap))  searchJSON.query.filters.map_filters.filters.map_blighted = { option: true}
     if(!_.isUndefined(item.UberBlightedMap))  searchJSON.query.filters.map_filters.filters.map_uberblighted = { option: true}
     if(!_.isUndefined(item.elderMap))  searchJSON.query.stats[0].filters.push(item.elderMap)
+    if(!_.isUndefined(item.conquerorMap))  searchJSON.query.stats[0].filters.push(item.conquerorMap)
 	if(item.isWeaponOrArmor)	searchJSON.query.filters.socket_filters={disabled: !(item.links===6), filters: {links:{min: item.links||0}}}
     return searchJSON
 }
