@@ -1,6 +1,6 @@
 {
   "name": "price-check",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "private": true,
   "author": {
     "name": "周士達"
@@ -13,7 +13,8 @@
     "eb": "vue-cli-service electron:build",
     "es": "vue-cli-service electron:serve",
     "postinstall": "electron-builder install-app-deps",
-    "postuninstall": "electron-builder install-app-deps"
+    "postuninstall": "electron-builder install-app-deps",
+    "rebuild": "npm rebuild --runtime=electron --target=16.0.5 --disturl=https://atom.io/download/atom-shell --abi=83"
   },
   "main": "background.js",
   "dependencies": {

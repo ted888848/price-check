@@ -36,25 +36,28 @@ function registShortcut() {
 function unRegistShortcut(){
     globalShortcut.unregisterAll()
 }
-
+let isClipStored=true
 function pasteTextToChat(text, moveToFront){
+    if(!isClipStored) {
+        return
+    }
+    isClipStored=false
     let clipSave=clipboard.readText()
-    clipboard.writeText(text)
     if(moveToFront){
+        clipboard.writeText(text)
         robotjs.keyTap('enter',['control'])
         robotjs.keyTap('home')
         robotjs.keyTap('delete')
     }
     else{
+        clipboard.writeText(text)
         robotjs.keyTap('enter')
-        // robotjs.keyTap('A',['control'])
     }
     robotjs.keyTap('V',['control'])
     robotjs.keyTap('enter')
-    // robotjs.keyTap('enter')
-    // robotjs.keyTap('up')
-    // robotjs.keyTap('up')
-    // robotjs.keyTap('escape')
-    clipboard.writeText(clipSave)
+    setTimeout(()=>{
+        clipboard.writeText(clipSave)
+        isClipStored=true
+    },120)
 }
 

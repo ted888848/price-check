@@ -689,14 +689,10 @@ function parseMap(item){
         }
     }
     for(let section of item){
+        parseCorrupt(section)
         if(parseIdentify(section)===PARSE_ITEM_SKIP) break
     }
 }
-
-
-// function parseNotNeedMods(item){
-
-// }
 function parseGem(item){
     let isAltQ = false
     let altQTrans={
