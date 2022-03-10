@@ -15,6 +15,9 @@ let searchJSONSample = {
 				"filters": {
 					"price": {
 						"min": 2
+					},
+					"collapse": {
+						"option": "true"
 					}
 				}
 			},
