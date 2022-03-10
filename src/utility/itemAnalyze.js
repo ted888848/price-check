@@ -16,6 +16,7 @@ let itemParsedSample={
     isWeaponOrArmor: false,
     isCorrupt: false,
     isIdentify: undefined,
+    autoSearch: true,
 }
 let itemParsed
 let parseFuns=[
@@ -87,7 +88,6 @@ export function itemAnalyze(item){
         case '鞋子':
         case '胸甲':
         case '頭部':
-        case '箭袋':
         case '盾':
             findUnique('armour', isFindUnique)
             parseArmor(itemSection)
@@ -109,9 +109,9 @@ export function itemAnalyze(item){
         case '深淵珠寶':
             findUnique('jewels',isFindUnique)
             //falls through
-        case '輿圖地區升級道具':
-            findUnique('watchstones',isFindUnique)
+        case '輿圖升級道具':
             //falls through
+        case '箭袋':
         case '飾品':
         case '劫盜裝備':
             parseOtherNeedMods(itemSection)
@@ -138,7 +138,9 @@ export function itemAnalyze(item){
             break
     }
     parsePseudoEleResistance()
+    if(itemParsed.rarity==='傳奇' && itemParsed.name) itemParsed.autoSearch=true
     if(itemParsed.baseType==='阿茲瓦特史記') parseTample(itemSection)
+    else if(itemParsed.baseType==='充能的羅盤') parseWatchstone(itemSection)
     return _.cloneDeep(itemParsed)
 }
 function parseItemName(section, itemSection){
@@ -481,6 +483,7 @@ function parseAllfuns(item){
 }
 function parseWeapon(item){
     itemParsed.isWeaponOrArmor=true
+    itemParsed.autoSearch=false
     item[0].forEach(line => { //parse Damage Section
         if(line.startsWith('品質: ')){
             itemParsed.quality=parseInt(line.match(/品質: \+(\d+)%/)[1])
@@ -522,6 +525,7 @@ function parseWeapon(item){
 }
 function parseArmor(item){
     itemParsed.isWeaponOrArmor=true
+    itemParsed.autoSearch=false
     item[0].forEach(line => { //parse Damage Section
         if(line.startsWith('品質: ')){
             itemParsed.quality=parseInt(line.match(/品質: \+(\d+)%/)[1])
@@ -587,15 +591,28 @@ function parseClusterJewel(item){
         if(state===PARSE_ITEM_SKIP) break
     }
 }
+function parseWatchstone(item){
+    for(let section of item){
+        if(parseEnchantMod(section)===PARSE_SECTION_SUCC) 
+            return
+    }
+}
 function parseOtherNeedMods(item){
+    itemParsed.autoSearch=false
     if(itemParsed.baseType.endsWith('星團珠寶')){
         parseClusterJewel(item)
         return 
     }
+    else if(itemParsed.baseType.endsWith("虛空石")){
+        parseWatchstone(item)
+        return
+    }
+    
     parseAllfuns(item)
     
 }
 function parseMap(item){
+    itemParsed.autoSearch=false
     // for(let map of APIitems.maps.entries){
     //     if(itemParsed.baseType.indexOf(map.type)>-1){
     //         itemParsed.baseType=map.type
@@ -694,6 +711,7 @@ function parseMap(item){
     }
 }
 function parseGem(item){
+    itemParsed.autoSearch=false
     let isAltQ = false
     let altQTrans={
         異常的: 1,
@@ -744,6 +762,7 @@ function parseGem(item){
     
 }
 function parseTample(item){
+    itemParsed.autoSearch=false
     item.shift()
     item[0]=item[0].map(line => line.replace(/ \(階級 [123]\)/, ''))
     parseMod(item[0],'temple')
@@ -754,6 +773,7 @@ function parseTample(item){
     })
 }
 function parseFlask(item){
+    itemParsed.autoSearch=false
     item[0].forEach(line=>{
         if(line.startsWith('品質: ')){
             itemParsed.quality=parseInt(line.match(/品質: \+(\d+)%/)[1])

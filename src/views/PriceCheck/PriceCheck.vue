@@ -167,7 +167,7 @@
                 :disabled="rateTimeLimit.flag" >Search</button>
                 <div v-if="isSearched">
                     <button class="mx-2 bg-green-400 text-black rounded px-1 hover:bg-green-300 disabled:cursor-default disabled:opacity-60 disabled:bg-green-400" 
-                    @click="fetchMore" :disabled="rateTimeLimit.flag || searchedNumber >= ( searchTotal >= 100 ? 100 : searchTotal)">在搜50筆</button>
+                    @click="fetchMore" :disabled="rateTimeLimit.flag || searchedNumber >= ( searchTotal >= 100 ? 100 : searchTotal)">在20筆</button>
                     <button class="mx-2 bg-blue-800 text-white rounded px-4 hover:bg-blue-700 disabled:cursor-default disabled:opacity-60 disabled:bg-blue-800" 
                     @click="openBrower" :disabled="rateTimeLimit.flag">B</button>
                 </div>
@@ -373,6 +373,8 @@ export default {
             this.searchJSON=getSearchJSON(this.item)
             console.log(this.searchJSON)
             this.setupJSONdata()
+            if(this.item.autoSearch)
+                this.searchBtn()
         })
         ipcRenderer.on(IPC.POE_ACTIVE,()=>{
             this.windowShowHide=false
@@ -599,7 +601,6 @@ export default {
                     this.searchResult.push({price: _price, currency: _currency, amount: temp[key], image: `https://web.poe.garena.tw${this.currencyImageUrl.find(ele=>ele.id===_currency).image}`})
                 }
             }
-            this.modTbodyToggle=false
             this.isSearching=false
         },
         searchBtn: _.debounce( async function(){
@@ -621,7 +622,6 @@ export default {
                 }
             }
             this.searchID = temp.searchID
-            this.modTbodyToggle=false
             this.isSearched=true
             this.isSearching=false
         },300),

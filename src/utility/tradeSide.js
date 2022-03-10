@@ -141,6 +141,9 @@ function cleanupJSON(searchJson){
 			if(!_.isNumber(ele.value.max)) delete ele.value.max
 		}
 	})
+	if(searchJson.query.type.endsWith('虛空石')){
+		delete searchJson.query.type
+	}
 	return searchJson
 } 
 export async function searchItem(searchJson, league){
@@ -181,7 +184,7 @@ export async function searchItem(searchJson, league){
 export async function fetchItem(){
 	if(searchResult.nowSearched >= (searchResult.total > 100 ? 100 : searchResult.total)) return null
 	let start=searchResult.nowSearched
-	let end=searchResult.nowSearched + 50 > searchResult.total ? searchResult.total : searchResult.nowSearched + 50
+	let end=searchResult.nowSearched + 20 > searchResult.total ? searchResult.total : searchResult.nowSearched + 20
 	let fetchResult=[]
 	let itemJsonUrl=[]
 	for(let i=start; i< end ; i+=10){
