@@ -357,7 +357,7 @@ export default {
             exaltedChaosImage: [],
             twoWeekOffline: false,
             itemILVL:   {disabled: true, min: undefined, max: undefined, show: false},
-            gemLVL:     {disabled: true, min: undefined, max: undefined, show: false},
+            gemLVL:     {disabled: false, min: undefined, max: undefined, show: false},
             itemQuality: {disabled: true, min: undefined, max: undefined, show: true},
             mapTier:    {disabled: true, min: undefined, max: undefined, show: false},
         }
@@ -500,7 +500,7 @@ export default {
             this.twoWeekOffline = false
             this.isSearchByBaseType=true
             this.itemILVL={disabled: true, min: undefined, max: undefined, show: false}
-            this.gemLVL={disabled: true, min: undefined, max: undefined, show: false}
+            this.gemLVL={disabled: false, min: undefined, max: undefined, show: false}
             this.itemQuality={disabled: true, min: undefined, max: undefined, show: true}
             this.mapTier={disabled: true, min: undefined, max: undefined, show: false}
         },
@@ -533,8 +533,8 @@ export default {
         setupJSONdata(){
             let temp=this.searchJSON.query.filters.misc_filters.filters.corrupted
             this.corruptedState = temp?.option
-            temp=this.searchJSON.query.filters.misc_filters.filters.identified
-            this.identifyState = temp?.option
+            // temp=this.searchJSON.query.filters.misc_filters.filters.identified
+            // this.identifyState = temp?.option
             if(this.item.elderMap){
                 this.elderMapSelected=this.elderMapOptions[this.item.elderMap.value.option-1]
             }

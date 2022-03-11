@@ -144,7 +144,7 @@ function cleanupJSON(searchJson){
 			if(!_.isNumber(ele.value.max)) delete ele.value.max
 		}
 	})
-	if(searchJson.query.type.endsWith('虛空石')){
+	if(searchJson.query.type?.endsWith('虛空石')){
 		delete searchJson.query.type
 	}
 	return searchJson
