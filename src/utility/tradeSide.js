@@ -267,5 +267,5 @@ export async function getExaltedToChaos(league){
 			startCountdown(parseInt(err.response.headers['retry-after']))
 		}
 	})
-	return chaos.toFixed(0)
+	return Math.round(chaos*0.2)*5
 }

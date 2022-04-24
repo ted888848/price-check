@@ -650,7 +650,6 @@ export default {
             return _.maxBy(this.searchResult, ele => ele.amount)
         },
         exaltedToChaosDec(){
-            
             return _.range(0.1,1,0.1).map(ele=>({e: ele.toFixed(1), c: (ele*this.exaltedToChaos).toFixed(0)}))
         },
         
