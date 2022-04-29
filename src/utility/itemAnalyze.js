@@ -301,7 +301,6 @@ function parseMod(section, type){
     let regSection=getStrReg(section, type)
     parseMutilineMod(regSection, section, type)
     let temp=[]
-    console.log(regSection)
     regSection.forEach((line, index)=> {
         let matchMod=APImods[type].entries.filter( s => line.test(s.text))
         if(matchMod.length > 1){
