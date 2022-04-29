@@ -301,6 +301,7 @@ function parseMod(section, type){
     let regSection=getStrReg(section, type)
     parseMutilineMod(regSection, section, type)
     let temp=[]
+    console.log(regSection)
     regSection.forEach((line, index)=> {
         let matchMod=APImods[type].entries.filter( s => line.test(s.text))
         if(matchMod.length > 1){
@@ -317,7 +318,7 @@ function parseMod(section, type){
         let matchReg=new RegExp(matchMod[0].text.replace(/#/g,String.raw`([+-]?\d+(?:\.\d+)?)`).replace(' (部分)','').replace(/減少|增加/,String.raw`(?:減少|增加)`))
         let regGroup=section[index].match(matchReg)
         regGroup?.shift()
-        let isDisabled = true
+        let isDisabled = !(type === 'enchant' )
         if(regGroup?.length) temp.push({...matchMod[0], value: {min: regGroup.reduce((pre, ele) => pre + Number(ele),0)/regGroup.length}, disabled: isDisabled})
         else temp.push({...matchMod[0], disabled: isDisabled})
         if(temp[temp.length-1].value && (matchMod[0].text.match(/減少|增加/)?.[0] !== section[index].match(/減少|增加/)?.[0])) 
@@ -592,6 +593,7 @@ function parseClusterJewel(item){
     }
 }
 function parseWatchstone(item){
+    itemParsed.autoSearch=true
     for(let section of item){
         if(parseEnchantMod(section)===PARSE_SECTION_SUCC) 
             return

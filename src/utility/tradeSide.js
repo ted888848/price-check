@@ -173,6 +173,7 @@ export async function searchItem(searchJson, league){
 		searchResult=data
 		searchID=data.id
 		searchResult.nowSearched = 0
+		searchResult.itemCount=searchResult.result.length
 	})
 	.catch((err)=>{
 		errData=err.response
@@ -182,12 +183,12 @@ export async function searchItem(searchJson, league){
 		}
 	})
 	if(errData) return {data: errData, err: true}
-	return {result: await fetchItem(),total: searchResult.total, err: false, searchID: searchID }
+	return {result: await fetchItem(),total: searchResult.itemCount, err: false, searchID: searchID }
 }
 export async function fetchItem(){
-	if(searchResult.nowSearched >= (searchResult.total > 100 ? 100 : searchResult.total)) return null
+	if(searchResult.nowSearched >= (searchResult.itemCount > 100 ? 100 : searchResult.itemCount)) return null
 	let start=searchResult.nowSearched
-	let end=searchResult.nowSearched + 20 > searchResult.total ? searchResult.total : searchResult.nowSearched + 20
+	let end=searchResult.nowSearched + 20 > searchResult.itemCount ? searchResult.itemCount : searchResult.nowSearched + 20
 	let fetchResult=[]
 	let itemJsonUrl=[]
 	for(let i=start; i< end ; i+=10){
