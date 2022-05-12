@@ -712,7 +712,7 @@ function parseMap(item){
     }
 }
 function parseGem(item){
-    itemParsed.autoSearch=false
+    itemParsed.autoSearch=true
     let isAltQ = false
     let altQTrans={
         異常的: 1,

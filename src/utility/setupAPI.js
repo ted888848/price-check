@@ -15,6 +15,7 @@ import { app, dialog, shell, BrowserWindow } from 'electron'
 const baseURL = 'https://web.poe.garena.tw/api'
 var leagues
 let store 
+let hiestReward=[]
 export var APIitems={
     accessories: undefined,
     armour: undefined,
@@ -41,7 +42,7 @@ export var APImods={
     veiled: undefined,
     temple: undefined,
     league: undefined,
-    clusterJewel: undefined
+    clusterJewel: undefined,
 }
 function setupItemArray(itemArray){
     let itemBaseType=[]
@@ -52,6 +53,9 @@ function setupItemArray(itemArray){
         }
         if(item.flags && item.flags.unique===true){
             itemBaseType[index].unique.push({name: item.name, text: item.text})
+            if(item.name.startsWith('贗品')){
+                hiestReward.push({name: item.name, type: item.type, text: item.text})
+            }
         }
     })
     return itemBaseType
@@ -77,6 +81,7 @@ function setupAPIItems(itemsJson){
             case 'currency':
             case 'gems':
                 APIitems[itemGroup.id]=itemGroup
+                if(itemGroup.id==='gems')   hiestReward.push(...itemGroup.entries)
                 break
             default:
                 return
@@ -85,6 +90,7 @@ function setupAPIItems(itemsJson){
     })
     APIitems.league=leagues[0]
     store.set('APIitems', APIitems)
+    store.set('HiestReward', hiestReward)
     // fs.writeFileSync(path.join(__dirname,'items.json'), JSON.stringify(APIitems))
 
 }

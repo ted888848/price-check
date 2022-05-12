@@ -38,6 +38,9 @@ let searchJSONSample = {
 }
 let searchResult
 let isUnique=false
+export function getDefaultSearchJSON(){
+	return _.cloneDeep(searchJSONSample)
+}
 export function getSearchJSON(item){
 	let searchJSON=_.cloneDeep(searchJSONSample)
 	searchResult=null
@@ -149,8 +152,9 @@ function cleanupJSON(searchJson){
 	}
 	return searchJson
 } 
-export async function searchItem(searchJson, league){
+export async function searchItem(searchJson, league, isFromHiestPC){
 	searchResult=null
+	isUnique=isFromHiestPC
 	searchJson=cleanupJSON(searchJson)
 	let searchID=''
 	let errData
