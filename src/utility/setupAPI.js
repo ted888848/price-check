@@ -221,13 +221,14 @@ export function checkForUpdate(){
         let latestVer=response.data.tag_name.substring(1).split('.')
         let currVer=app.getVersion().split('.')
         let flag=false
+        console.log(latestVer,currVer)
         for(let i=0;i<3;++i){
             if(latestVer[i]>currVer[i]) {
                 flag=true
                 break
             }
             if(latestVer[i]<currVer[i]) {
-                flag=true
+                flag=false
                 break
             }
         }
@@ -238,7 +239,7 @@ export function checkForUpdate(){
               }),{
                 title: '有新版本',
                 type: 'info',
-                message: `目前版本: ${app.getVersion()}\n新版本: ${latestVer}\n${response.data.body}`,
+                message: `目前版本: ${app.getVersion()}\n新版本: ${latestVer.join('.')}\n${response.data.body}`,
                 buttons: ['打開下載網址', '好'],
                 defaultId: 0
             })
