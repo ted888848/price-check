@@ -7,8 +7,13 @@
     <div class="flex p-2 items-center justify-center" >
         <span class="mx-1 text-white hover:cursor-default">相異品質:</span>
         <selecter class="text-sm style-chooser flex-grow" :options="gemAltQOptions"
-        v-model="gemAltQSelect" label="label" :clearable="false" :filterable="false"/>
+        v-model="gemAltQSelect" label="label" :clearable="false" :searchable="false"/>
     </div>
+    <div class="flex items-center justify-center py-1 hover:cursor-pointer" @click="twoWeekOffline=!twoWeekOffline">
+            <span class="mx-1 text-white">2周離線</span>
+            <i v-if="twoWeekOffline" class="fas fa-check-circle text-green-600 text-xl"></i>
+            <i v-else class="fas fa-times-circle text-red-600 text-xl"></i>
+        </div>
     <div class="my-2 justify-center flex text-xl" v-if="!isSearching" >
         <button @click="searchBtn" 
         class="mx-2 bg-gray-500 text-white rounded px-1 hover:bg-gray-400 disabled:cursor-default disabled:opacity-60 disabled:bg-gray-500" 
@@ -53,7 +58,7 @@ import { ipcRenderer, shell } from 'electron'
 import IPC from '@/ipc/ipcChannel'
 export default{
     name: "HiestPriceCheck",
-    props: ["leagueSelect", "currencyImageUrl"],
+    props: ["leagueSelect", "currencyImageUrl","exaltedToChaos"],
     setup(){
         const { rateTimeLimit } = getIsCounting()
         return { rateTimeLimit }
@@ -88,6 +93,7 @@ export default{
             searchTotal: 0,
             isSearching: false,
             searchID: '',
+            twoWeekOffline: false,
         }
     },
     created(){
@@ -96,6 +102,20 @@ export default{
         this.searchJSON=getDefaultSearchJSON()
         let store = new Store()
         this.gemReplicaOptions=store.get('HiestReward')
+        this.twoWeekOffline=false
+
+    },
+    watch:{
+        twoWeekOffline: function(value){
+            if(value){
+                this.searchJSON.query.filters.trade_filters.filters.indexed={ option: "2weeks" }
+                this.searchJSON.query.status.option="any"
+            }
+            else{
+                delete this.searchJSON.query.filters.trade_filters.filters.indexed
+                this.searchJSON.query.status.option="online"
+            }
+        },
     },
     methods:{
         resetSearchData(){
@@ -163,6 +183,9 @@ export default{
         },300)
     },
     computed:{
+        searchedNumber(){
+            return this.searchResultSorted.reduce((pre, curr)=>pre + curr.amount,0)
+        },
         searchResultSorted(){
             if(this.exaltedToChaos)
                 return this.searchResult.slice().sort((a,b)=>{
@@ -180,39 +203,4 @@ export default{
 }
 </script>
 <style>
-.style-chooser .vs__search::placeholder,
-.style-chooser .vs__dropdown-toggle,
-.style-chooser .vs__dropdown-menu{
-    text-align: center;
-    min-width: 0px;
-	background: #dfe5fb;
-	border: none;
-	color: #394066;
-}
-.style-chooser .vs__search{
-    padding: 0;
-    width: 0;
-    flex-grow: 0;
-}
-.style-chooser .vs__selected{
-    justify-content: center;
-    flex-grow: 1;
-}
-.style-chooser-inf .vs__search::placeholder,
-.style-chooser-inf .vs__dropdown-toggle,
-.style-chooser-inf .vs__dropdown-menu{
-    text-align: center;
-    min-width: fit-content;
-	background: #dfe5fb;
-	border: none;
-	color: #394066;
-}
-.style-chooser-inf .vs__selected-options{
-        min-width: 100px;
-}
-input::-webkit-outer-spin-button,
-input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
 </style>

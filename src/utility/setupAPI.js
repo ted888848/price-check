@@ -218,15 +218,27 @@ export async function checkAPIdata(){
 export function checkForUpdate(){
     axios.get('https://api.github.com/repos/ted888848/price-check/releases/latest')
     .then(response=>{
-        let latestVer=response.data.tag_name.substring(1)
-        if(latestVer!==app.getVersion()){
+        let latestVer=response.data.tag_name.substring(1).split('.')
+        let currVer=app.getVersion().split('.')
+        let flag=false
+        for(let i=0;i<3;++i){
+            if(latestVer[i]>currVer[i]) {
+                flag=true
+                break
+            }
+            if(latestVer[i]<currVer[i]) {
+                flag=true
+                break
+            }
+        }
+        if(flag){
             dialog.showMessageBox(new BrowserWindow({
                 show: false,
                 alwaysOnTop: true
               }),{
                 title: '有新版本',
                 type: 'info',
-                message: `目前版本: ${app.getVersion()}\n新版本: ${latestVer}`,
+                message: `目前版本: ${app.getVersion()}\n新版本: ${latestVer}\n${response.data.body}`,
                 buttons: ['打開下載網址', '好'],
                 defaultId: 0
             })

@@ -56,14 +56,14 @@ export function getSearchJSON(item){
     if(!_.isUndefined(item.gemLevel))  searchJSON.query.filters.misc_filters.filters.gem_level = { min: item.gemLevel }
     if(!_.isUndefined(item.itemLevel))  searchJSON.query.filters.misc_filters.filters.ilvl = { min: item.itemLevel }
     if(!_.isUndefined(item.type.option))  searchJSON.query.filters.type_filters.filters.category=item.type
-    if(!_.isUndefined(item.enchant))  searchJSON.query.stats[0].filters.push(...item.enchant)
-    if(!_.isUndefined(item.implicit)) searchJSON.query.stats[0].filters.push(...item.implicit)
-    if(!_.isUndefined(item.explicit)) searchJSON.query.stats[0].filters.push(...item.explicit)
-    if(!_.isUndefined(item.fractured))searchJSON.query.stats[0].filters.push(...item.fractured)
-    if(!_.isUndefined(item.crafted))  searchJSON.query.stats[0].filters.push(...item.crafted)
+    if(!_.isUndefined(item.enchant))  searchJSON.query.stats[0].filters.push(..._.cloneDeep(item.enchant))
+    if(!_.isUndefined(item.implicit)) searchJSON.query.stats[0].filters.push(..._.cloneDeep(item.implicit))
+    if(!_.isUndefined(item.explicit)) searchJSON.query.stats[0].filters.push(..._.cloneDeep(item.explicit))
+    if(!_.isUndefined(item.fractured))searchJSON.query.stats[0].filters.push(..._.cloneDeep(item.fractured))
+    if(!_.isUndefined(item.crafted))  searchJSON.query.stats[0].filters.push(..._.cloneDeep(item.crafted))
     if(!_.isUndefined(item.pseudo))   searchJSON.query.stats[0].filters.push(item.pseudo)
-    if(!_.isUndefined(item.temple))   searchJSON.query.stats[0].filters.push(...item.temple)
-    if(!_.isUndefined(item.influences))   searchJSON.query.stats[0].filters.push(...item.influences)
+    if(!_.isUndefined(item.temple))   searchJSON.query.stats[0].filters.push(..._.cloneDeep(item.temple))
+    if(!_.isUndefined(item.influences))   searchJSON.query.stats[0].filters.push(..._.cloneDeep(item.influences))
     if(!_.isUndefined(item.altQType)) searchJSON.query.filters.misc_filters.filters.gem_alternate_quality={option: item.altQType}
     if(!_.isUndefined(item.quality))  searchJSON.query.filters.misc_filters.filters.quality={min: item.quality}
     else searchJSON.query.filters.misc_filters.filters.quality={min: ''}

@@ -12,19 +12,19 @@
         <div class="flex p-2 items-center justify-center">
             <span class="mx-1 text-white hover:cursor-default">汙染:</span>
             <selecter class="text-sm style-chooser flex-grow" :options="generalOption" v-model="corruptedState" 
-             label="label" :reduce="ele => ele.value" :clearable="false" :filterable="false"/>
+             label="label" :reduce="ele => ele.value" :clearable="false" :searchable="false"/>
         </div>
         <div>
             <div class="flex p-2 items-center justify-center" v-if="item.rarity!=='寶石'">
                 <span class="mx-1 text-white hover:cursor-default">已鑑定:</span>
                 <selecter class="text-sm style-chooser flex-grow" :options="generalOption" v-model="identifyState" 
-                 label="label" :reduce="ele => ele.value" :clearable="false" :filterable="false"/>
+                 label="label" :reduce="ele => ele.value" :clearable="false" :searchable="false"/>
             </div>
             <div class="flex p-2 items-center justify-center" v-else>
                 <span class="mx-1 text-white hover:cursor-default">相異品:</span>
                 <selecter class="text-sm style-chooser flex-grow" :options="gemAltQOptions" 
                 v-model="searchJSON.query.filters.misc_filters.filters.gem_alternate_quality.option" 
-                 label="label" :reduce="ele => ele.value" :clearable="false" :filterable="false"/>
+                 label="label" :reduce="ele => ele.value" :clearable="false" :searchable="false"/>
             </div>
         </div>
         <div class="flex">
@@ -71,13 +71,13 @@
         </div>
         <div v-if="item.elderMap" class="flex col-span-2 items-center justify-center">
             <span class="mx-1 text-white hover:cursor-default">尊師守衛:</span>
-            <selecter class="text-sm style-chooser-inf " :options="elderMapOptions" v-model="elderMapSelected" 
-                 label="label" :filterable="false" :clearable="false"/>
+            <selecter class="text-sm style-chooser style-chooser-inf " :options="elderMapOptions" v-model="elderMapSelected" 
+                 label="label" :searchable="false" :clearable="false"/>
         </div>
         <div v-if="item.conquerorMap" class="flex col-span-2 items-center justify-center">
             <span class="mx-1 text-white hover:cursor-default">征服者:</span>
-            <selecter class="text-sm style-chooser-inf " :options="conquerorMapOptions" v-model="conquerorMapSelected" 
-                 label="label" :filterable="false" :clearable="false"/>
+            <selecter class="text-sm style-chooser style-chooser-inf " :options="conquerorMapOptions" v-model="conquerorMapSelected" 
+                 label="label" :searchable="false" :clearable="false"/>
         </div>
         <div v-else-if="item.blightedMap" class="flex items-center justify-center">
             <span class="mx-1 text-white hover:cursor-default">凋落圖</span>
@@ -85,10 +85,10 @@
         <div v-else-if="item.UberBlightedMap" class="flex items-center justify-center">
             <span class="mx-1 text-white hover:cursor-default">Uber凋落圖</span>
         </div>
-        <div v-else class="flex col-span-2 items-center justify-center">
+        <div v-else-if="item.isWeaponOrArmor || ['項鍊','戒指','腰帶','箭袋'].includes(item.type.text)" class="flex col-span-2 items-center justify-center">
             <span class="mx-1 text-white hover:cursor-default">勢力:</span>
-            <selecter class="text-sm style-chooser-inf " :options="influencesOptions" v-model="influencesSelected" 
-                 label="label" :filterable="false" multiple />
+            <div class=" flex-grow mx-1"><selecter class="text-sm style-chooser style-chooser-inf " :options="influencesOptions" v-model="influencesSelected" 
+            label="label" :searchable="false" multiple /></div>
         </div>
         <div v-if="item.isWeaponOrArmor" class="flex items-center justify-center py-1 hover:cursor-pointer"
             @click="searchJSON.query.filters.socket_filters.disabled=!searchJSON.query.filters.socket_filters.disabled">
@@ -99,14 +99,12 @@
         <div class="flex items-center justify-center py-1">
             <span class="mx-1 text-white hover:cursor-default">稀有度:</span>
             <selecter class="text-sm style-chooser w-24" :options="rarityOptions" v-model="raritySelected" 
-                 label="label" :filterable="false" :clearable="false"  />
+                 label="label" :searchable="false" :clearable="false"  />
         </div>
         <div class="flex items-center justify-center py-1 hover:cursor-pointer" @click="twoWeekOffline=!twoWeekOffline">
-            <span class="mx-1 text-white hover:cursor-default">2周離線</span>
-            <td class="text-base">
-                <i v-if="twoWeekOffline" class="fas fa-check-circle text-green-600 text-xl"></i>
-                <i v-else class="fas fa-times-circle text-red-600 text-xl"></i>
-            </td>
+            <span class="mx-1 text-white">2周離線</span>
+            <i v-if="twoWeekOffline" class="fas fa-check-circle text-green-600 text-xl"></i>
+            <i v-else class="fas fa-times-circle text-red-600 text-xl"></i>
         </div>
     </div>
     <table v-if="searchJSONStatsFiltered.length" class="bg-gray-700 text-center mt-1 text-white text-sm">
@@ -178,12 +176,11 @@
 <script>
 import { ipcRenderer, shell } from 'electron'
 import IPC from '@/ipc/ipcChannel'
-import Store from 'electron-store'
 import { getSearchJSON, searchItem, fetchItem, getIsCounting } from '@/utility/tradeSide'
 import _ from 'lodash' 
 export default {
     name: "NormalPriceCheck",
-    props: ["itemProp", "leagueSelect","currencyImageUrl"],
+    props: ["itemProp", "leagueSelect","currencyImageUrl","exaltedToChaos"],
     setup(){
         const { rateTimeLimit } = getIsCounting()
         return { rateTimeLimit }
@@ -496,7 +493,7 @@ export default {
                 this.conquerorMapSelected=this.conquerorMapOptions[this.item.conquerorMap.value.option-1]
             }
             this.influencesSelected=_.intersectionBy(this.influencesOptions, this.searchJSON.query.stats[0].filters, 'id')
-            this.searchJSON.query.stats[0].filters=this.searchJSON.query.stats[0].filters.filter(ele => !(ele.id.endsWith('_influence')))
+            this.searchJSON.query.stats[0].filters=this.searchJSON.query.stats[0].filters.filter(ele => ((!ele.id.endsWith('_influence')) || (ele.id.endsWith('_influence') && ele.text)))
             if(['普通', '魔法', '稀有'].includes(this.item.rarity)){
                 this.raritySelected = this.rarityOptions[5]
             }
@@ -511,6 +508,7 @@ export default {
                 this.itemILVL.show=true
                 this.itemILVL.min=this.searchJSON.query.filters.misc_filters.filters.ilvl.min
                 this.itemILVL.max=this.searchJSON.query.filters.misc_filters.filters.ilvl?.max
+                this.itemILVL.disabled=this.item.rarity==='傳奇'
             }
             else if(this.searchJSON.query.filters.misc_filters.filters.gem_level) {
                 this.gemLVL.show=true
@@ -605,52 +603,4 @@ export default {
 
 </script>
 <style>
-div.priceCheckRoot{
-    overflow-x: hidden;
-}
-div.priceCheck{
-    width: 500px;
-    
-}
-.style-chooser .vs__search::placeholder,
-.style-chooser .vs__dropdown-toggle,
-.style-chooser .vs__dropdown-menu{
-    text-align: center;
-    min-width: 0px;
-	background: #dfe5fb;
-	border: none;
-	color: #394066;
-}
-.style-chooser .vs__search{
-    padding: 0;
-    width: 0;
-    flex-grow: 0;
-}
-.style-chooser .vs__selected{
-    justify-content: center;
-    flex-grow: 1;
-}
-.style-chooser-inf .vs__search::placeholder,
-.style-chooser-inf .vs__dropdown-toggle,
-.style-chooser-inf .vs__dropdown-menu{
-    text-align: center;
-    min-width: fit-content;
-	background: #dfe5fb;
-	border: none;
-	color: #394066;
-}
-.style-chooser-inf .vs__selected-options{
-    min-width: 100px;
-}
-input::-webkit-outer-spin-button,
-input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-tbody.modsTbody>tr>td{
-    padding: 5px 1px;
-}
-.exaltedImg:hover .exaltedImgTooltip{
-    visibility: visible;
-}
 </style>

@@ -1,11 +1,12 @@
 <template>
     <div v-if="windowShowHide" class="absolute top-0 left-0 w-screen h-screen priceCheckRoot bg-gray-400 bg-opacity-25" @click.self="closePriceCheck" >
         <div  class="bg-gray-900 priceCheck absolute h-full flex flex-col" :style="priceCheckPos">
-            <div class="bg-gray-800 flex justify-between">
+            <div class="bg-gray-800 flex justify-center">
                 <!-- <span class="text-white text-2xl font-bold absolute left-1 hover:cursor-default">普通查價 </span> -->
-                <selecter class="text-sm style-chooser-inf" :options="priceCheckOptions" v-model="currentPriceCheck" 
-                         label="label" :filterable="false" :clearable="false" :reduce="option => option.value"/>
-                
+                <div class=" absolute left-1">
+                    <selecter class="text-sm style-chooser style-chooser-inf text-center" :options="priceCheckOptions" v-model="currentPriceCheck" 
+                    label="label" :searchable="false" :clearable="false" :reduce="option => option.value"/>
+                </div>
                 <div class="flex items-center ">
                     <div class="relative exaltedImg ">
                         <img :src="exaltedChaosImage[1].image" class=" w-8 h-8 ">
@@ -18,13 +19,14 @@
                     <span class=" text-white text-2xl">:{{exaltedToChaos}}</span>
                     <img :src="exaltedChaosImage[0].image" class=" w-8 h-8 hover:cursor-pointer" @dblclick="reflashChaos">
                 </div>
-                <button class=" text-white hover:text-red-500" @click="closePriceCheck">
+                <button class=" absolute right-1 text-white hover:text-red-500" @click="closePriceCheck">
                     <i class="fas fa-window-close fa-2x" ></i>
                 </button>
             </div>
             <!-- <NormalPriceCheck :itemProp="item" @BrowerView="openBrowerView"></NormalPriceCheck> -->
-            <selecter class=" text-base style-chooser text-center" v-model="leagueSelect" :options="leagues" :clearable="false" />
-            <component :is="currentPriceCheck" :itemProp="item" @BrowerView="openBrowerView" :leagueSelect="leagueSelect" :currencyImageUrl="currencyImageUrl"></component>
+            <selecter class=" text-base style-chooser text-center" v-model="leagueSelect" :options="leagues" :clearable="false" :searchable="false" />
+            <component :is="currentPriceCheck" :itemProp="item" @BrowerView="openBrowerView" :leagueSelect="leagueSelect" :currencyImageUrl="currencyImageUrl"
+                :exaltedToChaos="exaltedToChaos"></component>
         </div>
     </div>
 </template>
@@ -130,7 +132,6 @@ div.priceCheckRoot{
 }
 div.priceCheck{
     width: 500px;
-    
 }
 .style-chooser .vs__search::placeholder,
 .style-chooser .vs__dropdown-toggle,
@@ -147,20 +148,16 @@ div.priceCheck{
     flex-grow: 0;
 }
 .style-chooser .vs__selected{
-    justify-content: center;
-    flex-grow: 1;
+    flex-grow: 0;
 }
-.style-chooser-inf .vs__search::placeholder,
-.style-chooser-inf .vs__dropdown-toggle,
-.style-chooser-inf .vs__dropdown-menu{
-    text-align: center;
-    min-width: fit-content;
-	background: #dfe5fb;
-	border: none;
-	color: #394066;
+
+.style-chooser .vs__selected-options{
+    display: flex;
+    justify-content: center;
 }
 .style-chooser-inf .vs__selected-options{
     min-width: 100px;
+    justify-content: start;
 }
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {

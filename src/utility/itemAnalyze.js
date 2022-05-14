@@ -18,7 +18,7 @@ let itemParsedSample={
     isIdentify: undefined,
     autoSearch: true,
 }
-let itemParsed
+let itemParsed=_.cloneDeep(itemParsedSample)
 let parseFuns=[
     parseRequirement,
     parseSocket,
@@ -131,6 +131,9 @@ export function itemAnalyze(item){
         case '主動技能寶石':
         case '輔助技能寶石':
             parseGem(itemSection)
+            break
+        case '探險日誌':
+            parseLogbook(itemSection)
             break
         case '其它':
             break
@@ -782,4 +785,30 @@ function parseFlask(item){
     })
     item.shift()
     parseAllfuns(item)
+}
+
+function parseLogbook(item){
+    itemParsed.autoSearch=false
+    item.shift()
+    parseItemLevel(item[0])
+    item.shift()
+    itemParsed.itemLevel=itemParsed.itemLevel>83 ? 83 : itemParsed.itemLevel
+    let logbookTypes={
+        '破碎環之德魯伊': 'pseudo.pseudo_logbook_faction_druids',
+        '黑鐮傭兵': 'pseudo.pseudo_logbook_faction_mercenaries',
+        '聖杯之序': 'pseudo.pseudo_logbook_faction_order',
+        '豔陽騎士': 'pseudo.pseudo_logbook_faction_knights',
+    }
+    for(let section of item){
+        if(section.length>=2){
+            if(Object.keys(logbookTypes).includes(section[1])){
+                itemParsed.explicit=itemParsed.explicit ?? []
+                if(!itemParsed.explicit.find(e => section[1] === e.text)){
+                    itemParsed.explicit.push({id: logbookTypes[section[1]] ,text: section[1], disabled: true})
+                }
+                item=item.filter(s=>s !== section)
+            }
+        }
+    }
+    
 }
