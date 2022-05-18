@@ -11,8 +11,8 @@
     </div>
     <div class="flex items-center justify-center py-1 hover:cursor-pointer" @click="twoWeekOffline=!twoWeekOffline">
             <span class="mx-1 text-white">2周離線</span>
-            <i v-if="twoWeekOffline" class="fas fa-check-circle text-green-600 text-xl"></i>
-            <i v-else class="fas fa-times-circle text-red-600 text-xl"></i>
+            <font-awesome-icon v-if="twoWeekOffline" icon="circle-check" class="text-green-600 text-xl"/>
+            <font-awesome-icon v-else icon="circle-xmark" class="text-red-600 text-xl"/>
         </div>
     <div class="my-2 justify-center flex text-xl" v-if="!isSearching" >
         <button @click="searchBtn" 
@@ -45,7 +45,7 @@
     <span v-if="isSearchFail" class="text-white text-4xl text-center hover:cursor-default">fail</span>
     <span v-if="isSearched" class="text-white text-2xl text-center hover:cursor-default">共{{searchTotal}}筆,顯示{{searchedNumber}}</span>
     <div v-if="isSearching" class=" text-8xl text-white my-5 text-center flex justify-center">
-        <i class="fas fa-sync fa-spin"></i>
+        <font-awesome-icon icon="spinner" spin />
     </div>
     <span v-if="rateTimeLimit.flag" class="text-white bg-red-600 text-xl text-center my-2 hover:cursor-default">API次數限制 {{rateTimeLimit.second}} 秒後再回來  </span>
 </template>

@@ -93,8 +93,8 @@
         <div v-if="item.isWeaponOrArmor" class="flex items-center justify-center py-1 hover:cursor-pointer"
             @click="searchJSON.query.filters.socket_filters.disabled=!searchJSON.query.filters.socket_filters.disabled">
             <span class="mx-1 text-white text-xl">6L?</span>
-            <i v-if="!searchJSON.query.filters.socket_filters.disabled" class="fas fa-check-circle text-green-600 text-xl"></i>
-            <i v-else class="fas fa-times-circle text-red-600 text-xl"></i>
+            <font-awesome-icon v-if="!searchJSON.query.filters.socket_filters.disabled" icon="circle-check" class="text-green-600 text-xl"/>
+            <font-awesome-icon v-else icon="circle-xmark" class="text-red-600 text-xl"/>
         </div>
         <div class="flex items-center justify-center py-1">
             <span class="mx-1 text-white hover:cursor-default">稀有度:</span>
@@ -103,8 +103,8 @@
         </div>
         <div class="flex items-center justify-center py-1 hover:cursor-pointer" @click="twoWeekOffline=!twoWeekOffline">
             <span class="mx-1 text-white">2周離線</span>
-            <i v-if="twoWeekOffline" class="fas fa-check-circle text-green-600 text-xl"></i>
-            <i v-else class="fas fa-times-circle text-red-600 text-xl"></i>
+            <font-awesome-icon v-if="twoWeekOffline" icon="circle-check" class="text-green-600 text-xl"/>
+            <font-awesome-icon v-else icon="circle-xmark" class="text-red-600 text-xl"/>
         </div>
     </div>
     <table v-if="searchJSONStatsFiltered.length" class="bg-gray-700 text-center mt-1 text-white text-sm">
@@ -121,8 +121,8 @@
             <tr v-for="mod in searchJSONStatsFiltered" :key="mod.id"
                 class=" border-b-2 border-gray-400">
                 <td @click="mod.disabled=!mod.disabled" class="text-base">
-                    <i v-if="!mod.disabled" class="fas fa-check-circle text-green-600 text-lg"></i>
-                    <i v-else class="fas fa-times-circle text-red-600 text-lg"></i>
+                    <font-awesome-icon v-if="!mod.disabled" icon="circle-check" class="text-green-600 text-lg"/>
+                    <font-awesome-icon v-else icon="circle-xmark" class="text-red-600 text-lg"/>
                 </td>
                 <td @click="mod.disabled=!mod.disabled" class=" text-lg font-semibold hover:cursor-default" :style="{color: this.modTextColor(mod.type)}">{{mod.type}}</td>
                 <td @click="mod.disabled=!mod.disabled">
@@ -169,7 +169,7 @@
     <span v-if="isSearchFail" class="text-white text-4xl text-center hover:cursor-default">fail</span>
     <span v-if="isSearched" class="text-white text-2xl text-center hover:cursor-default">共{{searchTotal}}筆,顯示{{searchedNumber}}</span>
     <div v-if="isSearching" class=" text-8xl text-white my-5 text-center flex justify-center">
-        <i class="fas fa-sync fa-spin"></i>
+        <font-awesome-icon icon="spinner" spin />
     </div>
     <span v-if="rateTimeLimit.flag" class="text-white bg-red-600 text-xl text-center my-2 hover:cursor-default">API次數限制 {{rateTimeLimit.second}} 秒後再回來  </span>
 </template>

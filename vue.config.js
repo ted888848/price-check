@@ -6,21 +6,13 @@ module.exports = defineConfig({
 		electronBuilder: {
 			builderOptions: {
 				productName: '查價', 
+				// appId: 'your.id', // 認證的 appId
 				artifactName: '${productName}${version}.${ext}',
 				copyright: 'Copyright©2022 zhou',
 				npmRebuild: false,
 				win: {
 					icon: 'public/MavenOrb256.ico',
 					target: ['portable']
-				},
-				nsis: {
-					oneClick: false, 
-					perMachine: false, 
-					allowToChangeInstallationDirectory: true, 
-					createDesktopShortcut: true,
-					createStartMenuShortcut: false,
-					installerIcon: 'public/MavenOrb256.ico',
-					language: '1028'
 				}
 			},
 			nodeIntegration: true,

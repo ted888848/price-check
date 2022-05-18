@@ -2,9 +2,9 @@
     <div v-if="windowShowHide" class="absolute top-0 left-0 m-0 w-screen h-screen bg-gray-400 bg-opacity-30" 
         @click.self="closeOverlay">
         <button class="absolute top-10 left-10 bg-blue-600 hover:bg-gray-900 rounded-xl px-1 py-0.5" 
-            @click="settingWindowShow=!settingWindowShow"><i class="fas fa-cog text-4xl text-red-600"></i></button>
+            @click="settingWindowShow=!settingWindowShow"><font-awesome-icon icon="gear" class=" text-red-600 text-4xl"/></button>
         <button class="absolute top-28  left-10 bg-red-600 hover:bg-gray-900 rounded-xl px-1 py-0.5" 
-            @click="reloadAPIdata"><i class="fas fa-sync text-4xl text-blue-600"></i></button>
+            @click="reloadAPIdata"><font-awesome-icon icon="rotate" class=" text-blue-600 text-4xl"/></button>
         <setting-window  v-if="settingWindowShow" @close-settingWindow="closeSettingWindow" />
     </div>
 </template>
