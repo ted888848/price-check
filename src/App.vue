@@ -1,26 +1,31 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js App"/>
+  <overlay @reloadLeagues="reloadLeagues" />
+  <price-check ref="priceCheck"/>
+  
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
-
+//import HelloWorld from './components/HelloWorld.vue'
+import PriceCheck from './views/PriceCheck/PriceCheck.vue'
+import Overlay from './views/Overlay/Overlay.vue'
 export default {
   name: 'App',
-  components: {
-    HelloWorld
-  }
+  components:{
+    PriceCheck, Overlay
+  },
+  data(){
+    return{
+
+    }
+  },
+  methods:{
+    reloadLeagues(){
+      this.$refs.priceCheck.loadLeagues()
+    }
+  },
+  computed:{
+
+  },
+
 }
 </script>
-
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
-</style>
