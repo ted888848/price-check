@@ -99,6 +99,20 @@ let rateTimeLimitArr={
 			limit: 3,
 			time: 3
 		},
+	],
+	exchange:[
+		{
+			limit: 40,
+			time: 200
+		},
+		{
+			limit: 10,
+			time: 60
+		},
+		{
+			limit: 4,
+			time: 10
+		},
 	]
 }
 export let rateTimeLimit
@@ -244,7 +258,7 @@ async function fetchExaltedToChaos(searchUrl,id){
 	return ret
 }
 export async function getExaltedToChaos(league){
-	let exchangeJSON={"exchange":{"status":{"option":"online"},"have":["exalted"],"want":["chaos"]}}
+	let exchangeJSON={"exchange":{"status":{"option":"online"},"have":["exalted"],"want":["chaos"]},"sort": {"have": "asc"},"engine": "new"}
 	let chaos=0
 	await axios({
 		method: 'post',
@@ -261,9 +275,9 @@ export async function getExaltedToChaos(league){
 	}).then((response)=>{
 		parseRateTime(response.headers)
 		return response.data
-	}).then(async(data)=>{
-		let temp=await fetchExaltedToChaos(data.result.slice(0,5),data.result.id)
-		chaos=temp.reduce((pre,curr) => pre+(curr.listing.price.item.amount/curr.listing.price.exchange.amount) ,chaos)
+	}).then((data)=>{
+		let temp=Object.keys(data.result).slice(0,5)
+		chaos=temp.reduce((pre,curr) => pre+(data.result[curr].listing.ofers.item.amount/data.result[curr].listing.ofers.exchange.amount) ,chaos)
 		chaos/=temp.length
 	})
 	.catch((err)=>{
