@@ -484,8 +484,8 @@ export default {
         setupJSONdata(){
             let temp=this.searchJSON.query.filters.misc_filters.filters.corrupted
             this.corruptedState = temp?.option
-            // temp=this.searchJSON.query.filters.misc_filters.filters.identified
-            // this.identifyState = temp?.option
+            temp=this.searchJSON.query.filters.misc_filters.filters.identified
+            this.identifyState = temp?.option
             if(this.item.elderMap){
                 this.elderMapSelected=this.elderMapOptions[this.item.elderMap.value.option-1]
             }

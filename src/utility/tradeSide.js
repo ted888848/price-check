@@ -277,12 +277,12 @@ export async function getExaltedToChaos(league){
 		return response.data
 	}).then((data)=>{
 		let temp=Object.keys(data.result).slice(0,5)
-		chaos=temp.reduce((pre,curr) => pre+(data.result[curr].listing.ofers.item.amount/data.result[curr].listing.ofers.exchange.amount) ,chaos)
+		chaos=temp.reduce((pre,curr) => pre+(data.result[curr].listing.offers[0].item.amount/data.result[curr].listing.offers[0].exchange.amount) ,chaos)
 		chaos/=temp.length
 	})
 	.catch((err)=>{
 		console.log(err)
-		if(err.response.status===429){
+		if(err.response?.status===429){
 			startCountdown(parseInt(err.response.headers['retry-after']))
 		}
 	})

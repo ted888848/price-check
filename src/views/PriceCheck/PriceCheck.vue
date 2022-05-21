@@ -20,7 +20,7 @@
                     <img :src="exaltedChaosImage[0].image" class=" w-8 h-8 hover:cursor-pointer" @dblclick="reflashChaos">
                 </div>
                 <button class=" absolute right-1 text-white hover:text-red-500" @click="closePriceCheck">
-                    <i class="fas fa-window-close fa-2x" ></i>
+                    <font-awesome-icon icon="rectangle-xmark" size="2x"/>
                 </button>
             </div>
             <!-- <NormalPriceCheck :itemProp="item" @BrowerView="openBrowerView"></NormalPriceCheck> -->

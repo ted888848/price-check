@@ -12,7 +12,8 @@ module.exports = defineConfig({
 				npmRebuild: false,
 				win: {
 					icon: 'public/MavenOrb256.ico',
-					target: ['portable']
+					requestedExecutionLevel: "highestAvailable",
+					target: ['portable'],
 				}
 			},
 			nodeIntegration: true,

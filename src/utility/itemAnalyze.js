@@ -114,6 +114,7 @@ export function itemAnalyze(item){
         case '箭袋':
         case '飾品':
         case '劫盜裝備':
+        case '守望號令':
             parseOtherNeedMods(itemSection)
             break
         case '異界地圖':
