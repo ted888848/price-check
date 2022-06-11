@@ -181,6 +181,7 @@ export async function searchItem(searchJson, league, isFromHiestPC){
 			//'Cookie': 'POESESSID=ed40963cf49f66e758b54da23316f274'
 		},
 		data: JSON.stringify(searchJson),
+		timeout: 3000,
 		// rejectUnauthorized: false,
 		// requestCert: false,
 		// agent: false,
@@ -194,9 +195,9 @@ export async function searchItem(searchJson, league, isFromHiestPC){
 		searchResult.itemCount=searchResult.result.length
 	})
 	.catch((err)=>{
-		errData=err.response
+		errData=err.response || err
 		console.log(err.response)
-		if(err.response.status===429){
+		if(err.response?.status===429){
 			startCountdown(parseInt(err.response.headers['retry-after']))
 		}
 	})
@@ -215,6 +216,7 @@ export async function fetchItem(){
 	await axios.all(itemJsonUrl.map(url => axios({
 		method: 'get',
 		url: encodeURI(url),
+		timeout: 3000,
 		headers:{
 			'accept': 'application/json'
 			//'Cookie': 'POESESSID=ed40963cf49f66e758b54da23316f274'
@@ -227,7 +229,7 @@ export async function fetchItem(){
 		}))
 		.catch(err=>{
 			console.log(err.response)
-			if(err.response.status===429){
+			if(err.response?.status===429){
 				startCountdown(parseInt(err.response.headers['retry-after']))
 			}
 		})
@@ -263,6 +265,7 @@ export async function getExaltedToChaos(league){
 	await axios({
 		method: 'post',
 		url: encodeURI(`https://web.poe.garena.tw/api/trade/exchange/${league}`),
+		timeout: 3000,
 		headers:{
 			'accept': 'application/json',
 			'Content-Type': 'application/json'

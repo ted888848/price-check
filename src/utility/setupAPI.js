@@ -162,7 +162,8 @@ async function getLeagues(){
       store.set('Leagues', leagues)
     })
     .catch((err)=>{
-      console.log(err)
+        leagues=store.get('Leagues')
+        console.log(err)
     })
 }
 async function getItems(){

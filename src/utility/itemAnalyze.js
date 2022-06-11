@@ -188,6 +188,7 @@ function parseItemName(section, itemSection){
         飾品: 'accessory.trinket',
         異界地圖: 'map',
         輿圖地區升級道具: 'watchstone',
+        守望號令: 'sentinel'
     }
     if(!section[0].startsWith('物品種類:')) return PARSE_SECTION_FAIL
     let temp=section[0].match(/物品種類: ([^\n]+)/)[1]
@@ -597,7 +598,15 @@ function parseClusterJewel(item){
 }
 function parseWatchstone(item){
     itemParsed.autoSearch=true
+    console.log(item)
     for(let section of item){
+        console.log(section)
+        for(let index in section){
+            if(section[index].startsWith('你地圖中')){
+                section[index] = section[index].replace(/你地圖中[有的]?\s?/,'')
+            }
+        }
+        console.log(section)
         if(parseEnchantMod(section)===PARSE_SECTION_SUCC) 
             return
     }
@@ -614,7 +623,9 @@ function parseOtherNeedMods(item){
     }
     
     parseAllfuns(item)
-    
+    if(itemParsed.type?.option==='sentinel'){
+        delete itemParsed.isCorrupt
+    }
 }
 function parseMap(item){
     itemParsed.autoSearch=false
