@@ -571,6 +571,12 @@ function parseClusterJewel(item){
         temp=item[0].find(ele=>ele.startsWith('附加的小型天賦給予：'))
         temp=temp.substring(10, temp.indexOf(' (enchant)'))
         temp=APImods.clusterJewel.entries.find(mod => mod.text.includes(temp))
+        if(temp.text.endsWith('(古典)') && itemParsed.baseType==='小型星團珠寶'){
+            let tempText=temp.text.substring(0, temp.text.length-5)
+            console.log(tempText)
+            temp=APImods.clusterJewel.entries.reverse().find(mod => mod.text.includes(tempText))
+        }
+        
         itemParsed.enchant.push({ id: "enchant.stat_3948993189", text: temp.text.split('\n'), value: { option: temp.id}, type: '附魔', disabled: false})
         itemParsed.enchant.forEach(ele=> ele.disabled = false)
         item.shift()
