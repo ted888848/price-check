@@ -144,7 +144,7 @@ export function itemAnalyze(item){
             break
     }
     parsePseudoEleResistance()
-    if(itemParsed.rarity==='傳奇' && itemParsed.name) itemParsed.autoSearch=true
+    if(itemParsed.rarity.id==='unique' && itemParsed.name) itemParsed.autoSearch=true
     if(itemParsed.baseType==='阿茲瓦特史記') parseTample(itemSection)
     else if(itemParsed.baseType==='充能的羅盤') parseWatchstone(itemSection)
     return _.cloneDeep(itemParsed)
