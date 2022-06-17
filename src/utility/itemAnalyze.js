@@ -16,7 +16,9 @@ let itemParsedSample={
     isWeaponOrArmor: false,
     isCorrupt: false,
     isIdentify: undefined,
+    quality: {min: undefined, max: undefined, search: false},
     autoSearch: true,
+    searchTwoWeekOffline: false
 }
 let itemParsed=_.cloneDeep(itemParsedSample)
 let parseFuns=[
@@ -190,10 +192,45 @@ function parseItemName(section, itemSection){
         輿圖地區升級道具: 'watchstone',
         守望號令: 'sentinel'
     }
+    let rarityOptions= [
+        {
+            id: undefined,
+            label: "任何"
+        },
+        {
+            id: 'normal',
+            label: "普通"
+        },
+        {
+            id: 'magic',
+            label: "魔法"
+        },
+        {
+            id: 'rare',
+            label: "稀有"
+        },
+        {
+            id: 'unique',
+            label: "傳奇"
+        },
+        {
+            id: 'nonunique',
+            label: "非傳奇"
+        },
+    ]
     if(!section[0].startsWith('物品種類:')) return PARSE_SECTION_FAIL
     let temp=section[0].match(/物品種類: ([^\n]+)/)[1]
-    itemParsed.type={text: temp, option: typeTrans?.[temp] }
+    itemParsed.type={text: temp, option: typeTrans?.[temp], searchByType: false }
     itemParsed.rarity=section[1].match(/稀有度: ([^\n]+)/)[1]
+    if(['普通', '魔法', '稀有'].includes(itemParsed.rarity)){
+        itemParsed.rarity = rarityOptions[5]
+    }
+    else if(itemParsed.rarity==='傳奇'){
+        itemParsed.rarity = rarityOptions[4]
+    }
+    else{
+        itemParsed.rarity = rarityOptions[0]
+    }
     if(section.length>=4){
         itemParsed.name=section[2]
         if(section[3].startsWith('追憶之')) section[3]=section[3].substring(4)
@@ -243,14 +280,14 @@ function parseSocket(section){
     if(!section[0].startsWith('插槽')) return PARSE_SECTION_SKIP
     let sockets=section[0].replace(/R|G|B|W/g,'#')
     if(sockets.indexOf('#-#-#-#-#-#')>-1){
-        itemParsed.links=6
+        itemParsed.search6L=true
     }
     return PARSE_SECTION_SUCC
 }
 function parseItemLevel(section){
     if(!section[0].startsWith('物品等級:')) return PARSE_SECTION_SKIP
     let il=parseInt(section[0].match(/物品等級: (\d+)/)[1])
-    itemParsed.itemLevel=il > 86 ? 86 : il
+    itemParsed.itemLevel={min: il > 86 ? 86 : il, max: undefined, search: true}
     return PARSE_SECTION_SUCC
 }
 function getStrReg(section, type){
@@ -384,27 +421,33 @@ function parseInfluence(section){
         },
         {
             id: "pseudo.pseudo_has_shaper_influence",
-            text: "塑者之物"
+            text: "塑者之物",
+            label: "塑者"
         },
         {
             id: "pseudo.pseudo_has_elder_influence",
-            text: "尊師之物"
+            text: "尊師之物",
+            label: "尊師"
         },
         {
             id: "pseudo.pseudo_has_crusader_influence",
-            text: "聖戰軍王物品"
+            text: "聖戰軍王物品",
+            label: "聖戰"
         },
         {
             id: "pseudo.pseudo_has_redeemer_influence",
-            text: "救贖者物品"
+            text: "救贖者物品",
+            label: "救贖"
         },
         {
             id: "pseudo.pseudo_has_hunter_influence",
-            text: "狩獵者物品"
+            text: "狩獵者物品",
+            label: "狩獵"
         },
         {
             id: "pseudo.pseudo_has_warlord_influence",
-            text: "總督軍物品"
+            text: "總督軍物品",
+            label: "督軍"
         }]
     let tempInfluences=[]
     section.forEach( line =>{
@@ -491,7 +534,7 @@ function parseWeapon(item){
     itemParsed.autoSearch=false
     item[0].forEach(line => { //parse Damage Section
         if(line.startsWith('品質: ')){
-            itemParsed.quality=parseInt(line.match(/品質: \+(\d+)%/)[1])
+            itemParsed.quality={min: parseInt(line.match(/品質: \+(\d+)%/)[1]), max: undefined, search: true}
         }
         else if(line.startsWith('物理傷害: ')){
             let phyDamage={min: 0, max: 0}
@@ -533,7 +576,7 @@ function parseArmor(item){
     itemParsed.autoSearch=false
     item[0].forEach(line => { //parse Damage Section
         if(line.startsWith('品質: ')){
-            itemParsed.quality=parseInt(line.match(/品質: \+(\d+)%/)[1])
+            itemParsed.quality.min=parseInt(line.match(/品質: \+(\d+)%/)[1])
         }
         else if(line.startsWith('閃避值: ')){
             itemParsed.evasion=parseInt(line.match(/閃避值: (\d+)/)[1])
@@ -689,7 +732,7 @@ function parseMap(item){
     }
     item[0].forEach(line =>{
         if(line.startsWith('地圖階級: ')){
-            itemParsed.mapTier=parseInt(line.match(/地圖階級: (\d+)/)[1])
+            itemParsed.mapTier={min: parseInt(line.match(/地圖階級: (\d+)/)[1]), max: undefined, search: true}
         }
     })
     item.shift()
@@ -742,10 +785,11 @@ function parseGem(item){
     }
     item[0].forEach(line =>{
         if(line.startsWith('等級: ')){
-            itemParsed.gemLevel=parseInt(line.match(/等級: (\d+)/)[1])
+            itemParsed.gemLevel={min: parseInt(line.match(/等級: (\d+)/)[1]), max: undefined, search: true}
         }
         else if(line.startsWith('品質: ')){
-            itemParsed.quality=parseInt(line.match(/品質: \+(\d+)%/)[1])
+            itemParsed.quality={min: parseInt(line.match(/品質: \+(\d+)%/)[1]), max: undefined, search: true}
+            
         }
         else if(line.startsWith('替代品質')){
             isAltQ = true
@@ -798,7 +842,7 @@ function parseFlask(item){
     itemParsed.autoSearch=false
     item[0].forEach(line=>{
         if(line.startsWith('品質: ')){
-            itemParsed.quality=parseInt(line.match(/品質: \+(\d+)%/)[1])
+            itemParsed.quality={min: parseInt(line.match(/品質: \+(\d+)%/)[1]), max: undefined, search: true}
         }
     })
     item.shift()

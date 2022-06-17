@@ -43,19 +43,24 @@ export function getDefaultSearchJSON(){
 }
 export function getSearchJSON(item){
 	let searchJSON=_.cloneDeep(searchJSONSample)
-	searchResult=null
-    if(!_.isUndefined(item.name))   searchJSON.query.name=item.name
-    searchJSON.query.type=item.baseType
-	isUnique= (item.rarity==='傳奇')
+    if(!item.type.searchByType)	searchJSON.query.type=item.baseType //如果沒有要依照類別搜尋
+	if(item.rarity.id==='unique') searchJSON.query.name=item.name
     if(!_.isUndefined(item.isCorrupt))  searchJSON.query.filters.misc_filters.filters.corrupted = { option: item.isCorrupt }
-    if(!_.isUndefined(item.isIdentify))  {
-		if(!(isUnique && !item.isIdentify))
-			searchJSON.query.filters.misc_filters.filters.identified = { option: item.isIdentify }
-	}
-    if(!_.isUndefined(item.itemLevel))  searchJSON.query.filters.misc_filters.filters.ilvl = { min: item.itemLevel }
-    if(!_.isUndefined(item.gemLevel))  searchJSON.query.filters.misc_filters.filters.gem_level = { min: item.gemLevel }
-    if(!_.isUndefined(item.itemLevel))  searchJSON.query.filters.misc_filters.filters.ilvl = { min: item.itemLevel }
+    if(!_.isUndefined(item.isIdentify))  searchJSON.query.filters.misc_filters.filters.identified = { option: item.isIdentify }
+    if(!_.isUndefined(item.altQType)) searchJSON.query.filters.misc_filters.filters.gem_alternate_quality={option: item.altQType}
+    if(item.itemLevel?.search)  searchJSON.query.filters.misc_filters.filters.ilvl = {min: item.itemLevel.min, max: item.itemLevel.max}
+    if(item.gemLevel?.search)  searchJSON.query.filters.misc_filters.filters.gem_level = { min: item.gemLevel.min, max: item.gemLevel.max }
+    if(item.mapTier?.search)  searchJSON.query.filters.map_filters.filters.map_tier={min: item.mapTier.min, man: item.mapTier.man}
     if(!_.isUndefined(item.type.option))  searchJSON.query.filters.type_filters.filters.category=item.type
+    if(item.quality.search)  searchJSON.query.filters.misc_filters.filters.quality={min: item.quality.min, max: item.quality.max}
+    if(item.elderMap || item.conquerorMap) searchJSON.query.stats[0].filters.push(item.elderMap || item.conquerorMap)
+	if(item.search6L)	searchJSON.query.filters.socket_filters={disabled: false, filters: {links:{min: 6}}}
+	if(item.rarity.id) searchJSON.query.filters.type_filters.filters.rarity= { option: item.rarity.id }
+	if(item.searchTwoWeekOffline){
+		searchJSON.query.filters.trade_filters.filters.indexed={ option: "2weeks" }
+        searchJSON.query.status.option="any"
+	}
+	
     if(!_.isUndefined(item.enchant))  searchJSON.query.stats[0].filters.push(..._.cloneDeep(item.enchant))
     if(!_.isUndefined(item.implicit)) searchJSON.query.stats[0].filters.push(..._.cloneDeep(item.implicit))
     if(!_.isUndefined(item.explicit)) searchJSON.query.stats[0].filters.push(..._.cloneDeep(item.explicit))
@@ -64,15 +69,9 @@ export function getSearchJSON(item){
     if(!_.isUndefined(item.pseudo))   searchJSON.query.stats[0].filters.push(item.pseudo)
     if(!_.isUndefined(item.temple))   searchJSON.query.stats[0].filters.push(..._.cloneDeep(item.temple))
     if(!_.isUndefined(item.influences))   searchJSON.query.stats[0].filters.push(..._.cloneDeep(item.influences))
-    if(!_.isUndefined(item.altQType)) searchJSON.query.filters.misc_filters.filters.gem_alternate_quality={option: item.altQType}
-    if(!_.isUndefined(item.quality))  searchJSON.query.filters.misc_filters.filters.quality={min: item.quality}
-    else searchJSON.query.filters.misc_filters.filters.quality={min: ''}
-    if(!_.isUndefined(item.mapTier))  searchJSON.query.filters.map_filters.filters.map_tier={min: item.mapTier}
+
     if(!_.isUndefined(item.blightedMap))  searchJSON.query.filters.map_filters.filters.map_blighted = { option: true}
     if(!_.isUndefined(item.UberBlightedMap))  searchJSON.query.filters.map_filters.filters.map_uberblighted = { option: true}
-    if(!_.isUndefined(item.elderMap))  searchJSON.query.stats[0].filters.push(item.elderMap)
-    if(!_.isUndefined(item.conquerorMap))  searchJSON.query.stats[0].filters.push(item.conquerorMap)
-	if(item.isWeaponOrArmor)	searchJSON.query.filters.socket_filters={disabled: !(item.links===6), filters: {links:{min: 6}}}
     return searchJSON
 }
 let rateTimeLimitArr={
@@ -153,8 +152,6 @@ function parseRateTime(header){
 
 
 function cleanupJSON(searchJson){
-	if(!isUnique) delete searchJson.query.name
-	if(_.isNull(searchJson.query.name)) delete searchJson.query.name
 	searchJson.query.stats[0].filters.forEach(ele=>{
 		if(ele.value){
 			if(!_.isNumber(ele.value.min)) delete ele.value.min
@@ -168,8 +165,8 @@ function cleanupJSON(searchJson){
 } 
 export async function searchItem(searchJson, league, isFromHiestPC){
 	searchResult=null
-	isUnique=isFromHiestPC || isUnique
 	searchJson=cleanupJSON(searchJson)
+	console.log(searchJson)
 	let searchID=''
 	let errData
 	await axios({

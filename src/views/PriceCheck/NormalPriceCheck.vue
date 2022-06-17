@@ -1,83 +1,82 @@
 <template>
-    <div class=" text-xl text-white my-1 text-center" @click="isSearchByBaseType = !item.type.option || !isSearchByBaseType">
+    <div class=" text-xl text-white my-1 text-center" @click="item.type.searchByType = !item.type.option || !item.type.searchByType">
         <span v-if="item.name" class="mr-3">{{item.name}}</span>
-        <span :class="{ 'text-red-500': !isSearchByBaseType }">{{ item.baseType }}</span>
+        <span :class="{ 'text-red-500': item.type.searchByType }">{{ item.baseType }}</span>
     </div>
-    <div v-if="searchJSON.query.filters.type_filters.filters.category" class="text-base text-white text-center" :class="{ 'text-3xl': !isSearchByBaseType }">
-        <span>{{searchJSON.query.filters.type_filters.filters.category.text}}</span>
+    <div v-if="item.type.option" class="text-base text-white text-center" :class="{ 'text-3xl': item.type.searchByType }">
+        <span>{{item.type.text}}</span>
     </div>
     <selecter v-if="item.isIdentify===false && item.uniques !== [] && item.rarity==='傳奇'" class="text-sm style-chooser" :options="item.uniques" label="name" 
-        v-model="searchJSON.query.name" :reduce="ele=>ele.name" />
+        v-model="item.name" :reduce="ele=>ele.name" />
     <div class="mx-0  bg-blue-900 grid grid-cols-3">
         <div class="flex p-2 items-center justify-center">
             <span class="mx-1 text-white hover:cursor-default">汙染:</span>
-            <selecter class="text-sm style-chooser flex-grow" :options="generalOption" v-model="corruptedState" 
+            <selecter class="text-sm style-chooser flex-grow" :options="generalOption" v-model="item.isCorrupt" 
              label="label" :reduce="ele => ele.value" :clearable="false" :searchable="false"/>
         </div>
         <div>
             <div class="flex p-2 items-center justify-center" v-if="item.rarity!=='寶石'">
                 <span class="mx-1 text-white hover:cursor-default">已鑑定:</span>
-                <selecter class="text-sm style-chooser flex-grow" :options="generalOption" v-model="identifyState" 
+                <selecter class="text-sm style-chooser flex-grow" :options="generalOption" v-model="item.isIdentify" 
                  label="label" :reduce="ele => ele.value" :clearable="false" :searchable="false"/>
             </div>
             <div class="flex p-2 items-center justify-center" v-else>
                 <span class="mx-1 text-white hover:cursor-default">相異品:</span>
-                <selecter class="text-sm style-chooser flex-grow" :options="gemAltQOptions" 
-                v-model="searchJSON.query.filters.misc_filters.filters.gem_alternate_quality.option" 
+                <selecter class="text-sm style-chooser flex-grow" :options="gemAltQOptions" v-model="item.altQType" 
                  label="label" :reduce="ele => ele.value" :clearable="false" :searchable="false"/>
             </div>
         </div>
         <div class="flex">
-            <div v-if="itemILVL.show" class="flex p-2 items-center justify-center " :class="{'opacity-30': itemILVL.disabled}" 
-            @click.self="itemILVL.disabled=!itemILVL.disabled">
-                <span class="mx-1 text-white hover:cursor-default" @click.self="itemILVL.disabled=!itemILVL.disabled">物品等級:</span>
+            <div v-if="item.gemLevel" class="flex p-2 items-center justify-center" :class="{'opacity-30': !item.gemLevel.search}" 
+            @click.self="item.gemLevel.search=!item.gemLevel.search">
+                <span class="mx-1 text-white hover:cursor-default" @click.self="item.gemLevel.search=!item.gemLevel.search">寶石等級:</span>
                 <input class="w-8 appearance-none rounded bg-gray-400 text-center mx-1 font-bold" type="number" 
-                v-model.number="itemILVL.min" :disabled="itemILVL.disabled" 
-                @dblclick.stop="itemILVL.min=''">
+                v-model.number="item.gemLevel.min" :disabled="item.gemLevel.search" 
+                @dblclick="item.gemLevel.min=''">
                 <input class="w-8 appearance-none rounded bg-gray-400 text-center font-bold" type="number" 
-                v-model.number="itemILVL.max" :disabled="itemILVL.disabled" 
-                @dblclick="itemILVL.max=''">
+                v-model.number="item.gemLevel.max" :disabled="item.gemLevel.search" 
+                @dblclick="item.gemLevel.max=''">
             </div>
-            <div v-else-if="gemLVL.show" class="flex p-2 items-center justify-center" :class="{'opacity-30': gemLVL.disabled}" 
-            @click.self="gemLVL.disabled=!gemLVL.disabled">
-                <span class="mx-1 text-white hover:cursor-default" @click.self="gemLVL.disabled=!gemLVL.disabled">寶石等級:</span>
+            <div v-else-if="item.mapTier" class="flex p-2 items-center justify-center" :class="{'opacity-30': !item.mapTier.search}" 
+            @click.self="item.mapTier.search=!item.mapTier.search">
+                <span class="mx-1 text-white hover:cursor-default" @click.self="item.mapTier.search=!item.mapTier.search">地圖階級:</span>
                 <input class="w-8 appearance-none rounded bg-gray-400 text-center mx-1 font-bold" type="number" 
-                v-model.number="gemLVL.min" :disabled="gemLVL.disabled" 
-                @dblclick="gemLVL.min=''">
+                v-model.number="item.mapTier.min" :disabled="!item.mapTier.search" 
+                @dblclick="item.mapTier.min=''">
                 <input class="w-8 appearance-none rounded bg-gray-400 text-center font-bold" type="number" 
-                v-model.number="gemLVL.max" :disabled="gemLVL.disabled" 
-                @dblclick="gemLVL.max=''">
+                v-model.number="item.mapTier.max" :disabled="!item.mapTier.search" 
+                @dblclick="item.mapTier.max=''">
             </div>
-            <div v-else-if="mapTier.show" class="flex p-2 items-center justify-center" :class="{'opacity-30': mapTier.disabled}" 
-            @click.self="mapTier.disabled=!mapTier.disabled">
-                <span class="mx-1 text-white hover:cursor-default" @click.self="mapTier.disabled=!mapTier.disabled">地圖階級:</span>
+            <div v-if="item.itemLevel" class="flex p-2 items-center justify-center " :class="{'opacity-30': !item.itemLevel.search}" 
+            @click.self="item.itemLevel.search=!item.itemLevel.search">
+                <span class="mx-1 text-white hover:cursor-default" @click.self="item.itemLevel.search=!item.itemLevel.search">物品等級:</span>
                 <input class="w-8 appearance-none rounded bg-gray-400 text-center mx-1 font-bold" type="number" 
-                v-model.number="mapTier.min" :disabled="mapTier.disabled" 
-                @dblclick="mapTier.min=''">
+                v-model.number="item.itemLevel.min" :disabled="!item.itemLevel.search" 
+                @dblclick.stop="item.itemLevel.min=''">
                 <input class="w-8 appearance-none rounded bg-gray-400 text-center font-bold" type="number" 
-                v-model.number="mapTier.max" :disabled="mapTier.disabled" 
-                @dblclick="mapTier.max=''">
+                v-model.number="item.itemLevel.max" :disabled="!item.itemLevel.search" 
+                @dblclick="item.itemLevel.max=''">
             </div>
         </div>
-        <div class="flex p-2 items-center justify-center" :class="{'opacity-30': itemQuality.disabled}" 
-            @click.self="itemQuality.disabled=!itemQuality.disabled">
-            <span class="mx-1 text-white hover:cursor-default" @click.self="itemQuality.disabled=!itemQuality.disabled">品質:</span>
+        <div class="flex p-2 items-center justify-center" :class="{'opacity-30': !item.quality.search}" 
+            @click.self="item.quality.search=!item.quality.search">
+            <span class="mx-1 text-white hover:cursor-default" @click.self="item.quality.search=!item.quality.search">品質:</span>
             <input class="w-8 appearance-none rounded bg-gray-400 text-center mx-1 font-bold" type="number" 
-            v-model.number="itemQuality.min" :disabled="itemQuality.disabled" 
-            @dblclick="itemQuality.min=''">
+            v-model.number="item.quality.min" :disabled="!item.quality.search" 
+            @dblclick="item.quality.min=''">
             <input class="w-8 appearance-none rounded bg-gray-400 text-center font-bold" type="number" 
-            v-model.number="itemQuality.max" :disabled="itemQuality.disabled" 
-            @dblclick="itemQuality.max=''">
+            v-model.number="item.quality.max" :disabled="!item.quality.search" 
+            @dblclick="item.quality.max=''">
         </div>
         <div v-if="item.elderMap" class="flex col-span-2 items-center justify-center">
             <span class="mx-1 text-white hover:cursor-default">尊師守衛:</span>
-            <selecter class="text-sm style-chooser style-chooser-inf " :options="elderMapOptions" v-model="elderMapSelected" 
-                 label="label" :searchable="false" :clearable="false"/>
+            <selecter class="text-sm style-chooser style-chooser-inf " :options="elderMapOptions" v-model="item.elderMap.value.option" 
+                :reduce="ele => ele.value" label="label" :searchable="false" :clearable="false"/>
         </div>
         <div v-if="item.conquerorMap" class="flex col-span-2 items-center justify-center">
             <span class="mx-1 text-white hover:cursor-default">征服者:</span>
-            <selecter class="text-sm style-chooser style-chooser-inf " :options="conquerorMapOptions" v-model="conquerorMapSelected" 
-                 label="label" :searchable="false" :clearable="false"/>
+            <selecter class="text-sm style-chooser style-chooser-inf " :options="conquerorMapOptions" v-model="item.conquerorMap.value.option"
+                :reduce="ele => ele.value" label="label" :searchable="false" :clearable="false"/>
         </div>
         <div v-else-if="item.blightedMap" class="flex items-center justify-center">
             <span class="mx-1 text-white hover:cursor-default">凋落圖</span>
@@ -87,27 +86,27 @@
         </div>
         <div v-else-if="item.isWeaponOrArmor || ['項鍊','戒指','腰帶','箭袋'].includes(item.type.text)" class="flex col-span-2 items-center justify-center">
             <span class="mx-1 text-white hover:cursor-default">勢力:</span>
-            <div class=" flex-grow mx-1"><selecter class="text-sm style-chooser style-chooser-inf " :options="influencesOptions" v-model="influencesSelected" 
+            <div class=" flex-grow mx-1"><selecter class="text-sm style-chooser style-chooser-inf " :options="influencesOptions" v-model="item.influences" 
             label="label" :searchable="false" multiple /></div>
         </div>
         <div v-if="item.isWeaponOrArmor" class="flex items-center justify-center py-1 hover:cursor-pointer"
-            @click="searchJSON.query.filters.socket_filters.disabled=!searchJSON.query.filters.socket_filters.disabled">
+            @click="item.search6L=!item.search6L">
             <span class="mx-1 text-white text-xl">6L?</span>
-            <font-awesome-icon v-if="!searchJSON.query.filters.socket_filters.disabled" icon="circle-check" class="text-green-600 text-xl"/>
+            <font-awesome-icon v-if="item.search6L" icon="circle-check" class="text-green-600 text-xl"/>
             <font-awesome-icon v-else icon="circle-xmark" class="text-red-600 text-xl"/>
         </div>
         <div class="flex items-center justify-center py-1">
             <span class="mx-1 text-white hover:cursor-default">稀有度:</span>
-            <selecter class="text-sm style-chooser w-24" :options="rarityOptions" v-model="raritySelected" 
+            <selecter class="text-sm style-chooser w-24" :options="rarityOptions" v-model="item.rarity" 
                  label="label" :searchable="false" :clearable="false"  />
         </div>
-        <div class="flex items-center justify-center py-1 hover:cursor-pointer" @click="twoWeekOffline=!twoWeekOffline">
+        <div class="flex items-center justify-center py-1 hover:cursor-pointer" @click="item.searchTwoWeekOffline=!item.searchTwoWeekOffline">
             <span class="mx-1 text-white">2周離線</span>
-            <font-awesome-icon v-if="twoWeekOffline" icon="circle-check" class="text-green-600 text-xl"/>
+            <font-awesome-icon v-if="item.searchTwoWeekOffline" icon="circle-check" class="text-green-600 text-xl"/>
             <font-awesome-icon v-else icon="circle-xmark" class="text-red-600 text-xl"/>
         </div>
     </div>
-    <table v-if="searchJSONStatsFiltered.length" class="bg-gray-700 text-center mt-1 text-white text-sm">
+    <table v-if="searchStats.length" class="bg-gray-700 text-center mt-1 text-white text-sm">
         <thead class="bg-green-600" @click="modTbodyToggle=!modTbodyToggle">
             <tr class="text-lg">
                 <td class="w-6 text-center hover:cursor-default">查</td>
@@ -118,7 +117,7 @@
             </tr>
         </thead>
         <tbody v-show="modTbodyToggle" class="modsTbody" style="">
-            <tr v-for="mod in searchJSONStatsFiltered" :key="mod.id"
+            <tr v-for="mod in searchStats" :key="mod.id"
                 class=" border-b-2 border-gray-400">
                 <td @click="mod.disabled=!mod.disabled" class="text-base">
                     <font-awesome-icon v-if="!mod.disabled" icon="circle-check" class="text-green-600 text-lg"/>
@@ -173,6 +172,12 @@
     </div>
     <span v-if="rateTimeLimit.flag" class="text-white bg-red-600 text-xl text-center my-2 hover:cursor-default">API次數限制 {{rateTimeLimit.second}} 秒後再回來  </span>
 </template>
+<!-- <script setup>
+import { ipcRenderer, shell } from 'electron'
+import IPC from '@/ipc/ipcChannel'
+import { getSearchJSON, searchItem, fetchItem, getIsCounting } from '@/utility/tradeSide'
+import _ from 'lodash' 
+</script> -->
 <script>
 import { ipcRenderer, shell } from 'electron'
 import IPC from '@/ipc/ipcChannel'
@@ -244,45 +249,42 @@ export default {
                 id: "pseudo.pseudo_has_warlord_influence",
                 label: "督軍"
             }],
-            influencesSelected: [],
             elderMapOptions: [
             {
-                id: 1,
+                value: 1,
                 label: "奴役(右上)"
             },
             {
-                id: 2,
+                value: 2,
                 label: "根除(右下)"
             },
             {
-                id: 3,
+                value: 3,
                 label: "干擾(左下)"
             },
             {
-                id: 4,
+                value: 4,
                 label: "淨化(左上)"
             }
             ],
-            elderMapSelected: undefined,
             conquerorMapOptions: [
             {
-                id: 1,
+                value: 1,
                 label: "巴倫"
             },
             {
-                id: 2,
+                value: 2,
                 label: "維羅提尼亞"
             },
             {
-                id: 3,
+                value: 3,
                 label: "奧赫茲明"
             },
             {
-                id: 4,
+                value: 4,
                 label: "圖拉克斯"
             }
             ],
-            conquerorMapSelected: undefined,
             rarityOptions: [
             {
                 id: undefined,
@@ -309,135 +311,21 @@ export default {
                 label: "非傳奇"
             },
             ],
-            raritySelected: undefined,
-            corruptedState: undefined,
-            identifyState: undefined,
             searchResult: [],
             isSearchFail: false,
             isSearched: false,
             isSearching: false,
             searchTotal: 0,
             searchID: '',
-            isSearchByBaseType: true,
             modTbodyToggle: true,
-            twoWeekOffline: false,
-            itemILVL:   {disabled: true, min: undefined, max: undefined, show: false},
-            gemLVL:     {disabled: false, min: undefined, max: undefined, show: false},
-            itemQuality: {disabled: true, min: undefined, max: undefined, show: true},
-            mapTier:    {disabled: true, min: undefined, max: undefined, show: false},
         }
     },
     created(){
         this.resetSearchData()
-        this.resetItemData()
         console.log(this.item)
-        this.searchJSON=getSearchJSON(this.item)
-        console.log(this.searchJSON)
-        this.setupJSONdata()
         if(this.item.autoSearch)
             this.searchBtn()
-        ipcRenderer.on(IPC.POE_ACTIVE,()=>{
-            this.resetItemData()
-        })
     },
-	watch:{
-        corruptedState: function(value){
-            if(_.isUndefined(value))
-                delete this.searchJSON.query.filters.misc_filters.filters.corrupted
-            else
-                this.searchJSON.query.filters.misc_filters.filters.corrupted={ option: value }
-        },
-        identifyState: function(value){
-            if(_.isUndefined(value))
-                delete this.searchJSON.query.filters.misc_filters.filters.identified
-            else
-                this.searchJSON.query.filters.misc_filters.filters.identified={ option: value }
-        },
-        itemILVL:{
-            handler(value){
-                if(!value.show || (_.isUndefined(value.min) && _.isUndefined(value.max))) return
-                if(value.disabled) delete this.searchJSON.query.filters.misc_filters.filters.ilvl
-                else this.searchJSON.query.filters.misc_filters.filters.ilvl={min: value.min, max: value.max}
-                if(value.min==='') delete this.searchJSON.query.filters.misc_filters.filters.ilvl?.min
-                if(value.max==='') delete this.searchJSON.query.filters.misc_filters.filters.ilvl?.max
-            },
-            deep: true
-        },
-        gemLVL:{
-            handler(value){
-                if(!value.show || (_.isUndefined(value.min) && _.isUndefined(value.max))) return
-                if(value.disabled) delete this.searchJSON.query.filters.misc_filters.filters.gem_level
-                else this.searchJSON.query.filters.misc_filters.filters.gem_level={min: value.min, max: value.max}
-                if(value.min==='') delete this.searchJSON.query.filters.misc_filters.filters.gem_level?.min
-                if(value.max==='') delete this.searchJSON.query.filters.misc_filters.filters.gem_level?.max
-            },
-            deep: true
-        },
-        itemQuality:{
-            handler(value){
-                if(!value.show || (_.isUndefined(value.min) && _.isUndefined(value.max))) return
-                if(value.disabled) delete this.searchJSON.query.filters.misc_filters.filters.quality
-                else this.searchJSON.query.filters.misc_filters.filters.quality={min: value.min, max: value.max}
-                if(value.min==='') delete this.searchJSON.query.filters.misc_filters.filters.quality?.min
-                if(value.max==='') delete this.searchJSON.query.filters.misc_filters.filters.quality?.max
-            },
-            deep: true
-        },
-        mapTier:{
-            handler(value){
-                if(!value.show || (_.isUndefined(value.min) && _.isUndefined(value.max))) return
-                if(value.disabled) delete this.searchJSON.query.filters.map_filters.filters.map_tier
-                else this.searchJSON.query.filters.map_filters.filters.map_tier={min: value.min, max: value.max}
-                if(value.min==='') delete this.searchJSON.query.filters.map_filters.filters.map_tier?.min
-                if(value.max==='') delete this.searchJSON.query.filters.map_filters.filters.map_tier?.max
-            },
-            deep: true
-        },
-        influencesSelected: function(value,preValue){
-            if(value.length>preValue.length)
-                this.searchJSON.query.stats[0].filters.push(..._.clone(value.slice(preValue.length,value.length)))
-            else if(value.length<preValue.length){
-                let diff=_.differenceBy(preValue, value, 'id')[0]
-                let temp=this.searchJSON.query.stats[0].filters.findIndex(ele => ele.id === diff.id)
-                if(temp>-1)
-                    this.searchJSON.query.stats[0].filters.splice(temp, 1)
-            }
-        },
-        elderMapSelected: function(value){
-            if(!value) return
-            let foundMod=this.searchJSON.query.stats[0].filters.find(ele=>ele.id==="implicit.stat_3624393862")
-            foundMod.value.option=value.id
-        },
-        conquerorMapSelected: function(value){
-            if(!value) return
-            let foundMod=this.searchJSON.query.stats[0].filters.find(ele=>ele.id==="implicit.stat_2563183002")
-            foundMod.value.option=value.id
-        },
-        isSearchByBaseType: function(value){
-            if(value){
-                this.searchJSON.query.type=this.item.baseType
-            }
-            else{
-                delete this.searchJSON.query.type
-            }
-        },
-        raritySelected: function(value){
-            if(value?.id)
-                this.searchJSON.query.filters.type_filters.filters.rarity = { option: value.id }
-            else
-                delete this.searchJSON.query.filters.type_filters.filters.rarity
-        },
-        twoWeekOffline: function(value){
-            if(value){
-                this.searchJSON.query.filters.trade_filters.filters.indexed={ option: "2weeks" }
-                this.searchJSON.query.status.option="any"
-            }
-            else{
-                delete this.searchJSON.query.filters.trade_filters.filters.indexed
-                this.searchJSON.query.status.option="online"
-            }
-        }   
-	},
     methods:{
         resetSearchData(){
             this.searchResult=[]
@@ -447,20 +335,6 @@ export default {
             this.modTbodyToggle=true
             this.isSearching=false
             this.searchID=''
-        },
-        resetItemData(){
-            this.influencesSelected=[]
-            this.elderMapSelected=undefined
-            this.conquerorMapSelected=undefined
-            this.raritySelected=undefined
-            this.corruptedState=undefined
-            this.identifyState=undefined
-            this.twoWeekOffline = false
-            this.isSearchByBaseType=true
-            this.itemILVL={disabled: true, min: undefined, max: undefined, show: false}
-            this.gemLVL={disabled: false, min: undefined, max: undefined, show: false}
-            this.itemQuality={disabled: true, min: undefined, max: undefined, show: true}
-            this.mapTier={disabled: true, min: undefined, max: undefined, show: false}
         },
         closePriceCheck(){
             this.windowShowHide = false
@@ -480,52 +354,6 @@ export default {
                     return '#9936eb'
             }
             return 'white'
-        },
-        setupJSONdata(){
-            let temp=this.searchJSON.query.filters.misc_filters.filters.corrupted
-            this.corruptedState = temp?.option
-            temp=this.searchJSON.query.filters.misc_filters.filters.identified
-            this.identifyState = temp?.option
-            if(this.item.elderMap){
-                this.elderMapSelected=this.elderMapOptions[this.item.elderMap.value.option-1]
-            }
-            if(this.item.conquerorMap){
-                this.conquerorMapSelected=this.conquerorMapOptions[this.item.conquerorMap.value.option-1]
-            }
-            this.influencesSelected=_.intersectionBy(this.influencesOptions, this.searchJSON.query.stats[0].filters, 'id')
-            this.searchJSON.query.stats[0].filters=this.searchJSON.query.stats[0].filters.filter(ele => ((!ele.id.endsWith('_influence')) || (ele.id.endsWith('_influence') && ele.text)))
-            if(['普通', '魔法', '稀有'].includes(this.item.rarity)){
-                this.raritySelected = this.rarityOptions[5]
-            }
-            else if(this.item.rarity==='傳奇'){
-                this.raritySelected = this.rarityOptions[4]
-            }
-            else{
-                this.raritySelected = this.rarityOptions[0]
-            }
-
-            if(this.searchJSON.query.filters.misc_filters.filters.ilvl) {
-                this.itemILVL.show=true
-                this.itemILVL.min=this.searchJSON.query.filters.misc_filters.filters.ilvl.min
-                this.itemILVL.max=this.searchJSON.query.filters.misc_filters.filters.ilvl?.max
-                this.itemILVL.disabled=this.item.rarity==='傳奇'
-            }
-            else if(this.searchJSON.query.filters.misc_filters.filters.gem_level) {
-                this.gemLVL.show=true
-                this.gemLVL.min=this.searchJSON.query.filters.misc_filters.filters.gem_level.min
-                this.gemLVL.max=this.searchJSON.query.filters.misc_filters.filters.gem_level?.max
-            }
-            else if(this.searchJSON.query.filters.map_filters.filters.map_tier) {
-                this.mapTier.show=true
-                this.mapTier.min=this.searchJSON.query.filters.map_filters.filters.map_tier.min
-                this.mapTier.max=this.searchJSON.query.filters.map_filters.filters.map_tier?.max
-            }
-            if(this.searchJSON.query.filters.misc_filters.filters.quality) {
-                this.itemQuality.show=true
-                this.itemQuality.min=this.searchJSON.query.filters.misc_filters.filters.quality.min
-                this.itemQuality.max=this.searchJSON.query.filters.misc_filters.filters.quality?.max
-            }
-        
         },
         openBrowerView(){
             ipcRenderer.send(IPC.BROWSER_VIEW,`${this.leagueSelect}/${this.searchID}`)
@@ -558,7 +386,7 @@ export default {
         searchBtn: _.debounce( async function(){
             this.resetSearchData()
             this.isSearching=true
-            let temp = await searchItem(this.searchJSON,this.leagueSelect)
+            let temp = await searchItem(getSearchJSON(this.item),this.leagueSelect)
             if(temp.err) {
                 this.isSearching=false
                 this.isSearchFail=true
@@ -592,12 +420,20 @@ export default {
             else
                 return this.searchResult
         },
-        searchJSONStatsFiltered(){
-            return this.searchJSON.query.stats[0].filters.filter(ele => !(ele.id.endsWith('_influence') || ele.id.endsWith('stat_3624393862') || ele.id.endsWith('stat_2563183002')))
-        },
         maxAmout(){
             return _.maxBy(this.searchResult, ele => ele.amount)
         },
+        searchStats(){
+            let temp=[]     
+            if(this.item.enchant)    temp=temp.concat(this.item.enchant)
+            if(this.item.implicit)   temp=temp.concat(this.item.implicit)
+            if(this.item.explicit)   temp=temp.concat(this.item.explicit)
+            if(this.item.fractured)  temp=temp.concat(this.item.fractured)
+            if(this.item.crafted)    temp=temp.concat(this.item.crafted)
+            if(this.item.pseudo)     temp=temp.concat(this.item.pseudo)          
+            if(this.item.temple)     temp=temp.concat(this.item.temple)
+            return temp
+        }
     }
 }
 
