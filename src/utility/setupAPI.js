@@ -43,6 +43,7 @@ export var APImods={
     temple: undefined,
     league: undefined,
     clusterJewel: undefined,
+    forbiddenJewel: undefined
 }
 function setupItemArray(itemArray){
     let itemBaseType=[]
@@ -116,6 +117,8 @@ function setupAPIMods(statsJson){
                                                                                     .map(stat => ({id: stat.id, text: stat.text.substring(4).replace(/（階級 [123]）/,''), option: stat.option})), type: '神廟' }
                 break
             case '隨機屬性':
+                APImods.forbiddenJewel={label: statsGroup.label, entries: statsGroup.entries.filter(e => /^若你在禁忌(烈焰|血肉)上有符合的詞綴，配置 #$/.test(e.text))}
+                console.log(APImods.forbiddenJewel)
                 APImods.explicit={label: statsGroup.label, entries: statsGroup.entries.map(ele=> ({...ele, type: '隨機' }))
                                                                                     .filter(stat => !stat.text.includes('\n'))}
                 APImods.explicit.mutiLines=checkNewline(statsGroup, '隨機')

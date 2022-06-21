@@ -6,7 +6,7 @@
     <div v-if="item.type.option" class="text-base text-white text-center" :class="{ 'text-3xl': item.type.searchByType }">
         <span>{{item.type.text}}</span>
     </div>
-    <selecter v-if="item.isIdentify===false && item.uniques !== [] && item.rarity==='傳奇'" class="text-sm style-chooser" :options="item.uniques" label="name" 
+    <selecter v-if="item.undefinedUnqiue && item.uniques !== []" class="text-sm style-chooser" :options="item.uniques" label="name" 
         v-model="item.name" :reduce="ele=>ele.name" />
     <div class="mx-0  bg-blue-900 grid grid-cols-3">
         <div class="flex p-2 items-center justify-center">
@@ -15,7 +15,7 @@
              label="label" :reduce="ele => ele.value" :clearable="false" :searchable="false"/>
         </div>
         <div>
-            <div class="flex p-2 items-center justify-center" v-if="item.rarity!=='寶石'">
+            <div class="flex p-2 items-center justify-center" v-if="!item.type.text.endsWith('技能寶石')">
                 <span class="mx-1 text-white hover:cursor-default">已鑑定:</span>
                 <selecter class="text-sm style-chooser flex-grow" :options="generalOption" v-model="item.isIdentify" 
                  label="label" :reduce="ele => ele.value" :clearable="false" :searchable="false"/>
@@ -323,6 +323,7 @@ export default {
     created(){
         this.resetSearchData()
         console.log(this.item)
+        this.item.undefinedUnqiue = this.item.isIdentify===false && this.item.rarity.label==='傳奇'
         if(this.item.autoSearch)
             this.searchBtn()
     },

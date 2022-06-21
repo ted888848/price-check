@@ -144,7 +144,7 @@ export function itemAnalyze(item){
             break
     }
     parsePseudoEleResistance()
-    if(itemParsed.rarity.id==='unique' && itemParsed.name) itemParsed.autoSearch=true
+    if(itemParsed.rarity.label==='傳奇' && itemParsed.name) itemParsed.autoSearch=true
     if(itemParsed.baseType==='阿茲瓦特史記') parseTample(itemSection)
     else if(itemParsed.baseType==='充能的羅盤') parseWatchstone(itemSection)
     return _.cloneDeep(itemParsed)
@@ -237,9 +237,9 @@ function parseItemName(section, itemSection){
         itemParsed.baseType=section[3]
     }
     else{
-        if(section[2].startsWith('精良的') && itemParsed.rarity!== '寶石') section[2]=section[2].substring(4)
+        if(section[2].startsWith('精良的')) section[2]=section[2].substring(4)
         if(section[2].startsWith('追憶之')) section[2]=section[2].substring(4)
-        if(itemParsed.rarity==='魔法'){
+        if(itemParsed.rarity.label === '魔法'){
             let tempName=section[2]
             let index=tempName.indexOf('之')
             if(index>-1) {
@@ -597,7 +597,7 @@ function parseClusterJewel(item){
     itemParsed.itemLevel= temp >= 84 ? 84 : temp >= 75 ? 75 : temp >=68 ? 68 : temp >= 50 ? 50 : 1
     item.shift()
     // enchant
-    if(itemParsed.rarity !== '傳奇'){
+    if(itemParsed.rarity.label !== '傳奇'){
         parseEnchantMod(item[0].slice(0, 2))
         // if(parseEnchantMod(item[0].slice(0, 2))===PARSE_SECTION_SUCC) item[0].splice(0,2)
         switch(itemParsed.baseType){
@@ -645,6 +645,23 @@ function parseClusterJewel(item){
         if(state===PARSE_ITEM_SKIP) break
     }
 }
+function parseForbiddenJewel(item){
+    for(let section of item){
+        if(parseCorrupt(section)===PARSE_SECTION_SUCC) continue;
+        if(/^若禁忌(烈焰|血肉)上有符合的詞綴，配置/.test(section[0])){
+            let match=section[0].match(/若禁忌(烈焰|血肉)上有符合的詞綴，配置 (.*)/)
+            if(!match) return
+            let type=match[1]
+            let passive=match[2]
+            let matchStat=APImods.forbiddenJewel.entries.find(e => e.text.indexOf(type)>-1)
+            console.log(matchStat)
+            let matchPassive=matchStat.option.options.find(e => e.text===passive)
+            console.log(matchPassive)
+            itemParsed.explicit=[{id: matchStat.id ,text: matchStat.text.replace('#',passive), value:{ option: matchPassive.id}, disabled: false}]
+            
+        }
+    }
+}
 function parseWatchstone(item){
     itemParsed.autoSearch=true
     console.log(item)
@@ -670,7 +687,10 @@ function parseOtherNeedMods(item){
         parseWatchstone(item)
         return
     }
-    
+    else if(/^禁忌(血肉|烈焰)$/.test(itemParsed.name)){
+        parseForbiddenJewel(item)
+        return
+    }
     parseAllfuns(item)
     if(itemParsed.type?.option==='sentinel'){
         delete itemParsed.isCorrupt

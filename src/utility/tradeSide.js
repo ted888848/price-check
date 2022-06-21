@@ -44,7 +44,7 @@ export function getDefaultSearchJSON(){
 export function getSearchJSON(item){
 	let searchJSON=_.cloneDeep(searchJSONSample)
     if(!item.type.searchByType)	searchJSON.query.type=item.baseType //如果沒有要依照類別搜尋
-	if(item.rarity.id==='unique') searchJSON.query.name=item.name
+	if(item.rarity.id==='unique') searchJSON.query.name=item.name || undefined
     if(!_.isUndefined(item.isCorrupt))  searchJSON.query.filters.misc_filters.filters.corrupted = { option: item.isCorrupt }
     if(!_.isUndefined(item.isIdentify))  searchJSON.query.filters.misc_filters.filters.identified = { option: item.isIdentify }
     if(!_.isUndefined(item.altQType)) searchJSON.query.filters.misc_filters.filters.gem_alternate_quality={option: item.altQType}
