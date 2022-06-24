@@ -18,7 +18,8 @@ let itemParsedSample={
     isIdentify: undefined,
     quality: {min: undefined, max: undefined, search: false},
     autoSearch: true,
-    searchTwoWeekOffline: false
+    searchTwoWeekOffline: false,
+    searchExchange: {option: false, have: 'chaos'}
 }
 let itemParsed=_.cloneDeep(itemParsedSample)
 let parseFuns=[
@@ -126,10 +127,12 @@ export function itemAnalyze(item){
         case '契約書':
             findUnique('heistmission',isFindUnique)
             //falls through
-        case '命運卡':
         case '可堆疊通貨':
         case '地圖碎片':
+        case '掘獄可堆疊有插槽通貨':
             // parseNotNeedMods(itemSection)
+            itemParsed.searchExchange.option=true
+            itemParsed.searchExchange.have=store.get('config').searchExchangeExalted ? 'exalted' : 'chaos'
             break
         case '主動技能寶石':
         case '輔助技能寶石':
@@ -138,6 +141,7 @@ export function itemAnalyze(item){
         case '探險日誌':
             parseLogbook(itemSection)
             break
+        case '命運卡':
         case '其它':
             break
         default:

@@ -45,6 +45,11 @@ export var APImods={
     clusterJewel: undefined,
     forbiddenJewel: undefined
 }
+export var APIStatic={
+    league: undefined,
+    entries: []
+}
+let currencyImageUrl
 function setupItemArray(itemArray){
     let itemBaseType=[]
     itemArray.slice().reverse().forEach(item => {
@@ -118,7 +123,6 @@ function setupAPIMods(statsJson){
                 break
             case '隨機屬性':
                 APImods.forbiddenJewel={label: statsGroup.label, entries: statsGroup.entries.filter(e => /^若你在禁忌(烈焰|血肉)上有符合的詞綴，配置 #$/.test(e.text))}
-                console.log(APImods.forbiddenJewel)
                 APImods.explicit={label: statsGroup.label, entries: statsGroup.entries.map(ele=> ({...ele, type: '隨機' }))
                                                                                     .filter(stat => !stat.text.includes('\n'))}
                 APImods.explicit.mutiLines=checkNewline(statsGroup, '隨機')
@@ -157,6 +161,15 @@ function setupAPIMods(statsJson){
     store.set('APImods', APImods)
     // fs.writeFileSync(path.join(__dirname,'stats.json'), JSON.stringify(APImods))
 }
+
+function setupAPIStatic(data){
+    data.forEach(group => {
+        if(group.label?.match(/^地圖（(階級\d+|傳奇)）|命運卡$/)) return
+        APIStatic.entries = APIStatic.entries.concat(_.cloneDeep(group.entries))
+    })
+    APIStatic.league=leagues[0]
+}
+
 async function getLeagues(){
     await axios.get(`${baseURL}/trade/data/leagues`)
     .then(response => response.data)
@@ -183,12 +196,14 @@ async function getStats(){
         setupAPIMods(data)
     })
 }
-async function getCurrencyImageName(){
+async function getStatic(){
     await axios.get(`${baseURL}/trade/data/static`)
     .then((response) => response.data)
     .then((data)=>{
-        data.result[0].league=leagues[0]
-        store.set('APICurrencyImageName', data.result[0])
+        currencyImageUrl=data.result[0]
+        store.set('currencyImageUrl', currencyImageUrl)
+        setupAPIStatic(data.result)
+        store.set('APIStatic', APIStatic)
     })
 }
 export async function checkAPIdata(){
@@ -210,13 +225,13 @@ export async function checkAPIdata(){
     else {
         await getStats()
     }
-    if(store.has('APICurrencyImageName')){
+    if(store.has('APIStatic') && store.has('currencyImageUrl')){
         // APImods = store.get('APImods')
-        APImods=store.get('APICurrencyImageName')
-        if(APImods.league !== leagues[0]) await getCurrencyImageName()
+        APIStatic=store.get('APIStatic')
+        if(APIStatic.league !== leagues[0]) await getStatic()
     }
     else {
-        await getCurrencyImageName()
+        await getStatic()
     }
 }
 export function checkForUpdate(){

@@ -26,7 +26,7 @@
                  label="label" :reduce="ele => ele.value" :clearable="false" :searchable="false"/>
             </div>
         </div>
-        <div class="flex">
+        <div class="flex items-center justify-center">
             <div v-if="item.gemLevel" class="flex p-2 items-center justify-center" :class="{'opacity-30': !item.gemLevel.search}" 
             @click.self="item.gemLevel.search=!item.gemLevel.search">
                 <span class="mx-1 text-white hover:cursor-default" @click.self="item.gemLevel.search=!item.gemLevel.search">寶石等級:</span>
@@ -56,6 +56,11 @@
                 <input class="w-8 appearance-none rounded bg-gray-400 text-center font-bold" type="number" 
                 v-model.number="item.itemLevel.max" :disabled="!item.itemLevel.search" 
                 @dblclick="item.itemLevel.max=''">
+            </div>
+            <div v-else class="flex p-2 items-center justify-center" @click="item.searchExchange.have = ('exalted' === item.searchExchange.have) ? 'chaos' : 'exalted'">
+                <span class="mx-1 text-white hover:cursor-default">崇高價</span>
+                <font-awesome-icon v-if="item.searchExchange.have==='exalted'" icon="circle-check" class="text-green-600 text-xl"/>
+                <font-awesome-icon v-else icon="circle-xmark" class="text-red-600 text-xl"/>
             </div>
         </div>
         <div class="flex p-2 items-center justify-center" :class="{'opacity-30': !item.quality.search}" 
@@ -160,7 +165,8 @@
         <tbody class="">
             <tr v-for="ele in searchResultSorted" :key="ele" class=" border-b-2 border-gray-600" 
             :class="{'text-red-500 text-xl bg-indigo-600 font-bold': ele.amount===maxAmout.amount}">
-                <td class="flex justify-center items-center">{{ele.price}}<img :src="ele.image" class=" w-7 h-7"></td>
+                <td v-if="item.searchExchange.option" class="flex justify-center items-center"><img :src="ele.image" class=" w-7 h-7">{{ele.price}}<img :src="ele.image2" class=" w-7 h-7"></td>
+                <td v-else class="flex justify-center items-center">{{ele.price}}<img :src="ele.image" class=" w-7 h-7"></td>
                 <td>{{ele.amount}}</td>
             </tr>
         </tbody>
@@ -172,17 +178,12 @@
     </div>
     <span v-if="rateTimeLimit.flag" class="text-white bg-red-600 text-xl text-center my-2 hover:cursor-default">API次數限制 {{rateTimeLimit.second}} 秒後再回來  </span>
 </template>
-<!-- <script setup>
-import { ipcRenderer, shell } from 'electron'
-import IPC from '@/ipc/ipcChannel'
-import { getSearchJSON, searchItem, fetchItem, getIsCounting } from '@/utility/tradeSide'
-import _ from 'lodash' 
-</script> -->
 <script>
 import { ipcRenderer, shell } from 'electron'
 import IPC from '@/ipc/ipcChannel'
-import { getSearchJSON, searchItem, fetchItem, getIsCounting } from '@/utility/tradeSide'
+import { getSearchJSON, searchItem, fetchItem, getIsCounting, searchExchange } from '@/utility/tradeSide'
 import _ from 'lodash' 
+import Store from 'electron-store'
 export default {
     name: "NormalPriceCheck",
     props: ["itemProp", "leagueSelect","currencyImageUrl","exaltedToChaos"],
@@ -316,8 +317,9 @@ export default {
             isSearched: false,
             isSearching: false,
             searchTotal: 0,
-            searchID: '',
+            searchID: {ID: '', type: 'search'},
             modTbodyToggle: true,
+            APIStatic: undefined
         }
     },
     created(){
@@ -357,11 +359,11 @@ export default {
             return 'white'
         },
         openBrowerView(){
-            ipcRenderer.send(IPC.BROWSER_VIEW,`${this.leagueSelect}/${this.searchID}`)
+            ipcRenderer.send(IPC.BROWSER_VIEW,`${this.searchID.type}/${this.leagueSelect}/${this.searchID.ID}`)
             this.$emit("BrowerView")
         },
         openBrower(){
-            shell.openExternal(encodeURI(`https://web.poe.garena.tw/trade/search/${this.leagueSelect}/${this.searchID}`))
+            shell.openExternal(encodeURI(`https://web.poe.garena.tw/trade/${this.searchID.type}/${this.leagueSelect}/${this.searchID.ID}`))
         },
         async fetchMore(){
             this.isSearching=true
@@ -387,7 +389,18 @@ export default {
         searchBtn: _.debounce( async function(){
             this.resetSearchData()
             this.isSearching=true
-            let temp = await searchItem(getSearchJSON(this.item),this.leagueSelect)
+            let temp
+            let currency2Img
+            if(this.item.searchExchange.option){
+                temp = await searchExchange(this.item, this.leagueSelect)
+                console.log(temp.currency2)
+                let store=new Store()
+                this.APIStatic=store.get('APIStatic').entries
+                currency2Img=`https://web.poe.garena.tw${this.APIStatic.find(ele=>ele.id === temp.currency2).image}`
+            }
+            else{
+                temp = await searchItem(getSearchJSON(this.item),this.leagueSelect)
+            }
             if(temp.err) {
                 this.isSearching=false
                 this.isSearchFail=true
@@ -395,11 +408,12 @@ export default {
             }
             else if(temp.total){
                 this.searchTotal=temp.total
+                
                 for(let [key, index] of Object.entries(temp.result)){
                     let tempArr=key.split('|')
                     let _price=tempArr[0]
                     let _currency=tempArr[1]
-                    this.searchResult.push({price: _price, currency: _currency, amount: temp.result[key], image: `https://web.poe.garena.tw${this.currencyImageUrl.find(ele=>ele.id===_currency).image}`})
+                    this.searchResult.push({price: _price, currency: _currency, amount: temp.result[key], image: `https://web.poe.garena.tw${this.currencyImageUrl.find(ele=>ele.id===_currency).image}`, image2: currency2Img})
                 }
             }
             this.searchID = temp.searchID
@@ -412,7 +426,7 @@ export default {
             return this.searchResultSorted.reduce((pre, curr)=>pre + curr.amount,0)
         },
         searchResultSorted(){
-            if(this.exaltedToChaos)
+            if(this.exaltedToChaos && !this.item.searchExchange.option)
                 return this.searchResult.slice().sort((a,b)=>{
                     let ca = a.currency==='exalted' ? a.price*this.exaltedToChaos : a.price
                     let cb = b.currency==='exalted' ? b.price*this.exaltedToChaos : b.price

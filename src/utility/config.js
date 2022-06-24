@@ -8,6 +8,7 @@ export function setupConfig(){
     config = new Store()
     if(!config.has('config')) config.set('config',{
         characterName: '',
+        searchExchangeExalted: false
     })
     ipcMain.on(IPC.SET_CONFIG,(e, configData)=>{
         config.set('config',configData)

@@ -91,7 +91,7 @@ export default {
             let store = new Store()
             this.leagues = store.get('Leagues')
             this.leagueSelect = this.leagues[0]
-            this.currencyImageUrl = store.get('APICurrencyImageName')?.entries
+            this.currencyImageUrl = store.get('currencyImageUrl')?.entries
             this.exaltedChaosImage=this.currencyImageUrl.filter(ele=>['exalted','chaos'].includes(ele.id)).map(ele=>({...ele,image: 'https://web.poe.garena.tw'+ele.image}))
         },
         closePriceCheck(){

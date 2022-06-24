@@ -1,6 +1,7 @@
 import axios from 'axios'
 import _ from 'lodash'
 import { reactive } from 'vue'
+import Store from 'electron-store'
 let searchJSONSample = {
 	"query": {
 		"status": {
@@ -35,6 +36,19 @@ let searchJSONSample = {
 	"sort": {
 		"price": "asc"
 	}
+}
+let exchangeJSONSample ={ 
+	"exchange": { 
+		"status": { 
+			"option": "online" 
+		}, 
+		"have": [], 
+		"want": [] 
+	}, 
+	"sort": { 
+		"have": "asc" 
+	}, 
+	"engine": "new" 
 }
 let searchResult
 let isUnique=false
@@ -109,8 +123,8 @@ let rateTimeLimitArr={
 			time: 60
 		},
 		{
-			limit: 4,
-			time: 10
+			limit: 3,
+			time: 8
 		},
 	]
 }
@@ -167,7 +181,7 @@ export async function searchItem(searchJson, league, isFromHiestPC){
 	searchResult=null
 	searchJson=cleanupJSON(searchJson)
 	console.log(searchJson)
-	let searchID=''
+	let searchID={ID: '', type: 'search'}
 	let errData
 	await axios({
 		method: 'post',
@@ -187,7 +201,7 @@ export async function searchItem(searchJson, league, isFromHiestPC){
 		return response.data
 	}).then((data)=>{
 		searchResult=data
-		searchID=data.id
+		searchID.ID=data.id
 		searchResult.nowSearched = 0
 		searchResult.itemCount=searchResult.result.length
 	})
@@ -199,7 +213,7 @@ export async function searchItem(searchJson, league, isFromHiestPC){
 		}
 	})
 	if(errData) return {data: errData, err: true}
-	return {result: await fetchItem(),total: searchResult.itemCount, err: false, searchID: searchID }
+	return {result: await fetchItem(), total: searchResult.itemCount, err: false, searchID: searchID }
 }
 export async function fetchItem(){
 	if(searchResult.nowSearched >= (searchResult.itemCount > 100 ? 100 : searchResult.itemCount)) return null
@@ -234,30 +248,10 @@ export async function fetchItem(){
 	fetchResult=fetchResult.map(ele=>`${ele.listing.price.amount}|${ele.listing.price.currency}`)
 	return _.countBy(fetchResult)
 }
-async function fetchExaltedToChaos(searchUrl,id){
-	let getItemJosnUrl='https://web.poe.garena.tw/api/trade/fetch/'+searchUrl.join(',')+`?query=${id}&exchange`
-	let ret
-	await axios({
-		method: 'get',
-		url: encodeURI(getItemJosnUrl),
-		headers:{
-			'accept': 'application/json'
-			//'Cookie': 'POESESSID=ed40963cf49f66e758b54da23316f274'
-		}})
-	.then((res)=>{
-		parseRateTime(res.headers)
-		ret=res.data.result
-	})
-	.catch(err=>{
-		console.log(err)
-		if(err.response.status===429){
-			startCountdown(parseInt(err.response.headers['retry-after']))
-		}
-	})
-	return ret
-}
 export async function getExaltedToChaos(league){
-	let exchangeJSON={"exchange":{"status":{"option":"online"},"have":["exalted"],"want":["chaos"]},"sort": {"have": "asc"},"engine": "new"}
+	let exchangeJSON=_.cloneDeep(exchangeJSONSample)
+	exchangeJSON.exchange.have=["exalted"]
+	exchangeJSON.exchange.want=["chaos"]
 	let chaos=0
 	await axios({
 		method: 'post',
@@ -287,4 +281,43 @@ export async function getExaltedToChaos(league){
 		}
 	})
 	return Math.round(chaos*0.2)*5
+}
+export async function searchExchange(item, league){
+	searchResult={}
+	let errData=undefined
+	let searchID={ID: '', type: 'exchange'}
+	let exchangeJSON=_.cloneDeep(exchangeJSONSample)
+	exchangeJSON.exchange.have=[item.searchExchange.have]
+	let store=new Store()
+	let APIStatic=store.get('APIStatic')
+	exchangeJSON.exchange.want=[APIStatic.entries.find(e => e.text === item.baseType).id]
+	await axios({
+		method: 'post',
+		url: encodeURI(`https://web.poe.garena.tw/api/trade/exchange/${league}`),
+		timeout: 3000,
+		headers:{
+			'accept': 'application/json',
+			'Content-Type': 'application/json'
+			//'Cookie': 'POESESSID=ed40963cf49f66e758b54da23316f274'
+		},
+		data: exchangeJSON,
+	}).then((response)=>{
+		parseRateTime(response.headers)
+		return response.data
+	}).then((data)=>{
+		searchID.ID=data.id
+		searchResult.itemCount=data.total
+		searchResult.result=[]
+		for(let key in data.result){
+			searchResult.result.push(data.result[key].listing.offers[0].exchange.amount + '：' + data.result[key].listing.offers[0].item.amount + '|'+item.searchExchange.have)
+		}
+	})
+	.catch((err)=>{
+		console.log(err)
+		if(err.response?.status===429){
+			startCountdown(parseInt(err.response.headers['retry-after']))
+		}
+	})
+	if(errData) return {data: errData, err: true}
+	return {result: _.countBy(searchResult.result), total: searchResult.itemCount, err: false, searchID: searchID, currency2: exchangeJSON.exchange.want[0] }
 }

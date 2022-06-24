@@ -53,7 +53,7 @@ function setupBV(url){
     if(!BVwin) BVwin = new BrowserView()
     win.setBrowserView(BVwin)
     BVwin.setBounds({x: 0, y: 0, width: PoeWindow.bounds.width-500, height: PoeWindow.bounds.height})
-    BVwin.webContents.loadURL(encodeURI(`https://web.poe.garena.tw/trade/search/${url}`))
+    BVwin.webContents.loadURL(encodeURI(`https://web.poe.garena.tw/trade/${url}`))
     BVwin.webContents.on('before-input-event',handleBIEvent)
 }
 function handlePoeActive(isActive){
