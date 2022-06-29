@@ -9,7 +9,7 @@ import axios from 'axios'
 // import { win } from './overlayWindow'
 import Store from 'electron-store'
 import _ from 'lodash'
-import { app, dialog, shell, BrowserWindow } from 'electron'
+import { app, dialog, shell, BrowserWindow, session } from 'electron'
 // const fetch = require('node-fetch')
 
 const baseURL = 'https://web.poe.garena.tw/api'
@@ -235,6 +235,10 @@ export async function checkAPIdata(){
     }
 }
 export function checkForUpdate(){
+    session.defaultSession.clearCache()
+        .catch(err=>console.log(err))
+    session.defaultSession.clearCodeCaches({})
+        .catch(err=>console.log(err))
     axios.get('https://api.github.com/repos/ted888848/price-check/releases/latest')
     .then(response=>{
         let latestVer=response.data.tag_name.substring(1).split('.')

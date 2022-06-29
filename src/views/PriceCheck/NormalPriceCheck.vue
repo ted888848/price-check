@@ -57,7 +57,7 @@
                 v-model.number="item.itemLevel.max" :disabled="!item.itemLevel.search" 
                 @dblclick="item.itemLevel.max=''">
             </div>
-            <div v-else class="flex p-2 items-center justify-center" @click="item.searchExchange.have = ('exalted' === item.searchExchange.have) ? 'chaos' : 'exalted'">
+            <div v-if="item.searchExchange.option" class="flex p-2 items-center justify-center" @click="item.searchExchange.have = ('exalted' === item.searchExchange.have) ? 'chaos' : 'exalted'">
                 <span class="mx-1 text-white hover:cursor-default">崇高價</span>
                 <font-awesome-icon v-if="item.searchExchange.have==='exalted'" icon="circle-check" class="text-green-600 text-xl"/>
                 <font-awesome-icon v-else icon="circle-xmark" class="text-red-600 text-xl"/>

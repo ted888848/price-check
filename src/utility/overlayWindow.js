@@ -4,8 +4,6 @@ import { OverlayWindow } from 'electron-overlay-window';
 import { PoeWindow } from './POEWindow'
 import IPC from '../ipc/ipcChannel'
 import { overlayEvent, priceCheckEvent} from '../ipc/ipcHandler'
-import fs from 'fs'
-import path from 'path'
 
 export let win;
 let BVwin
@@ -23,13 +21,6 @@ export async function createWindow() {
             webSecurity: false,
         },
     });
-    await session.defaultSession.getCacheSize()
-    .then(size => {
-        if((size >>> 20) >= 100){
-            session.defaultSession.clearCache()
-            fs.rmSync(path.join(app.getPath('userData'), 'Code Cache'), { recursive: true, force: true })
-        }
-    })
     if (process.env.WEBPACK_DEV_SERVER_URL) {
         await win.loadURL(process.env.WEBPACK_DEV_SERVER_URL)
         win.webContents.openDevTools({ mode: 'detach', activate: false })
