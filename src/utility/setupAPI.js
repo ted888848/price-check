@@ -235,10 +235,12 @@ export async function checkAPIdata(){
     }
 }
 export function checkForUpdate(){
-    session.defaultSession.clearCache()
+    if((session.defaultSession?.getCacheSize() >>> 20) >= 20){ //大於20MB
+        session.defaultSession.clearCache()
+            .catch(err=>console.log(err))
+        session.defaultSession.clearCodeCaches({})
         .catch(err=>console.log(err))
-    session.defaultSession.clearCodeCaches({})
-        .catch(err=>console.log(err))
+    }
     axios.get('https://api.github.com/repos/ted888848/price-check/releases/latest')
     .then(response=>{
         let latestVer=response.data.tag_name.substring(1).split('.')

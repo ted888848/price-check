@@ -47,7 +47,7 @@
                 v-model.number="item.mapTier.max" :disabled="!item.mapTier.search" 
                 @dblclick="item.mapTier.max=''">
             </div>
-            <div v-if="item.itemLevel" class="flex p-2 items-center justify-center " :class="{'opacity-30': !item.itemLevel.search}" 
+            <div v-else-if="item.itemLevel" class="flex p-2 items-center justify-center " :class="{'opacity-30': !item.itemLevel.search}" 
             @click.self="item.itemLevel.search=!item.itemLevel.search">
                 <span class="mx-1 text-white hover:cursor-default" @click.self="item.itemLevel.search=!item.itemLevel.search">物品等級:</span>
                 <input class="w-8 appearance-none rounded bg-gray-400 text-center mx-1 font-bold" type="number" 
@@ -57,7 +57,7 @@
                 v-model.number="item.itemLevel.max" :disabled="!item.itemLevel.search" 
                 @dblclick="item.itemLevel.max=''">
             </div>
-            <div v-if="item.searchExchange.option" class="flex p-2 items-center justify-center" @click="item.searchExchange.have = ('exalted' === item.searchExchange.have) ? 'chaos' : 'exalted'">
+            <div v-else-if="item.searchExchange.option" class="flex p-2 items-center justify-center" @click="item.searchExchange.have = ('exalted' === item.searchExchange.have) ? 'chaos' : 'exalted'">
                 <span class="mx-1 text-white hover:cursor-default">崇高價</span>
                 <font-awesome-icon v-if="item.searchExchange.have==='exalted'" icon="circle-check" class="text-green-600 text-xl"/>
                 <font-awesome-icon v-else icon="circle-xmark" class="text-red-600 text-xl"/>
