@@ -31,10 +31,10 @@
             @click.self="item.gemLevel.search=!item.gemLevel.search">
                 <span class="mx-1 text-white hover:cursor-default" @click.self="item.gemLevel.search=!item.gemLevel.search">寶石等級:</span>
                 <input class="w-8 appearance-none rounded bg-gray-400 text-center mx-1 font-bold" type="number" 
-                v-model.number="item.gemLevel.min" :disabled="item.gemLevel.search" 
+                v-model.number="item.gemLevel.min" :disabled="!item.gemLevel.search" 
                 @dblclick="item.gemLevel.min=''">
                 <input class="w-8 appearance-none rounded bg-gray-400 text-center font-bold" type="number" 
-                v-model.number="item.gemLevel.max" :disabled="item.gemLevel.search" 
+                v-model.number="item.gemLevel.max" :disabled="!item.gemLevel.search" 
                 @dblclick="item.gemLevel.max=''">
             </div>
             <div v-else-if="item.mapTier" class="flex p-2 items-center justify-center" :class="{'opacity-30': !item.mapTier.search}" 
