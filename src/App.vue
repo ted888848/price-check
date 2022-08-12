@@ -1,31 +1,15 @@
 <template>
-  <overlay @reloadLeagues="reloadLeagues" />
-  <price-check ref="priceCheck"/>
-  
+	<OverlayWindow @reload-leagues="reloadLeagues" />
+	<PriceCheck ref="priceCheck" />
 </template>
-
-<script>
-//import HelloWorld from './components/HelloWorld.vue'
-import PriceCheck from './views/PriceCheck/PriceCheck.vue'
-import Overlay from './views/Overlay/Overlay.vue'
-export default {
-  name: 'App',
-  components:{
-    PriceCheck, Overlay
-  },
-  data(){
-    return{
-
-    }
-  },
-  methods:{
-    reloadLeagues(){
-      this.$refs.priceCheck.loadLeagues()
-    }
-  },
-  computed:{
-
-  },
-
+<script setup>
+import OverlayWindow from './components/OverlayWindow/OverlayWindow.vue'
+import PriceCheck from './components/PriceCheck/PriceCheck.vue';
+import { ref } from 'vue'
+import { loadAPIdata } from './utility/setupAPI';
+const priceCheck = ref(null);
+const reloadLeagues = () => {
+	priceCheck.value.loadLeagues()
 }
+loadAPIdata()
 </script>
