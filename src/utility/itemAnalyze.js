@@ -16,11 +16,19 @@ let itemParsedSample = {
 	isCorrupt: false,
 	isIdentify: undefined,
 	quality: { min: undefined, max: undefined, search: false },
-	autoSearch: true,
+	enchant: [],
+	implicit: [],
+	explicit: [],
+	fractured: [],
+	crafted: [],
+	pseudo: [],
+	temple: [],
+	influences: [],
+	autoSearch: false,
 	searchTwoWeekOffline: false,
 	searchExchange: { option: false, have: 'chaos' }
 }
-let itemParsed = cloneDeep(itemParsedSample)
+let itemParsed = itemParsedSample
 let parseFuns = [
 	parseRequirement,
 	parseSocket,
@@ -127,6 +135,7 @@ export function itemAnalyze(item) {
 		case '地圖碎片':
 		case '掘獄可堆疊有插槽通貨': {
 			itemParsed.searchExchange.option = true
+			itemParsed.autoSearch = true
 			let searchExchangeExalted = ipcRenderer.sendSync(IPC.GET_CONFIG).searchExchangeExalted
 			itemParsed.searchExchange.have = searchExchangeExalted ? 'exalted' : 'chaos'
 			break
@@ -139,6 +148,8 @@ export function itemAnalyze(item) {
 			parseLogbook(itemSection)
 			break
 		case '命運卡':
+			itemParsed.autoSearch = true
+			break
 		case '其它':
 			break
 		default:
@@ -303,7 +314,7 @@ function getStrReg(section, type) {
 }
 function parseMutilineMod(regSection, section, type) {
 	if (!APImods[type].mutiLines) return
-	let temp = []
+	let tempArr = []
 	for (let i = 0; i < regSection.length; ++i) {
 		let matchMod = APImods[type].mutiLines.filter(s => regSection[i].test(s.text[0]))
 		outer:
@@ -331,20 +342,17 @@ function parseMutilineMod(regSection, section, type) {
 				i -= tempGroup.text.length
 				i = i < 0 ? -1 : i
 				if (tempValue)
-					temp.push({ ...tempGroup, value: { min: tempValue / valueCount }, disabled: true })
+					tempArr.push({ ...tempGroup, value: { min: tempValue / valueCount }, disabled: true })
 				else
-					temp.push({ ...tempGroup, disabled: true })
+					tempArr.push({ ...tempGroup, disabled: true })
 			}
 		}
 	}
-	if (temp.length) {
-		itemParsed[type] = temp
-	}
+	return tempArr
 }
 function parseMod(section, type) {
 	let regSection = getStrReg(section, type)
-	parseMutilineMod(regSection, section, type)
-	let temp = []
+	let tempArr = parseMutilineMod(regSection, section, type)
 	regSection.forEach((line, index) => {
 		let matchMod = APImods[type].entries.filter(s => line.test(s.text))
 		if (matchMod.length > 1) {
@@ -362,19 +370,22 @@ function parseMod(section, type) {
 		let regGroup = section[index].match(matchReg)
 		regGroup?.shift()
 		let isDisabled = !(type === 'enchant')
-		if (regGroup?.length) temp.push({ ...matchMod[0], value: { min: regGroup.reduce((pre, ele) => pre + Number(ele), 0) / regGroup.length }, disabled: isDisabled })
-		else temp.push({ ...matchMod[0], disabled: isDisabled })
-		if (temp[temp.length - 1].value && (matchMod[0].text.match(/減少|增加/)?.[0] !== section[index].match(/減少|增加/)?.[0]))
-			temp[temp.length - 1].value.min = -temp[temp.length - 1].value.min
+		if (regGroup?.length) {
+			let minValue = regGroup.reduce((pre, ele) => pre + Number(ele), 0) / regGroup.length
+			if (matchMod[0].text.match(/減少|增加/)?.[0] !== section[index].match(/減少|增加/)?.[0]) { //數字前增加與減少不相等，把數字變負數
+				minValue = -minValue
+			}
+			tempArr.push({ ...matchMod[0], value: { min: minValue }, disabled: isDisabled })
+		}
+		else {
+			tempArr.push({ ...matchMod[0], disabled: isDisabled })
+		}
 	})
-	if (temp.length) {
-		if (!itemParsed[type]) itemParsed[type] = []
-		itemParsed[type] = temp.concat(itemParsed[type])
+	if (tempArr.length) {
+		itemParsed[type].push(...tempArr)
 		return PARSE_SECTION_SUCC
 	}
-	else {
-		return PARSE_SECTION_SKIP
-	}
+	return PARSE_SECTION_SKIP
 }
 function parseEnchantMod(section) {
 	if (!section.find(line => line.endsWith('(enchant)'))) return PARSE_SECTION_SKIP
@@ -387,7 +398,7 @@ function parseImplicitMod(section) {
 	return PARSE_SECTION_FAIL
 }
 function parseExplicitMod(section) {
-	if (itemParsed !== '魔法' || itemParsed !== '稀有' || itemParsed !== '傳奇') PARSE_SECTION_SKIP
+	if (!['魔法', '稀有', '傳奇'].includes(itemParsed.rarity)) PARSE_SECTION_SKIP
 	let explicitSection = [],
 		fracturedSection = [],
 		craftedSection = []
@@ -459,7 +470,7 @@ function parseInfluence(section) {
 		else if (influence) tempInfluences.push(influence)
 	})
 	if (tempInfluences.length) {
-		itemParsed.influences = tempInfluences
+		itemParsed.influences.push(...tempInfluences)
 		return PARSE_SECTION_SUCC
 	}
 	else {
@@ -501,22 +512,22 @@ function parsePseudoEleResistance() {
 			}
 		})
 	}
-	if (itemParsed.implicit) fun(itemParsed.implicit)
-	if (itemParsed.explicit) fun(itemParsed.explicit)
-	if (itemParsed.fractured) fun(itemParsed.fractured)
-	if (itemParsed.crafted) fun(itemParsed.crafted)
+	fun(itemParsed.implicit)
+	fun(itemParsed.explicit)
+	fun(itemParsed.fractured)
+	fun(itemParsed.crafted)
 	if (eleRes) {
-		itemParsed.pseudo = {
+		itemParsed.pseudo.push({
 			id: "pseudo.pseudo_total_elemental_resistance",
 			text: "+#% 元素抗性",
 			type: "偽屬性",
 			value: { min: eleRes },
 			disabled: true
-		}
+		})
 	}
 }
-function parseAllfuns(item) {
-	for (let fun of parseFuns) {
+function parseAllfuns(item, functions) {
+	for (let fun of functions) {
 		let state
 		for (let section of item) {
 			state = fun(section)
@@ -533,7 +544,6 @@ function parseAllfuns(item) {
 }
 function parseWeapon(item) {
 	itemParsed.isWeaponOrArmor = true
-	itemParsed.autoSearch = false
 	item[0].forEach(line => { //parse Damage Section
 		if (line.startsWith('品質: ')) {
 			itemParsed.quality = { min: parseInt(line.match(/品質: \+(\d+)%/)[1]), max: undefined, search: true }
@@ -563,11 +573,10 @@ function parseWeapon(item) {
 	item.shift()
 	if (itemParsed.phyDamage) itemParsed.pDPS = parseFloat(((itemParsed.phyDamage.min + itemParsed.phyDamage.max) / 2 * itemParsed.attackSpeed).toFixed(2))
 	if (itemParsed.eleDamage) itemParsed.eDPS = parseFloat(((itemParsed.eleDamage.min + itemParsed.eleDamage.max) / 2 * itemParsed.attackSpeed).toFixed(2))
-	parseAllfuns(item)
+	parseAllfuns(item, parseFuns)
 }
 function parseArmor(item) {
 	itemParsed.isWeaponOrArmor = true
-	itemParsed.autoSearch = false
 	item[0].forEach(line => { //parse Damage Section
 		if (line.startsWith('品質: ')) {
 			itemParsed.quality.min = parseInt(line.match(/品質: \+(\d+)%/)[1])
@@ -583,17 +592,18 @@ function parseArmor(item) {
 		}
 	})
 	item.shift()
-	parseAllfuns(item)
+	parseAllfuns(item, parseFuns)
 }
 function parseClusterJewel(item) {
 	if (parseRequirement(item[0]) === PARSE_SECTION_SUCC) item.shift()
 	let temp = parseInt(item[0][0].match(/物品等級: (\d+)/)[1])
-	itemParsed.itemLevel = temp >= 84 ? 84 : temp >= 75 ? 75 : temp >= 68 ? 68 : temp >= 50 ? 50 : 1
+	itemParsed.itemLevel = {
+		min: temp >= 84 ? 84 : temp >= 75 ? 75 : temp >= 68 ? 68 : temp >= 50 ? 50 : 1,
+		max: temp >= 84 ? 100 : temp >= 75 ? 83 : temp >= 68 ? 84 : temp >= 50 ? 67 : 49, search: true
+	}
 	item.shift()
-	// enchant
 	if (itemParsed.rarity !== '傳奇') {
 		parseEnchantMod(item[0].slice(0, 2))
-		// if(parseEnchantMod(item[0].slice(0, 2))===PARSE_SECTION_SUCC) item[0].splice(0,2)
 		switch (itemParsed.baseType) {
 			case '巨型星團珠寶':
 			case '小型星團珠寶':
@@ -613,7 +623,6 @@ function parseClusterJewel(item) {
 			console.log(tempText)
 			temp = APImods.clusterJewel.entries.reverse().find(mod => mod.text.includes(tempText))
 		}
-
 		itemParsed.enchant.push({ id: "enchant.stat_3948993189", text: temp.text.split('\n'), value: { option: temp.id }, type: '附魔', disabled: false })
 		itemParsed.enchant.forEach(ele => ele.disabled = false)
 		item.shift()
@@ -624,20 +633,7 @@ function parseClusterJewel(item) {
 		parseImplicitMod,
 		parseExplicitMod,
 	]
-	for (let fun of _parseFuns) {
-		let state
-		for (let section of item) {
-			state = fun(section)
-			if (state === PARSE_SECTION_SUCC) {
-				item = item.filter(s => s !== section)
-				break
-			}
-			else if (state === PARSE_ITEM_SKIP) {
-				break
-			}
-		}
-		if (state === PARSE_ITEM_SKIP) break
-	}
+	parseAllfuns(item, _parseFuns)
 }
 function parseForbiddenJewel(item) {
 	for (let section of item) {
@@ -648,31 +644,24 @@ function parseForbiddenJewel(item) {
 			let type = match[1]
 			let passive = match[2]
 			let matchStat = APImods.forbiddenJewel.entries.find(e => e.text.indexOf(type) > -1)
-			console.log(matchStat)
 			let matchPassive = matchStat.option.options.find(e => e.text === passive)
-			console.log(matchPassive)
-			itemParsed.explicit = [{ id: matchStat.id, text: matchStat.text.replace('#', passive), value: { option: matchPassive.id }, disabled: false }]
-
+			itemParsed.explicit.push({ id: matchStat.id, text: matchStat.text.replace('#', passive), value: { option: matchPassive.id }, disabled: false })
 		}
 	}
 }
 function parseWatchstone(item) {
 	itemParsed.autoSearch = true
-	console.log(item)
 	for (let section of item) {
-		console.log(section)
 		for (let index in section) {
 			if (section[index].startsWith('你地圖中')) {
 				section[index] = section[index].replace(/你地圖中[有的]?\s?/, '')
 			}
 		}
-		console.log(section)
 		if (parseEnchantMod(section) === PARSE_SECTION_SUCC)
 			return
 	}
 }
 function parseOtherNeedMods(item) {
-	itemParsed.autoSearch = false
 	if (itemParsed.baseType.endsWith('星團珠寶')) {
 		parseClusterJewel(item)
 		return
@@ -685,13 +674,12 @@ function parseOtherNeedMods(item) {
 		parseForbiddenJewel(item)
 		return
 	}
-	parseAllfuns(item)
+	parseAllfuns(item, parseFuns)
 	if (itemParsed.type?.option === 'sentinel') {
 		delete itemParsed.isCorrupt
 	}
 }
 function parseMap(item) {
-	itemParsed.autoSearch = false
 	let elderMap = {
 		id: "implicit.stat_3624393862",
 		text: "地圖被 # 佔據",
@@ -801,12 +789,12 @@ function parseGem(item) {
 		}
 		else if (line.startsWith('品質: ')) {
 			itemParsed.quality = { min: parseInt(line.match(/品質: \+(\d+)%/)[1]), max: undefined, search: true }
-
 		}
 		else if (line.startsWith('替代品質')) {
 			isAltQ = true
 		}
 	})
+	itemParsed.quality.search = !/啟蒙|賦予|增幅/.test(itemParsed.baseType) && !isAltQ
 	item.shift()
 	let vaalLine
 	for (let section of item.reverse()) {
@@ -837,10 +825,8 @@ function parseGem(item) {
 		}
 		itemParsed.altQType = 0
 	}
-
 }
 function parseTample(item) {
-	itemParsed.autoSearch = false
 	item.shift()
 	item[0] = item[0].map(line => line.replace(/ \(階級 [123]\)/, ''))
 	parseMod(item[0], 'temple')
@@ -851,18 +837,16 @@ function parseTample(item) {
 	})
 }
 function parseFlask(item) {
-	itemParsed.autoSearch = false
 	item[0].forEach(line => {
 		if (line.startsWith('品質: ')) {
 			itemParsed.quality = { min: parseInt(line.match(/品質: \+(\d+)%/)[1]), max: undefined, search: true }
 		}
 	})
 	item.shift()
-	parseAllfuns(item)
+	parseAllfuns(item, parseFuns)
 }
 
 function parseLogbook(item) {
-	itemParsed.autoSearch = false
 	item.shift()
 	parseItemLevel(item[0])
 	item.shift()
@@ -876,7 +860,6 @@ function parseLogbook(item) {
 	for (let section of item) {
 		if (section.length >= 2) {
 			if (Object.keys(logbookTypes).includes(section[1])) {
-				itemParsed.explicit = itemParsed.explicit ?? []
 				if (!itemParsed.explicit.find(e => section[1] === e.text)) {
 					itemParsed.explicit.push({ id: logbookTypes[section[1]], text: section[1], disabled: true })
 				}
@@ -884,5 +867,4 @@ function parseLogbook(item) {
 			}
 		}
 	}
-
 }

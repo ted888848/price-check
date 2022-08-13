@@ -222,7 +222,7 @@ export async function getAPIdata() {
 	store.set('APIVersion', app.getVersion())
 }
 export async function checkForUpdate() {
-	if ((session.defaultSession?.getCacheSize() >>> 20) >= 30) { //大於30MB
+	if ((await session.defaultSession?.getCacheSize() >>> 20) >= 30) { //大於30MB
 		session.defaultSession.clearCache()
 			.catch(err => console.log(err))
 		session.defaultSession.clearCodeCaches({})

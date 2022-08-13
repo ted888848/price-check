@@ -1,10 +1,10 @@
 <template>
 	<div class=" text-xl text-white my-1 text-center"
-		@click="item.type.searchByType = !item.type.option || !item.type.searchByType">
+		@click="item.type.searchByType = !item.type.searchByType && item.type.option">
 		<span v-if="item.name" class="mr-3">{{ item.name }}</span>
 		<span :class="{ 'text-red-500': item.type.searchByType }">{{ item.baseType }}</span>
 	</div>
-	<div v-if="item.type.option" class="text-base text-white text-center" :class="{ 'text-3xl': item.type.searchByType }">
+	<div v-if="item.type.text" class="text-base text-white text-center" :class="{ 'text-3xl': item.type.searchByType }">
 		<span>{{ item.type.text }}</span>
 	</div>
 	<vSelect v-if="item.undefinedUnqiue && item.uniques !== []" class="text-sm style-chooser" :options="item.uniques"
@@ -56,9 +56,10 @@
 				<input class="w-8 appearance-none rounded bg-gray-400 text-center font-bold" type="number"
 					v-model.number="item.itemLevel.max" :disabled="!item.itemLevel.search" @dblclick="item.itemLevel.max = ''">
 			</div>
-			<div v-else-if="item.searchExchange.option" class="flex p-2 items-center justify-center"
+			<div v-else-if="item.searchExchange.option"
+				class="flex p-2 items-center justify-center hover:cursor-pointer flex-grow"
 				@click="item.searchExchange.have = ('exalted' === item.searchExchange.have) ? 'chaos' : 'exalted'">
-				<span class="mx-1 text-white hover:cursor-default">崇高價</span>
+				<span class="mx-1 text-white">崇高價</span>
 				<FontAwesomeIcon v-if="item.searchExchange.have === 'exalted'" icon="circle-check"
 					class="text-green-600 text-xl" />
 				<FontAwesomeIcon v-else icon="circle-xmark" class="text-red-600 text-xl" />
@@ -152,11 +153,11 @@
 		<button @click="searchBtn"
 			class="mx-2 bg-gray-500 text-white rounded px-1 hover:bg-gray-400 disabled:cursor-default disabled:opacity-60 disabled:bg-gray-500"
 			:disabled="rateTimeLimit.flag">Search</button>
-		<div v-if="isSearched">
+		<div v-if="searchResult.err || searchResult.searchID.ID">
 			<button
 				class="mx-2 bg-green-400 text-black rounded px-1 hover:bg-green-300 disabled:cursor-default disabled:opacity-60 disabled:bg-green-400"
 				@click="fetchMore"
-				:disabled="rateTimeLimit.flag || searchedNumber >= (searchTotal >= 100 ? 100 : searchTotal)">在20筆</button>
+				:disabled="rateTimeLimit.flag || searchResult.nowFetched >= searchResult.totalCount">在20筆</button>
 			<button
 				class="mx-2 bg-blue-800 text-white rounded px-4 hover:bg-blue-700 disabled:cursor-default disabled:opacity-60 disabled:bg-blue-800"
 				@click="openBrower" :disabled="rateTimeLimit.flag">B</button>
@@ -165,8 +166,7 @@
 			class="mx-2 bg-blue-800 text-white rounded px-4 hover:bg-blue-700 disabled:cursor-default disabled:opacity-60 disabled:bg-blue-800"
 			@click="openBrowerView" :disabled="rateTimeLimit.flag">BV</button>
 	</div>
-	<table v-if="searchResultSorted.length"
-		class="bg-blue-500 text-center text-white text-sm my-1 mx-5 w-1/2 self-center">
+	<table v-if="fetchResultSorted.length" class="bg-blue-500 text-center text-white text-sm my-1 mx-5 w-1/2 self-center">
 		<thead class="">
 			<tr class=" border-b-2 border-red-500 text-base">
 				<td class=" hover:cursor-default">價格</td>
@@ -174,33 +174,36 @@
 			</tr>
 		</thead>
 		<tbody class="">
-			<tr v-for="ele in searchResultSorted" :key="ele" class=" border-b-2 border-gray-600"
+			<tr v-for="ele in fetchResultSorted" :key="ele" class=" border-b-2 border-gray-600"
 				:class="{ 'text-yellow-400 text-xl bg-indigo-700 font-bold': ele.amount === maxAmout.amount }">
-				<td v-if="item.searchExchange.option" class="flex justify-center items-center"><img :src="ele.image"
-						class=" w-7 h-7">{{ ele.price }}<img :src="ele.image2" class=" w-7 h-7"></td>
+				<td v-if="item.searchExchange.option" class="flex justify-center items-center">
+					<img :src="ele.image" class=" w-7 h-7">{{ ele.price }}<img :src="currency2Img" class=" w-7 h-7">
+				</td>
 				<td v-else class="flex justify-center items-center">{{ ele.price }}<img :src="ele.image" class=" w-7 h-7">
 				</td>
 				<td>{{ ele.amount }}</td>
 			</tr>
 		</tbody>
 	</table>
-	<span v-if="isSearchFail" class="text-red-600 text-4xl text-center hover:cursor-default">{{ errMsg || 'Fail' }}</span>
-	<span v-if="isSearched" class="text-white text-2xl text-center hover:cursor-default">共{{ searchTotal }}筆,顯示{{
-			searchedNumber
-	}}</span>
+	<span v-if="searchResult.err" class="text-red-600 text-4xl text-center hover:cursor-default">
+		{{ searchResult.errData || 'Fail' }}
+	</span>
+	<span v-if="searchResult.searchID?.ID" class="text-white text-2xl text-center hover:cursor-default">
+		共{{ searchResult.totalCount }}筆,顯示{{ searchResult.nowFetched }}筆
+	</span>
 	<div v-if="isSearching" class=" text-8xl text-white my-5 text-center flex justify-center">
 		<FontAwesomeIcon icon="spinner" spin />
 	</div>
-	<span v-if="rateTimeLimit.flag" class="text-white bg-red-600 text-xl text-center my-2 hover:cursor-default">API次數限制
-		{{ rateTimeLimit.second }} 秒後再回來 </span>
+	<span v-if="rateTimeLimit.flag" class="text-white bg-red-600 text-xl text-center my-2 hover:cursor-default">
+		API次數限制 {{ rateTimeLimit.second }} 秒後再回來
+	</span>
 </template>
 <script setup>
-import { currencyImageUrl, APIStatic } from '@/utility/setupAPI'
-import { ipcRenderer, shell } from 'electron'
-import IPC from '@/ipc/ipcChannel'
+import { APIStatic } from '@/utility/setupAPI'
+import { shell } from 'electron'
 import { getSearchJSON, searchItem, fetchItem, getIsCounting, searchExchange, selectOptions } from '@/utility/tradeSide'
 import { computed, ref, nextTick } from 'vue'
-import { debounce, maxBy } from 'lodash-es'
+import { maxBy } from 'lodash-es'
 
 const props = defineProps(["itemProp", "leagueSelect", "exaltedToChaos", "isOverflow"])
 const { rateTimeLimit } = getIsCounting()
@@ -226,117 +229,79 @@ function modTextColor(type) {
 	return 'white'
 }
 
-const searchResult = ref([])
-const isSearchFail = ref(false)
-const errMsg = ref('')
-const isSearched = ref(false)
+const searchResult = ref({ result: [], err: false, totalCount: 0, nowFetched: 0, searchID: { ID: '', type: '' } })
+const fetchResult = ref([])
 const isSearching = ref(false)
 const modTbodyToggle = ref(true)
-const searchTotal = ref(0)
-let searchID = { ID: '', type: 'search' }
+const currency2Img = ref('')
+
 function resetSearchData() {
-	searchResult.value = []
-	errMsg.value = ''
-	isSearchFail.value = false
-	isSearched.value = false
+	searchResult.value = { result: [], err: false, totalCount: 0, nowFetched: 0, searchID: { ID: '', type: '' } }
+	fetchResult.value = []
 	isSearching.value = false
 	modTbodyToggle.value = true
-	searchTotal.value = 0
-	searchID = { ID: '', type: 'search' }
+	currency2Img.value = ''
 }
 async function fetchMore() {
 	isSearching.value = true
-	let temp = await fetchItem()
-	if (!temp) {
-		isSearching.value = false
-		return
-	}
-	for (let key in temp) {
-		let tempArr = key.split('|')
-		let _price = tempArr[0]
-		let _currency = tempArr[1]
-		let findRes = searchResult.value.find(ele => ele.price === _price)
-		if (findRes) {
-			findRes.amount += temp[key]
-		}
-		else {
-			searchResult.value.push({ price: _price, currency: _currency, amount: temp[key], image: `https://web.poe.garena.tw${currencyImageUrl.find(ele => ele.id === _currency).image}` })
-		}
-	}
-	isSearching.value = false
-}
-const searchBtn = debounce(async function () {
-	resetSearchData()
-	isSearching.value = true
-	let temp
-	let currency2Img
-	if (item.value.searchExchange.option) {
-		temp = await searchExchange(item.value, props.leagueSelect)
-		currency2Img = `https://web.poe.garena.tw${APIStatic.find(ele => ele.id === temp.currency2).image}`
-	}
-	else {
-		temp = await searchItem(getSearchJSON(item.value), props.leagueSelect)
-	}
-	if (temp.err) {
-		isSearching.value = false
-		isSearchFail.value = true
-		errMsg.value = temp.data
-		return
-	}
-	else if (temp.total) {
-		searchTotal.value = temp.total
-		for (let key in temp.result) {
-			let tempArr = key.split('|')
-			let _price = tempArr[0]
-			let _currency = tempArr[1]
-			searchResult.value.push({
-				price: _price, currency: _currency, amount: temp.result[key],
-				image: `https://web.poe.garena.tw${currencyImageUrl.find(ele => ele.id === _currency).image}`, image2: currency2Img
-			})
-		}
-	}
-	searchID = temp.searchID
-	isSearched.value = true
+	let fetchStartPos = searchResult.value.nowFetched
+	let fetchEndPos = (searchResult.value.nowFetched + 20) <= (searchResult.value.totalCount) ? (searchResult.value.nowFetched + 20) : (searchResult.value.totalCount)
+	searchResult.value.nowFetched = fetchEndPos
+	let fetchList = searchResult.value.result.slice(fetchStartPos, fetchEndPos)
+	fetchResult.value = await fetchItem(fetchList, searchResult.value.searchID.ID, fetchResult.value)
 	isSearching.value = false
 	nextTick(() => { modTbodyToggle.value = !props.isOverflow() })
-}, 300)
-const searchResultSorted = computed(() => {
+}
+async function searchBtn() {
+	if (rateTimeLimit.value.flag) return;
+	resetSearchData()
+	isSearching.value = true
+	if (item.value.searchExchange.option) {
+		searchResult.value = await searchExchange(item.value, props.leagueSelect)
+		if (!searchResult.value.err) {
+			currency2Img.value = `https://web.poe.garena.tw${APIStatic.find(ele => ele.id === searchResult.value.currency2).image}`
+			fetchResult.value = searchResult.value.result
+		}
+	}
+	else {
+		searchResult.value = await searchItem(getSearchJSON(item.value), props.leagueSelect)
+		if (!searchResult.value.err) {
+			let fetchStartPos = searchResult.value.nowFetched
+			let fetchEndPos = (searchResult.value.nowFetched + 20) <= (searchResult.value.totalCount) ? (searchResult.value.nowFetched + 20) : (searchResult.value.totalCount)
+			searchResult.value.nowFetched = fetchEndPos
+			let fetchList = searchResult.value.result.slice(fetchStartPos, fetchEndPos)
+			fetchResult.value = await fetchItem(fetchList, searchResult.value.searchID.ID)
+		}
+	}
+	isSearching.value = false
+	nextTick(() => { modTbodyToggle.value = !props.isOverflow() })
+}
+
+const fetchResultSorted = computed(() => {
 	if (props.exaltedToChaos && !item.value.searchExchange.option)
-		return searchResult.value.slice().sort((a, b) => {
+		return fetchResult.value.slice().sort((a, b) => {
 			let ca = a.currency === 'exalted' ? a.price * props.exaltedToChaos : a.price
 			let cb = b.currency === 'exalted' ? b.price * props.exaltedToChaos : b.price
 			return ca - cb
 		})
 	else
-		return searchResult.value
-})
-const searchedNumber = computed(() => {
-	return searchResultSorted.value.reduce((pre, curr) => pre + curr.amount, 0)
+		return fetchResult.value
 })
 const maxAmout = computed(() => {
-	return maxBy(searchResult.value, ele => ele.amount)
+	return maxBy(fetchResult.value, ele => ele.amount)
 })
 const searchStats = computed(() => {
-	let temp = []
-	if (item.value.enchant) temp = temp.concat(item.value.enchant)
-	if (item.value.implicit) temp = temp.concat(item.value.implicit)
-	if (item.value.explicit) temp = temp.concat(item.value.explicit)
-	if (item.value.fractured) temp = temp.concat(item.value.fractured)
-	if (item.value.crafted) temp = temp.concat(item.value.crafted)
-	if (item.value.pseudo) temp = temp.concat(item.value.pseudo)
-	if (item.value.temple) temp = temp.concat(item.value.temple)
-	return temp
+	return [].concat(item.value.enchant, item.value.implicit, item.value.explicit, item.value.fractured, item.value.crafted, item.value.pseudo, item.value.temple)
 })
 if (item.value.autoSearch)
 	searchBtn()
 
 const emit = defineEmits(["brower-view"])
 function openBrowerView() {
-	ipcRenderer.send(IPC.BROWSER_VIEW, `${searchID.type}/${props.leagueSelect}/${searchID.ID}`)
-	emit("brower-view")
+	emit("brower-view", `${searchResult.value.searchID.type}/${props.leagueSelect}/${searchResult.value.searchID.ID}`)
 }
 function openBrower() {
-	shell.openExternal(encodeURI(`https://web.poe.garena.tw/trade/${searchID.type}/${props.leagueSelect}/${searchID.ID}`))
+	shell.openExternal(encodeURI(`https://web.poe.garena.tw/trade/${searchResult.value.searchID.type}/${props.leagueSelect}/${searchResult.value.searchID.ID}`))
 }
 </script>
 <style>

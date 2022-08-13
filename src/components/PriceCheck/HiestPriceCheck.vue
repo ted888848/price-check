@@ -18,11 +18,11 @@
 		<button @click="searchBtn"
 			class="mx-2 bg-gray-500 text-white rounded px-1 hover:bg-gray-400 disabled:cursor-default disabled:opacity-60 disabled:bg-gray-500"
 			:disabled="rateTimeLimit.flag">Search</button>
-		<div v-if="isSearched">
+		<div v-if="searchResult.err || searchResult.searchID.ID">
 			<button
 				class="mx-2 bg-green-400 text-black rounded px-1 hover:bg-green-300 disabled:cursor-default disabled:opacity-60 disabled:bg-green-400"
 				@click="fetchMore"
-				:disabled="rateTimeLimit.flag || searchedNumber >= (searchTotal >= 100 ? 100 : searchTotal)">在20筆</button>
+				:disabled="rateTimeLimit.flag || searchResult.nowFetched >= searchResult.totalCount">在20筆</button>
 			<button
 				class="mx-2 bg-blue-800 text-white rounded px-4 hover:bg-blue-700 disabled:cursor-default disabled:opacity-60 disabled:bg-blue-800"
 				@click="openBrower" :disabled="rateTimeLimit.flag">B</button>
@@ -31,8 +31,7 @@
 			class="mx-2 bg-blue-800 text-white rounded px-4 hover:bg-blue-700 disabled:cursor-default disabled:opacity-60 disabled:bg-blue-800"
 			@click="openBrowerView" :disabled="rateTimeLimit.flag">BV</button>
 	</div>
-	<table v-if="searchResultSorted.length"
-		class="bg-blue-500 text-center text-white text-sm my-1 mx-5 w-1/2 self-center">
+	<table v-if="fetchResultSorted.length" class="bg-blue-500 text-center text-white text-sm my-1 mx-5 w-1/2 self-center">
 		<thead class="">
 			<tr class=" border-b-2 border-red-500 text-base">
 				<td class=" hover:cursor-default">價格</td>
@@ -40,17 +39,19 @@
 			</tr>
 		</thead>
 		<tbody class="">
-			<tr v-for="ele in searchResultSorted" :key="ele" class=" border-b-2 border-gray-600"
+			<tr v-for="ele in fetchResultSorted" :key="ele" class=" border-b-2 border-gray-600"
 				:class="{ 'text-red-500 text-xl bg-indigo-600 font-bold': ele.amount === maxAmout.amount }">
 				<td class="flex justify-center items-center">{{ ele.price }}<img :src="ele.image" class=" w-7 h-7"></td>
 				<td>{{ ele.amount }}</td>
 			</tr>
 		</tbody>
 	</table>
-	<span v-if="isSearchFail" class="text-red-600 text-4xl text-center hover:cursor-default">{{ errMsg || 'Fail' }}</span>
-	<span v-if="isSearched" class="text-white text-2xl text-center hover:cursor-default">共{{ searchTotal }}筆,顯示{{
-			searchedNumber
-	}}</span>
+	<span v-if="searchResult.err" class="text-red-600 text-4xl text-center hover:cursor-default">
+		{{ searchResult.errData || 'Fail' }}
+	</span>
+	<span v-if="searchResult.searchID?.ID" class="text-white text-2xl text-center hover:cursor-default">
+		共{{ searchResult.totalCount }}筆,顯示{{ searchResult.nowFetched }}筆
+	</span>
 	<div v-if="isSearching" class=" text-8xl text-white my-5 text-center flex justify-center">
 		<FontAwesomeIcon icon="spinner" spin />
 	</div>
@@ -59,28 +60,22 @@
 </template>
 <script setup>
 import { getDefaultSearchJSON, searchItem, fetchItem, getIsCounting, selectOptions } from '@/utility/tradeSide'
-import { maxBy, debounce } from 'lodash-es'
-import { ipcRenderer, shell } from 'electron'
-import IPC from '@/ipc/ipcChannel'
+import { maxBy } from 'lodash-es'
+import { shell } from 'electron'
 import { computed, ref, watch } from 'vue'
-import { hiestReward, currencyImageUrl } from '@/utility/setupAPI'
+import { hiestReward as gemReplicaOptions } from '@/utility/setupAPI'
 const props = defineProps(["itemProp", "leagueSelect", "exaltedToChaos", "isOverflow"])
 const { rateTimeLimit } = getIsCounting()
 
-let gemReplicaOptions = hiestReward
 const gemReplicaSelect = ref(null)
 const { gemAltQOptions } = selectOptions
 const gemAltQSelect = ref(gemAltQOptions[0])
 
 let searchJSON = getDefaultSearchJSON()
-const searchResult = ref([])
-const isSearchFail = ref(false)
-const errMsg = ref('')
-const isSearched = ref(false)
+const searchResult = ref({ result: [], err: false, totalCount: 0, nowFetched: 0, searchID: { ID: '', type: '' } })
+const fetchResult = ref([])
 const isSearching = ref(false)
-const searchTotal = ref(0)
 const twoWeekOffline = ref(false)
-let searchID = { ID: '', type: 'search' }
 watch(twoWeekOffline, (newValue) => {
 	if (newValue) {
 		searchJSON.query.filters.trade_filters.filters.indexed = { option: "2weeks" }
@@ -91,42 +86,22 @@ watch(twoWeekOffline, (newValue) => {
 		searchJSON.query.status.option = "online"
 	}
 })
-
 function resetSearchData() {
-	searchResult.value = []
-	isSearchFail.value = false
-	errMsg.value = ''
-	isSearched.value = false
-	searchTotal.value = 0
+	searchResult.value = { result: [], err: false, totalCount: 0, nowFetched: 0, searchID: { ID: '', type: '' } }
+	fetchResult.value = []
 	isSearching.value = false
-	searchID = { ID: '', type: 'search' }
 }
-
 async function fetchMore() {
 	isSearching.value = true
-	let temp = await fetchItem()
-	if (!temp) {
-		isSearching.value = false
-		return
-	}
-	for (let key in temp) {
-		let tempArr = key.split('|')
-		let _price = tempArr[0]
-		let _currency = tempArr[1]
-		let findRes = searchResult.value.find(ele => ele.price === _price)
-		if (findRes) {
-			findRes.amount += temp[key]
-		}
-		else {
-			searchResult.value.push({
-				price: _price, currency: _currency, amount: temp[key],
-				image: `https://web.poe.garena.tw${currencyImageUrl.find(ele => ele.id === _currency).image}`
-			})
-		}
-	}
+	let fetchStartPos = searchResult.value.nowFetched
+	let fetchEndPos = (searchResult.value.nowFetched + 20) <= (searchResult.value.totalCount) ? (searchResult.value.nowFetched + 20) : (searchResult.value.totalCount)
+	searchResult.value.nowFetched = fetchEndPos
+	let fetchList = searchResult.value.result.slice(fetchStartPos, fetchEndPos)
+	fetchResult.value = await fetchItem(fetchList, searchResult.value.searchID.ID, fetchResult.value)
 	isSearching.value = false
 }
-const searchBtn = debounce(async function () {
+async function searchBtn() {
+	if (rateTimeLimit.value.flag) return;
 	resetSearchData()
 	isSearching.value = true
 	searchJSON.query.name = gemReplicaSelect.value.name
@@ -134,52 +109,38 @@ const searchBtn = debounce(async function () {
 	if (!gemReplicaSelect.value.name?.startsWith('贗品')) {
 		searchJSON.query.filters.misc_filters.filters.gem_alternate_quality = { option: gemAltQSelect.value.value }
 	}
-	let temp = await searchItem(searchJSON, props.leagueSelect)
-	if (temp.err) {
-		isSearching.value = false
-		isSearchFail.value = true
-		errMsg.value = temp.data.message
-		return
+	searchResult.value = await searchItem(searchJSON, props.leagueSelect)
+	if (!searchResult.value.err) {
+		let fetchStartPos = searchResult.value.nowFetched
+		let fetchEndPos = (searchResult.value.nowFetched + 20) <= (searchResult.value.totalCount) ? (searchResult.value.nowFetched + 20) : (searchResult.value.totalCount)
+		searchResult.value.nowFetched = fetchEndPos
+		let fetchList = searchResult.value.result.slice(fetchStartPos, fetchEndPos)
+		fetchResult.value = await fetchItem(fetchList, searchResult.value.searchID.ID)
 	}
-	else if (temp.total) {
-		searchTotal.value = temp.total
-		for (let key in temp.result) {
-			let tempArr = key.split('|')
-			let _price = tempArr[0]
-			let _currency = tempArr[1]
-			searchResult.value.push({ price: _price, currency: _currency, amount: temp.result[key], image: `https://web.poe.garena.tw${currencyImageUrl.find(ele => ele.id === _currency).image}` })
-		}
-	}
-	searchID = temp.searchID
-	isSearched.value = true
 	isSearching.value = false
-}, 300)
+}
 
-const searchResultSorted = computed(() => {
+const fetchResultSorted = computed(() => {
 	if (props.exaltedToChaos)
-		return searchResult.value.slice().sort((a, b) => {
+		return fetchResult.value.slice().sort((a, b) => {
 			let ca = a.currency === 'exalted' ? a.price * props.exaltedToChaos : a.price
 			let cb = b.currency === 'exalted' ? b.price * props.exaltedToChaos : b.price
 			return ca - cb
 		})
 	else
-		return searchResult.value
-})
-const searchedNumber = computed(() => {
-	return searchResultSorted.value.reduce((pre, curr) => pre + curr.amount, 0)
+		return fetchResult.value
 })
 
 const maxAmout = computed(() => {
-	return maxBy(searchResult.value, ele => ele.amount)
+	return maxBy(fetchResult.value, ele => ele.amount)
 })
 
 const emit = defineEmits(["brower-view"])
 function openBrowerView() {
-	ipcRenderer.send(IPC.BROWSER_VIEW, `search/${props.leagueSelect}/${searchID.ID}`)
-	emit("brower-view")
+	emit("brower-view", `search/${props.leagueSelect}/${searchResult.value.searchID.ID}`)
 }
 function openBrower() {
-	shell.openExternal(encodeURI(`https://web.poe.garena.tw/trade/search/${props.leagueSelect}/${searchID.ID}`))
+	shell.openExternal(encodeURI(`https://web.poe.garena.tw/trade/search/${props.leagueSelect}/${searchResult.value.searchID.ID}`))
 }
 </script>
 <style>

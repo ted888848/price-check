@@ -25,7 +25,7 @@
 <script setup>
 import IPC from '@/ipc/ipcChannel'
 import { ipcRenderer } from 'electron'
-import { onMounted, ref, unref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { cloneDeep } from 'lodash-es'
 
 let isLoading = ref(true)

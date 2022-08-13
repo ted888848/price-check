@@ -1,11 +1,11 @@
-import { BrowserWindow, ipcMain, BrowserView } from 'electron'
+import { BrowserWindow, ipcMain } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib';
 import { OverlayWindow } from 'electron-overlay-window';
 import { PoeWindow } from './POEWindow'
 import IPC from '@/ipc/ipcChannel'
+import path from 'path';
 import { overlayEvent, priceCheckEvent } from '@/ipc/ipcHandler'
 export let win;
-let BVwin
 let isOverlayOpen
 export async function createWindow() {
 	win = new BrowserWindow({
@@ -13,11 +13,13 @@ export async function createWindow() {
 		height: 600,
 		...OverlayWindow.WINDOW_OPTS,
 		// eslint-disable-next-line no-undef
-		icon: `${__static}/MavenOrb256.ico`,
+		icon: path.join(__static, 'MavenOrb256.ico'),
+
 		webPreferences: {
 			nodeIntegration: true,
 			contextIsolation: false,
 			webSecurity: false,
+			webviewTag: true
 		},
 	});
 	if (process.env.WEBPACK_DEV_SERVER_URL) {
@@ -31,21 +33,15 @@ export async function createWindow() {
 	ipcMain.on(IPC.FORCE_POE, () => {
 		forcePOE()
 	})
-	ipcMain.on(IPC.BROWSER_VIEW, (_, url) => {
-		setupBV(url)
-	})
+
 	PoeWindow.attach(win, 'Path of Exile')
 	PoeWindow.on('poeActiveChange', handlePoeActive)
 	win.webContents.on('before-input-event', handleBIEvent)
+	win.webContents.on('did-attach-webview', (_, webviewWebContent) => {
+		webviewWebContent.on('before-input-event', handleBIEvent)
+	})
 }
 
-function setupBV(url) {
-	if (!BVwin) BVwin = new BrowserView()
-	win.setBrowserView(BVwin)
-	BVwin.setBounds({ x: 0, y: 0, width: PoeWindow.bounds.width - 500, height: PoeWindow.bounds.height })
-	BVwin.webContents.loadURL(encodeURI(`https://web.poe.garena.tw/trade/${url}`))
-	BVwin.webContents.on('before-input-event', handleBIEvent)
-}
 function handlePoeActive(isActive) {
 	if (isOverlayOpen) forceOverlay()
 	else if (isActive) {
@@ -84,9 +80,5 @@ export function forceOverlay() {
 export function forcePOE() {
 	isOverlayOpen = false
 	PoeWindow.isActive = true
-	if (BVwin) {
-		win.removeBrowserView(BVwin)
-		BVwin.webContents.loadURL('about:blank')
-	}
 	OverlayWindow.focusTarget()
 }

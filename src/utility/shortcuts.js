@@ -5,7 +5,7 @@ import { getClopboard } from './clipboard'
 import { config } from './config';
 import robotjs from '@jitsi/robotjs'
 export function setupShortcut() {
-	robotjs.setKeyboardDelay(1)
+	// robotjs.setKeyboardDelay(1)
 	registShortcut()
 	PoeWindow.on('poeActiveChange', (isActive) => {
 		process.nextTick(() => {

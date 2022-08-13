@@ -1,5 +1,4 @@
 const { defineConfig } = require('@vue/cli-service')
-const path = require('path')
 module.exports = defineConfig({
 	transpileDependencies: true,
 	pluginOptions: {
@@ -24,7 +23,19 @@ module.exports = defineConfig({
 				}
 			},
 			nodeIntegration: true,
-
 		}
+	},
+	chainWebpack: config => {
+		config.module
+			.rule("vue")
+			.use("vue-loader")
+			.tap((options) => {
+				options.compilerOptions = {
+					...(options.compilerOptions),
+					isCustomElement: (tag) => (tag === 'webview'),
+				};
+				return options;
+			});
 	}
+
 })

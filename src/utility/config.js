@@ -9,10 +9,10 @@ export function setupConfig() {
 		characterName: '',
 		searchExchangeExalted: false
 	})
-	ipcMain.on(IPC.SET_CONFIG, (e, configData) => {
+	ipcMain.on(IPC.SET_CONFIG, (_e, configData) => {
 		config.set('config', configData)
 	})
-	ipcMain.handle(IPC.GET_CONFIG, (e) => {
+	ipcMain.handle(IPC.GET_CONFIG, () => {
 		return config.get('config')
 	})
 	ipcMain.on(IPC.GET_CONFIG, (e) => {

@@ -40,6 +40,7 @@ function reloadAPIdata() {
 		.then(() => {
 			emit("reloadLeagues");
 			loadAPIdata();
+			console.log('API reloaded')
 		})
 		.catch((error) => {
 			console.error(error);

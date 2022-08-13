@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { GGCapi, APIStatic } from './setupAPI'
+import { GGCapi, APIStatic, currencyImageUrl } from './setupAPI'
 import { ref } from 'vue'
 import { cloneDeep, isUndefined, isNumber, countBy } from 'lodash-es'
 
@@ -51,7 +51,6 @@ let exchangeJSONSample = {
 	},
 	"engine": "new"
 }
-let searchResult
 
 export const selectOptions = {
 	generalOption: [
@@ -198,14 +197,14 @@ export function getSearchJSON(item) {
 		searchJSON.query.status.option = "any"
 	}
 
-	if (!isUndefined(item.enchant)) searchJSON.query.stats[0].filters.push(...cloneDeep(item.enchant))
-	if (!isUndefined(item.implicit)) searchJSON.query.stats[0].filters.push(...cloneDeep(item.implicit))
-	if (!isUndefined(item.explicit)) searchJSON.query.stats[0].filters.push(...cloneDeep(item.explicit))
-	if (!isUndefined(item.fractured)) searchJSON.query.stats[0].filters.push(...cloneDeep(item.fractured))
-	if (!isUndefined(item.crafted)) searchJSON.query.stats[0].filters.push(...cloneDeep(item.crafted))
-	if (!isUndefined(item.pseudo)) searchJSON.query.stats[0].filters.push(item.pseudo)
-	if (!isUndefined(item.temple)) searchJSON.query.stats[0].filters.push(...cloneDeep(item.temple))
-	if (!isUndefined(item.influences)) searchJSON.query.stats[0].filters.push(...cloneDeep(item.influences))
+	searchJSON.query.stats[0].filters.push(...(item.enchant))
+	searchJSON.query.stats[0].filters.push(...(item.implicit))
+	searchJSON.query.stats[0].filters.push(...(item.explicit))
+	searchJSON.query.stats[0].filters.push(...(item.fractured))
+	searchJSON.query.stats[0].filters.push(...(item.crafted))
+	searchJSON.query.stats[0].filters.push(...(item.pseudo))
+	searchJSON.query.stats[0].filters.push(...(item.temple))
+	searchJSON.query.stats[0].filters.push(...(item.influences))
 
 	if (!isUndefined(item.blightedMap)) searchJSON.query.filters.map_filters.filters.map_blighted = { option: true }
 	if (!isUndefined(item.UberBlightedMap)) searchJSON.query.filters.map_filters.filters.map_uberblighted = { option: true }
@@ -251,14 +250,13 @@ const rateTimeLimitArr = {
 		},
 	]
 }
-export let rateTimeLimit = ref({ flag: false, second: 0 })
+let rateTimeLimit = ref({ flag: false, second: 0 })
 export function getIsCounting() {
-	rateTimeLimit.value = { flag: false, second: 0 }
 	return { rateTimeLimit }
 }
 let interval
 function startCountdown(time) {
-	if (time < rateTimeLimit.value.second) return null
+	if (time < rateTimeLimit.value.second) return;
 	if (interval) {
 		clearInterval(interval)
 		interval = null
@@ -299,22 +297,22 @@ function cleanupJSON(searchJson) {
 	}
 	return searchJson
 }
+// let searchResult
 export async function searchItem(searchJson, league) {
-	searchResult = null
+	let searchResult = {}
+	let errData
 	searchJson = cleanupJSON(searchJson)
 	if (process.env.NODE_ENV === 'development') console.log(searchJson)
-	let searchID = { ID: '', type: 'search' }
-	let errData
 	await GGCapi.post(encodeURI(`trade/search/${league}`), JSON.stringify(searchJson))
 		.then((response) => {
 			parseRateTime(response.headers)
 			return response.data
 		})
 		.then((data) => {
-			searchResult = data
-			searchID.ID = data.id
-			searchResult.nowSearched = 0
-			searchResult.itemCount = searchResult.result.length
+			searchResult.searchID = { ID: data.id, type: 'search' }
+			searchResult.result = data.result
+			searchResult.totalCount = data.result.length
+			searchResult.nowFetched = 0
 		})
 		.catch((err) => {
 			if (err.response?.status === 400) {
@@ -326,17 +324,15 @@ export async function searchItem(searchJson, league) {
 				startCountdown(parseInt(err.response.headers['retry-after']))
 			}
 		})
-	if (errData) return { data: errData, err: true }
-	return { result: await fetchItem(), total: searchResult.itemCount, err: false, searchID: searchID }
+	if (errData) return { errData, err: true }
+	return { ...searchResult, err: false }
 }
-export async function fetchItem() {
-	if (searchResult.nowSearched >= (searchResult.itemCount > 100 ? 100 : searchResult.itemCount)) return null
-	let start = searchResult.nowSearched
-	let end = searchResult.nowSearched + 20 > searchResult.itemCount ? searchResult.itemCount : searchResult.nowSearched + 20
+export async function fetchItem(fetchList, searchID, oldFetchResult) {
+	if (!fetchList.length) return oldFetchResult ?? [];
 	let fetchResult = []
 	let itemJsonUrl = []
-	for (let i = start; i < end; i += 10) {
-		itemJsonUrl.push('trade/fetch/' + searchResult.result.slice(i, i + 10).join(',') + `?query=${searchResult.id}`)
+	for (let i = 0; i < fetchList.length; i += 10) {
+		itemJsonUrl.push('trade/fetch/' + fetchList.slice(i, i + 10).join(',') + `?query=${searchID}`)
 	}
 	await axios.all(itemJsonUrl.map((url) => GGCapi.get(encodeURI(url))))
 		.then(axios.spread((...args) => {
@@ -351,9 +347,23 @@ export async function fetchItem() {
 				startCountdown(parseInt(err.response.headers['retry-after']))
 			}
 		})
-	searchResult.nowSearched += fetchResult.length
 	fetchResult = fetchResult.map(ele => `${ele.listing.price.amount}|${ele.listing.price.currency}`)
-	return countBy(fetchResult)
+	let countByFetchResult = countBy(fetchResult)
+	fetchResult = oldFetchResult ?? []
+	for (let key in countByFetchResult) {
+		let [price, currency] = key.split('|')
+		let fetchResultFind = fetchResult.find((e) => (e.price === price && e.currency === currency))
+		if (fetchResultFind) {
+			fetchResultFind.amount += countByFetchResult[key]
+		}
+		else {
+			fetchResult.push({
+				price, currency, amount: countByFetchResult[key],
+				image: `https://web.poe.garena.tw${currencyImageUrl.find(ele => ele.id === currency).image}`
+			})
+		}
+	}
+	return fetchResult
 }
 export async function getExaltedToChaos(league) {
 	let exchangeJSON = cloneDeep(exchangeJSONSample)
@@ -378,9 +388,9 @@ export async function getExaltedToChaos(league) {
 	return Math.round(chaos * 0.2) * 5
 }
 export async function searchExchange(item, league) {
-	searchResult = {}
+	let searchResult = {}
+	let tempResult = []
 	let errData = undefined
-	let searchID = { ID: '', type: 'exchange' }
 	let exchangeJSON = cloneDeep(exchangeJSONSample)
 	exchangeJSON.exchange.have = [item.searchExchange.have]
 	exchangeJSON.exchange.want = [APIStatic.find(e => e.text === item.baseType).id]
@@ -389,19 +399,33 @@ export async function searchExchange(item, league) {
 			parseRateTime(response.headers)
 			return response.data
 		}).then((data) => {
-			searchID.ID = data.id
-			searchResult.itemCount = data.total
+			searchResult.searchID = { ID: data.id, type: 'exchange' }
 			searchResult.result = []
+			searchResult.currency2 = exchangeJSON.exchange.want[0]
 			for (let key in data.result) {
-				searchResult.result.push(data.result[key].listing.offers[0].exchange.amount + '：' + data.result[key].listing.offers[0].item.amount + '|' + item.searchExchange.have)
+				tempResult.push(data.result[key].listing.offers[0].exchange.amount + '：' + data.result[key].listing.offers[0].item.amount + '|' + item.searchExchange.have)
 			}
+			searchResult.nowFetched = searchResult.totalCount = tempResult.length
 		})
 		.catch((err) => {
+			if (err.response?.status === 400) {
+				errData = err.response.data?.error?.message
+			}
+			errData = errData || err.message || err
 			console.log(err)
 			if (err.response?.status === 429) {
 				startCountdown(parseInt(err.response.headers['retry-after']))
 			}
 		})
-	if (errData) return { data: errData, err: true }
-	return { result: countBy(searchResult.result), total: searchResult.itemCount, err: false, searchID: searchID, currency2: exchangeJSON.exchange.want[0] }
+	let tempResultCountBy = countBy(tempResult)
+	for (let key in tempResultCountBy) {
+		let [price, currency] = key.split('|')
+		searchResult.result.push({
+			price, currency, amount: tempResultCountBy[key],
+			image: `https://web.poe.garena.tw${currencyImageUrl.find(ele => ele.id === currency).image}`
+		})
+
+	}
+	if (errData) return { errData, err: true }
+	return { ...searchResult, err: false }
 }

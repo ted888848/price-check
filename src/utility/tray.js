@@ -5,7 +5,7 @@ let tray
 
 export function setupTray() {
 	// eslint-disable-next-line no-undef
-	tray = new Tray(path.join(__static, 'MavenOrb256.ico'))
+	tray = new Tray(path.join(__static, 'MavenOrb.ico'))
 	const trayMenu = Menu.buildFromTemplate([
 		{
 			label: 'DevTool',
@@ -15,7 +15,7 @@ export function setupTray() {
 			}
 		},
 		{
-			label: '最新版本',
+			label: '打開最新版本網頁',
 			type: 'normal',
 			click() {
 				shell.openExternal('https://github.com/ted888848/price-check/releases/latest')

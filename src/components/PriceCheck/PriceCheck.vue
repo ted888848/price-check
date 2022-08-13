@@ -1,7 +1,10 @@
 <template>
-	<div v-if="windowShowHide" class="absolute top-0 left-0 w-screen h-screen priceCheckRoot bg-gray-400 bg-opacity-25"
+	<div v-if="windowShowHide"
+		class="absolute top-0 left-0 w-screen h-screen priceCheckRoot bg-gray-400 bg-opacity-25 flex"
 		@click.self="closePriceCheck">
-		<div class="bg-gray-900 priceCheck absolute h-full flex flex-col" :style="priceCheckPos" ref="priceCheckDiv">
+		<webview v-if="isBrowerOpen" class=" flex-1" ref="BrowerView" partition="trade" src=""></webview>
+		<div class="bg-gray-900 priceCheck h-full flex flex-col" :style="priceCheckPos" ref="priceCheckDiv"
+			:class="{ 'absolute': !isBrowerOpen }">
 			<div class="bg-gray-800 flex justify-between max-h-9 items-center">
 				<div class="flex justify-start mr-auto ml-1 flex-1">
 					<vSelect class="text-sm style-chooser style-chooser-inf text-center" :options="priceCheckOptions"
@@ -31,9 +34,11 @@
 				<vSelect class=" text-base style-chooser text-center" v-model="leagueSelect" :options="leagues"
 					:clearable="false" :searchable="false" />
 			</div>
-			<component :is="currentPriceCheck" :itemProp="item" @brower-view="openBrowerView" :leagueSelect="leagueSelect"
-				:exaltedToChaos="exaltedToChaos" :isOverflow="isOverflow">
-			</component>
+			<KeepAlive>
+				<component :is="currentPriceCheck" :itemProp="item" @brower-view="openBrowerView" :leagueSelect="leagueSelect"
+					:exaltedToChaos="exaltedToChaos" :isOverflow="isOverflow">
+				</component>
+			</KeepAlive>
 		</div>
 	</div>
 </template>
@@ -44,21 +49,34 @@ import { itemAnalyze } from '@/utility/itemAnalyze'
 import { getExaltedToChaos } from '@/utility/tradeSide'
 import NormalPriceCheck from './NormalPriceCheck.vue'
 import HiestPriceCheck from './HiestPriceCheck.vue'
-import { ref, computed, markRaw } from 'vue'
+import { ref, computed, markRaw, nextTick, } from 'vue'
 import { leagues, currencyImageUrl } from '@/utility/setupAPI'
 import { range } from 'lodash-es'
 
+const isBrowerOpen = ref(false)
+const BrowerView = ref(null)
 const priceCheckPos = ref({
 	right: '0px',
 })
-function openBrowerView() {
+function openBrowerView(url) {
 	priceCheckPos.value.right = '0px'
+	isBrowerOpen.value = true
+	nextTick(() => {
+		BrowerView.value.src = encodeURI(`https://web.poe.garena.tw/trade/${url}`)
+	})
+}
+function closeBrowerView() {
+	if (BrowerView.value) {
+		BrowerView.value.src = ''
+	}
+	isBrowerOpen.value = false
 }
 
 const windowShowHide = ref(false)
 function closePriceCheck() {
 	windowShowHide.value = false
 	ipcRenderer.send(IPC.FORCE_POE)
+	isBrowerOpen.value = false
 }
 
 const leagueSelect = ref(leagues[0])
@@ -89,10 +107,11 @@ const exaltedToChaosDec = computed(() => {
 
 const priceCheckDiv = ref()
 function isOverflow() {
-	return priceCheckDiv?.value.scrollHeight > priceCheckDiv?.value.offsetHeight
+	return priceCheckDiv?.value?.scrollHeight > priceCheckDiv?.value?.offsetHeight
 }
 
 ipcRenderer.on(IPC.PRICE_CHECK_SHOW, (e, clip, pos) => {
+	closeBrowerView()
 	windowShowHide.value = true
 	currentPriceCheck.value = markRaw(NormalPriceCheck)
 	priceCheckPos.value.right = pos
