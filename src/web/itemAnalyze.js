@@ -1,6 +1,6 @@
 import { ipcRenderer } from 'electron'
 import IPC from '@/ipc/ipcChannel'
-import { APIitems, APImods } from './setupAPI'
+import { APIitems, APImods } from './APIdata'
 import { cloneDeep } from 'lodash-es'
 
 const PARSE_SECTION_FAIL = 0, PARSE_SECTION_SUCC = 1, PARSE_SECTION_SKIP = 2, PARSE_ITEM_SKIP = 3
@@ -369,16 +369,15 @@ function parseMod(section, type) {
 		let matchReg = new RegExp(matchMod[0].text.replace(/#/g, String.raw`([+-]?\d+(?:\.\d+)?)`).replace(' (部分)', '').replace(/減少|增加/, String.raw`(?:減少|增加)`))
 		let regGroup = section[index].match(matchReg)
 		regGroup?.shift()
-		let isDisabled = !(type === 'enchant')
 		if (regGroup?.length) {
 			let minValue = regGroup.reduce((pre, ele) => pre + Number(ele), 0) / regGroup.length
 			if (matchMod[0].text.match(/減少|增加/)?.[0] !== section[index].match(/減少|增加/)?.[0]) { //數字前增加與減少不相等，把數字變負數
 				minValue = -minValue
 			}
-			tempArr.push({ ...matchMod[0], value: { min: minValue }, disabled: isDisabled })
+			tempArr.push({ ...matchMod[0], value: { min: minValue }, disabled: true })
 		}
 		else {
-			tempArr.push({ ...matchMod[0], disabled: isDisabled })
+			tempArr.push({ ...matchMod[0], disabled: true })
 		}
 	})
 	if (tempArr.length) {
@@ -419,49 +418,41 @@ function parseExplicitMod(section) {
 	})
 	if (craftedSection.length) parsed = parseMod(craftedSection, 'crafted') === PARSE_SECTION_SUCC || parsed
 	if (fracturedSection.length) parsed = parseMod(fracturedSection, 'fractured') === PARSE_SECTION_SUCC || parsed
-	explicitSection = explicitSection.filter(line => line !== '隱匿前綴' && line !== '隱匿後綴')
+	explicitSection = explicitSection.filter(line => !(line === '隱匿前綴' || line === '隱匿後綴'))
 	if (explicitSection.length) parsed = parseMod(explicitSection, 'explicit') === PARSE_SECTION_SUCC || parsed
 	if (parsed) return PARSE_SECTION_SUCC
-	else return PARSE_SECTION_SKIP
+	return PARSE_SECTION_SKIP
 }
 function parseInfluence(section) {
-	let influences = [
-		{
-			text: "破裂之物"
-		},
-		{
-			text: "追憶之物"
-		},
-		{
-			id: "pseudo.pseudo_has_shaper_influence",
-			text: "塑者之物",
-			label: "塑者"
-		},
-		{
-			id: "pseudo.pseudo_has_elder_influence",
-			text: "尊師之物",
-			label: "尊師"
-		},
-		{
-			id: "pseudo.pseudo_has_crusader_influence",
-			text: "聖戰軍王物品",
-			label: "聖戰"
-		},
-		{
-			id: "pseudo.pseudo_has_redeemer_influence",
-			text: "救贖者物品",
-			label: "救贖"
-		},
-		{
-			id: "pseudo.pseudo_has_hunter_influence",
-			text: "狩獵者物品",
-			label: "狩獵"
-		},
-		{
-			id: "pseudo.pseudo_has_warlord_influence",
-			text: "總督軍物品",
-			label: "督軍"
-		}]
+	let influences = [{
+		text: "破裂之物"
+	}, {
+		text: "追憶之物"
+	}, {
+		id: "pseudo.pseudo_has_shaper_influence",
+		text: "塑者之物",
+		label: "塑者"
+	}, {
+		id: "pseudo.pseudo_has_elder_influence",
+		text: "尊師之物",
+		label: "尊師"
+	}, {
+		id: "pseudo.pseudo_has_crusader_influence",
+		text: "聖戰軍王物品",
+		label: "聖戰"
+	}, {
+		id: "pseudo.pseudo_has_redeemer_influence",
+		text: "救贖者物品",
+		label: "救贖"
+	}, {
+		id: "pseudo.pseudo_has_hunter_influence",
+		text: "狩獵者物品",
+		label: "狩獵"
+	}, {
+		id: "pseudo.pseudo_has_warlord_influence",
+		text: "總督軍物品",
+		label: "督軍"
+	}]
 	let tempInfluences = []
 	section.forEach(line => {
 		let influence = influences.find(inf => inf.text === line)
@@ -473,27 +464,21 @@ function parseInfluence(section) {
 		itemParsed.influences.push(...tempInfluences)
 		return PARSE_SECTION_SUCC
 	}
-	else {
-		return PARSE_SECTION_SKIP
-	}
+	return PARSE_SECTION_SKIP
 }
 function parseCorrupt(section) {
 	if (section[0].match(/^已汙染$/)) {
 		itemParsed.isCorrupt = true
 		return PARSE_SECTION_SUCC
 	}
-	else {
-		return PARSE_SECTION_SKIP
-	}
+	return PARSE_SECTION_SKIP
 }
 function parseIdentify(section) {
 	if (section[0].match(/^未鑑定$/)) {
 		itemParsed.isIdentify = false
 		return PARSE_ITEM_SKIP
 	}
-	else {
-		return PARSE_SECTION_SKIP
-	}
+	return PARSE_SECTION_SKIP
 }
 function parsePseudoEleResistance() {
 	let eleRes = 0
@@ -527,19 +512,18 @@ function parsePseudoEleResistance() {
 	}
 }
 function parseAllfuns(item, functions) {
+	endFor:
 	for (let fun of functions) {
-		let state
 		for (let section of item) {
-			state = fun(section)
+			let state = fun(section)
 			if (state === PARSE_SECTION_SUCC) {
 				item = item.filter(s => s !== section)
 				break
 			}
 			else if (state === PARSE_ITEM_SKIP) {
-				break
+				break endFor
 			}
 		}
-		if (state === PARSE_ITEM_SKIP) break
 	}
 }
 function parseWeapon(item) {
@@ -599,7 +583,7 @@ function parseClusterJewel(item) {
 	let temp = parseInt(item[0][0].match(/物品等級: (\d+)/)[1])
 	itemParsed.itemLevel = {
 		min: temp >= 84 ? 84 : temp >= 75 ? 75 : temp >= 68 ? 68 : temp >= 50 ? 50 : 1,
-		max: temp >= 84 ? 100 : temp >= 75 ? 83 : temp >= 68 ? 84 : temp >= 50 ? 67 : 49, search: true
+		max: temp >= 84 ? 100 : temp >= 75 ? 83 : temp >= 68 ? 74 : temp >= 50 ? 67 : 49, search: true
 	}
 	item.shift()
 	if (itemParsed.rarity !== '傳奇') {
@@ -636,6 +620,7 @@ function parseClusterJewel(item) {
 	parseAllfuns(item, _parseFuns)
 }
 function parseForbiddenJewel(item) {
+	itemParsed.autoSearch = true
 	for (let section of item) {
 		if (parseCorrupt(section) === PARSE_SECTION_SUCC) continue;
 		if (/^若禁忌(烈焰|血肉)上有符合的詞綴，配置/.test(section[0])) {
@@ -684,47 +669,37 @@ function parseMap(item) {
 		id: "implicit.stat_3624393862",
 		text: "地圖被 # 佔據",
 		type: "implicit",
-		options: [
-			{
-				id: 1,
-				text: "異界．奴役"
-			},
-			{
-				id: 2,
-				text: "異界．根除"
-			},
-			{
-				id: 3,
-				text: "異界．干擾"
-			},
-			{
-				id: 4,
-				text: "異界．淨化"
-			}
-		]
+		options: [{
+			id: 1,
+			text: "異界．奴役"
+		}, {
+			id: 2,
+			text: "異界．根除"
+		}, {
+			id: 3,
+			text: "異界．干擾"
+		}, {
+			id: 4,
+			text: "異界．淨化"
+		}]
 	}
 	let conquerorMap = {
 		id: "implicit.stat_2563183002",
 		text: "地圖含有 # 的壁壘",
 		type: "implicit",
-		options: [
-			{
-				id: 1,
-				text: "巴倫"
-			},
-			{
-				id: 2,
-				text: "維羅提尼亞"
-			},
-			{
-				id: 3,
-				text: "奧赫茲明"
-			},
-			{
-				id: 4,
-				text: "圖拉克斯"
-			}
-		]
+		options: [{
+			id: 1,
+			text: "巴倫"
+		}, {
+			id: 2,
+			text: "維羅提尼亞"
+		}, {
+			id: 3,
+			text: "奧赫茲明"
+		}, {
+			id: 4,
+			text: "圖拉克斯"
+		}]
 	}
 	item[0].forEach(line => {
 		if (line.startsWith('地圖階級: ')) {
@@ -794,19 +769,19 @@ function parseGem(item) {
 			isAltQ = true
 		}
 	})
-	itemParsed.quality.search = !/啟蒙|賦予|增幅/.test(itemParsed.baseType) && !isAltQ
+	itemParsed.quality.search = !(/啟蒙|賦予|增幅/.test(itemParsed.baseType) || isAltQ)
 	item.shift()
 	let vaalLine
+	endFor:
 	for (let section of item.reverse()) {
 		if (parseCorrupt(section) === PARSE_SECTION_SUCC) {
 			for (section of item) {
 				if (section[0].includes('瓦爾．')) {
 					itemParsed.vaalVer = true
 					vaalLine = section[0]
-					break
+					break endFor
 				}
 			}
-			if (itemParsed.vaalVer) break
 		}
 	}
 	if (isAltQ) {

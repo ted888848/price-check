@@ -12,12 +12,11 @@
 	</div>
 </template>
 <script setup>
+import { ref } from "vue";
 import { ipcRenderer } from "electron";
 import IPC from "@/ipc/ipcChannel";
-import SettingWindow from "../SettingWindow/SettingWindow.vue";
-import { loadAPIdata } from "@/utility/setupAPI";
-import { store } from "@/utility/setupAPI";
-import { ref } from "vue";
+import { loadAPIdata, store } from "@/web/APIdata";
+import SettingWindow from "@/components/SettingWindow/SettingWindow.vue";
 const overlayWindowShow = ref(false);
 function closeOverlay() {
 	overlayWindowShow.value = false;

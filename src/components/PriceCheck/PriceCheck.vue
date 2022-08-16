@@ -44,14 +44,14 @@
 </template>
 <script setup>
 import { ipcRenderer } from 'electron'
+import { ref, computed, markRaw, nextTick, } from 'vue'
+import { range } from 'lodash-es'
 import IPC from '@/ipc/ipcChannel'
-import { itemAnalyze } from '@/utility/itemAnalyze'
-import { getExaltedToChaos } from '@/utility/tradeSide'
+import { itemAnalyze } from '@/web/itemAnalyze'
+import { getExaltedToChaos } from '@/web/tradeSide'
+import { leagues, currencyImageUrl } from '@/web/APIdata'
 import NormalPriceCheck from './NormalPriceCheck.vue'
 import HiestPriceCheck from './HiestPriceCheck.vue'
-import { ref, computed, markRaw, nextTick, } from 'vue'
-import { leagues, currencyImageUrl } from '@/utility/setupAPI'
-import { range } from 'lodash-es'
 
 const isBrowerOpen = ref(false)
 const BrowerView = ref(null)

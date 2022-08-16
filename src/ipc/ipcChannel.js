@@ -6,5 +6,6 @@ export default {
 	BROWSER_VIEW: 'browserView',
 	GET_CONFIG: 'getConfig',
 	SET_CONFIG: 'setConfig',
-	RELOAD_APIDATA: 'reloadAPIData'
+	RELOAD_APIDATA: 'reloadAPIData',
+	GET_COOKIE: 'getCookie'
 };

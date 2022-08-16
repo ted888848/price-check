@@ -1,10 +1,10 @@
 'use strict';
 import { app, dialog, ipcMain, protocol } from 'electron';
-import { setupShortcut } from './utility/shortcuts'
-import { createWindow } from './utility/overlayWindow'
-import { setupTray } from './utility/tray';
-import { getAPIdata, checkForUpdate } from './utility/setupAPI'
-import { setupConfig } from './utility/config'
+import { setupShortcut } from './main/shortcuts'
+import { createWindow } from './main/overlayWindow'
+import { setupTray } from './main/tray';
+import { getAPIdata, checkForUpdate } from './main/setupAPI'
+import { setupConfig } from './main/config'
 import { EventEmitter } from 'events'
 import IPC from './ipc/ipcChannel'
 const isDevelopment = process.env.NODE_ENV !== 'production';
@@ -20,19 +20,18 @@ app.on('window-all-closed', () => {
 	}
 });
 app.on('ready', async () => {
+	setupConfig()
 	try {
 		await checkForUpdate()
 	} catch (error) {
 		dialog.showMessageBox({
-			title: '檢查更新錯誤',
+			title: '讀取API資料錯誤',
 			message: '請稍後重新讀取API資料',
-			// detail: error?.response?.data?.error?.message,
 			detail: `data: ${JSON.stringify(error?.response?.data)}\r\n
 			status: ${error?.response?.status}`,
 			type: 'error',
 		})
 	}
-	setupConfig()
 	setupTray()
 	await createWindow()
 	setupShortcut()
@@ -42,7 +41,13 @@ app.on('ready', async () => {
 			await getAPIdata()
 			return true
 		} catch (error) {
-			dialog.showErrorBox("API資料錯誤，請稍後重新讀取API資料", error)
+			dialog.showMessageBox({
+				title: '讀取API資料錯誤',
+				message: '請稍後重新讀取API資料',
+				detail: `data: ${JSON.stringify(error?.response?.data)}\r\n
+				status: ${error?.response?.status}`,
+				type: 'error',
+			})
 			return error
 		}
 	})

@@ -5,7 +5,8 @@ module.exports = defineConfig({
 		electronBuilder: {
 			builderOptions: {
 				productName: '查價',
-				// appId: 'zhou.electron.price-check', // 認證的 appId
+				appId: 'com.electron.price-check', // 認證的 appId
+				publish: ['github'],
 				artifactName: '${productName}${version}.${ext}',
 				copyright: 'Copyright©2022 zhou',
 				npmRebuild: false,

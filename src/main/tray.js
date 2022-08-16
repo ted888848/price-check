@@ -1,5 +1,6 @@
-import { Tray, Menu, app, shell } from "electron";
+import { Tray, Menu, app } from "electron";
 import { win } from './overlayWindow'
+import { checkForUpdate } from './setupAPI'
 import path from 'path'
 let tray
 
@@ -15,10 +16,10 @@ export function setupTray() {
 			}
 		},
 		{
-			label: '打開最新版本網頁',
+			label: `目前版本: v${app.getVersion()}\n檢查更新`,
 			type: 'normal',
 			click() {
-				shell.openExternal('https://github.com/ted888848/price-check/releases/latest')
+				checkForUpdate()
 			}
 		},
 		{

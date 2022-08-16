@@ -13,8 +13,7 @@
 		"eb": "vue-cli-service electron:build",
 		"es": "vue-cli-service electron:serve",
 		"postinstall": "electron-builder install-app-deps",
-		"postuninstall": "electron-builder install-app-deps",
-		"rebuild": "npm rebuild --runtime=electron --target=17.0.0 --disturl=https://atom.io/download/atom-shell --abi=93"
+		"postuninstall": "electron-builder install-app-deps"
 	},
 	"dependencies": {
 		"@fortawesome/fontawesome-svg-core": "^6.1.1",
@@ -37,7 +36,7 @@
 		"@vue/cli-service": "~5.0.0",
 		"autoprefixer": "^10.4.7",
 		"electron": "^17.4.8",
-		"electron-rebuild": "^3.2.7",
+		"electron-updater": "^5.2.1",
 		"eslint": "^7.32.0",
 		"eslint-plugin-vue": "^8.0.3",
 		"postcss": "^8.4.13",
@@ -46,5 +45,9 @@
 	},
 	"engines": {
 		"node": ">=14"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/ted888848/price-check"
 	}
 }

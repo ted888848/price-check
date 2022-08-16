@@ -1,20 +1,13 @@
-import axios from 'axios'
+import { GGCapi } from '@/utility/api'
 import Store from 'electron-store'
 import { cloneDeep } from 'lodash-es'
-import { app, dialog, shell, session } from 'electron'
-export const GGCapi = axios.create({
-	baseURL: 'https://web.poe.garena.tw/api/',
-	timeout: 4000,
-	headers: {
-		'accept': 'application/json',
-		'Content-Type': 'application/json'
-	}
-})
-//render process
-export let store = new Store()
-export let leagues = []
-export let hiestReward = []
-export let APIitems = {
+import { app, session, dialog } from 'electron' //, shell
+import { autoUpdater } from 'electron-updater'
+import { setImmediate } from 'timers'
+
+let store = new Store()
+let leagues = []
+let APIitems = {
 	accessories: undefined,
 	armour: undefined,
 	cards: undefined,
@@ -30,7 +23,7 @@ export let APIitems = {
 	logbook: undefined,
 	hiestReward: []
 }
-export let APImods = {
+let APImods = {
 	pseudo: undefined,
 	explicit: undefined,
 	implicit: undefined,
@@ -42,19 +35,8 @@ export let APImods = {
 	clusterJewel: undefined,
 	forbiddenJewel: undefined
 }
-export let APIStatic = []
-export let currencyImageUrl
+let APIStatic = []
 
-export function loadAPIdata() {
-	leagues = store.get('Leagues')
-	APIitems = store.get('APIitems')
-	hiestReward = APIitems.hiestReward
-	APIStatic = store.get('APIStatic')
-	APImods = store.get('APImods')
-	currencyImageUrl = store.get('currencyImageUrl')
-}
-
-//main process
 function setupItemArray(itemArray, _APIitems) {
 	let itemBaseType = []
 	itemArray.slice().reverse().forEach(item => {
@@ -97,7 +79,6 @@ function setupAPIItems(itemsJson) {
 				break
 			default:
 				return
-
 		}
 	})
 	return _APIitems
@@ -218,9 +199,37 @@ async function getStatic() {
 		})
 }
 export async function getAPIdata() {
-	await Promise.all([getLeagues(), getItems(), getStatic(), getStats()])
+	let result = await Promise.allSettled([getLeagues(), getItems(), getStatic(), getStats()])
+	result.forEach(e => {
+		if (e.status === 'rejected') {
+			throw e.reason
+		}
+	})
 	store.set('APIVersion', app.getVersion())
 }
+autoUpdater.on('update-available', () => {
+	dialog.showMessageBox({
+		title: '有新版本',
+		type: 'info',
+		message: '並已經開始在背景下載',
+	})
+})
+autoUpdater.on('update-downloaded', () => {
+	dialog.showMessageBox({
+		title: '下載完成',
+		type: 'info',
+		message: '更新安裝擋已經下載完成，如果沒有自動重新啟動，\n請手動離開後稍等安裝完畢再打開',
+		buttons: ['重新開啟並安裝更新', '稍後再安裝'],
+		defaultId: 0
+	})
+		.then((buttonClick) => {
+			if (buttonClick === 0) {
+				setImmediate(() => {
+					autoUpdater.quitAndInstall();
+				})
+			}
+		})
+})
 export async function checkForUpdate() {
 	if ((await session.defaultSession?.getCacheSize() >>> 20) >= 30) { //大於30MB
 		session.defaultSession.clearCache()
@@ -228,37 +237,7 @@ export async function checkForUpdate() {
 		session.defaultSession.clearCodeCaches({})
 			.catch(err => console.log(err))
 	}
-	axios.get('https://api.github.com/repos/ted888848/price-check/releases/latest')
-		.then(response => {
-			let latestVer = response.data.tag_name.substring(1).split('.').map(Number)
-			let currVer = app.getVersion().split('.').map(Number)
-			let flag = true
-			for (let i = 0; i < 3; ++i) {
-				if (latestVer[i] > currVer[i]) {
-					flag = true
-					break
-				}
-				if (latestVer[i] < currVer[i]) {
-					flag = false
-					break
-				}
-			}
-			if (flag) {
-				dialog.showMessageBox({
-					title: '有新版本',
-					type: 'info',
-					message: `目前版本: ${app.getVersion()}\n新版本: ${latestVer.join('.')}\n${response.data.body}`,
-					buttons: ['打開下載網址', '好'],
-					defaultId: 0
-				})
-					.then(result => {
-						if (result.response === 0) {
-							shell.openExternal('https://github.com/ted888848/price-check/releases/latest')
-						}
-					})
-					.catch(err => console.log(err))
-			}
-		})
+	await autoUpdater.checkForUpdates()
 	if (store.get('APIVersion', '') !== app.getVersion()) {
 		await getAPIdata()
 	}

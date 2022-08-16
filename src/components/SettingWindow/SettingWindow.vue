@@ -5,9 +5,14 @@
 		</div>
 		<div v-else class="flex flex-col">
 			<div class="flex items-center justify-center mt-5">
-				<span class="text-xl text-white mr-2 hover:cursor-default">角色名字:</span>
-				<input class="shadow appearance-none border rounded py-1 px-2 text-gray-700 leading-tight" type="text"
-					v-model="config.characterName">
+				<label for="characterName" class="text-xl text-white mr-2 hover:cursor-default">角色名字:</label>
+				<input class="shadow appearance-none w-[200px] border rounded py-1 px-2 text-gray-700 leading-tight"
+					v-model="config.characterName" id="characterName" type="text">
+			</div>
+			<div class="flex items-center justify-center mt-5">
+				<label for="POESESSID" class="text-xl text-white mr-2 hover:cursor-default">POESESSID:</label>
+				<input class="shadow appearance-none w-[305px] border rounded py-1 px-2 text-gray-700 leading-tight"
+					v-model="config.POESESSID" id="POESESSID" type="text">
 			</div>
 			<div class="flex items-center justify-center mt-5 hover:cursor-pointer"
 				@click="config.searchExchangeExalted = !config.searchExchangeExalted">
@@ -23,19 +28,17 @@
 	</div>
 </template>
 <script setup>
-import IPC from '@/ipc/ipcChannel'
 import { ipcRenderer } from 'electron'
 import { onMounted, ref } from 'vue'
-import { cloneDeep } from 'lodash-es'
-
-let isLoading = ref(true)
-let config = ref(null)
+import IPC from '@/ipc/ipcChannel'
+import { cloneDeep } from 'lodash-es';
+const isLoading = ref(true)
+const config = ref(null)
 onMounted(() => {
 	isLoading.value = true
 	ipcRenderer.invoke(IPC.GET_CONFIG)
 		.then(data => {
 			config.value = data
-			console.log(config.value)
 			isLoading.value = false
 		})
 })

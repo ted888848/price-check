@@ -175,7 +175,7 @@
 		</thead>
 		<tbody class="">
 			<tr v-for="ele in fetchResultSorted" :key="ele" class=" border-b-2 border-gray-600"
-				:class="{ 'text-yellow-400 text-xl bg-indigo-700 font-bold': ele.amount === maxAmout.amount }">
+				:class="{ 'text-yellow-400 text-xl bg-indigo-700 font-bold': ele.amount === maxAmount.amount }">
 				<td v-if="item.searchExchange.option" class="flex justify-center items-center">
 					<img :src="ele.image" class=" w-7 h-7">{{ ele.price }}<img :src="currency2Img" class=" w-7 h-7">
 				</td>
@@ -199,11 +199,11 @@
 	</span>
 </template>
 <script setup>
-import { APIStatic } from '@/utility/setupAPI'
 import { shell } from 'electron'
-import { getSearchJSON, searchItem, fetchItem, getIsCounting, searchExchange, selectOptions } from '@/utility/tradeSide'
-import { computed, ref, nextTick } from 'vue'
 import { maxBy } from 'lodash-es'
+import { computed, ref, nextTick } from 'vue'
+import { getSearchJSON, searchItem, fetchItem, getIsCounting, searchExchange, selectOptions } from '@/web/tradeSide'
+import { APIStatic } from '@/web/APIdata'
 
 const props = defineProps(["itemProp", "leagueSelect", "exaltedToChaos", "isOverflow"])
 const { rateTimeLimit } = getIsCounting()
@@ -287,7 +287,7 @@ const fetchResultSorted = computed(() => {
 	else
 		return fetchResult.value
 })
-const maxAmout = computed(() => {
+const maxAmount = computed(() => {
 	return maxBy(fetchResult.value, ele => ele.amount)
 })
 const searchStats = computed(() => {

@@ -40,7 +40,7 @@
 		</thead>
 		<tbody class="">
 			<tr v-for="ele in fetchResultSorted" :key="ele" class=" border-b-2 border-gray-600"
-				:class="{ 'text-red-500 text-xl bg-indigo-600 font-bold': ele.amount === maxAmout.amount }">
+				:class="{ 'text-red-500 text-xl bg-indigo-600 font-bold': ele.amount === maxAmount.amount }">
 				<td class="flex justify-center items-center">{{ ele.price }}<img :src="ele.image" class=" w-7 h-7"></td>
 				<td>{{ ele.amount }}</td>
 			</tr>
@@ -59,11 +59,11 @@
 		{{ rateTimeLimit.second }} 秒後再回來 </span>
 </template>
 <script setup>
-import { getDefaultSearchJSON, searchItem, fetchItem, getIsCounting, selectOptions } from '@/utility/tradeSide'
-import { maxBy } from 'lodash-es'
 import { shell } from 'electron'
 import { computed, ref, watch } from 'vue'
-import { hiestReward as gemReplicaOptions } from '@/utility/setupAPI'
+import { maxBy } from 'lodash-es'
+import { getDefaultSearchJSON, searchItem, fetchItem, getIsCounting, selectOptions } from '@/web/tradeSide'
+import { hiestReward as gemReplicaOptions } from '@/web/APIdata'
 const props = defineProps(["itemProp", "leagueSelect", "exaltedToChaos", "isOverflow"])
 const { rateTimeLimit } = getIsCounting()
 
@@ -131,7 +131,7 @@ const fetchResultSorted = computed(() => {
 		return fetchResult.value
 })
 
-const maxAmout = computed(() => {
+const maxAmount = computed(() => {
 	return maxBy(fetchResult.value, ele => ele.amount)
 })
 

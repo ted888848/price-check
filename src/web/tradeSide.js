@@ -1,7 +1,10 @@
-import axios from 'axios'
-import { GGCapi, APIStatic, currencyImageUrl } from './setupAPI'
+// import axios from 'axios'
+import { GGCapi } from '@/utility/api'
+import { APIStatic, currencyImageUrl } from './APIdata'
 import { ref } from 'vue'
 import { cloneDeep, isUndefined, isNumber, countBy } from 'lodash-es'
+// import IPC from '@/ipc/ipcChannel'
+// import { ipcRenderer } from 'electron'
 
 let searchJSONSample = {
 	"query": {
@@ -53,126 +56,93 @@ let exchangeJSONSample = {
 }
 
 export const selectOptions = {
-	generalOption: [
-		{
-			label: '任何',
-			value: undefined
-		},
-		{
-			label: '是',
-			value: true
-		},
-		{
-			label: '否',
-			value: false
-		}
-	],
-	gemAltQOptions: [
-		{
-			label: '普通',
-			value: 0
-		},
-		{
-			label: '異常的',
-			value: 1
-		},
-		{
-			label: '相異的',
-			value: 2
-		},
-		{
-			label: '幻影的',
-			value: 3
-		}
-	],
-	influencesOptions: [
-		{
-			id: "pseudo.pseudo_has_shaper_influence",
-			label: "塑者"
-		},
-		{
-			id: "pseudo.pseudo_has_elder_influence",
-			label: "尊師"
-		},
-		{
-			id: "pseudo.pseudo_has_crusader_influence",
-			label: "聖戰"
-		},
-		{
-			id: "pseudo.pseudo_has_redeemer_influence",
-			label: "救贖"
-		},
-		{
-			id: "pseudo.pseudo_has_hunter_influence",
-			label: "狩獵"
-		},
-		{
-			id: "pseudo.pseudo_has_warlord_influence",
-			label: "督軍"
-		}
-	],
-	elderMapOptions: [
-		{
-			value: 1,
-			label: "奴役(右上)"
-		},
-		{
-			value: 2,
-			label: "根除(右下)"
-		},
-		{
-			value: 3,
-			label: "干擾(左下)"
-		},
-		{
-			value: 4,
-			label: "淨化(左上)"
-		}
-	],
-	conquerorMapOptions: [
-		{
-			value: 1,
-			label: "巴倫"
-		},
-		{
-			value: 2,
-			label: "維羅提尼亞"
-		},
-		{
-			value: 3,
-			label: "奧赫茲明"
-		},
-		{
-			value: 4,
-			label: "圖拉克斯"
-		}
-	],
-	rarityOptions: [
-		{
-			id: undefined,
-			label: "任何"
-		},
-		{
-			id: 'normal',
-			label: "普通"
-		},
-		{
-			id: 'magic',
-			label: "魔法"
-		},
-		{
-			id: 'rare',
-			label: "稀有"
-		},
-		{
-			id: 'unique',
-			label: "傳奇"
-		},
-		{
-			id: 'nonunique',
-			label: "非傳奇"
-		}
-	],
+	generalOption: [{
+		label: '任何',
+		value: undefined
+	}, {
+		label: '是',
+		value: true
+	}, {
+		label: '否',
+		value: false
+	}],
+	gemAltQOptions: [{
+		label: '普通',
+		value: 0
+	}, {
+		label: '異常的',
+		value: 1
+	}, {
+		label: '相異的',
+		value: 2
+	}, {
+		label: '幻影的',
+		value: 3
+	}],
+	influencesOptions: [{
+		id: "pseudo.pseudo_has_shaper_influence",
+		label: "塑者"
+	}, {
+		id: "pseudo.pseudo_has_elder_influence",
+		label: "尊師"
+	}, {
+		id: "pseudo.pseudo_has_crusader_influence",
+		label: "聖戰"
+	}, {
+		id: "pseudo.pseudo_has_redeemer_influence",
+		label: "救贖"
+	}, {
+		id: "pseudo.pseudo_has_hunter_influence",
+		label: "狩獵"
+	}, {
+		id: "pseudo.pseudo_has_warlord_influence",
+		label: "督軍"
+	}],
+	elderMapOptions: [{
+		value: 1,
+		label: "奴役(右上)"
+	}, {
+		value: 2,
+		label: "根除(右下)"
+	}, {
+		value: 3,
+		label: "干擾(左下)"
+	}, {
+		value: 4,
+		label: "淨化(左上)"
+	}],
+	conquerorMapOptions: [{
+		value: 1,
+		label: "巴倫"
+	}, {
+		value: 2,
+		label: "維羅提尼亞"
+	}, {
+		value: 3,
+		label: "奧赫茲明"
+	}, {
+		value: 4,
+		label: "圖拉克斯"
+	}],
+	rarityOptions: [{
+		id: undefined,
+		label: "任何"
+	}, {
+		id: 'normal',
+		label: "普通"
+	}, {
+		id: 'magic',
+		label: "魔法"
+	}, {
+		id: 'rare',
+		label: "稀有"
+	}, {
+		id: 'unique',
+		label: "傳奇"
+	}, {
+		id: 'nonunique',
+		label: "非傳奇"
+	}],
 }
 export function getDefaultSearchJSON() {
 	return cloneDeep(searchJSONSample)
@@ -211,44 +181,33 @@ export function getSearchJSON(item) {
 	return searchJSON
 }
 const rateTimeLimitArr = {
-	fetch: [
-		{
-			limit: 14,
-			time: 6
-		},
-		{
-			limit: 10,
-			time: 2
-		},
-	],
-	search: [
-		{
-			limit: 25,
-			time: 120
-		},
-		{
-			limit: 12,
-			time: 20
-		},
-		{
-			limit: 3,
-			time: 3
-		},
-	],
-	exchange: [
-		{
-			limit: 40,
-			time: 200
-		},
-		{
-			limit: 10,
-			time: 60
-		},
-		{
-			limit: 3,
-			time: 8
-		},
-	]
+	fetch: [{
+		limit: 14,
+		time: 6
+	}, {
+		limit: 10,
+		time: 2
+	},],
+	search: [{
+		limit: 25,
+		time: 120
+	}, {
+		limit: 12,
+		time: 20
+	}, {
+		limit: 3,
+		time: 3
+	},],
+	exchange: [{
+		limit: 40,
+		time: 200
+	}, {
+		limit: 10,
+		time: 60
+	}, {
+		limit: 3,
+		time: 8
+	},]
 }
 let rateTimeLimit = ref({ flag: false, second: 0 })
 export function getIsCounting() {
@@ -272,7 +231,7 @@ function startCountdown(time) {
 	}, 1000)
 }
 
-function parseRateTime(header) {
+function parseRateTimeLimit(header) {
 	let type = header['x-rate-limit-policy'].split('-')[1]
 	if (Object.keys(rateTimeLimitArr).includes(type)) {
 		let timesArr = header['x-rate-limit-ip-state'].split(',').map(ele => parseInt(ele.substring(0, ele.indexOf(':')))).reverse()
@@ -297,7 +256,6 @@ function cleanupJSON(searchJson) {
 	}
 	return searchJson
 }
-// let searchResult
 export async function searchItem(searchJson, league) {
 	let searchResult = {}
 	let errData
@@ -305,7 +263,7 @@ export async function searchItem(searchJson, league) {
 	if (process.env.NODE_ENV === 'development') console.log(searchJson)
 	await GGCapi.post(encodeURI(`trade/search/${league}`), JSON.stringify(searchJson))
 		.then((response) => {
-			parseRateTime(response.headers)
+			parseRateTimeLimit(response.headers)
 			return response.data
 		})
 		.then((data) => {
@@ -315,11 +273,13 @@ export async function searchItem(searchJson, league) {
 			searchResult.nowFetched = 0
 		})
 		.catch((err) => {
+			console.log(err)
 			if (err.response?.status === 400) {
 				errData = err.response.data?.error?.message
 			}
-			errData = errData || err.message || err
-			console.log(err)
+			else {
+				errData = err.message || err
+			}
 			if (err.response?.status === 429) {
 				startCountdown(parseInt(err.response.headers['retry-after']))
 			}
@@ -334,13 +294,13 @@ export async function fetchItem(fetchList, searchID, oldFetchResult) {
 	for (let i = 0; i < fetchList.length; i += 10) {
 		itemJsonUrl.push('trade/fetch/' + fetchList.slice(i, i + 10).join(',') + `?query=${searchID}`)
 	}
-	await axios.all(itemJsonUrl.map((url) => GGCapi.get(encodeURI(url))))
-		.then(axios.spread((...args) => {
-			args.forEach(ele => {
-				fetchResult.push(...ele.data.result)
+	await Promise.all(itemJsonUrl.map((url) => GGCapi.get(encodeURI(url))))
+		.then((responses) => {
+			responses.forEach(res => {
+				fetchResult.push(...res.data.result)
 			})
-			parseRateTime(args.pop().headers)
-		}))
+			parseRateTimeLimit(responses.pop()?.headers)
+		})
 		.catch(err => {
 			console.log(err)
 			if (err.response?.status === 429) {
@@ -372,7 +332,7 @@ export async function getExaltedToChaos(league) {
 	let chaos = 0
 	await GGCapi.post(encodeURI(`trade/exchange/${league}`), JSON.stringify(exchangeJSON))
 		.then((response) => {
-			parseRateTime(response.headers)
+			parseRateTimeLimit(response.headers)
 			return response.data
 		}).then((data) => {
 			let temp = Object.keys(data.result).slice(0, 5)
@@ -396,7 +356,7 @@ export async function searchExchange(item, league) {
 	exchangeJSON.exchange.want = [APIStatic.find(e => e.text === item.baseType).id]
 	await GGCapi.post(encodeURI(`trade/exchange/${league}`), JSON.stringify(exchangeJSON))
 		.then((response) => {
-			parseRateTime(response.headers)
+			parseRateTimeLimit(response.headers)
 			return response.data
 		}).then((data) => {
 			searchResult.searchID = { ID: data.id, type: 'exchange' }
@@ -408,11 +368,13 @@ export async function searchExchange(item, league) {
 			searchResult.nowFetched = searchResult.totalCount = tempResult.length
 		})
 		.catch((err) => {
+			console.log(err)
 			if (err.response?.status === 400) {
 				errData = err.response.data?.error?.message
 			}
-			errData = errData || err.message || err
-			console.log(err)
+			else {
+				errData = err.message || err
+			}
 			if (err.response?.status === 429) {
 				startCountdown(parseInt(err.response.headers['retry-after']))
 			}
@@ -424,7 +386,6 @@ export async function searchExchange(item, league) {
 			price, currency, amount: tempResultCountBy[key],
 			image: `https://web.poe.garena.tw${currencyImageUrl.find(ele => ele.id === currency).image}`
 		})
-
 	}
 	if (errData) return { errData, err: true }
 	return { ...searchResult, err: false }
