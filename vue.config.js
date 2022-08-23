@@ -21,6 +21,7 @@ module.exports = defineConfig({
 					allowToChangeInstallationDirectory: true,
 					installerIcon: 'public/MavenOrb256.ico',
 					uninstallerIcon: 'public/MavenOrb256.ico',
+					createDesktopShortcut: true,
 				}
 			},
 			nodeIntegration: true,

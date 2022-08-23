@@ -1,7 +1,7 @@
 import Store from 'electron-store'
 
 export const baseURL = 'https://web.poe.garena.tw/api/'
-export let store = new Store()
+export const store = new Store()
 export let leagues = []
 export let hiestReward = []
 export let APIitems = {

@@ -58,9 +58,9 @@
 			</div>
 			<div v-else-if="item.searchExchange.option"
 				class="flex p-2 items-center justify-center hover:cursor-pointer flex-grow"
-				@click="item.searchExchange.have = ('exalted' === item.searchExchange.have) ? 'chaos' : 'exalted'">
-				<span class="mx-1 text-white">崇高價</span>
-				<FontAwesomeIcon v-if="item.searchExchange.have === 'exalted'" icon="circle-check"
+				@click="item.searchExchange.have = ('divine' === item.searchExchange.have) ? 'chaos' : 'divine'">
+				<span class="mx-1 text-white">神聖價</span>
+				<FontAwesomeIcon v-if="item.searchExchange.have === 'divine'" icon="circle-check"
 					class="text-green-600 text-xl" />
 				<FontAwesomeIcon v-else icon="circle-xmark" class="text-red-600 text-xl" />
 			</div>
@@ -164,7 +164,7 @@
 		</div>
 		<button
 			class="mx-2 bg-blue-800 text-white rounded px-4 hover:bg-blue-700 disabled:cursor-default disabled:opacity-60 disabled:bg-blue-800"
-			@click="openBrowerView" :disabled="rateTimeLimit.flag">BV</button>
+			@click="openWebView" :disabled="rateTimeLimit.flag">BV</button>
 	</div>
 	<table v-if="fetchResultSorted.length" class="bg-blue-500 text-center text-white text-sm my-1 mx-5 w-1/2 self-center">
 		<thead class="">
@@ -199,13 +199,12 @@
 	</span>
 </template>
 <script setup>
-import { shell } from 'electron'
 import { maxBy } from 'lodash-es'
 import { computed, ref, nextTick } from 'vue'
 import { getSearchJSON, searchItem, fetchItem, getIsCounting, searchExchange, selectOptions } from '@/web/tradeSide'
 import { APIStatic } from '@/web/APIdata'
 
-const props = defineProps(["itemProp", "leagueSelect", "exaltedToChaos", "isOverflow"])
+const props = defineProps(["itemProp", "leagueSelect", "divineToChaos", "isOverflow"])
 const { rateTimeLimit } = getIsCounting()
 const item = ref(props.itemProp)
 if (process.env.NODE_ENV === 'development') console.log(item.value)
@@ -278,10 +277,12 @@ async function searchBtn() {
 }
 
 const fetchResultSorted = computed(() => {
-	if (props.exaltedToChaos && !item.value.searchExchange.option)
+	if (props.divineToChaos && !item.value.searchExchange.option)
 		return fetchResult.value.slice().sort((a, b) => {
-			let ca = a.currency === 'exalted' ? a.price * props.exaltedToChaos : a.price
-			let cb = b.currency === 'exalted' ? b.price * props.exaltedToChaos : b.price
+			if (!['divine', 'chaos'].includes(a.currency)) return 1
+			if (!['divine', 'chaos'].includes(b.currency)) return -1
+			let ca = a.currency === 'divine' ? a.price * props.divineToChaos : a.price
+			let cb = b.currency === 'divine' ? b.price * props.divineToChaos : b.price
 			return ca - cb
 		})
 	else
@@ -296,12 +297,12 @@ const searchStats = computed(() => {
 if (item.value.autoSearch)
 	searchBtn()
 
-const emit = defineEmits(["brower-view"])
-function openBrowerView() {
-	emit("brower-view", `${searchResult.value.searchID.type}/${props.leagueSelect}/${searchResult.value.searchID.ID}`)
+const emit = defineEmits(["open-web-view"])
+function openWebView() {
+	emit("open-web-view", `${searchResult.value.searchID.type}/${props.leagueSelect}/${searchResult.value.searchID.ID}`)
 }
 function openBrower() {
-	shell.openExternal(encodeURI(`https://web.poe.garena.tw/trade/${searchResult.value.searchID.type}/${props.leagueSelect}/${searchResult.value.searchID.ID}`))
+	window.open(encodeURI(`https://web.poe.garena.tw/trade/${searchResult.value.searchID.type}/${props.leagueSelect}/${searchResult.value.searchID.ID}`))
 }
 </script>
 <style>

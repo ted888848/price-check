@@ -5,15 +5,12 @@ import { createWindow } from './main/overlayWindow'
 import { setupTray } from './main/tray';
 import { getAPIdata, checkForUpdate } from './main/setupAPI'
 import { setupConfig } from './main/config'
-import { EventEmitter } from 'events'
 import IPC from './ipc/ipcChannel'
 const isDevelopment = process.env.NODE_ENV !== 'production';
 protocol.registerSchemesAsPrivileged([
 	{ scheme: 'app', privileges: { secure: true, standard: true } }
 ]);
 app.disableHardwareAcceleration()
-const emitter = new EventEmitter();
-emitter.setMaxListeners(20)
 app.on('window-all-closed', () => {
 	if (process.platform !== 'darwin') {
 		app.quit();
@@ -21,6 +18,7 @@ app.on('window-all-closed', () => {
 });
 app.on('ready', async () => {
 	setupConfig()
+	setupTray()
 	try {
 		await checkForUpdate()
 	} catch (error) {
@@ -32,14 +30,13 @@ app.on('ready', async () => {
 			type: 'error',
 		})
 	}
-	setupTray()
 	await createWindow()
 	setupShortcut()
 
 	ipcMain.handle(IPC.RELOAD_APIDATA, async () => {
 		try {
 			await getAPIdata()
-			return true
+			return { status: true }
 		} catch (error) {
 			dialog.showMessageBox({
 				title: '讀取API資料錯誤',
@@ -48,7 +45,7 @@ app.on('ready', async () => {
 				status: ${error?.response?.status}`,
 				type: 'error',
 			})
-			return error
+			return { status: false, error }
 		}
 	})
 

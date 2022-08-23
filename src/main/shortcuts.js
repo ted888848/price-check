@@ -1,11 +1,10 @@
 import { clipboard, globalShortcut } from 'electron'
-import { toggleOverlay, togglePriceCheck } from './overlayWindow';
+import { toggleOverlay, togglePriceCheck } from './overlayWindow'
 import { PoeWindow } from './POEWindow'
 import { getClopboard } from './clipboard'
-import { config } from './config';
-import robotjs from '@jitsi/robotjs'
+import { config } from './config'
+import { uIOhook, UiohookKey } from 'uiohook-napi'
 export function setupShortcut() {
-	// robotjs.setKeyboardDelay(1)
 	registShortcut()
 	PoeWindow.on('poeActiveChange', (isActive) => {
 		process.nextTick(() => {
@@ -20,8 +19,7 @@ function registShortcut() {
 		getClopboard()
 			.then((clip) => togglePriceCheck(clip))
 			.catch((err) => console.log(err))
-		robotjs.keyTap('C', ['control'])
-		//togglePriceCheck()
+		uIOhook.keyTap(UiohookKey.C, [UiohookKey.Ctrl])
 	});
 	globalShortcut.register('CmdOrCtrl+F2', () => {
 		toggleOverlay()
@@ -43,16 +41,22 @@ function pasteTextToChat(text, moveToFront) {
 	let clipSave = clipboard.readText()
 	if (moveToFront) {
 		clipboard.writeText(text)
-		robotjs.keyTap('enter', ['control'])
-		robotjs.keyTap('home')
-		robotjs.keyTap('delete')
+		uIOhook.keyTap(UiohookKey.Enter, [UiohookKey.Ctrl])
+		uIOhook.keyTap(UiohookKey.Home)
+		uIOhook.keyTap(UiohookKey.Delete)
 	}
 	else {
 		clipboard.writeText(text)
-		robotjs.keyTap('enter')
+		uIOhook.keyTap(UiohookKey.Enter)
 	}
-	robotjs.keyTap('V', ['control'])
-	robotjs.keyTap('enter')
+	uIOhook.keyTap(UiohookKey.V, [UiohookKey.Ctrl])
+	uIOhook.keyTap(UiohookKey.Enter)
+	//return to latest message
+	uIOhook.keyTap(UiohookKey.Enter)
+	uIOhook.keyTap(UiohookKey.ArrowUp)
+	uIOhook.keyTap(UiohookKey.ArrowUp)
+	uIOhook.keyTap(UiohookKey.Escape)
+
 	setTimeout(() => {
 		clipboard.writeText(clipSave)
 		isClipStored = true

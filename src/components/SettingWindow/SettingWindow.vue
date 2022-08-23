@@ -15,9 +15,9 @@
 					v-model="config.POESESSID" id="POESESSID" type="text">
 			</div>
 			<div class="flex items-center justify-center mt-5 hover:cursor-pointer"
-				@click="config.searchExchangeExalted = !config.searchExchangeExalted">
-				<span class="text-xl text-white mr-2">可堆疊通貨優先使用崇高:</span>
-				<FontAwesomeIcon v-if="config.searchExchangeExalted" icon="circle-check" class="text-green-600 text-lg" />
+				@click="config.searchExchangeDivine = !config.searchExchangeDivine">
+				<span class="text-xl text-white mr-2">可堆疊通貨優先使用神聖:</span>
+				<FontAwesomeIcon v-if="config.searchExchangeDivine" icon="circle-check" class="text-green-600 text-lg" />
 				<FontAwesomeIcon v-else icon="circle-xmark" class="text-red-600 text-lg" />
 			</div>
 			<div class=" absolute bottom-4 mx-auto left-0 right-0 flex items-center justify-center ">

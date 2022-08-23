@@ -4,7 +4,7 @@ import { cloneDeep } from 'lodash-es'
 import { app, session, dialog } from 'electron' //, shell
 import { autoUpdater } from 'electron-updater'
 import { setImmediate } from 'timers'
-
+import { buildTray } from './tray'
 let store = new Store()
 let leagues = []
 let APIitems = {
@@ -207,19 +207,31 @@ export async function getAPIdata() {
 	})
 	store.set('APIVersion', app.getVersion())
 }
-autoUpdater.on('update-available', () => {
+
+export const updateState = {
+	label: '',
+	canClick: true
+}
+
+autoUpdater.on('update-available', ({ version }) => {
+	updateState.label = `下載新版本 v${version}中`
+	updateState.canClick = false
+	buildTray()
 	dialog.showMessageBox({
 		title: '有新版本',
 		type: 'info',
-		message: '並已經開始在背景下載',
+		message: `有新版本 v${version}，並已經開始在背景下載`,
 	})
 })
 autoUpdater.on('update-downloaded', () => {
+	updateState.label = `下載完成，關閉後將自動安裝`
+	updateState.canClick = false
+	buildTray()
 	dialog.showMessageBox({
 		title: '下載完成',
 		type: 'info',
 		message: '更新安裝擋已經下載完成，如果沒有自動重新啟動，\n請手動離開後稍等安裝完畢再打開',
-		buttons: ['重新開啟並安裝更新', '稍後再安裝'],
+		buttons: ['重新開啟並安裝更新(可能會沒用)', '稍後再安裝'],
 		defaultId: 0
 	})
 		.then((buttonClick) => {
@@ -230,6 +242,11 @@ autoUpdater.on('update-downloaded', () => {
 			}
 		})
 })
+autoUpdater.on('update-not-available', () => {
+	updateState.label = '目前沒有新版本'
+	updateState.canClick = true
+	buildTray()
+})
 export async function checkForUpdate() {
 	if ((await session.defaultSession?.getCacheSize() >>> 20) >= 30) { //大於30MB
 		session.defaultSession.clearCache()
@@ -237,7 +254,17 @@ export async function checkForUpdate() {
 		session.defaultSession.clearCodeCaches({})
 			.catch(err => console.log(err))
 	}
-	await autoUpdater.checkForUpdates()
+	updateState.label = '檢查更新中'
+	updateState.canClick = false
+	buildTray()
+	try {
+		await autoUpdater.checkForUpdates()
+	}
+	catch {
+		updateState.label = '檢查更新錯誤'
+		updateState.canClick = true
+		buildTray()
+	}
 	if (store.get('APIVersion', '') !== app.getVersion()) {
 		await getAPIdata()
 	}

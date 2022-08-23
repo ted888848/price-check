@@ -36,10 +36,15 @@ function reloadAPIdata() {
 	store.set("config", configTemp);
 	ipcRenderer
 		.invoke(IPC.RELOAD_APIDATA)
-		.then(() => {
-			emit("reloadLeagues");
-			loadAPIdata();
-			console.log('API reloaded')
+		.then(({ status, error }) => {
+			if (status) {
+				emit("reloadLeagues");
+				loadAPIdata();
+				console.log('API reloaded')
+			}
+			else {
+				console.error(error)
+			}
 		})
 		.catch((error) => {
 			console.error(error);

@@ -1,4 +1,4 @@
-import { BrowserWindow, ipcMain } from 'electron'
+import { BrowserWindow, ipcMain, shell } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib';
 import { OverlayWindow } from 'electron-overlay-window';
 import { PoeWindow } from './POEWindow'
@@ -44,6 +44,10 @@ export async function createWindow() {
 	win.webContents.on('before-input-event', handleBIEvent)
 	win.webContents.on('did-attach-webview', (_, webviewWebContent) => {
 		webviewWebContent.on('before-input-event', handleBIEvent)
+	})
+	win.webContents.setWindowOpenHandler((details) => {
+		shell.openExternal(details.url)
+		return { action: 'deny' }
 	})
 }
 

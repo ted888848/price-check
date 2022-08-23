@@ -273,7 +273,7 @@ export async function searchItem(searchJson, league) {
 			searchResult.nowFetched = 0
 		})
 		.catch((err) => {
-			console.log(err)
+			console.error(err)
 			if (err.response?.status === 400) {
 				errData = err.response.data?.error?.message
 			}
@@ -302,7 +302,7 @@ export async function fetchItem(fetchList, searchID, oldFetchResult) {
 			parseRateTimeLimit(responses.pop()?.headers)
 		})
 		.catch(err => {
-			console.log(err)
+			console.error(err)
 			if (err.response?.status === 429) {
 				startCountdown(parseInt(err.response.headers['retry-after']))
 			}
@@ -325,9 +325,9 @@ export async function fetchItem(fetchList, searchID, oldFetchResult) {
 	}
 	return fetchResult
 }
-export async function getExaltedToChaos(league) {
+export async function getDivineToChaos(league) {
 	let exchangeJSON = cloneDeep(exchangeJSONSample)
-	exchangeJSON.exchange.have = ["exalted"]
+	exchangeJSON.exchange.have = ["divine"]
 	exchangeJSON.exchange.want = ["chaos"]
 	let chaos = 0
 	await GGCapi.post(encodeURI(`trade/exchange/${league}`), JSON.stringify(exchangeJSON))
@@ -340,7 +340,7 @@ export async function getExaltedToChaos(league) {
 			chaos /= temp.length
 		})
 		.catch((err) => {
-			console.log(err)
+			console.error(err)
 			if (err.response?.status === 429) {
 				startCountdown(parseInt(err.response.headers['retry-after']))
 			}
@@ -368,7 +368,7 @@ export async function searchExchange(item, league) {
 			searchResult.nowFetched = searchResult.totalCount = tempResult.length
 		})
 		.catch((err) => {
-			console.log(err)
+			console.error(err)
 			if (err.response?.status === 400) {
 				errData = err.response.data?.error?.message
 			}

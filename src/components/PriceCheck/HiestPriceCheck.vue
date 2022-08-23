@@ -29,7 +29,7 @@
 		</div>
 		<button
 			class="mx-2 bg-blue-800 text-white rounded px-4 hover:bg-blue-700 disabled:cursor-default disabled:opacity-60 disabled:bg-blue-800"
-			@click="openBrowerView" :disabled="rateTimeLimit.flag">BV</button>
+			@click="openWebView" :disabled="rateTimeLimit.flag">BV</button>
 	</div>
 	<table v-if="fetchResultSorted.length" class="bg-blue-500 text-center text-white text-sm my-1 mx-5 w-1/2 self-center">
 		<thead class="">
@@ -59,12 +59,11 @@
 		{{ rateTimeLimit.second }} 秒後再回來 </span>
 </template>
 <script setup>
-import { shell } from 'electron'
 import { computed, ref, watch } from 'vue'
 import { maxBy } from 'lodash-es'
 import { getDefaultSearchJSON, searchItem, fetchItem, getIsCounting, selectOptions } from '@/web/tradeSide'
 import { hiestReward as gemReplicaOptions } from '@/web/APIdata'
-const props = defineProps(["itemProp", "leagueSelect", "exaltedToChaos", "isOverflow"])
+const props = defineProps(["itemProp", "leagueSelect", "divineToChaos", "isOverflow"])
 const { rateTimeLimit } = getIsCounting()
 
 const gemReplicaSelect = ref(null)
@@ -121,10 +120,12 @@ async function searchBtn() {
 }
 
 const fetchResultSorted = computed(() => {
-	if (props.exaltedToChaos)
+	if (props.divineToChaos)
 		return fetchResult.value.slice().sort((a, b) => {
-			let ca = a.currency === 'exalted' ? a.price * props.exaltedToChaos : a.price
-			let cb = b.currency === 'exalted' ? b.price * props.exaltedToChaos : b.price
+			if (!['divine', 'chaos'].includes(a.currency)) return 1
+			if (!['divine', 'chaos'].includes(b.currency)) return -1
+			let ca = a.currency === 'divine' ? a.price * props.divineToChaos : a.price
+			let cb = b.currency === 'divine' ? b.price * props.divineToChaos : b.price
 			return ca - cb
 		})
 	else
@@ -135,12 +136,12 @@ const maxAmount = computed(() => {
 	return maxBy(fetchResult.value, ele => ele.amount)
 })
 
-const emit = defineEmits(["brower-view"])
-function openBrowerView() {
-	emit("brower-view", `search/${props.leagueSelect}/${searchResult.value.searchID.ID}`)
+const emit = defineEmits(["open-web-view"])
+function openWebView() {
+	emit("open-web-view", `search/${props.leagueSelect}/${searchResult.value.searchID.ID}`)
 }
 function openBrower() {
-	shell.openExternal(encodeURI(`https://web.poe.garena.tw/trade/search/${props.leagueSelect}/${searchResult.value.searchID.ID}`))
+	window.open(encodeURI(`https://web.poe.garena.tw/trade/${searchResult.value.searchID.type}/${props.leagueSelect}/${searchResult.value.searchID.ID}`))
 }
 </script>
 <style>

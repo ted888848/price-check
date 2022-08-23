@@ -2,11 +2,9 @@ import { Tray, Menu, app } from "electron";
 import { win } from './overlayWindow'
 import { checkForUpdate } from './setupAPI'
 import path from 'path'
+import { updateState } from './setupAPI'
 let tray
-
-export function setupTray() {
-	// eslint-disable-next-line no-undef
-	tray = new Tray(path.join(__static, 'MavenOrb.ico'))
+export function buildTray() {
 	const trayMenu = Menu.buildFromTemplate([
 		{
 			label: 'DevTool',
@@ -16,7 +14,12 @@ export function setupTray() {
 			}
 		},
 		{
-			label: `目前版本: v${app.getVersion()}\n檢查更新`,
+			label: `目前版本: v${app.getVersion()}`,
+			enabled: false
+		},
+		{
+			enabled: updateState.canClick,
+			label: updateState.label,
 			type: 'normal',
 			click() {
 				checkForUpdate()
@@ -31,4 +34,10 @@ export function setupTray() {
 		}
 	])
 	tray.setContextMenu(trayMenu)
+}
+
+export function setupTray() {
+	// eslint-disable-next-line no-undef
+	tray = new Tray(path.join(__static, 'MavenOrb.ico'))
+	buildTray()
 }

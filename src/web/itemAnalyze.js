@@ -136,8 +136,8 @@ export function itemAnalyze(item) {
 		case '掘獄可堆疊有插槽通貨': {
 			itemParsed.searchExchange.option = true
 			itemParsed.autoSearch = true
-			let searchExchangeExalted = ipcRenderer.sendSync(IPC.GET_CONFIG).searchExchangeExalted
-			itemParsed.searchExchange.have = searchExchangeExalted ? 'exalted' : 'chaos'
+			let searchExchangeDivine = ipcRenderer.sendSync(IPC.GET_CONFIG).searchExchangeDivine
+			itemParsed.searchExchange.have = searchExchangeDivine ? 'divine' : 'chaos'
 			break
 		}
 		case '主動技能寶石':
@@ -203,7 +203,6 @@ function parseItemName(section, itemSection) {
 		飾品: 'accessory.trinket',
 		異界地圖: 'map',
 		輿圖地區升級道具: 'watchstone',
-		守望號令: 'sentinel'
 	}
 	let rarityOptions = [
 		{
@@ -660,9 +659,6 @@ function parseOtherNeedMods(item) {
 		return
 	}
 	parseAllfuns(item, parseFuns)
-	if (itemParsed.type?.option === 'sentinel') {
-		delete itemParsed.isCorrupt
-	}
 }
 function parseMap(item) {
 	let elderMap = {

@@ -2,9 +2,9 @@
 	<div v-if="windowShowHide"
 		class="absolute top-0 left-0 w-screen h-screen priceCheckRoot bg-gray-400 bg-opacity-25 flex"
 		@click.self="closePriceCheck">
-		<webview v-if="isBrowerOpen" class=" flex-1" ref="BrowerView" partition="trade" src=""></webview>
+		<webview v-if="isWebrViewOpen" class=" flex-1" ref="webView" src=""></webview>
 		<div class="bg-gray-900 priceCheck h-full flex flex-col" :style="priceCheckPos" ref="priceCheckDiv"
-			:class="{ 'absolute': !isBrowerOpen }">
+			:class="{ 'absolute': !isWebrViewOpen }">
 			<div class="bg-gray-800 flex justify-between max-h-9 items-center">
 				<div class="flex justify-start mr-auto ml-1 flex-1">
 					<vSelect class="text-sm style-chooser style-chooser-inf text-center" :options="priceCheckOptions"
@@ -13,16 +13,16 @@
 				</div>
 				<div class="flex justify-center flex-1">
 					<div class="relative exaltedImg ">
-						<img :src="exaltedChaosImage[1].image" class=" w-8 h-8 ">
-						<ul v-if="exaltedToChaos"
+						<img :src="divineImage" class=" w-8 h-8 ">
+						<ul v-if="divineToChaos"
 							class="exaltedImgTooltip invisible bg-gray-700 z-10 text-center absolute text-white">
-							<li v-for="line in exaltedToChaosDec" :key="line.e" class="flex px-2 min-w-max text-xl">
+							<li v-for="line in divineToChaosDec" :key="line.e" class="flex px-2 min-w-max text-xl">
 								{{ line.e }} : {{ line.c }}
 							</li>
 						</ul>
 					</div>
-					<span class=" text-white text-2xl">:{{ exaltedToChaos }}</span>
-					<img :src="exaltedChaosImage[0].image" class=" w-8 h-8 hover:cursor-pointer" @dblclick="reflashChaos">
+					<span class=" text-white text-2xl">:{{ divineToChaos }}</span>
+					<img :src="chaosImage" class=" w-8 h-8 hover:cursor-pointer" @dblclick="reflashDivineToChaos">
 				</div>
 				<div class="flex justify-end mr-1 ml-auto flex-1">
 					<button class=" text-white hover:text-red-500" @click="closePriceCheck">
@@ -35,8 +35,8 @@
 					:clearable="false" :searchable="false" />
 			</div>
 			<KeepAlive>
-				<component :is="currentPriceCheck" :itemProp="item" @brower-view="openBrowerView" :leagueSelect="leagueSelect"
-					:exaltedToChaos="exaltedToChaos" :isOverflow="isOverflow">
+				<component :is="currentPriceCheck" :itemProp="item" @open-web-view="openWebView" :leagueSelect="leagueSelect"
+					:divineToChaos="divineToChaos" :isOverflow="isOverflow">
 				</component>
 			</KeepAlive>
 		</div>
@@ -48,61 +48,60 @@ import { ref, computed, markRaw, nextTick, } from 'vue'
 import { range } from 'lodash-es'
 import IPC from '@/ipc/ipcChannel'
 import { itemAnalyze } from '@/web/itemAnalyze'
-import { getExaltedToChaos } from '@/web/tradeSide'
+import { getDivineToChaos } from '@/web/tradeSide'
 import { leagues, currencyImageUrl } from '@/web/APIdata'
 import NormalPriceCheck from './NormalPriceCheck.vue'
 import HiestPriceCheck from './HiestPriceCheck.vue'
 
-const isBrowerOpen = ref(false)
-const BrowerView = ref(null)
+const isWebrViewOpen = ref(false)
+const webView = ref(null)
 const priceCheckPos = ref({
 	right: '0px',
 })
-function openBrowerView(url) {
+function openWebView(url) {
 	priceCheckPos.value.right = '0px'
-	isBrowerOpen.value = true
+	isWebrViewOpen.value = true
 	nextTick(() => {
-		BrowerView.value.src = encodeURI(`https://web.poe.garena.tw/trade/${url}`)
+		webView.value.src = encodeURI(`https://web.poe.garena.tw/trade/${url}`)
 	})
 }
-function closeBrowerView() {
-	if (BrowerView.value) {
-		BrowerView.value.src = ''
+function closeWebView() {
+	if (webView.value) {
+		webView.value.src = ''
 	}
-	isBrowerOpen.value = false
+	isWebrViewOpen.value = false
 }
 
 const windowShowHide = ref(false)
 function closePriceCheck() {
 	windowShowHide.value = false
 	ipcRenderer.send(IPC.FORCE_POE)
-	isBrowerOpen.value = false
+	isWebrViewOpen.value = false
 }
 
 const leagueSelect = ref(leagues[0])
 function loadLeagues() {
 	leagueSelect.value = leagues[0]
-	exaltedChaosImage = currencyImageUrl.filter(ele => ['exalted', 'chaos'].includes(ele.id)).map(ele => ({ ...ele, image: 'https://web.poe.garena.tw' + ele.image }))
 }
 defineExpose({ loadLeagues })
 const currentPriceCheck = ref(null)
 const priceCheckOptions = [{
 	label: "普通查價",
 	value: markRaw(NormalPriceCheck)
-}
-	, {
+}, {
 	label: "劫盜查價",
 	value: markRaw(HiestPriceCheck)
 }]
 const item = ref(null)
 
-const exaltedToChaos = ref(0)
-let exaltedChaosImage = currencyImageUrl.filter(ele => ['exalted', 'chaos'].includes(ele.id)).map(ele => ({ ...ele, image: 'https://web.poe.garena.tw' + ele.image }))
-async function reflashChaos() {
-	exaltedToChaos.value = await getExaltedToChaos(leagueSelect.value)
+const divineToChaos = ref(0)
+let divineImage = 'https://web.poe.garena.tw' + currencyImageUrl.find(ele => ele.id === 'divine')?.image
+let chaosImage = 'https://web.poe.garena.tw' + currencyImageUrl.find(ele => ele.id === 'chaos')?.image
+async function reflashDivineToChaos() {
+	divineToChaos.value = await getDivineToChaos(leagueSelect.value)
 }
-const exaltedToChaosDec = computed(() => {
-	return range(0.1, 1, 0.1).map(ele => ({ e: ele.toFixed(1), c: (ele * exaltedToChaos.value).toFixed(0) }))
+const divineToChaosDec = computed(() => {
+	return range(0.1, 1, 0.1).map(ele => ({ e: ele.toFixed(1), c: (ele * divineToChaos.value).toFixed(0) }))
 })
 
 const priceCheckDiv = ref()
@@ -111,7 +110,7 @@ function isOverflow() {
 }
 
 ipcRenderer.on(IPC.PRICE_CHECK_SHOW, (e, clip, pos) => {
-	closeBrowerView()
+	closeWebView()
 	windowShowHide.value = true
 	currentPriceCheck.value = markRaw(NormalPriceCheck)
 	priceCheckPos.value.right = pos

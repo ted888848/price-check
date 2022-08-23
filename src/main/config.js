@@ -5,7 +5,7 @@ export let config = new Store()
 export function setupConfig() {
 	if (!config.has('config')) config.set('config', {
 		characterName: '',
-		searchExchangeExalted: false,
+		searchExchangeDivine: false,
 		POESESSID: ''
 	})
 	ipcMain.on(IPC.SET_CONFIG, (_e, configData) => {
