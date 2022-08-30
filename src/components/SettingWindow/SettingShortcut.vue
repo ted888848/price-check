@@ -1,7 +1,7 @@
 <template>
-	<div>
-		Shortcut setting
-	</div>
+  <div>
+    Shortcut setting
+  </div>
 </template>
 <script setup>
 

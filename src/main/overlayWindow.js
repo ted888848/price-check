@@ -8,69 +8,71 @@ import path from 'path';
 export let win;
 let isOverlayOpen
 export async function createWindow() {
-	win = new BrowserWindow({
-		width: 800,
-		height: 600,
-		...OverlayWindow.WINDOW_OPTS,
-		// eslint-disable-next-line no-undef
-		icon: path.join(__static, 'MavenOrb256.ico'),
-
-		webPreferences: {
-			nodeIntegration: true,
-			contextIsolation: false,
-			webSecurity: false,
-			webviewTag: true
-		},
-	});
-	if (process.env.WEBPACK_DEV_SERVER_URL) {
-		await win.loadURL(process.env.WEBPACK_DEV_SERVER_URL)
-		win.webContents.openDevTools({ "mode": 'detach', "activate": false })
-	}
-	else {
-		createProtocol('app')
-		await win.loadURL('app://./index.html')
-	}
-	ipcMain.on(IPC.FORCE_POE, () => {
-		forcePOE()
-	})
-	// ipcMain.on(IPC.GET_COOKIE, async (e) => {
-	// 	let [cookie] = await session.defaultSession.cookies.get({ name: 'POESESSID' })
-	// 	e.returnValue = cookie
-	// })
-	// handleHeaderReceived()
-	// handleHeaderBeforeSend()
-	PoeWindow.attach(win, 'Path of Exile')
-	PoeWindow.on('poeActiveChange', handlePoeActive)
-	win.webContents.on('before-input-event', handleBIEvent)
-	win.webContents.on('did-attach-webview', (_, webviewWebContent) => {
-		webviewWebContent.on('before-input-event', handleBIEvent)
-	})
-	win.webContents.setWindowOpenHandler((details) => {
-		shell.openExternal(details.url)
-		return { action: 'deny' }
-	})
+  win = new BrowserWindow({
+    width: 800,
+    height: 600,
+    ...OverlayWindow.WINDOW_OPTS,
+    icon: path.join(__static, 'MavenOrb256.ico'),
+    webPreferences: {
+      nodeIntegration: true,
+      contextIsolation: false,
+      webSecurity: false,
+      webviewTag: true
+    },
+  });
+  if (process.env.WEBPACK_DEV_SERVER_URL) {
+    await win.loadURL(process.env.WEBPACK_DEV_SERVER_URL)
+    win.webContents.openDevTools({
+      'mode': 'detach', 'activate': false 
+    })
+  }
+  else {
+    createProtocol('app')
+    await win.loadURL('app://./index.html')
+  }
+  ipcMain.on(IPC.FORCE_POE, () => {
+    forcePOE()
+  })
+  // ipcMain.on(IPC.GET_COOKIE, async (e) => {
+  // 	let [cookie] = await session.defaultSession.cookies.get({ name: 'POESESSID' })
+  // 	e.returnValue = cookie
+  // })
+  // handleHeaderReceived()
+  // handleHeaderBeforeSend()
+  PoeWindow.attach(win, 'Path of Exile')
+  PoeWindow.on('poeActiveChange', handlePoeActive)
+  win.webContents.on('before-input-event', handleBIEvent)
+  win.webContents.on('did-attach-webview', (_, webviewWebContent) => {
+    webviewWebContent.on('before-input-event', handleBIEvent)
+  })
+  win.webContents.setWindowOpenHandler((details) => {
+    shell.openExternal(details.url)
+    return {
+      action: 'deny' 
+    }
+  })
 }
 
 function handlePoeActive(isActive) {
-	if (isOverlayOpen) forceOverlay()
-	else if (isActive) {
-		win.webContents.send(IPC.POE_ACTIVE)
-	}
+  if (isOverlayOpen) forceOverlay()
+  else if (isActive) {
+    win.webContents.send(IPC.POE_ACTIVE)
+  }
 }
 function handleBIEvent(event, input) {
-	if (input.type !== 'keyDown') return
-	let { code, control, alt, shift } = input
-	if (code.indexOf('Key') !== -1) code = code.substring(code.indexOf('Key') + 3)
-	if (control && !alt && !shift) code = 'Ctrl+' + code
-	switch (code) {
-		case 'Ctrl+W':
-		case 'Escape':
-			event.preventDefault()
-			forcePOE()
-			break
-		default:
-			return
-	}
+  if (input.type !== 'keyDown') return
+  let { code, control, alt, shift } = input
+  if (code.indexOf('Key') !== -1) code = code.substring(code.indexOf('Key') + 3)
+  if (control && !alt && !shift) code = 'Ctrl+' + code
+  switch (code) {
+    case 'Ctrl+W':
+    case 'Escape':
+      event.preventDefault()
+      forcePOE()
+      break
+    default:
+      return
+  }
 }
 
 // function handleHeaderBeforeSend() {
@@ -111,21 +113,21 @@ function handleBIEvent(event, input) {
 // }
 
 export function toggleOverlay() {
-	forceOverlay()
-	overlayEvent()
+  forceOverlay()
+  overlayEvent()
 }
 
 export function togglePriceCheck(clip = null) {
-	priceCheckEvent(clip, PoeWindow.priceCheckPos)
-	forceOverlay()
+  priceCheckEvent(clip, PoeWindow.priceCheckPos)
+  forceOverlay()
 }
 export function forceOverlay() {
-	isOverlayOpen = true
-	PoeWindow.isActive = false
-	OverlayWindow.activateOverlay()
+  isOverlayOpen = true
+  PoeWindow.isActive = false
+  OverlayWindow.activateOverlay()
 }
 export function forcePOE() {
-	isOverlayOpen = false
-	PoeWindow.isActive = true
-	OverlayWindow.focusTarget()
+  isOverlayOpen = false
+  PoeWindow.isActive = true
+  OverlayWindow.focusTarget()
 }

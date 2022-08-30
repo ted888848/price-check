@@ -1,7 +1,7 @@
 <template>
-	<div>
-		PriceCheck setting
-	</div>
+  <div>
+    PriceCheck setting
+  </div>
 </template>
 <script setup>
 

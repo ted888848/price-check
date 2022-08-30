@@ -9,7 +9,7 @@ library.add(faGear, faRotate, faCircleCheck, faCircleXmark, faSpinner, faRectang
 import 'vue-select/dist/vue-select.css'
 import vSelect from 'vue-select'
 // eslint-disable-next-line vue/multi-word-component-names
-app.component('vSelect', vSelect)
+app.component('VSelect', vSelect)
 app.component('FontAwesomeIcon', FontAwesomeIcon)
 
 app.mount('#app');

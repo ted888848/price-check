@@ -1,46 +1,45 @@
 <template>
-	<div v-if="windowShowHide"
-		class="absolute top-0 left-0 w-screen h-screen priceCheckRoot bg-gray-400 bg-opacity-25 flex"
-		@click.self="closePriceCheck">
-		<webview v-if="isWebrViewOpen" class=" flex-1" ref="webView" src=""></webview>
-		<div class="bg-gray-900 priceCheck h-full flex flex-col" :style="priceCheckPos" ref="priceCheckDiv"
-			:class="{ 'absolute': !isWebrViewOpen }">
-			<div class="bg-gray-800 flex justify-between max-h-9 items-center">
-				<div class="flex justify-start mr-auto ml-1 flex-1">
-					<vSelect class="text-sm style-chooser style-chooser-inf text-center" :options="priceCheckOptions"
-						v-model="currentPriceCheck" label="label" :searchable="false" :clearable="false"
-						:reduce="option => option.value" />
-				</div>
-				<div class="flex justify-center flex-1">
-					<div class="relative exaltedImg ">
-						<img :src="divineImage" class=" w-8 h-8 ">
-						<ul v-if="divineToChaos"
-							class="exaltedImgTooltip invisible bg-gray-700 z-10 text-center absolute text-white">
-							<li v-for="line in divineToChaosDec" :key="line.e" class="flex px-2 min-w-max text-xl">
-								{{ line.e }} : {{ line.c }}
-							</li>
-						</ul>
-					</div>
-					<span class=" text-white text-2xl">:{{ divineToChaos }}</span>
-					<img :src="chaosImage" class=" w-8 h-8 hover:cursor-pointer" @dblclick="reflashDivineToChaos">
-				</div>
-				<div class="flex justify-end mr-1 ml-auto flex-1">
-					<button class=" text-white hover:text-red-500" @click="closePriceCheck">
-						<FontAwesomeIcon icon="rectangle-xmark" size="2x" />
-					</button>
-				</div>
-			</div>
-			<div class="p-1">
-				<vSelect class=" text-base style-chooser text-center" v-model="leagueSelect" :options="leagues"
-					:clearable="false" :searchable="false" />
-			</div>
-			<KeepAlive>
-				<component :is="currentPriceCheck" :itemProp="item" @open-web-view="openWebView" :leagueSelect="leagueSelect"
-					:divineToChaos="divineToChaos" :isOverflow="isOverflow">
-				</component>
-			</KeepAlive>
-		</div>
-	</div>
+  <div v-if="windowShowHide"
+       class="absolute top-0 left-0 w-screen h-screen priceCheckRoot bg-gray-400 bg-opacity-25 flex"
+       @click.self="closePriceCheck">
+    <webview v-if="isWebrViewOpen" ref="webView" class=" flex-1" src="" />
+    <div ref="priceCheckDiv" class="bg-gray-900 priceCheck h-full flex flex-col" :style="priceCheckPos"
+         :class="{ 'absolute': !isWebrViewOpen }">
+      <div class="bg-gray-800 flex justify-between max-h-9 items-center">
+        <div class="flex justify-start mr-auto ml-1 flex-1">
+          <VSelect v-model="currentPriceCheck" class="text-sm style-chooser style-chooser-inf text-center"
+                   :options="priceCheckOptions" label="label" :searchable="false" :clearable="false"
+                   :reduce="option => option.value" />
+        </div>
+        <div class="flex justify-center flex-1">
+          <div class="relative exaltedImg ">
+            <img :src="divineImage" class=" w-8 h-8 ">
+            <ul v-if="divineToChaos"
+                class="exaltedImgTooltip invisible bg-gray-700 z-10 text-center absolute text-white">
+              <li v-for="line in divineToChaosDec" :key="line.e" class="flex px-2 min-w-max text-xl">
+                {{ line.e }} : {{ line.c }}
+              </li>
+            </ul>
+          </div>
+          <span class=" text-white text-2xl">:{{ divineToChaos }}</span>
+          <img :src="chaosImage" class=" w-8 h-8 hover:cursor-pointer" @dblclick="reflashDivineToChaos">
+        </div>
+        <div class="flex justify-end mr-1 ml-auto flex-1">
+          <button class=" text-white hover:text-red-500" @click="closePriceCheck">
+            <FontAwesomeIcon icon="rectangle-xmark" size="2x" />
+          </button>
+        </div>
+      </div>
+      <div class="p-1">
+        <VSelect v-model="leagueSelect" class=" text-base style-chooser text-center" :options="leagues"
+                 :clearable="false" :searchable="false" />
+      </div>
+      <KeepAlive>
+        <component :is="currentPriceCheck" :item-prop="item" :league-select="leagueSelect"
+                   :divine-to-chaos="divineToChaos" :is-overflow="isOverflow" @open-web-view="openWebView" />
+      </KeepAlive>
+    </div>
+  </div>
 </template>
 <script setup>
 import { ipcRenderer } from 'electron'
@@ -56,41 +55,43 @@ import HiestPriceCheck from './HiestPriceCheck.vue'
 const isWebrViewOpen = ref(false)
 const webView = ref(null)
 const priceCheckPos = ref({
-	right: '0px',
+  right: '0px',
 })
 function openWebView(url) {
-	priceCheckPos.value.right = '0px'
-	isWebrViewOpen.value = true
-	nextTick(() => {
-		webView.value.src = encodeURI(`https://web.poe.garena.tw/trade/${url}`)
-	})
+  priceCheckPos.value.right = '0px'
+  isWebrViewOpen.value = true
+  nextTick(() => {
+    webView.value.src = encodeURI(`https://web.poe.garena.tw/trade/${url}`)
+  })
 }
 function closeWebView() {
-	if (webView.value) {
-		webView.value.src = ''
-	}
-	isWebrViewOpen.value = false
+  if (webView.value) {
+    webView.value.src = ''
+  }
+  isWebrViewOpen.value = false
 }
 
 const windowShowHide = ref(false)
 function closePriceCheck() {
-	windowShowHide.value = false
-	ipcRenderer.send(IPC.FORCE_POE)
-	isWebrViewOpen.value = false
+  windowShowHide.value = false
+  ipcRenderer.send(IPC.FORCE_POE)
+  isWebrViewOpen.value = false
 }
 
 const leagueSelect = ref(leagues[0])
 function loadLeagues() {
-	leagueSelect.value = leagues[0]
+  leagueSelect.value = leagues[0]
 }
-defineExpose({ loadLeagues })
+defineExpose({
+  loadLeagues 
+})
 const currentPriceCheck = ref(null)
 const priceCheckOptions = [{
-	label: "普通查價",
-	value: markRaw(NormalPriceCheck)
+  label: '普通查價',
+  value: markRaw(NormalPriceCheck)
 }, {
-	label: "劫盜查價",
-	value: markRaw(HiestPriceCheck)
+  label: '劫盜查價',
+  value: markRaw(HiestPriceCheck)
 }]
 const item = ref(null)
 
@@ -98,26 +99,28 @@ const divineToChaos = ref(0)
 let divineImage = 'https://web.poe.garena.tw' + currencyImageUrl.find(ele => ele.id === 'divine')?.image
 let chaosImage = 'https://web.poe.garena.tw' + currencyImageUrl.find(ele => ele.id === 'chaos')?.image
 async function reflashDivineToChaos() {
-	divineToChaos.value = await getDivineToChaos(leagueSelect.value)
+  divineToChaos.value = await getDivineToChaos(leagueSelect.value)
 }
 const divineToChaosDec = computed(() => {
-	return range(0.1, 1, 0.1).map(ele => ({ e: ele.toFixed(1), c: (ele * divineToChaos.value).toFixed(0) }))
+  return range(0.1, 1, 0.1).map(ele => ({
+    e: ele.toFixed(1), c: (ele * divineToChaos.value).toFixed(0) 
+  }))
 })
 
 const priceCheckDiv = ref()
 function isOverflow() {
-	return priceCheckDiv?.value?.scrollHeight > priceCheckDiv?.value?.offsetHeight
+  return priceCheckDiv?.value?.scrollHeight > priceCheckDiv?.value?.offsetHeight
 }
 
 ipcRenderer.on(IPC.PRICE_CHECK_SHOW, (e, clip, pos) => {
-	closeWebView()
-	windowShowHide.value = true
-	currentPriceCheck.value = markRaw(NormalPriceCheck)
-	priceCheckPos.value.right = pos
-	item.value = itemAnalyze(clip)
+  closeWebView()
+  windowShowHide.value = true
+  currentPriceCheck.value = markRaw(NormalPriceCheck)
+  priceCheckPos.value.right = pos
+  item.value = itemAnalyze(clip)
 })
 ipcRenderer.on(IPC.POE_ACTIVE, () => {
-	windowShowHide.value = false
+  windowShowHide.value = false
 })
 </script>
 

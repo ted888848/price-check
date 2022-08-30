@@ -1,19 +1,78 @@
 {
-	"env": {
-		"node": true
-	},
-	"extends": [
-		// add more generic rulesets here, such as:
-		"eslint:recommended",
-		// "plugin:vue/vue3-recommended"
-		"plugin:vue/vue3-essential"
-		// 'plugin:vue/recommended' // Use this if you are using Vue.js 2.x.
-	],
-	"parserOptions": {},
-	"rules": {},
-	"globals": {
-		"defineEmits": true,
-		"defineExpose": true,
-		"defineProps": true
-	}
+  "env": {
+    "node": true,
+    "browser": true
+  },
+  "extends": [
+    // add more generic rulesets here, such as:
+    "eslint:recommended",
+    // "plugin:vue/vue3-recommended"
+    "plugin:vue/vue3-recommended"
+    // 'plugin:vue/recommended' // Use this if you are using Vue.js 2.x.
+  ],
+  "parserOptions": {},
+  "rules": {
+    "quotes": [
+      "warn",
+      "single"
+    ],
+    "vue/max-attributes-per-line": "off",
+    "vue/first-attribute-linebreak": "off",
+    "vue/html-closing-bracket-newline": [
+      "warn",
+      {
+        "multiline": "never"
+      }
+    ],
+    "vue/require-prop-types": "off",
+    "indent": [
+      "warn",
+      2,
+      {
+        "SwitchCase": 1
+      }
+    ],
+    "space-infix-ops": "warn",
+    "arrow-spacing": [
+      "warn",
+      {
+        "before": true,
+        "after": true
+      }
+    ],
+    "switch-colon-spacing": [
+      "warn",
+      {
+        "after": true,
+        "before": false
+      }
+    ],
+    "object-property-newline": [
+      "warn",
+      {
+        "allowAllPropertiesOnSameLine": false,
+        "allowMultiplePropertiesPerLine": true
+      }
+    ],
+    "object-curly-newline": [
+      "warn",
+      {
+        "ObjectExpression": "always",
+        "ObjectPattern": {
+          "multiline": true
+        },
+        "ImportDeclaration": "never",
+        "ExportDeclaration": {
+          "multiline": true,
+          "minProperties": 3
+        }
+      }
+    ]
+  },
+  "globals": {
+    "defineEmits": "writable",
+    "defineExpose": "writable",
+    "defineProps": "writable",
+    "__static": "readonly"
+  }
 }

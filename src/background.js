@@ -8,59 +8,68 @@ import { setupConfig } from './main/config'
 import IPC from './ipc/ipcChannel'
 const isDevelopment = process.env.NODE_ENV !== 'production';
 protocol.registerSchemesAsPrivileged([
-	{ scheme: 'app', privileges: { secure: true, standard: true } }
+  {
+    scheme: 'app',
+    privileges: {
+      secure: true, standard: true 
+    } 
+  }
 ]);
 app.disableHardwareAcceleration()
 app.on('window-all-closed', () => {
-	if (process.platform !== 'darwin') {
-		app.quit();
-	}
+  if (process.platform !== 'darwin') {
+    app.quit();
+  }
 });
 app.on('ready', async () => {
-	setupConfig()
-	setupTray()
-	try {
-		await checkForUpdate()
-	} catch (error) {
-		dialog.showMessageBox({
-			title: '讀取API資料錯誤',
-			message: '請稍後重新讀取API資料',
-			detail: `data: ${JSON.stringify(error?.response?.data)}\r\n
+  setupConfig()
+  setupTray()
+  try {
+    await checkForUpdate()
+  } catch (error) {
+    dialog.showMessageBox({
+      title: '讀取API資料錯誤',
+      message: '請稍後重新讀取API資料',
+      detail: `data: ${JSON.stringify(error?.response?.data)}\r\n
 			status: ${error?.response?.status}`,
-			type: 'error',
-		})
-	}
-	await createWindow()
-	setupShortcut()
+      type: 'error',
+    })
+  }
+  await createWindow()
+  setupShortcut()
 
-	ipcMain.handle(IPC.RELOAD_APIDATA, async () => {
-		try {
-			await getAPIdata()
-			return { status: true }
-		} catch (error) {
-			dialog.showMessageBox({
-				title: '讀取API資料錯誤',
-				message: '請稍後重新讀取API資料',
-				detail: `data: ${JSON.stringify(error?.response?.data)}\r\n
+  ipcMain.handle(IPC.RELOAD_APIDATA, async () => {
+    try {
+      await getAPIdata()
+      return {
+        status: true 
+      }
+    } catch (error) {
+      dialog.showMessageBox({
+        title: '讀取API資料錯誤',
+        message: '請稍後重新讀取API資料',
+        detail: `data: ${JSON.stringify(error?.response?.data)}\r\n
 				status: ${error?.response?.status}`,
-				type: 'error',
-			})
-			return { status: false, error }
-		}
-	})
+        type: 'error',
+      })
+      return {
+        status: false, error 
+      }
+    }
+  })
 
 });
 if (isDevelopment) {
-	if (process.platform === 'win32') {
-		process.on('message', (data) => {
-			if (data === 'graceful-exit') {
-				app.quit();
-			}
-		});
-	}
-	else {
-		process.on('SIGTERM', () => {
-			app.quit();
-		});
-	}
+  if (process.platform === 'win32') {
+    process.on('message', (data) => {
+      if (data === 'graceful-exit') {
+        app.quit();
+      }
+    });
+  }
+  else {
+    process.on('SIGTERM', () => {
+      app.quit();
+    });
+  }
 }
