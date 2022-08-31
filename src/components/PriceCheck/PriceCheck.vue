@@ -41,7 +41,7 @@
     </div>
   </div>
 </template>
-<script setup>
+<script setup lang="ts">
 import { ipcRenderer } from 'electron'
 import { ref, computed, markRaw, nextTick, } from 'vue'
 import { range } from 'lodash-es'

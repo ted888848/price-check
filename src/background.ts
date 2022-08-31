@@ -26,7 +26,7 @@ app.on('ready', async () => {
   setupTray()
   try {
     await checkForUpdate()
-  } catch (error) {
+  } catch (error: any) {
     dialog.showMessageBox({
       title: '讀取API資料錯誤',
       message: '請稍後重新讀取API資料',
@@ -44,7 +44,7 @@ app.on('ready', async () => {
       return {
         status: true 
       }
-    } catch (error) {
+    } catch (error: any) {
       dialog.showMessageBox({
         title: '讀取API資料錯誤',
         message: '請稍後重新讀取API資料',

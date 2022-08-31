@@ -11,7 +11,7 @@
     <SettingWindow v-if="settingWindowShow" @close-setting-window="closeSettingWindow" />
   </div>
 </template>
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue';
 import { ipcRenderer } from 'electron';
 import IPC from '@/ipc/ipcChannel';

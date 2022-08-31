@@ -230,7 +230,7 @@
     API次數限制 {{ rateTimeLimit.second }} 秒後再回來
   </span>
 </template>
-<script setup>
+<script setup lang="ts">
 import { maxBy } from 'lodash-es'
 import { computed, ref, nextTick } from 'vue'
 import { getSearchJSON, searchItem, fetchItem, getIsCounting, searchExchange, selectOptions } from '@/web/tradeSide'

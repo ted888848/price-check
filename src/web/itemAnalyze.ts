@@ -2,13 +2,14 @@ import { ipcRenderer } from 'electron'
 import IPC from '@/ipc/ipcChannel'
 import { APIitems, APImods } from './APIdata'
 import { cloneDeep } from 'lodash-es'
+import { itemInterface } from './interface'
 
 const PARSE_SECTION_FAIL = 0, PARSE_SECTION_SUCC = 1, PARSE_SECTION_SKIP = 2, PARSE_ITEM_SKIP = 3
-let itemParsedSample = {
+let itemParsedSample: itemInterface = {
   type: undefined,
   baseType: undefined,
   name: undefined,
-  uniques: undefined,
+  uniques: [],
   raritySearch: undefined,
   rarity: undefined,
   itemLevel: undefined,

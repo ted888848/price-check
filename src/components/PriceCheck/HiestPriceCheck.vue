@@ -71,7 +71,7 @@
   <span v-if="rateTimeLimit.flag" class="text-white bg-red-600 text-xl text-center my-2 hover:cursor-default">API次數限制
     {{ rateTimeLimit.second }} 秒後再回來 </span>
 </template>
-<script setup>
+<script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { maxBy } from 'lodash-es'
 import { getDefaultSearchJSON, searchItem, fetchItem, getIsCounting, selectOptions } from '@/web/tradeSide'
