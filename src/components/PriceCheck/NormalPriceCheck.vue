@@ -1,13 +1,13 @@
 <template>
   <div class=" text-xl text-white my-1 text-center"
-       @click="item.type.searchByType = !item.type.searchByType && item.type.option">
+       @click="item.type.searchByType = Boolean(!item.type.searchByType && item.type.option)">
     <span v-if="item.name" class="mr-3">{{ item.name }}</span>
     <span :class="{ 'text-red-500': item.type.searchByType }">{{ item.baseType }}</span>
   </div>
   <div v-if="item.type.text" class="text-base text-white text-center" :class="{ 'text-3xl': item.type.searchByType }">
     <span>{{ item.type.text }}</span>
   </div>
-  <VSelect v-if="item.undefinedUnqiue && item.uniques !== []" v-model="item.name" class="text-sm style-chooser"
+  <VSelect v-if="undefinedUnqiue && item.uniques !== []" v-model="item.name" class="text-sm style-chooser"
            :options="item.uniques" label="name" :reduce="ele => ele.name" />
   <div class="mx-0  bg-blue-900 grid grid-cols-3">
     <div class="flex p-2 items-center justify-center">
@@ -235,12 +235,18 @@ import { maxBy } from 'lodash-es'
 import { computed, ref, nextTick } from 'vue'
 import { getSearchJSON, searchItem, fetchItem, getIsCounting, searchExchange, selectOptions } from '@/web/tradeSide'
 import { APIStatic } from '@/web/APIdata'
+import { ItemInterface } from '@/web/interface';
 
-const props = defineProps(['itemProp', 'leagueSelect', 'divineToChaos', 'isOverflow'])
+const props = defineProps<{
+  itemProp: ItemInterface
+  leagueSelect: string
+  divineToChaos: number
+  isOverflow: ()=>void
+}>()
 const { rateTimeLimit } = getIsCounting()
 const item = ref(props.itemProp)
 if (process.env.NODE_ENV === 'development') console.log(item.value)
-item.value.undefinedUnqiue = item.value.isIdentify === false && item.value.raritySearch.label === '傳奇'
+const undefinedUnqiue = item.value.isIdentify === false && item.value.raritySearch.label === '傳奇'
 
 const {
   generalOption, gemAltQOptions, influencesOptions, elderMapOptions,

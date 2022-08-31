@@ -1,59 +1,57 @@
-export interface itemInterface{
-  baseType: string | undefined
+interface ItemMod{
+  id: string
+  text: string[] | string
+  type: string
+  value?: {
+    min?: number
+    max?: number
+  }
+  disable: boolean
+}
+export interface ItemInterface{
+  baseType: string
   type: {
     text: string
-    option: string
+    option?: string
     searchByType: boolean
-  } | undefined
-  name: string | undefined
-  uniques: []
+  }
+  name?: string
+  uniques?: UniquesInterface[]
   raritySearch: {
     id: string | undefined
     label: string
-  } | undefined
-  rarity: string | undefined
+  }
+  rarity?: string
   itemLevel: {
-    min: number | undefined
-    max: number | undefined
+    min?: number
+    max?: number
     search: boolean
-  } | undefined
+  }
   isWeaponOrArmor: boolean
-  isCorrupt: boolean | undefined
-  isIdentify: boolean | undefined
+  isCorrupt?: boolean
+  isIdentify?: boolean
   quality: {
-    min: number | undefined
-    max: number | undefined
-    search: boolean | undefined
+    min?: number
+    max?: number
+    search: boolean
   }
-  enchant: Array<{
-    id: string
-  }>
-}
-let itemParsedSample: itemInterface = {
-  type: undefined,
-  baseType: undefined,
-  name: undefined,
-  uniques: [],
-  raritySearch: undefined,
-  rarity: undefined,
-  itemLevel: undefined,
-  isWeaponOrArmor: false,
-  isCorrupt: false,
-  isIdentify: undefined,
-  quality: {
-    min: undefined, max: undefined, search: false 
-  },
-  enchant: [],
-  implicit: [],
-  explicit: [],
-  fractured: [],
-  crafted: [],
-  pseudo: [],
-  temple: [],
-  influences: [],
-  autoSearch: false,
-  searchTwoWeekOffline: false,
+  enchant?: ItemMod[]
+  implicit?: ItemMod[]
+  explicit?: ItemMod[]
+  fractured?: ItemMod[]
+  crafted?: ItemMod[]
+  pseudo?: ItemMod[]
+  temple?: ItemMod[]
+  influences?: ItemMod[]
+  autoSearch: boolean
+  searchTwoWeekOffline: boolean
   searchExchange: {
-    option: false, have: 'chaos' 
+    option: boolean
+    have: 'chaos' | 'divine'
   }
+}
+
+export interface UniquesInterface{
+  text: string
+  name: string
 }

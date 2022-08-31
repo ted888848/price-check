@@ -51,17 +51,18 @@ import { getDivineToChaos } from '@/web/tradeSide'
 import { leagues, currencyImageUrl } from '@/web/APIdata'
 import NormalPriceCheck from './NormalPriceCheck.vue'
 import HiestPriceCheck from './HiestPriceCheck.vue'
+import { ItemInterface } from '@/web/interface'
 
 const isWebrViewOpen = ref(false)
-const webView = ref(null)
+const webView = ref<HTMLIFrameElement | null>(null)
 const priceCheckPos = ref({
   right: '0px',
 })
-function openWebView(url) {
+function openWebView(url: string) {
   priceCheckPos.value.right = '0px'
   isWebrViewOpen.value = true
   nextTick(() => {
-    webView.value.src = encodeURI(`https://web.poe.garena.tw/trade/${url}`)
+    webView.value!.src = encodeURI(`https://web.poe.garena.tw/trade/${url}`)
   })
 }
 function closeWebView() {
@@ -93,7 +94,7 @@ const priceCheckOptions = [{
   label: '劫盜查價',
   value: markRaw(HiestPriceCheck)
 }]
-const item = ref(null)
+const item = ref<ItemInterface | null>(null)
 
 const divineToChaos = ref(0)
 let divineImage = 'https://web.poe.garena.tw' + currencyImageUrl.find(ele => ele.id === 'divine')?.image
