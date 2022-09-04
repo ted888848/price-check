@@ -1,14 +1,17 @@
-interface ItemMod{
+export interface IItemStat{
   id: string
   text: string[] | string
-  type: string
-  value?: {
+  type?: string
+  min?: number
+  max?: number
+  disabled?: boolean
+  value?: { 
     min?: number
     max?: number
+    option?: number
   }
-  disable: boolean
 }
-export interface ItemInterface{
+export interface IItem{
   baseType: string
   type: {
     text: string
@@ -16,42 +19,81 @@ export interface ItemInterface{
     searchByType: boolean
   }
   name?: string
-  uniques?: UniquesInterface[]
+  uniques?: IItemUniques[]
   raritySearch: {
     id: string | undefined
     label: string
   }
-  rarity?: string
-  itemLevel: {
+  rarity: string
+  itemLevel?: {
     min?: number
     max?: number
     search: boolean
   }
+  mapTier?: {
+    min?: number
+    max?: number
+    search: boolean
+  }
+  gemLevel?: {
+    min?: number
+    max?: number
+    search: boolean
+  }
+  altQType?: number
+  requireLevel?: number
+  requireInt?: number
+  requireStr?: number
+  requireDex?: number
   isWeaponOrArmor: boolean
   isCorrupt?: boolean
   isIdentify?: boolean
+  isFractured?: boolean
+  isSynthesised?: boolean
+  blightedMap?: boolean
+  UberBlightedMap?: boolean
   quality: {
     min?: number
     max?: number
     search: boolean
   }
-  enchant?: ItemMod[]
-  implicit?: ItemMod[]
-  explicit?: ItemMod[]
-  fractured?: ItemMod[]
-  crafted?: ItemMod[]
-  pseudo?: ItemMod[]
-  temple?: ItemMod[]
-  influences?: ItemMod[]
+  phyDamage?: {
+    min: number
+    max: number
+  }
+  eleDamage?: {
+    min: number
+    max: number
+  }
+  pDPS?: number
+  eDPS?: number
+  evasion?: number
+  armour?: number
+  energyShield?: number
+  critChance?: number
+  attackSpeed?: number
+  weaponArea?: number
+  enchant?: IItemStat[]
+  implicit?: IItemStat[]
+  explicit?: IItemStat[]
+  fractured?: IItemStat[]
+  crafted?: IItemStat[]
+  pseudo?: IItemStat[]
+  temple?: IItemStat[]
+  influences?: IItemStat[]
+  elderMap?: IItemStat
+  conquerorMap?: IItemStat
   autoSearch: boolean
   searchTwoWeekOffline: boolean
   searchExchange: {
     option: boolean
     have: 'chaos' | 'divine'
   }
+  search6L?: boolean
+  [key: string]: any
 }
 
-export interface UniquesInterface{
+export interface IItemUniques{
   text: string
   name: string
 }

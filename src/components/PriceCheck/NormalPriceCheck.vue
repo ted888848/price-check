@@ -7,24 +7,24 @@
   <div v-if="item.type.text" class="text-base text-white text-center" :class="{ 'text-3xl': item.type.searchByType }">
     <span>{{ item.type.text }}</span>
   </div>
-  <VSelect v-if="undefinedUnqiue && item.uniques !== []" v-model="item.name" class="text-sm style-chooser"
-           :options="item.uniques" label="name" :reduce="ele => ele.name" />
+  <VSelect v-if="undefinedUnqiue && item.uniques.length > 0" v-model="item.name" class="text-sm style-chooser"
+           :options="item.uniques" label="name" :reduce="(ele: any) => ele.name" />
   <div class="mx-0  bg-blue-900 grid grid-cols-3">
     <div class="flex p-2 items-center justify-center">
       <span class="mx-1 text-white hover:cursor-default">汙染:</span>
       <VSelect v-model="item.isCorrupt" class="text-sm style-chooser flex-grow" :options="generalOption" label="label"
-               :reduce="ele => ele.value" :clearable="false" :searchable="false" />
+               :reduce="(ele: any) => ele.value" :clearable="false" :searchable="false" />
     </div>
     <div>
       <div v-if="!item.type.text.endsWith('技能寶石')" class="flex p-2 items-center justify-center">
         <span class="mx-1 text-white hover:cursor-default">已鑑定:</span>
         <VSelect v-model="item.isIdentify" class="text-sm style-chooser flex-grow" :options="generalOption"
-                 label="label" :reduce="ele => ele.value" :clearable="false" :searchable="false" />
+                 label="label" :reduce="(ele: any) => ele.value" :clearable="false" :searchable="false" />
       </div>
       <div v-else class="flex p-2 items-center justify-center">
         <span class="mx-1 text-white hover:cursor-default">相異品:</span>
         <VSelect v-model="item.altQType" class="text-sm style-chooser flex-grow" :options="gemAltQOptions" label="label"
-                 :reduce="ele => ele.value" :clearable="false" :searchable="false" />
+                 :reduce="(ele: any) => ele.value" :clearable="false" :searchable="false" />
       </div>
     </div>
     <div class="flex items-center justify-center">
@@ -34,9 +34,9 @@
               @click.self="item.gemLevel.search = !item.gemLevel.search">寶石等級:</span>
         <input v-model.number="item.gemLevel.min"
                class="w-8 appearance-none rounded bg-gray-400 text-center mx-1 font-bold" type="number"
-               :disabled="!item.gemLevel.search" @dblclick="item.gemLevel.min = ''">
+               :disabled="!item.gemLevel.search" @dblclick="item.gemLevel.min = undefined">
         <input v-model.number="item.gemLevel.max" class="w-8 appearance-none rounded bg-gray-400 text-center font-bold"
-               type="number" :disabled="!item.gemLevel.search" @dblclick="item.gemLevel.max = ''">
+               type="number" :disabled="!item.gemLevel.search" @dblclick="item.gemLevel.max = undefined">
       </div>
       <div v-else-if="item.mapTier" class="flex p-2 items-center justify-center"
            :class="{ 'opacity-30': !item.mapTier.search }" @click.self="item.mapTier.search = !item.mapTier.search">
@@ -44,9 +44,9 @@
               @click.self="item.mapTier.search = !item.mapTier.search">地圖階級:</span>
         <input v-model.number="item.mapTier.min"
                class="w-8 appearance-none rounded bg-gray-400 text-center mx-1 font-bold" type="number"
-               :disabled="!item.mapTier.search" @dblclick="item.mapTier.min = ''">
+               :disabled="!item.mapTier.search" @dblclick="item.mapTier.min = undefined">
         <input v-model.number="item.mapTier.max" class="w-8 appearance-none rounded bg-gray-400 text-center font-bold"
-               type="number" :disabled="!item.mapTier.search" @dblclick="item.mapTier.max = ''">
+               type="number" :disabled="!item.mapTier.search" @dblclick="item.mapTier.max = undefined">
       </div>
       <div v-else-if="item.itemLevel" class="flex p-2 items-center justify-center "
            :class="{ 'opacity-30': !item.itemLevel.search }" @click.self="item.itemLevel.search = !item.itemLevel.search">
@@ -54,9 +54,9 @@
               @click.self="item.itemLevel.search = !item.itemLevel.search">物品等級:</span>
         <input v-model.number="item.itemLevel.min"
                class="w-8 appearance-none rounded bg-gray-400 text-center mx-1 font-bold" type="number"
-               :disabled="!item.itemLevel.search" @dblclick.stop="item.itemLevel.min = ''">
+               :disabled="!item.itemLevel.search" @dblclick.stop="item.itemLevel.min = undefined">
         <input v-model.number="item.itemLevel.max" class="w-8 appearance-none rounded bg-gray-400 text-center font-bold"
-               type="number" :disabled="!item.itemLevel.search" @dblclick="item.itemLevel.max = ''">
+               type="number" :disabled="!item.itemLevel.search" @dblclick="item.itemLevel.max = undefined">
       </div>
       <div v-else-if="item.searchExchange.option"
            class="flex p-2 items-center justify-center hover:cursor-pointer flex-grow"
@@ -73,19 +73,19 @@
             @click.self="item.quality.search = !item.quality.search">品質:</span>
       <input v-model.number="item.quality.min"
              class="w-8 appearance-none rounded bg-gray-400 text-center mx-1 font-bold" type="number"
-             :disabled="!item.quality.search" @dblclick="item.quality.min = ''">
+             :disabled="!item.quality.search" @dblclick="item.quality.min = undefined">
       <input v-model.number="item.quality.max" class="w-8 appearance-none rounded bg-gray-400 text-center font-bold"
-             type="number" :disabled="!item.quality.search" @dblclick="item.quality.max = ''">
+             type="number" :disabled="!item.quality.search" @dblclick="item.quality.max = undefined">
     </div>
     <div v-if="item.elderMap" class="flex col-span-2 items-center justify-center">
       <span class="mx-1 text-white hover:cursor-default">尊師守衛:</span>
       <VSelect v-model="item.elderMap.value.option" class="text-sm style-chooser style-chooser-inf "
-               :options="elderMapOptions" :reduce="ele => ele.value" label="label" :searchable="false" :clearable="false" />
+               :options="elderMapOptions" :reduce="(ele: any) => ele.value" label="label" :searchable="false" :clearable="false" />
     </div>
     <div v-if="item.conquerorMap" class="flex col-span-2 items-center justify-center">
       <span class="mx-1 text-white hover:cursor-default">征服者:</span>
       <VSelect v-model="item.conquerorMap.value.option" class="text-sm style-chooser style-chooser-inf "
-               :options="conquerorMapOptions" :reduce="ele => ele.value" label="label" :searchable="false"
+               :options="conquerorMapOptions" :reduce="(ele: any) => ele.value" label="label" :searchable="false"
                :clearable="false" />
     </div>
     <div v-else-if="item.blightedMap" class="flex items-center justify-center">
@@ -205,7 +205,7 @@
       </tr>
     </thead>
     <tbody class="">
-      <tr v-for="ele in fetchResultSorted" :key="ele" class=" border-b-2 border-gray-600"
+      <tr v-for="ele in fetchResultSorted" :key="`${ele.price}|${ele.currency}`" class=" border-b-2 border-gray-600"
           :class="{ 'text-yellow-400 text-xl bg-indigo-700 font-bold': ele.amount === maxAmount.amount }">
         <td v-if="item.searchExchange.option" class="flex justify-center items-center">
           <img :src="ele.image" class=" w-7 h-7">{{ ele.price }}<img :src="currency2Img" class=" w-7 h-7">
@@ -235,13 +235,13 @@ import { maxBy } from 'lodash-es'
 import { computed, ref, nextTick } from 'vue'
 import { getSearchJSON, searchItem, fetchItem, getIsCounting, searchExchange, selectOptions } from '@/web/tradeSide'
 import { APIStatic } from '@/web/APIdata'
-import { ItemInterface } from '@/web/interface';
-
+import type { IItem } from '@/web/interface'
+import type { ISearchResult, IExchangeResult, IFetchResult } from '@/web/tradeSide'
 const props = defineProps<{
-  itemProp: ItemInterface
+  itemProp: IItem
   leagueSelect: string
   divineToChaos: number
-  isOverflow: ()=>void
+  isOverflow: () => boolean
 }>()
 const { rateTimeLimit } = getIsCounting()
 const item = ref(props.itemProp)
@@ -252,7 +252,7 @@ const {
   generalOption, gemAltQOptions, influencesOptions, elderMapOptions,
   conquerorMapOptions, rarityOptions 
 } = selectOptions
-function modTextColor(type) {
+function modTextColor(type: string) {
   switch (type) {
     case '固定':
       return '#346beb'
@@ -268,16 +268,16 @@ function modTextColor(type) {
   return 'white'
 }
 
-const searchResult = ref({
+const searchResult = ref<ISearchResult | IExchangeResult>({
   result: [],
-  err: false,
   totalCount: 0,
   nowFetched: 0,
   searchID: {
     ID: '', type: 'search' 
-  } 
+  },
+  err: false
 })
-const fetchResult = ref([])
+const fetchResult = ref<IFetchResult[]>([])
 const isSearching = ref(false)
 const modTbodyToggle = ref(true)
 const currency2Img = ref('')
@@ -285,12 +285,12 @@ const currency2Img = ref('')
 function resetSearchData() {
   searchResult.value = {
     result: [],
-    err: false,
     totalCount: 0,
     nowFetched: 0,
     searchID: {
       ID: '', type: 'search' 
-    } 
+    },
+    err: false
   }
   fetchResult.value = []
   isSearching.value = false
@@ -302,7 +302,7 @@ async function fetchMore() {
   let fetchStartPos = searchResult.value.nowFetched
   let fetchEndPos = (searchResult.value.nowFetched + 20) <= (searchResult.value.totalCount) ? (searchResult.value.nowFetched + 20) : (searchResult.value.totalCount)
   searchResult.value.nowFetched = fetchEndPos
-  let fetchList = searchResult.value.result.slice(fetchStartPos, fetchEndPos)
+  let fetchList = searchResult.value.result.slice(fetchStartPos, fetchEndPos) as string[]
   fetchResult.value = await fetchItem(fetchList, searchResult.value.searchID.ID, fetchResult.value)
   isSearching.value = false
   nextTick(() => { modTbodyToggle.value = !props.isOverflow() })
@@ -314,7 +314,7 @@ async function searchBtn() {
   if (item.value.searchExchange.option) {
     searchResult.value = await searchExchange(item.value, props.leagueSelect)
     if (!searchResult.value.err) {
-      currency2Img.value = `https://web.poe.garena.tw${APIStatic.find(ele => ele.id === searchResult.value.currency2).image}`
+      currency2Img.value = `https://web.poe.garena.tw${APIStatic.find(ele => ele.id === (searchResult.value as IExchangeResult).currency2).image}`
       fetchResult.value = searchResult.value.result
     }
   }

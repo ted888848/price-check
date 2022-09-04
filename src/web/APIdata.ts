@@ -1,4 +1,4 @@
-import { UniquesInterface } from './interface';
+import { IItemUniques } from './interface';
 import Store from 'electron-store'
 export const baseURL = 'https://web.poe.garena.tw/api/'
 export const store = new Store()
@@ -11,39 +11,48 @@ interface HiestRewardInterface{
 }
 export let hiestReward: HiestRewardInterface[] = []
 
-interface ItemsInterface{
+interface IAPIItemsItem{
   id: string
   label: string
   entries: {
     type: string
     text: string
-    unique: UniquesInterface[]
+    unique: IItemUniques[]
   }[]
 }
-interface APIitemsInterface{
-  accessories: ItemsInterface
-  armour: ItemsInterface,
-  cards: ItemsInterface,
-  currency: ItemsInterface,
-  flasks: ItemsInterface,
-  gems: ItemsInterface,
-  jewels: ItemsInterface,
-  maps: ItemsInterface,
-  weapons: ItemsInterface,
-  watchstones: ItemsInterface,
-  heistequipment: ItemsInterface,
-  heistmission: ItemsInterface,
-  logbook: ItemsInterface,
-  hiestReward: HiestRewardInterface[]
+export interface IAPIitems{
+  accessories: IAPIItemsItem
+  armour: IAPIItemsItem,
+  cards: IAPIItemsItem,
+  currency: IAPIItemsItem,
+  flasks: IAPIItemsItem,
+  gems: IAPIItemsItem,
+  jewels: IAPIItemsItem,
+  maps: IAPIItemsItem,
+  weapons: IAPIItemsItem,
+  watchstones: IAPIItemsItem,
+  heistequipment: IAPIItemsItem,
+  heistmission: IAPIItemsItem,
+  logbook: IAPIItemsItem
 }
-export let APIitems: APIitemsInterface
+export let APIitems: IAPIitems
 
-interface ModsInterface{
+interface IAPIModsMod{
   label: string
+  type: string
   entries: {
     id: string
     text: string
-    type?: string
+    option?: {
+      options: {
+        id: number
+        text: string
+      }[]
+    }
+  }[]
+  mutiLines?: {
+    id: string
+    text: string[]
     option?: {
       options: {
         id: number
@@ -52,43 +61,31 @@ interface ModsInterface{
     }
   }[]
 }
-interface APIModsInterface{
-  pseudo: ModsInterface,
-  explicit: ModsInterface,
-  implicit: ModsInterface,
-  fractured: ModsInterface,
-  enchant: ModsInterface,
-  crafted: ModsInterface,
-  veiled: ModsInterface,
-  temple: {
-    lebel: string
-		entries: {
-			id: string
-			text: string
-			option: {
-        options: {
-					id: 1 | 2,
-					text: '開啟房間' | '關閉房間'
-				}[]
-			}
-		}[]
-  },
-  clusterJewel: ModsInterface,
-  forbiddenJewel: ModsInterface
+export interface IAPIMods{
+  pseudo: IAPIModsMod
+  explicit: IAPIModsMod
+  implicit: IAPIModsMod
+  fractured: IAPIModsMod
+  enchant: IAPIModsMod
+  crafted: IAPIModsMod
+  temple: IAPIModsMod
+  clusterJewel: IAPIModsMod
+  forbiddenJewel: IAPIModsMod
 }
-export let APImods: APIModsInterface
-interface StaticInterface{
+export let APImods: IAPIMods
+export interface IStatic{
   id: string
   text: string
   image: string
 }
-export let APIStatic: StaticInterface[]
-export let currencyImageUrl: StaticInterface[]
+export let APIStatic: IStatic[]
+export let currencyImageUrl: IStatic[]
+
 export function loadAPIdata() {
   leagues = store.get('Leagues') as string[]
-  APIitems = store.get('APIitems') as APIitemsInterface
-  hiestReward = APIitems.hiestReward
-  APIStatic = store.get('APIStatic') as StaticInterface[]
-  APImods = store.get('APImods') as APIModsInterface
-  currencyImageUrl = store.get('currencyImageUrl') as StaticInterface[]
+  APIitems = store.get('APIitems') as IAPIitems
+  hiestReward = store.get('hiestReward') as HiestRewardInterface[]
+  APIStatic = store.get('APIStatic') as IStatic[]
+  APImods = store.get('APImods') as IAPIMods
+  currencyImageUrl = store.get('currencyImageUrl') as IStatic[]
 }

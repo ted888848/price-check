@@ -5,8 +5,8 @@ import { PoeWindow } from './POEWindow'
 import { overlayEvent, priceCheckEvent } from '@/ipc/ipcHandler'
 import IPC from '@/ipc/ipcChannel'
 import path from 'path';
-export let win;
-let isOverlayOpen
+export let win: BrowserWindow
+let isOverlayOpen: boolean
 export async function createWindow() {
   win = new BrowserWindow({
     width: 800,
@@ -53,13 +53,13 @@ export async function createWindow() {
   })
 }
 
-function handlePoeActive(isActive) {
+function handlePoeActive(isActive: boolean) {
   if (isOverlayOpen) forceOverlay()
   else if (isActive) {
     win.webContents.send(IPC.POE_ACTIVE)
   }
 }
-function handleBIEvent(event, input) {
+function handleBIEvent(event: Electron.Event, input: Electron.Input) {
   if (input.type !== 'keyDown') return
   let { code, control, alt, shift } = input
   if (code.indexOf('Key') !== -1) code = code.substring(code.indexOf('Key') + 3)
@@ -117,7 +117,7 @@ export function toggleOverlay() {
   overlayEvent()
 }
 
-export function togglePriceCheck(clip = null) {
+export function togglePriceCheck(clip: string | null = null) {
   priceCheckEvent(clip, PoeWindow.priceCheckPos)
   forceOverlay()
 }

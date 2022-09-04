@@ -37,7 +37,7 @@ function unRegistShortcut() {
   globalShortcut.unregisterAll()
 }
 let isClipStored = true
-function pasteTextToChat(text, moveToFront) {
+function pasteTextToChat(text: string, moveToFront?: boolean) {
   if (!isClipStored) {
     return
   }

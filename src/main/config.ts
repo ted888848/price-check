@@ -22,7 +22,7 @@ export function setupConfig() {
   setCookie()
 }
 function setCookie() {
-  let poesessid = config.get('config.POESESSID', '')
+  let poesessid = config.get('config.POESESSID', '') as string
   if (poesessid) {
     session.defaultSession.cookies.set({
       url: 'https://web.poe.garena.tw',

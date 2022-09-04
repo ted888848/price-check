@@ -3,7 +3,7 @@ import { win } from './overlayWindow'
 import { checkForUpdate } from './setupAPI'
 import path from 'path'
 import { updateState } from './setupAPI'
-let tray
+let tray: Tray
 export function buildTray() {
   const trayMenu = Menu.buildFromTemplate([
     {
@@ -39,7 +39,6 @@ export function buildTray() {
 }
 
 export function setupTray() {
-  // eslint-disable-next-line no-undef
   tray = new Tray(path.join(__static, 'MavenOrb.ico'))
   buildTray()
 }

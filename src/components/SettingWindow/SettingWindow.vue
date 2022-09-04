@@ -39,9 +39,8 @@
 </template>
 <script setup lang="ts">
 import { ipcRenderer } from 'electron'
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, unref } from 'vue'
 import IPC from '@/ipc/ipcChannel'
-import { cloneDeep } from 'lodash-es';
 const isLoading = ref(true)
 const config = ref(null)
 onMounted(() => {
@@ -54,7 +53,7 @@ onMounted(() => {
 })
 const emit = defineEmits(['close-setting-window'])
 function save() {
-  ipcRenderer.send(IPC.SET_CONFIG, cloneDeep(config.value))
+  ipcRenderer.send(IPC.SET_CONFIG, unref(config))
   emit('close-setting-window')
 }
 function cancel() {

@@ -9,7 +9,7 @@
         <div class="flex justify-start mr-auto ml-1 flex-1">
           <VSelect v-model="currentPriceCheck" class="text-sm style-chooser style-chooser-inf text-center"
                    :options="priceCheckOptions" label="label" :searchable="false" :clearable="false"
-                   :reduce="option => option.value" />
+                   :reduce="(option: any) => option.value" />
         </div>
         <div class="flex justify-center flex-1">
           <div class="relative exaltedImg ">
@@ -51,7 +51,7 @@ import { getDivineToChaos } from '@/web/tradeSide'
 import { leagues, currencyImageUrl } from '@/web/APIdata'
 import NormalPriceCheck from './NormalPriceCheck.vue'
 import HiestPriceCheck from './HiestPriceCheck.vue'
-import { ItemInterface } from '@/web/interface'
+import { IItem } from '@/web/interface'
 
 const isWebrViewOpen = ref(false)
 const webView = ref<HTMLIFrameElement | null>(null)
@@ -94,7 +94,7 @@ const priceCheckOptions = [{
   label: '劫盜查價',
   value: markRaw(HiestPriceCheck)
 }]
-const item = ref<ItemInterface | null>(null)
+const item = ref<IItem | null>(null)
 
 const divineToChaos = ref(0)
 let divineImage = 'https://web.poe.garena.tw' + currencyImageUrl.find(ele => ele.id === 'divine')?.image
