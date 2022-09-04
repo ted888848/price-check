@@ -324,7 +324,7 @@ function getStrReg(section, type) {
   return retArr
 }
 function parseMutilineMod(regSection, section, type) {
-  if (!APImods[type].mutiLines) return
+  if (!APImods[type].mutiLines) return []
   let tempArr = []
   for (let i = 0; i < regSection.length; ++i) {
     let matchMod = APImods[type].mutiLines.filter(s => regSection[i].test(s.text[0]))

@@ -157,12 +157,12 @@
           </div>
         </td>
         <td>
-          <input v-if="mod.value" v-model.number="mod.value.min" type="number"
+          <input v-if="mod.value && !mod.value.option" v-model.number="mod.value.min" type="number"
                  class="w-8 appearance-none rounded bg-gray-400 text-center text-black font-bold"
                  @dblclick="delete mod.value.min">
         </td>
         <td>
-          <input v-if="mod.value" v-model.number="mod.value.max" type="number"
+          <input v-if="mod.value && !mod.value.option" v-model.number="mod.value.max" type="number"
                  class="w-8 appearance-none rounded bg-gray-400 text-center text-black font-bold"
                  @dblclick="delete mod.value.max">
         </td>
