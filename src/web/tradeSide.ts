@@ -4,7 +4,6 @@ import { ref } from 'vue'
 import { isUndefined, isNumber, countBy } from 'lodash-es'
 import type { AxiosResponseHeaders } from 'axios'
 import type { IItem, IItemStat } from './interface'
-import { number } from 'yargs'
 export interface ISearchJson {
   query:{
     type?: string
