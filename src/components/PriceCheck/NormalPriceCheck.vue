@@ -34,9 +34,9 @@
               @click.self="item.gemLevel.search = !item.gemLevel.search">寶石等級:</span>
         <input v-model.number="item.gemLevel.min"
                class="w-8 appearance-none rounded bg-gray-400 text-center mx-1 font-bold" type="number"
-               :disabled="!item.gemLevel.search" @dblclick="item.gemLevel.min = ''">
+               :disabled="!item.gemLevel.search" @dblclick="delete item.gemLevel.min">
         <input v-model.number="item.gemLevel.max" class="w-8 appearance-none rounded bg-gray-400 text-center font-bold"
-               type="number" :disabled="!item.gemLevel.search" @dblclick="item.gemLevel.max = ''">
+               type="number" :disabled="!item.gemLevel.search" @dblclick="delete item.gemLevel.max">
       </div>
       <div v-else-if="item.mapTier" class="flex p-2 items-center justify-center"
            :class="{ 'opacity-30': !item.mapTier.search }" @click.self="item.mapTier.search = !item.mapTier.search">
@@ -44,9 +44,9 @@
               @click.self="item.mapTier.search = !item.mapTier.search">地圖階級:</span>
         <input v-model.number="item.mapTier.min"
                class="w-8 appearance-none rounded bg-gray-400 text-center mx-1 font-bold" type="number"
-               :disabled="!item.mapTier.search" @dblclick="item.mapTier.min = ''">
+               :disabled="!item.mapTier.search" @dblclick="delete item.mapTier.min">
         <input v-model.number="item.mapTier.max" class="w-8 appearance-none rounded bg-gray-400 text-center font-bold"
-               type="number" :disabled="!item.mapTier.search" @dblclick="item.mapTier.max = ''">
+               type="number" :disabled="!item.mapTier.search" @dblclick="delete item.mapTier.max">
       </div>
       <div v-else-if="item.itemLevel" class="flex p-2 items-center justify-center "
            :class="{ 'opacity-30': !item.itemLevel.search }" @click.self="item.itemLevel.search = !item.itemLevel.search">
@@ -54,9 +54,9 @@
               @click.self="item.itemLevel.search = !item.itemLevel.search">物品等級:</span>
         <input v-model.number="item.itemLevel.min"
                class="w-8 appearance-none rounded bg-gray-400 text-center mx-1 font-bold" type="number"
-               :disabled="!item.itemLevel.search" @dblclick.stop="item.itemLevel.min = ''">
+               :disabled="!item.itemLevel.search" @dblclick="delete item.itemLevel.min">
         <input v-model.number="item.itemLevel.max" class="w-8 appearance-none rounded bg-gray-400 text-center font-bold"
-               type="number" :disabled="!item.itemLevel.search" @dblclick="item.itemLevel.max = ''">
+               type="number" :disabled="!item.itemLevel.search" @dblclick="delete item.itemLevel.max">
       </div>
       <div v-else-if="item.searchExchange.option"
            class="flex p-2 items-center justify-center hover:cursor-pointer flex-grow"
@@ -73,9 +73,9 @@
             @click.self="item.quality.search = !item.quality.search">品質:</span>
       <input v-model.number="item.quality.min"
              class="w-8 appearance-none rounded bg-gray-400 text-center mx-1 font-bold" type="number"
-             :disabled="!item.quality.search" @dblclick="item.quality.min = ''">
+             :disabled="!item.quality.search" @dblclick="delete item.quality.min">
       <input v-model.number="item.quality.max" class="w-8 appearance-none rounded bg-gray-400 text-center font-bold"
-             type="number" :disabled="!item.quality.search" @dblclick="item.quality.max = ''">
+             type="number" :disabled="!item.quality.search" @dblclick="delete item.quality.max">
     </div>
     <div v-if="item.elderMap" class="flex col-span-2 items-center justify-center">
       <span class="mx-1 text-white hover:cursor-default">尊師守衛:</span>
