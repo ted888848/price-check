@@ -73,11 +73,11 @@ export interface IItem{
   critChance?: number
   attackSpeed?: number
   weaponArea?: number
-  enchant?: IItemStat[]
-  implicit?: IItemStat[]
-  explicit?: IItemStat[]
-  fractured?: IItemStat[]
-  crafted?: IItemStat[]
+  enchant: IItemStat[]
+  implicit: IItemStat[]
+  explicit: IItemStat[]
+  fractured: IItemStat[]
+  crafted: IItemStat[]
   pseudo?: IItemStat[]
   temple?: IItemStat[]
   influences?: IItemStat[]
