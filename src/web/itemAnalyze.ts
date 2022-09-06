@@ -47,6 +47,11 @@ export function itemAnalyze(item: string) {
       min: 0,
       search: false
     },
+    enchant: [],
+    implicit: [],
+    explicit: [],
+    fractured: [],
+    crafted: [],
     isWeaponOrArmor: false,
     isCorrupt: false,
     quality: {
