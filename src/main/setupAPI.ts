@@ -31,7 +31,21 @@ function setupItemArray(itemArray: any[], hiestReward: any[]) {
   return itemBaseType
 }
 function setupAPIItems(itemsJson: any) {
-  let APIitems: IAPIitems
+  let APIitems: IAPIitems = {
+    accessories: undefined,
+    armour: undefined,
+    cards: undefined,
+    currency: undefined,
+    flasks: undefined,
+    gems: undefined,
+    jewels: undefined,
+    maps: undefined,
+    weapons: undefined,
+    watchstones: undefined,
+    heistequipment: undefined,
+    heistmission: undefined,
+    logbook: undefined
+  }
   let hiestReward: any = []
   itemsJson.result.forEach((itemGroup: any) => {
     switch (itemGroup.id) {
@@ -82,7 +96,17 @@ function checkNewline(statsGroup: any, type: string) {
   return undefined
 }
 function setupAPIMods(statsJson: any) {
-  let APImods: IAPIMods
+  let APImods: IAPIMods = {
+    pseudo: undefined,
+    explicit: undefined,
+    implicit: undefined,
+    fractured: undefined,
+    enchant: undefined,
+    crafted: undefined,
+    temple: undefined,
+    clusterJewel: undefined,
+    forbiddenJewel: undefined,
+  }
   statsJson.result.forEach((statsGroup: any) => {
     switch (statsGroup.label) {
       case '偽屬性':
@@ -180,7 +204,7 @@ function setupAPIMods(statsJson: any) {
   return APImods
 }
 function setupAPIStatic(data: any) {
-  let APIStatic: IStatic[]
+  let APIStatic: IStatic[] = []
   data.forEach((group: any) => {
     if (group.label?.match(/^地圖（(階級\d+|傳奇)）|命運卡$/)) return
     APIStatic = APIStatic.concat(cloneDeep(group.entries))

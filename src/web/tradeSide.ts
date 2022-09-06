@@ -204,7 +204,9 @@ export function getSearchJSON(item: IItem) {
   if (item.mapTier?.search) searchJSON.query.filters.map_filters.filters.map_tier = {
     min: item.mapTier.min, max: item.mapTier.max
   }
-  if (!isUndefined(item.type.option)) searchJSON.query.filters.type_filters.filters.category!.option = item.type.option
+  if (!isUndefined(item.type.option)) searchJSON.query.filters.type_filters.filters.category = {
+    option: item.type.option
+  }
   if (item.quality.search) searchJSON.query.filters.misc_filters.filters.quality = {
     min: item.quality.min, max: item.quality.max 
   }
@@ -227,14 +229,14 @@ export function getSearchJSON(item: IItem) {
     searchJSON.query.status.option = 'any'
   }
 
-  searchJSON.query.stats[0].filters.push(...(item.enchant!))
-  searchJSON.query.stats[0].filters.push(...(item.implicit!))
-  searchJSON.query.stats[0].filters.push(...(item.explicit!))
-  searchJSON.query.stats[0].filters.push(...(item.fractured!))
-  searchJSON.query.stats[0].filters.push(...(item.crafted!))
-  searchJSON.query.stats[0].filters.push(...(item.pseudo!))
-  searchJSON.query.stats[0].filters.push(...(item.temple!))
-  searchJSON.query.stats[0].filters.push(...(item.influences!))
+  searchJSON.query.stats[0].filters.push(...(item.enchant))
+  searchJSON.query.stats[0].filters.push(...(item.implicit))
+  searchJSON.query.stats[0].filters.push(...(item.explicit))
+  searchJSON.query.stats[0].filters.push(...(item.fractured))
+  searchJSON.query.stats[0].filters.push(...(item.crafted))
+  searchJSON.query.stats[0].filters.push(...(item.pseudo))
+  searchJSON.query.stats[0].filters.push(...(item.temple))
+  searchJSON.query.stats[0].filters.push(...(item.influences))
 
   if (!isUndefined(item.blightedMap)) searchJSON.query.filters.map_filters.filters.map_blighted = {
     option: true 
@@ -379,7 +381,7 @@ export async function searchItem(searchJson: ISearchJson, league: string) {
   }
 }
 export interface IFetchResult {
-  price: number
+  price: string | number
   currency: string
   amount: number
   image: string
@@ -456,7 +458,7 @@ export async function getDivineToChaos(league: string) {
   exchangeJSON.query.have = ['divine']
   exchangeJSON.query.want = ['chaos']
   let chaos = 0
-  await GGCapi.post(encodeURI(`trade/query/${league}`), JSON.stringify(exchangeJSON))
+  await GGCapi.post(encodeURI(`trade/exchange/${league}`), JSON.stringify(exchangeJSON))
     .then((response) => {
       parseRateTimeLimit(response.headers)
       return response.data
@@ -511,15 +513,12 @@ export async function searchExchange(item: IItem, league: string) {
   }
   exchangeJSON.query.have = [item.searchExchange.have]
   exchangeJSON.query.want = [APIStatic.find(e => e.text === item.baseType)?.id ?? '']
-  await GGCapi.post(encodeURI(`trade/query/${league}`), JSON.stringify(exchangeJSON))
+  await GGCapi.post(encodeURI(`trade/exchange/${league}`), JSON.stringify(exchangeJSON))
     .then((response) => {
       parseRateTimeLimit(response.headers)
       return response.data
     }).then((data) => {
-      exchangeResult.searchID = {
-        ID: data.id, type: 'exchange' 
-      }
-      exchangeResult.result = []
+      exchangeResult.searchID.ID = data.id
       exchangeResult.currency2 = exchangeJSON.query.want[0]
       for (let key in data.result) {
         tempResult.push(data.result[key].listing.offers[0].exchange.amount + '：' + data.result[key].listing.offers[0].item.amount + '|' + item.searchExchange.have)
@@ -541,9 +540,8 @@ export async function searchExchange(item: IItem, league: string) {
   let tempResultCountBy = countBy(tempResult)
   for (let key in tempResultCountBy) {
     let [price, currency] = key.split('|')
-    let numPrice = Number(price)
     exchangeResult.result.push({
-      price: numPrice,
+      price,
       currency,
       amount: tempResultCountBy[key],
       image: `https://web.poe.garena.tw${currencyImageUrl.find(ele => ele.id === currency)?.image}`

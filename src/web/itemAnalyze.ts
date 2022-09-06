@@ -5,7 +5,6 @@ import type { IAPIitems, IAPIMods } from './APIdata'
 import type { IItem, IItemUniques, IItemStat } from './interface'
 
 const PARSE_SECTION_FAIL = 0, PARSE_SECTION_SUCC = 1, PARSE_SECTION_SKIP = 2, PARSE_ITEM_SKIP = 3
-let itemParsed: IItem
 const parseFuns: ((section: string[]) => number) [] = [
   parseRequirement,
   parseSocket,
@@ -17,6 +16,7 @@ const parseFuns: ((section: string[]) => number) [] = [
   parseEnchantMod,
   parseExplicitMod,
 ]
+let itemParsed: IItem
 function findUnique(type: string, isFinded: { flag:boolean }): void {
   if (isFinded.flag) return null
   let temp: IItemUniques[] = []
@@ -44,18 +44,20 @@ export function itemAnalyze(item: string) {
     },
     rarity: '',
     itemLevel: {
-      min: 0,
       search: false
     },
+    isWeaponOrArmor: false,
+    isCorrupt: false,
     enchant: [],
     implicit: [],
     explicit: [],
     fractured: [],
     crafted: [],
-    isWeaponOrArmor: false,
-    isCorrupt: false,
+    pseudo: [],
+    temple: [],
+    influences: [],
     quality: {
-      min: 0, max: undefined, search: false 
+      search: false 
     },
     autoSearch: false,
     searchTwoWeekOffline: false,
@@ -144,7 +146,7 @@ export function itemAnalyze(item: string) {
     case '掘獄可堆疊有插槽通貨': {
       itemParsed.searchExchange.option = true
       itemParsed.autoSearch = true
-      const searchExchangeDivine = ipcRenderer.sendSync(IPC.GET_CONFIG).searchExchangeDivine
+      const searchExchangeDivine = ipcRenderer.sendSync(IPC.GET_CONFIG).searchExchangeDivine as boolean
       itemParsed.searchExchange.have = searchExchangeDivine ? 'divine' : 'chaos'
       break
     }
@@ -324,11 +326,11 @@ function getStrReg(section: string[], type: string) {
   })
   return retArr
 }
-function parseMutilineMod(regSection: RegExp[], section: string[], type: string) {
-  if (!APImods[type as keyof IAPIMods].mutiLines) return []
+function parseMutilineMod(regSection: RegExp[], section: string[], type: keyof IAPIMods) {
+  if (!APImods[type].mutiLines) return []
   const tempArr: IItemStat[] = []
   for (let i = 0; i < regSection.length; ++i) {
-    const matchMod = APImods[type as keyof IAPIMods].mutiLines.filter(s => regSection[i].test(s.text[0]))
+    const matchMod = APImods[type].mutiLines.filter(s => regSection[i].test(s.text[0]))
     outer:
     for (const mMod of matchMod) {
       let flag = true
@@ -362,11 +364,11 @@ function parseMutilineMod(regSection: RegExp[], section: string[], type: string)
               min: tempValue / valueCount 
             },
             disabled: true,
-            type: APImods[type as keyof IAPIMods].type
+            type: APImods[type].type
           })
         else
           tempArr.push({
-            ...tempGroup, disabled: true, type: APImods[type as keyof IAPIMods].type
+            ...tempGroup, disabled: true, type: APImods[type].type
           })
       }
     }
@@ -413,7 +415,6 @@ function parseMod(section: string[], type: keyof IAPIMods) {
     }
   })
   if (tempArr.length) {
-    itemParsed[type] = itemParsed[type] ?? []
     itemParsed[type].push(...tempArr)
     return PARSE_SECTION_SUCC
   }
@@ -494,7 +495,7 @@ function parseInfluence(section: string[]) {
     const influence = influences.find(inf => inf.text === line)
     if (influence) itemParsed.influences?.push(influence)
   }
-  if (itemParsed.influences) {
+  if (itemParsed.influences.length > 0) {
     return PARSE_SECTION_SUCC
   }
   return PARSE_SECTION_SKIP

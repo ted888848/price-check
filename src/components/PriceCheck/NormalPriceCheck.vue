@@ -48,6 +48,14 @@
         <input v-model.number="item.mapTier.max" class="w-8 appearance-none rounded bg-gray-400 text-center font-bold"
                type="number" :disabled="!item.mapTier.search" @dblclick="delete item.mapTier.max">
       </div>
+      <div v-else-if="item.searchExchange.option"
+           class="flex p-2 items-center justify-center hover:cursor-pointer flex-grow"
+           @click="item.searchExchange.have = ('divine' === item.searchExchange.have) ? 'chaos' : 'divine'">
+        <span class="mx-1 text-white">神聖價</span>
+        <FontAwesomeIcon v-if="item.searchExchange.have === 'divine'" icon="circle-check"
+                         class="text-green-600 text-xl" />
+        <FontAwesomeIcon v-else icon="circle-xmark" class="text-red-600 text-xl" />
+      </div>
       <div v-else-if="item.itemLevel" class="flex p-2 items-center justify-center "
            :class="{ 'opacity-30': !item.itemLevel.search }" @click.self="item.itemLevel.search = !item.itemLevel.search">
         <span class="mx-1 text-white hover:cursor-default"
@@ -57,14 +65,6 @@
                :disabled="!item.itemLevel.search" @dblclick="delete item.itemLevel.min">
         <input v-model.number="item.itemLevel.max" class="w-8 appearance-none rounded bg-gray-400 text-center font-bold"
                type="number" :disabled="!item.itemLevel.search" @dblclick="delete item.itemLevel.max">
-      </div>
-      <div v-else-if="item.searchExchange.option"
-           class="flex p-2 items-center justify-center hover:cursor-pointer flex-grow"
-           @click="item.searchExchange.have = ('divine' === item.searchExchange.have) ? 'chaos' : 'divine'">
-        <span class="mx-1 text-white">神聖價</span>
-        <FontAwesomeIcon v-if="item.searchExchange.have === 'divine'" icon="circle-check"
-                         class="text-green-600 text-xl" />
-        <FontAwesomeIcon v-else icon="circle-xmark" class="text-red-600 text-xl" />
       </div>
     </div>
     <div class="flex p-2 items-center justify-center" :class="{ 'opacity-30': !item.quality.search }"
@@ -337,8 +337,8 @@ const fetchResultSorted = computed(() => {
     return fetchResult.value.slice().sort((a, b) => {
       if (!['divine', 'chaos'].includes(a.currency)) return 1
       if (!['divine', 'chaos'].includes(b.currency)) return -1
-      let ca = a.currency === 'divine' ? a.price * props.divineToChaos : a.price
-      let cb = b.currency === 'divine' ? b.price * props.divineToChaos : b.price
+      let ca = a.currency === 'divine' ? (a.price as number) * props.divineToChaos : a.price as number
+      let cb = b.currency === 'divine' ? (b.price as number) * props.divineToChaos : b.price as number
       return ca - cb
     })
   else

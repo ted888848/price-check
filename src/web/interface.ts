@@ -78,9 +78,9 @@ export interface IItem{
   explicit: IItemStat[]
   fractured: IItemStat[]
   crafted: IItemStat[]
-  pseudo?: IItemStat[]
-  temple?: IItemStat[]
-  influences?: IItemStat[]
+  pseudo: IItemStat[]
+  temple: IItemStat[]
+  influences: IItemStat[]
   elderMap?: IItemStat
   conquerorMap?: IItemStat
   autoSearch: boolean
