@@ -16,7 +16,7 @@ import { ref } from 'vue';
 import { ipcRenderer } from 'electron';
 import IPC from '@/ipc/ipcChannel';
 import { loadAPIdata, store } from '@/web/APIdata';
-import SettingWindow from '@/components/SettingWindow/SettingWindow.vue';
+import SettingWindow from '@/web/components/SettingWindow/SettingWindow.vue';
 const overlayWindowShow = ref(false);
 function closeOverlay() {
   overlayWindowShow.value = false;
@@ -29,17 +29,19 @@ function closeSettingWindow() {
   settingWindowShow.value = false;
 }
 
-const emit = defineEmits(['reloadLeagues']);
+const emit = defineEmits<{
+  (event: 'reloadLeagues'): void
+}>();
 function reloadAPIdata() {
-  let configTemp = store.get('config');
+  let configTemp = store.get('config')
   store.clear();
   store.set('config', configTemp);
   ipcRenderer
     .invoke(IPC.RELOAD_APIDATA)
     .then(({ status, error }) => {
       if (status) {
-        emit('reloadLeagues');
-        loadAPIdata();
+        emit('reloadLeagues')
+        loadAPIdata()
         console.log('API reloaded')
       }
       else {

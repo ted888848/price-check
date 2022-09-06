@@ -75,12 +75,12 @@
 import { computed, ref, watch } from 'vue'
 import { maxBy } from 'lodash-es'
 import { searchItem, fetchItem, getIsCounting, selectOptions } from '@/web/tradeSide'
-import { hiestReward as gemReplicaOptions } from '@/web/APIdata'
+import { hiestReward as gemReplicaOptions, IHiestReward } from '@/web/APIdata'
 import type { ISearchResult, ISearchJson, IFetchResult } from '@/web/tradeSide'
 const props = defineProps(['itemProp', 'leagueSelect', 'divineToChaos', 'isOverflow'])
 const { rateTimeLimit } = getIsCounting()
 
-const gemReplicaSelect = ref(null)
+const gemReplicaSelect = ref<IHiestReward>(null)
 const { gemAltQOptions } = selectOptions
 const gemAltQSelect = ref(gemAltQOptions[0])
 
@@ -188,8 +188,8 @@ const fetchResultSorted = computed(() => {
     return fetchResult.value.slice().sort((a, b) => {
       if (!['divine', 'chaos'].includes(a.currency)) return 1
       if (!['divine', 'chaos'].includes(b.currency)) return -1
-      let ca = a.currency === 'divine' ? a.price * props.divineToChaos : a.price
-      let cb = b.currency === 'divine' ? b.price * props.divineToChaos : b.price
+      let ca = a.currency === 'divine' ? (a.price as number) * props.divineToChaos : a.price as number
+      let cb = b.currency === 'divine' ? (b.price as number) * props.divineToChaos : b.price as number
       return ca - cb
     })
   else
@@ -200,7 +200,9 @@ const maxAmount = computed(() => {
   return maxBy(fetchResult.value, ele => ele.amount)
 })
 
-const emit = defineEmits(['open-web-view'])
+const emit = defineEmits<{
+  (event: 'open-web-view', extendUrl: string): void
+}>()
 function openWebView() {
   emit('open-web-view', `search/${props.leagueSelect}/${searchResult.value.searchID.ID}`)
 }

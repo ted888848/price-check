@@ -58,11 +58,11 @@ const webView = ref<HTMLIFrameElement | null>(null)
 const priceCheckPos = ref({
   right: '0px',
 })
-function openWebView(url: string) {
+function openWebView(extendUrl: string) {
   priceCheckPos.value.right = '0px'
   isWebrViewOpen.value = true
   nextTick(() => {
-    webView.value!.src = encodeURI(`https://web.poe.garena.tw/trade/${url}`)
+    webView.value!.src = encodeURI(`https://web.poe.garena.tw/trade/${extendUrl}`)
   })
 }
 function closeWebView() {

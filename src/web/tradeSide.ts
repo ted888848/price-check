@@ -12,7 +12,7 @@ export interface ISearchJson {
       trade_filters: {
         filters: {
           price?: {
-            min: number | undefined
+            min: number
           },
           collapse?: {
             option: boolean
@@ -158,6 +158,9 @@ export function getSearchJSON(item: IItem) {
       filters: {
         trade_filters:{
           filters:{
+            price: {
+              min: 2
+            }
           }
         },
         misc_filters:{

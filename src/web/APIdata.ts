@@ -4,12 +4,12 @@ export const baseURL = 'https://web.poe.garena.tw/api/'
 export const store = new Store()
 
 export let leagues: string[] = []
-interface HiestRewardInterface{
+export interface IHiestReward{
   name?: string
 	type: string
 	text: string
 }
-export let hiestReward: HiestRewardInterface[] = []
+export let hiestReward: IHiestReward[] = []
 
 interface IAPIItemsItem{
   id: string
@@ -84,7 +84,7 @@ export let currencyImageUrl: IStatic[]
 export function loadAPIdata() {
   leagues = store.get('Leagues') as string[]
   APIitems = store.get('APIitems') as IAPIitems
-  hiestReward = store.get('hiestReward') as HiestRewardInterface[]
+  hiestReward = store.get('hiestReward') as IHiestReward[]
   APIStatic = store.get('APIStatic') as IStatic[]
   APImods = store.get('APImods') as IAPIMods
   currencyImageUrl = store.get('currencyImageUrl') as IStatic[]

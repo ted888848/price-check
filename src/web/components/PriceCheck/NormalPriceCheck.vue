@@ -353,7 +353,9 @@ const searchStats: ComputedRef<IItemStat[]> = computed(() => {
 if (item.value.autoSearch)
   searchBtn()
 
-const emit = defineEmits(['open-web-view'])
+const emit = defineEmits<{
+  (event: 'open-web-view', extendUrl: string): void
+}>()
 function openWebView() {
   emit('open-web-view', `${searchResult.value.searchID.type}/${props.leagueSelect}/${searchResult.value.searchID.ID}`)
 }
