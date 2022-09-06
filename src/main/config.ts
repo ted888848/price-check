@@ -9,8 +9,8 @@ export function setupConfig() {
     POESESSID: '',
     searchTwoWeekOffline: false
   })
-  ipcMain.on(IPC.SET_CONFIG, (_e, configData) => {
-    config.set('config', configData)
+  ipcMain.on(IPC.SET_CONFIG, (_e, configData: string) => {
+    config.set('config', JSON.parse(configData))
     setCookie()
   }) 
   ipcMain.handle(IPC.GET_CONFIG, () => {
@@ -22,7 +22,7 @@ export function setupConfig() {
   setCookie()
 }
 function setCookie() {
-  let poesessid = config.get('config.POESESSID', '')
+  let poesessid = config.get('config.POESESSID', '') as string
   if (poesessid) {
     session.defaultSession.cookies.set({
       url: 'https://web.poe.garena.tw',

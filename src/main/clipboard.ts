@@ -1,7 +1,7 @@
 import { clipboard } from 'electron';
 const DELAY = 50
 const LIMIT = 250
-let clipboardPromise
+let clipboardPromise: Promise<string> | null
 export async function getClopboard() {
   let timeLimit = 0
   if (clipboardPromise) {
@@ -15,13 +15,13 @@ export async function getClopboard() {
       const clipAfter = clipboard.readText()
       if (clipAfter.startsWith('物品種類:')) {
         clipboard.writeText(clipBefore)
-        clipboardPromise = undefined
+        clipboardPromise = null
         resolve(clipAfter)
       }
       else {
         timeLimit += DELAY
         if (timeLimit > LIMIT) {
-          clipboardPromise = undefined
+          clipboardPromise = null
           clipboard.writeText(clipBefore)
           reject('time limit')
         }

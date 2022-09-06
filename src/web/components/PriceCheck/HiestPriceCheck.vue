@@ -50,7 +50,7 @@
       </tr>
     </thead>
     <tbody class="">
-      <tr v-for="ele in fetchResultSorted" :key="ele" class=" border-b-2 border-gray-600"
+      <tr v-for="ele in fetchResultSorted" :key="`${ele.price}|${ele.currency}`" class=" border-b-2 border-gray-600"
           :class="{ 'text-red-500 text-xl bg-indigo-600 font-bold': ele.amount === maxAmount.amount }">
         <td class="flex justify-center items-center">
           {{ ele.price }}<img :src="ele.image" class=" w-7 h-7">
@@ -71,20 +71,51 @@
   <span v-if="rateTimeLimit.flag" class="text-white bg-red-600 text-xl text-center my-2 hover:cursor-default">API次數限制
     {{ rateTimeLimit.second }} 秒後再回來 </span>
 </template>
-<script setup>
+<script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { maxBy } from 'lodash-es'
-import { getDefaultSearchJSON, searchItem, fetchItem, getIsCounting, selectOptions } from '@/web/tradeSide'
-import { hiestReward as gemReplicaOptions } from '@/web/APIdata'
+import { searchItem, fetchItem, getIsCounting, selectOptions } from '@/web/tradeSide'
+import { hiestReward as gemReplicaOptions, IHiestReward } from '@/web/APIdata'
+import type { ISearchResult, ISearchJson, IFetchResult } from '@/web/tradeSide'
 const props = defineProps(['itemProp', 'leagueSelect', 'divineToChaos', 'isOverflow'])
 const { rateTimeLimit } = getIsCounting()
 
-const gemReplicaSelect = ref(null)
+const gemReplicaSelect = ref<IHiestReward>(null)
 const { gemAltQOptions } = selectOptions
 const gemAltQSelect = ref(gemAltQOptions[0])
 
-let searchJSON = getDefaultSearchJSON()
-const searchResult = ref({
+let searchJSON: ISearchJson = {
+  query: {
+    filters: {
+      trade_filters:{
+        filters:{
+        }
+      },
+      misc_filters:{
+        filters:{
+        }
+      },
+      type_filters:{
+        filters:{
+        }
+      },
+      map_filters:{
+        filters:{
+        }
+      }
+    },
+    stats: [{
+      type: 'and', filters: []
+    }],
+    status:{
+      option: 'online'
+    }
+  },
+  sort:{
+    price: 'asc'
+  }
+}
+const searchResult = ref<ISearchResult>({
   result: [],
   err: false,
   totalCount: 0,
@@ -93,7 +124,7 @@ const searchResult = ref({
     ID: '', type: 'search' 
   } 
 })
-const fetchResult = ref([])
+const fetchResult = ref<IFetchResult[]>([])
 const isSearching = ref(false)
 const twoWeekOffline = ref(false)
 watch(twoWeekOffline, (newValue) => {
@@ -134,9 +165,9 @@ async function searchBtn() {
   if (rateTimeLimit.value.flag) return;
   resetSearchData()
   isSearching.value = true
-  searchJSON.query.name = gemReplicaSelect.value.name
-  searchJSON.query.type = gemReplicaSelect.value.type
-  if (!gemReplicaSelect.value.name?.startsWith('贗品')) {
+  searchJSON.query.name = gemReplicaSelect.value?.name
+  searchJSON.query.type = gemReplicaSelect.value?.type
+  if (!gemReplicaSelect.value?.name?.startsWith('贗品')) {
     searchJSON.query.filters.misc_filters.filters.gem_alternate_quality = {
       option: gemAltQSelect.value.value 
     }
@@ -157,8 +188,8 @@ const fetchResultSorted = computed(() => {
     return fetchResult.value.slice().sort((a, b) => {
       if (!['divine', 'chaos'].includes(a.currency)) return 1
       if (!['divine', 'chaos'].includes(b.currency)) return -1
-      let ca = a.currency === 'divine' ? a.price * props.divineToChaos : a.price
-      let cb = b.currency === 'divine' ? b.price * props.divineToChaos : b.price
+      let ca = a.currency === 'divine' ? (a.price as number) * props.divineToChaos : a.price as number
+      let cb = b.currency === 'divine' ? (b.price as number) * props.divineToChaos : b.price as number
       return ca - cb
     })
   else
@@ -169,7 +200,9 @@ const maxAmount = computed(() => {
   return maxBy(fetchResult.value, ele => ele.amount)
 })
 
-const emit = defineEmits(['open-web-view'])
+const emit = defineEmits<{
+  (event: 'open-web-view', extendUrl: string): void
+}>()
 function openWebView() {
   emit('open-web-view', `search/${props.leagueSelect}/${searchResult.value.searchID.ID}`)
 }

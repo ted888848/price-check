@@ -7,15 +7,24 @@
     // add more generic rulesets here, such as:
     "eslint:recommended",
     // "plugin:vue/vue3-recommended"
-    "plugin:vue/vue3-recommended"
+    "plugin:vue/vue3-recommended",
+    "plugin:@typescript-eslint/recommended"
     // 'plugin:vue/recommended' // Use this if you are using Vue.js 2.x.
   ],
-  "parserOptions": {},
+  "plugins": [
+    "@typescript-eslint"
+  ],
+  "parserOptions": {
+    "parser": "@typescript-eslint/parser"
+  },
+  "parser": "vue-eslint-parser",
   "rules": {
     "quotes": [
       "warn",
       "single"
     ],
+    "prefer-const": "off",
+    "no-fallthrough": "off",
     "vue/max-attributes-per-line": "off",
     "vue/first-attribute-linebreak": "off",
     "vue/html-closing-bracket-newline": [
@@ -67,7 +76,9 @@
           "minProperties": 3
         }
       }
-    ]
+    ],
+    "@typescript-eslint/no-non-null-assertion": "off",
+    "@typescript-eslint/no-explicit-any": "off"
   },
   "globals": {
     "defineEmits": "writable",

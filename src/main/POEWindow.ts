@@ -1,6 +1,8 @@
 import { OverlayWindow } from 'electron-overlay-window';
 import { EventEmitter } from 'events'
+import type { BrowserWindow } from 'electron'
 class POEWindowClass extends EventEmitter {
+  private _isActive: boolean;
   constructor() {
     super()
     this._isActive = false
@@ -20,10 +22,10 @@ class POEWindowClass extends EventEmitter {
   get isActive() {
     return this._isActive
   }
-  attach(win) {
+  attach(win: BrowserWindow, windowName: string ) {
     OverlayWindow.events.on('focus', () => this.isActive = true)
     OverlayWindow.events.on('blur', () => this.isActive = false)
-    OverlayWindow.attachTo(win, 'Path of Exile')
+    OverlayWindow.attachTo(win, windowName)
   }
 }
 

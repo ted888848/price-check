@@ -9,7 +9,7 @@
         <div class="flex justify-start mr-auto ml-1 flex-1">
           <VSelect v-model="currentPriceCheck" class="text-sm style-chooser style-chooser-inf text-center"
                    :options="priceCheckOptions" label="label" :searchable="false" :clearable="false"
-                   :reduce="option => option.value" />
+                   :reduce="(option: any) => option.value" />
         </div>
         <div class="flex justify-center flex-1">
           <div class="relative exaltedImg ">
@@ -35,15 +35,15 @@
                  :clearable="false" :searchable="false" />
       </div>
       <KeepAlive>
-        <component :is="currentPriceCheck" :item-prop="item" :league-select="leagueSelect"
+        <component :is="priceCheckTabs[currentPriceCheck]" :item-prop="item" :league-select="leagueSelect"
                    :divine-to-chaos="divineToChaos" :is-overflow="isOverflow" @open-web-view="openWebView" />
       </KeepAlive>
     </div>
   </div>
 </template>
-<script setup>
+<script setup lang="ts">
 import { ipcRenderer } from 'electron'
-import { ref, computed, markRaw, nextTick, } from 'vue'
+import { ref, computed, nextTick, } from 'vue'
 import { range } from 'lodash-es'
 import IPC from '@/ipc/ipcChannel'
 import { itemAnalyze } from '@/web/itemAnalyze'
@@ -51,17 +51,18 @@ import { getDivineToChaos } from '@/web/tradeSide'
 import { leagues, currencyImageUrl } from '@/web/APIdata'
 import NormalPriceCheck from './NormalPriceCheck.vue'
 import HiestPriceCheck from './HiestPriceCheck.vue'
+import { IItem } from '@/web/interface'
 
 const isWebrViewOpen = ref(false)
-const webView = ref(null)
+const webView = ref<HTMLIFrameElement | null>(null)
 const priceCheckPos = ref({
   right: '0px',
 })
-function openWebView(url) {
+function openWebView(extendUrl: string) {
   priceCheckPos.value.right = '0px'
   isWebrViewOpen.value = true
   nextTick(() => {
-    webView.value.src = encodeURI(`https://web.poe.garena.tw/trade/${url}`)
+    webView.value!.src = encodeURI(`https://web.poe.garena.tw/trade/${extendUrl}`)
   })
 }
 function closeWebView() {
@@ -85,15 +86,19 @@ function loadLeagues() {
 defineExpose({
   loadLeagues 
 })
-const currentPriceCheck = ref(null)
+const currentPriceCheck = ref<keyof typeof priceCheckTabs>('NormalPriceCheck')
+const priceCheckTabs = {
+  'NormalPriceCheck': NormalPriceCheck, 
+  'HiestPriceCheck': HiestPriceCheck
+}
 const priceCheckOptions = [{
   label: '普通查價',
-  value: markRaw(NormalPriceCheck)
+  value: 'NormalPriceCheck'
 }, {
   label: '劫盜查價',
-  value: markRaw(HiestPriceCheck)
+  value: 'HiestPriceCheck'
 }]
-const item = ref(null)
+const item = ref<IItem | null>(null)
 
 const divineToChaos = ref(0)
 let divineImage = 'https://web.poe.garena.tw' + currencyImageUrl.find(ele => ele.id === 'divine')?.image
@@ -115,7 +120,7 @@ function isOverflow() {
 ipcRenderer.on(IPC.PRICE_CHECK_SHOW, (e, clip, pos) => {
   closeWebView()
   windowShowHide.value = true
-  currentPriceCheck.value = markRaw(NormalPriceCheck)
+  currentPriceCheck.value = 'NormalPriceCheck'
   priceCheckPos.value.right = pos
   item.value = itemAnalyze(clip)
 })
@@ -166,6 +171,7 @@ div.priceCheck {
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
 	-webkit-appearance: none;
+  appearance: none;
 	margin: 0;
 }
 

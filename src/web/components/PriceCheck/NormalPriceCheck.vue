@@ -1,30 +1,30 @@
 <template>
   <div class=" text-xl text-white my-1 text-center"
-       @click="item.type.searchByType = !item.type.searchByType && item.type.option">
+       @click="item.type.searchByType = Boolean(!item.type.searchByType && item.type.option)">
     <span v-if="item.name" class="mr-3">{{ item.name }}</span>
     <span :class="{ 'text-red-500': item.type.searchByType }">{{ item.baseType }}</span>
   </div>
   <div v-if="item.type.text" class="text-base text-white text-center" :class="{ 'text-3xl': item.type.searchByType }">
     <span>{{ item.type.text }}</span>
   </div>
-  <VSelect v-if="item.undefinedUnqiue && item.uniques !== []" v-model="item.name" class="text-sm style-chooser"
-           :options="item.uniques" label="name" :reduce="ele => ele.name" />
+  <VSelect v-if="undefinedUnqiue && item.uniques.length > 0" v-model="item.name" class="text-sm style-chooser"
+           :options="item.uniques" label="name" :reduce="(ele: any) => ele.name" />
   <div class="mx-0  bg-blue-900 grid grid-cols-3">
     <div class="flex p-2 items-center justify-center">
       <span class="mx-1 text-white hover:cursor-default">汙染:</span>
       <VSelect v-model="item.isCorrupt" class="text-sm style-chooser flex-grow" :options="generalOption" label="label"
-               :reduce="ele => ele.value" :clearable="false" :searchable="false" />
+               :reduce="(ele: any) => ele.value" :clearable="false" :searchable="false" />
     </div>
     <div>
       <div v-if="!item.type.text.endsWith('技能寶石')" class="flex p-2 items-center justify-center">
         <span class="mx-1 text-white hover:cursor-default">已鑑定:</span>
         <VSelect v-model="item.isIdentify" class="text-sm style-chooser flex-grow" :options="generalOption"
-                 label="label" :reduce="ele => ele.value" :clearable="false" :searchable="false" />
+                 label="label" :reduce="(ele: any) => ele.value" :clearable="false" :searchable="false" />
       </div>
       <div v-else class="flex p-2 items-center justify-center">
         <span class="mx-1 text-white hover:cursor-default">相異品:</span>
         <VSelect v-model="item.altQType" class="text-sm style-chooser flex-grow" :options="gemAltQOptions" label="label"
-                 :reduce="ele => ele.value" :clearable="false" :searchable="false" />
+                 :reduce="(ele: any) => ele.value" :clearable="false" :searchable="false" />
       </div>
     </div>
     <div class="flex items-center justify-center">
@@ -48,6 +48,14 @@
         <input v-model.number="item.mapTier.max" class="w-8 appearance-none rounded bg-gray-400 text-center font-bold"
                type="number" :disabled="!item.mapTier.search" @dblclick="delete item.mapTier.max">
       </div>
+      <div v-else-if="item.searchExchange.option"
+           class="flex p-2 items-center justify-center hover:cursor-pointer flex-grow"
+           @click="item.searchExchange.have = ('divine' === item.searchExchange.have) ? 'chaos' : 'divine'">
+        <span class="mx-1 text-white">神聖價</span>
+        <FontAwesomeIcon v-if="item.searchExchange.have === 'divine'" icon="circle-check"
+                         class="text-green-600 text-xl" />
+        <FontAwesomeIcon v-else icon="circle-xmark" class="text-red-600 text-xl" />
+      </div>
       <div v-else-if="item.itemLevel" class="flex p-2 items-center justify-center "
            :class="{ 'opacity-30': !item.itemLevel.search }" @click.self="item.itemLevel.search = !item.itemLevel.search">
         <span class="mx-1 text-white hover:cursor-default"
@@ -57,14 +65,6 @@
                :disabled="!item.itemLevel.search" @dblclick="delete item.itemLevel.min">
         <input v-model.number="item.itemLevel.max" class="w-8 appearance-none rounded bg-gray-400 text-center font-bold"
                type="number" :disabled="!item.itemLevel.search" @dblclick="delete item.itemLevel.max">
-      </div>
-      <div v-else-if="item.searchExchange.option"
-           class="flex p-2 items-center justify-center hover:cursor-pointer flex-grow"
-           @click="item.searchExchange.have = ('divine' === item.searchExchange.have) ? 'chaos' : 'divine'">
-        <span class="mx-1 text-white">神聖價</span>
-        <FontAwesomeIcon v-if="item.searchExchange.have === 'divine'" icon="circle-check"
-                         class="text-green-600 text-xl" />
-        <FontAwesomeIcon v-else icon="circle-xmark" class="text-red-600 text-xl" />
       </div>
     </div>
     <div class="flex p-2 items-center justify-center" :class="{ 'opacity-30': !item.quality.search }"
@@ -80,12 +80,12 @@
     <div v-if="item.elderMap" class="flex col-span-2 items-center justify-center">
       <span class="mx-1 text-white hover:cursor-default">尊師守衛:</span>
       <VSelect v-model="item.elderMap.value.option" class="text-sm style-chooser style-chooser-inf "
-               :options="elderMapOptions" :reduce="ele => ele.value" label="label" :searchable="false" :clearable="false" />
+               :options="elderMapOptions" :reduce="(ele: any) => ele.value" label="label" :searchable="false" :clearable="false" />
     </div>
     <div v-if="item.conquerorMap" class="flex col-span-2 items-center justify-center">
       <span class="mx-1 text-white hover:cursor-default">征服者:</span>
       <VSelect v-model="item.conquerorMap.value.option" class="text-sm style-chooser style-chooser-inf "
-               :options="conquerorMapOptions" :reduce="ele => ele.value" label="label" :searchable="false"
+               :options="conquerorMapOptions" :reduce="(ele: any) => ele.value" label="label" :searchable="false"
                :clearable="false" />
     </div>
     <div v-else-if="item.blightedMap" class="flex items-center justify-center">
@@ -205,7 +205,7 @@
       </tr>
     </thead>
     <tbody class="">
-      <tr v-for="ele in fetchResultSorted" :key="ele" class=" border-b-2 border-gray-600"
+      <tr v-for="ele in fetchResultSorted" :key="`${ele.price}|${ele.currency}`" class=" border-b-2 border-gray-600"
           :class="{ 'text-yellow-400 text-xl bg-indigo-700 font-bold': ele.amount === maxAmount.amount }">
         <td v-if="item.searchExchange.option" class="flex justify-center items-center">
           <img :src="ele.image" class=" w-7 h-7">{{ ele.price }}<img :src="currency2Img" class=" w-7 h-7">
@@ -230,23 +230,29 @@
     API次數限制 {{ rateTimeLimit.second }} 秒後再回來
   </span>
 </template>
-<script setup>
+<script setup lang="ts">
 import { maxBy } from 'lodash-es'
-import { computed, ref, nextTick } from 'vue'
+import { computed, ref, nextTick, ComputedRef } from 'vue'
 import { getSearchJSON, searchItem, fetchItem, getIsCounting, searchExchange, selectOptions } from '@/web/tradeSide'
 import { APIStatic } from '@/web/APIdata'
-
-const props = defineProps(['itemProp', 'leagueSelect', 'divineToChaos', 'isOverflow'])
+import type { IItem, IItemStat } from '@/web/interface'
+import type { ISearchResult, IExchangeResult, IFetchResult } from '@/web/tradeSide'
+const props = defineProps<{
+  itemProp: IItem
+  leagueSelect: string
+  divineToChaos: number
+  isOverflow: () => boolean
+}>()
 const { rateTimeLimit } = getIsCounting()
 const item = ref(props.itemProp)
 if (process.env.NODE_ENV === 'development') console.log(item.value)
-item.value.undefinedUnqiue = item.value.isIdentify === false && item.value.raritySearch.label === '傳奇'
+const undefinedUnqiue = item.value.isIdentify === false && item.value.raritySearch.label === '傳奇'
 
 const {
   generalOption, gemAltQOptions, influencesOptions, elderMapOptions,
   conquerorMapOptions, rarityOptions 
 } = selectOptions
-function modTextColor(type) {
+function modTextColor(type: string) {
   switch (type) {
     case '固定':
       return '#346beb'
@@ -262,16 +268,16 @@ function modTextColor(type) {
   return 'white'
 }
 
-const searchResult = ref({
+const searchResult = ref<ISearchResult | IExchangeResult>({
   result: [],
-  err: false,
   totalCount: 0,
   nowFetched: 0,
   searchID: {
     ID: '', type: 'search' 
-  } 
+  },
+  err: false
 })
-const fetchResult = ref([])
+const fetchResult = ref<IFetchResult[]>([])
 const isSearching = ref(false)
 const modTbodyToggle = ref(true)
 const currency2Img = ref('')
@@ -279,12 +285,12 @@ const currency2Img = ref('')
 function resetSearchData() {
   searchResult.value = {
     result: [],
-    err: false,
     totalCount: 0,
     nowFetched: 0,
     searchID: {
       ID: '', type: 'search' 
-    } 
+    },
+    err: false
   }
   fetchResult.value = []
   isSearching.value = false
@@ -296,7 +302,7 @@ async function fetchMore() {
   let fetchStartPos = searchResult.value.nowFetched
   let fetchEndPos = (searchResult.value.nowFetched + 20) <= (searchResult.value.totalCount) ? (searchResult.value.nowFetched + 20) : (searchResult.value.totalCount)
   searchResult.value.nowFetched = fetchEndPos
-  let fetchList = searchResult.value.result.slice(fetchStartPos, fetchEndPos)
+  let fetchList = searchResult.value.result.slice(fetchStartPos, fetchEndPos) as string[]
   fetchResult.value = await fetchItem(fetchList, searchResult.value.searchID.ID, fetchResult.value)
   isSearching.value = false
   nextTick(() => { modTbodyToggle.value = !props.isOverflow() })
@@ -308,7 +314,7 @@ async function searchBtn() {
   if (item.value.searchExchange.option) {
     searchResult.value = await searchExchange(item.value, props.leagueSelect)
     if (!searchResult.value.err) {
-      currency2Img.value = `https://web.poe.garena.tw${APIStatic.find(ele => ele.id === searchResult.value.currency2).image}`
+      currency2Img.value = `https://web.poe.garena.tw${APIStatic.find(ele => ele.id === (searchResult.value as IExchangeResult).currency2).image}`
       fetchResult.value = searchResult.value.result
     }
   }
@@ -331,8 +337,8 @@ const fetchResultSorted = computed(() => {
     return fetchResult.value.slice().sort((a, b) => {
       if (!['divine', 'chaos'].includes(a.currency)) return 1
       if (!['divine', 'chaos'].includes(b.currency)) return -1
-      let ca = a.currency === 'divine' ? a.price * props.divineToChaos : a.price
-      let cb = b.currency === 'divine' ? b.price * props.divineToChaos : b.price
+      let ca = a.currency === 'divine' ? (a.price as number) * props.divineToChaos : a.price as number
+      let cb = b.currency === 'divine' ? (b.price as number) * props.divineToChaos : b.price as number
       return ca - cb
     })
   else
@@ -341,13 +347,15 @@ const fetchResultSorted = computed(() => {
 const maxAmount = computed(() => {
   return maxBy(fetchResult.value, ele => ele.amount)
 })
-const searchStats = computed(() => {
+const searchStats: ComputedRef<IItemStat[]> = computed(() => {
   return [].concat(item.value.enchant, item.value.implicit, item.value.explicit, item.value.fractured, item.value.crafted, item.value.pseudo, item.value.temple)
 })
 if (item.value.autoSearch)
   searchBtn()
 
-const emit = defineEmits(['open-web-view'])
+const emit = defineEmits<{
+  (event: 'open-web-view', extendUrl: string): void
+}>()
 function openWebView() {
   emit('open-web-view', `${searchResult.value.searchID.type}/${props.leagueSelect}/${searchResult.value.searchID.ID}`)
 }
