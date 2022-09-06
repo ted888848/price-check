@@ -6,13 +6,13 @@
     <div v-else class="flex flex-col">
       <div class="flex items-center justify-center mt-5">
         <label for="characterName" class="text-xl text-white mr-2 hover:cursor-default">角色名字:</label>
-        <input id="characterName" v-model="config.characterName"
+        <input id="characterName" v-model.trim="config.characterName"
                class="shadow appearance-none w-[200px] border rounded py-1 px-2 text-gray-700 leading-tight" type="text">
       </div>
       <div class="flex items-center justify-center mt-5">
         <label for="POESESSID" class="text-xl text-white mr-2 hover:cursor-default">POESESSID:</label>
-        <input id="POESESSID" v-model="config.POESESSID"
-               class="shadow appearance-none w-[305px] border rounded py-1 px-2 text-gray-700 leading-tight" type="text">
+        <input id="POESESSID" v-model.trim="config.POESESSID"
+               class="shadow appearance-none w-[310px] border rounded py-1 px-2 text-gray-700 leading-tight" type="text">
       </div>
       <div class="flex items-center justify-center mt-5 hover:cursor-pointer"
            @click="config.searchExchangeDivine = !config.searchExchangeDivine">
@@ -39,7 +39,7 @@
 </template>
 <script setup lang="ts">
 import { ipcRenderer } from 'electron'
-import { onMounted, ref, unref } from 'vue'
+import { onMounted, ref } from 'vue'
 import IPC from '@/ipc/ipcChannel'
 const isLoading = ref(true)
 const config = ref(null)
@@ -53,7 +53,7 @@ onMounted(() => {
 })
 const emit = defineEmits(['close-setting-window'])
 function save() {
-  ipcRenderer.send(IPC.SET_CONFIG, unref(config))
+  ipcRenderer.send(IPC.SET_CONFIG, JSON.stringify(config.value))
   emit('close-setting-window')
 }
 function cancel() {

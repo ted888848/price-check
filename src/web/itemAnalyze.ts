@@ -408,6 +408,7 @@ function parseMod(section: string[], type: keyof IAPIMods) {
     }
   })
   if (tempArr.length) {
+    itemParsed[type] = itemParsed[type] ?? []
     itemParsed[type].push(...tempArr)
     return PARSE_SECTION_SUCC
   }
