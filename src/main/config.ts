@@ -1,6 +1,12 @@
 import Store from 'electron-store'
 import { ipcMain, session } from 'electron'
 import IPC from '@/ipc/ipcChannel'
+export interface IConfig {
+  characterName: string;
+  searchExchangeDivine: boolean;
+  POESESSID: string;
+  searchTwoWeekOffline: boolean;
+}
 export let config = new Store()
 export function setupConfig() {
   if (!config.has('config')) config.set('config', {

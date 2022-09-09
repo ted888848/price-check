@@ -201,7 +201,7 @@ const maxAmount = computed(() => {
 })
 
 const emit = defineEmits<{
-  (event: 'open-web-view', extendUrl: string): void
+  (event: 'open-web-view', extendUrl: string): void;
 }>()
 function openWebView() {
   emit('open-web-view', `search/${props.leagueSelect}/${searchResult.value.searchID.ID}`)

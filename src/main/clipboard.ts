@@ -1,4 +1,4 @@
-import { clipboard } from 'electron';
+import { clipboard } from 'electron'
 const DELAY = 50
 const LIMIT = 250
 let clipboardPromise: Promise<string> | null
@@ -11,9 +11,9 @@ export async function getClopboard() {
   clipboard.writeText('')
 
   clipboardPromise = new Promise((resolve, reject) => {
-    function foo() {
+    function foo(){
       const clipAfter = clipboard.readText()
-      if (clipAfter.startsWith('物品種類:')) {
+      if (clipAfter.startsWith('物品種類:')){
         clipboard.writeText(clipBefore)
         clipboardPromise = null
         resolve(clipAfter)

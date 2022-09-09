@@ -4,12 +4,9 @@
     "browser": true
   },
   "extends": [
-    // add more generic rulesets here, such as:
     "eslint:recommended",
-    // "plugin:vue/vue3-recommended"
     "plugin:vue/vue3-recommended",
     "plugin:@typescript-eslint/recommended"
-    // 'plugin:vue/recommended' // Use this if you are using Vue.js 2.x.
   ],
   "plugins": [
     "@typescript-eslint"
@@ -34,7 +31,12 @@
       }
     ],
     "vue/require-prop-types": "off",
-    "indent": [
+    "indent": "off",
+    "semi": [
+      "warn",
+      "never"
+    ],
+    "@typescript-eslint/indent": [
       "warn",
       2,
       {
@@ -77,8 +79,13 @@
         }
       }
     ],
+    "array-bracket-spacing": "warn",
+    "key-spacing": "warn",
     "@typescript-eslint/no-non-null-assertion": "off",
-    "@typescript-eslint/no-explicit-any": "off"
+    "@typescript-eslint/no-explicit-any": "off",
+    "@typescript-eslint/member-delimiter-style": "warn",
+    "@typescript-eslint/type-annotation-spacing": "warn",
+    "@typescript-eslint/comma-spacing": "warn"
   },
   "globals": {
     "defineEmits": "writable",

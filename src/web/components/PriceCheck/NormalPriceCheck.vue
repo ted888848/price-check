@@ -80,7 +80,8 @@
     <div v-if="item.elderMap" class="flex col-span-2 items-center justify-center">
       <span class="mx-1 text-white hover:cursor-default">尊師守衛:</span>
       <VSelect v-model="item.elderMap.value.option" class="text-sm style-chooser style-chooser-inf "
-               :options="elderMapOptions" :reduce="(ele: any) => ele.value" label="label" :searchable="false" :clearable="false" />
+               :options="elderMapOptions" :reduce="(ele: any) => ele.value" label="label" :searchable="false"
+               :clearable="false" />
     </div>
     <div v-if="item.conquerorMap" class="flex col-span-2 items-center justify-center">
       <span class="mx-1 text-white hover:cursor-default">征服者:</span>
@@ -120,7 +121,7 @@
       <FontAwesomeIcon v-else icon="circle-xmark" class="text-red-600 text-xl" />
     </div>
   </div>
-  <table v-if="searchStats.length" class="bg-gray-700 text-center mt-1 text-white text-sm">
+  <table v-if="item.stats.length" class="bg-gray-700 text-center mt-1 text-white text-sm">
     <thead class="bg-green-600" @click="modTbodyToggle = !modTbodyToggle">
       <tr class="text-lg">
         <td class="w-6 text-center hover:cursor-default">
@@ -141,7 +142,7 @@
       </tr>
     </thead>
     <tbody v-show="modTbodyToggle" class="modsTbody" style="">
-      <tr v-for="mod in searchStats" :key="mod.id" class=" border-b-2 border-gray-400">
+      <tr v-for="mod in item.stats" :key="mod.id" class=" border-b-2 border-gray-400">
         <td class="text-base" @click="mod.disabled = !mod.disabled">
           <FontAwesomeIcon v-if="!mod.disabled" icon="circle-check" class="text-green-600 text-lg" />
           <FontAwesomeIcon v-else icon="circle-xmark" class="text-red-600 text-lg" />
@@ -232,16 +233,16 @@
 </template>
 <script setup lang="ts">
 import { maxBy } from 'lodash-es'
-import { computed, ref, nextTick, ComputedRef } from 'vue'
+import { computed, ref, nextTick } from 'vue'
 import { getSearchJSON, searchItem, fetchItem, getIsCounting, searchExchange, selectOptions } from '@/web/tradeSide'
 import { APIStatic } from '@/web/APIdata'
-import type { IItem, IItemStat } from '@/web/interface'
+import type { IItem } from '@/web/interface'
 import type { ISearchResult, IExchangeResult, IFetchResult } from '@/web/tradeSide'
-const props = defineProps<{
-  itemProp: IItem
-  leagueSelect: string
-  divineToChaos: number
-  isOverflow: () => boolean
+const props = defineProps<  {
+  itemProp: IItem;
+  leagueSelect: string;
+  divineToChaos: number;
+  isOverflow: () => boolean;
 }>()
 const { rateTimeLimit } = getIsCounting()
 const item = ref(props.itemProp)
@@ -250,7 +251,7 @@ const undefinedUnqiue = item.value.isIdentify === false && item.value.raritySear
 
 const {
   generalOption, gemAltQOptions, influencesOptions, elderMapOptions,
-  conquerorMapOptions, rarityOptions 
+  conquerorMapOptions, rarityOptions
 } = selectOptions
 function modTextColor(type: string) {
   switch (type) {
@@ -273,7 +274,7 @@ const searchResult = ref<ISearchResult | IExchangeResult>({
   totalCount: 0,
   nowFetched: 0,
   searchID: {
-    ID: '', type: 'search' 
+    ID: '', type: 'search'
   },
   err: false
 })
@@ -288,7 +289,7 @@ function resetSearchData() {
     totalCount: 0,
     nowFetched: 0,
     searchID: {
-      ID: '', type: 'search' 
+      ID: '', type: 'search'
     },
     err: false
   }
@@ -308,7 +309,7 @@ async function fetchMore() {
   nextTick(() => { modTbodyToggle.value = !props.isOverflow() })
 }
 async function searchBtn() {
-  if (rateTimeLimit.value.flag) return;
+  if (rateTimeLimit.value.flag) return
   resetSearchData()
   isSearching.value = true
   if (item.value.searchExchange.option) {
@@ -347,14 +348,11 @@ const fetchResultSorted = computed(() => {
 const maxAmount = computed(() => {
   return maxBy(fetchResult.value, ele => ele.amount)
 })
-const searchStats: ComputedRef<IItemStat[]> = computed(() => {
-  return [].concat(item.value.enchant, item.value.implicit, item.value.explicit, item.value.fractured, item.value.crafted, item.value.pseudo, item.value.temple)
-})
 if (item.value.autoSearch)
   searchBtn()
 
 const emit = defineEmits<{
-  (event: 'open-web-view', extendUrl: string): void
+  (event: 'open-web-view', extendUrl: string): void;
 }>()
 function openWebView() {
   emit('open-web-view', `${searchResult.value.searchID.type}/${props.leagueSelect}/${searchResult.value.searchID.ID}`)
@@ -364,4 +362,5 @@ function openBrower() {
 }
 </script>
 <style>
+
 </style>

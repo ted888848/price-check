@@ -41,8 +41,9 @@
 import { ipcRenderer } from 'electron'
 import { onMounted, ref } from 'vue'
 import IPC from '@/ipc/ipcChannel'
+import type { IConfig } from '@/main/config'
 const isLoading = ref(true)
-const config = ref(null)
+const config = ref<IConfig>(null)
 onMounted(() => {
   isLoading.value = true
   ipcRenderer.invoke(IPC.GET_CONFIG)

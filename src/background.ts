@@ -1,26 +1,24 @@
-'use strict';
-import { app, dialog, ipcMain, protocol } from 'electron';
+'use strict'
+import { app, dialog, ipcMain, protocol } from 'electron'
 import { setupShortcut } from './main/shortcuts'
 import { createWindow } from './main/overlayWindow'
-import { setupTray } from './main/tray';
+import { setupTray } from './main/tray'
 import { getAPIdata, checkForUpdate } from './main/setupAPI'
 import { setupConfig } from './main/config'
 import IPC from './ipc/ipcChannel'
-const isDevelopment = process.env.NODE_ENV !== 'production';
-protocol.registerSchemesAsPrivileged([
-  {
-    scheme: 'app',
-    privileges: {
-      secure: true, standard: true 
-    } 
+const isDevelopment = process.env.NODE_ENV !== 'production'
+protocol.registerSchemesAsPrivileged([{
+  scheme: 'app',
+  privileges: {
+    secure: true, standard: true 
   }
-]);
+}])
 app.disableHardwareAcceleration()
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
-    app.quit();
+    app.quit()
   }
-});
+})
 app.on('ready', async () => {
   setupConfig()
   setupTray()
@@ -58,18 +56,18 @@ app.on('ready', async () => {
     }
   })
 
-});
+})
 if (isDevelopment) {
   if (process.platform === 'win32') {
     process.on('message', (data) => {
       if (data === 'graceful-exit') {
-        app.quit();
+        app.quit()
       }
-    });
+    })
   }
   else {
     process.on('SIGTERM', () => {
-      app.quit();
-    });
+      app.quit()
+    })
   }
 }

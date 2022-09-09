@@ -3,81 +3,80 @@ import Store from 'electron-store'
 export const baseURL = 'https://web.poe.garena.tw/api/'
 export const store = new Store()
 
-export let leagues: string[] = []
 export interface IHiestReward{
-  name?: string
-	type: string
-	text: string
+  name?: string;
+  type: string;
+  text: string;
 }
-export let hiestReward: IHiestReward[] = []
-
 interface IAPIItemsItem{
-  id: string
-  label: string
+  id: string;
+  label: string;
   entries: {
-    type: string
-    text: string
-    unique: IItemUniques[]
-  }[]
+    type: string;
+    text: string;
+    unique: IItemUniques[];
+  }[];
 }
 export interface IAPIitems{
-  accessories: IAPIItemsItem
-  armour: IAPIItemsItem,
-  cards: IAPIItemsItem,
-  currency: IAPIItemsItem,
-  flasks: IAPIItemsItem,
-  gems: IAPIItemsItem,
-  jewels: IAPIItemsItem,
-  maps: IAPIItemsItem,
-  weapons: IAPIItemsItem,
-  watchstones: IAPIItemsItem,
-  heistequipment: IAPIItemsItem,
-  heistmission: IAPIItemsItem,
-  logbook: IAPIItemsItem
+  accessories: IAPIItemsItem;
+  armour: IAPIItemsItem;
+  cards: IAPIItemsItem;
+  currency: IAPIItemsItem;
+  flasks: IAPIItemsItem;
+  gems: IAPIItemsItem;
+  jewels: IAPIItemsItem;
+  maps: IAPIItemsItem;
+  weapons: IAPIItemsItem;
+  watchstones: IAPIItemsItem;
+  heistequipment: IAPIItemsItem;
+  heistmission: IAPIItemsItem;
+  logbook: IAPIItemsItem;
 }
-export let APIitems: IAPIitems
-
 interface IAPIModsMod{
-  label: string
-  type: string
+  label: string;
+  type: string;
   entries: {
-    id: string
-    text: string
+    id: string;
+    text: string;
     option?: {
       options: {
-        id: number
-        text: string
-      }[]
-    }
-  }[]
+        id: number;
+        text: string;
+      }[];
+    };
+  }[];
   mutiLines?: {
-    id: string
-    text: string[]
+    id: string;
+    text: string[];
     option?: {
       options: {
-        id: number
-        text: string
-      }[]
-    }
-  }[]
+        id: number;
+        text: string;
+      }[];
+    };
+  }[];
 }
 export interface IAPIMods{
-  pseudo: IAPIModsMod
-  explicit: IAPIModsMod
-  implicit: IAPIModsMod
-  fractured: IAPIModsMod
-  enchant: IAPIModsMod
-  crafted: IAPIModsMod
-  temple: IAPIModsMod
-  clusterJewel: IAPIModsMod
-  forbiddenJewel: IAPIModsMod
+  pseudo: IAPIModsMod;
+  explicit: IAPIModsMod;
+  implicit: IAPIModsMod;
+  fractured: IAPIModsMod;
+  enchant: IAPIModsMod;
+  crafted: IAPIModsMod;
+  temple: IAPIModsMod;
+  clusterJewel: IAPIModsMod;
+  forbiddenJewel: IAPIModsMod;
 }
-export let APImods: IAPIMods
 export interface IStatic{
-  id: string
-  text: string
-  image: string
+  id: string;
+  text: string;
+  image: string;
 }
+
+export let leagues: string[] = []
+export let APIitems: IAPIitems
+export let hiestReward: IHiestReward[] = []
+export let APImods: IAPIMods
 export let APIStatic: IStatic[]
 export let currencyImageUrl: IStatic[]
 

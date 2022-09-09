@@ -24,7 +24,7 @@ function registShortcut() {
       .then((clip) => togglePriceCheck(clip))
       .catch((err) => console.log(err))
     uIOhook.keyTap(UiohookKey.C, [UiohookKey.Ctrl])
-  });
+  })
   globalShortcut.register('CmdOrCtrl+F2', () => {
     toggleOverlay()
   })

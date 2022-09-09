@@ -12,30 +12,30 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref } from 'vue';
-import { ipcRenderer } from 'electron';
-import IPC from '@/ipc/ipcChannel';
-import { loadAPIdata, store } from '@/web/APIdata';
-import SettingWindow from '@/web/components/SettingWindow/SettingWindow.vue';
-const overlayWindowShow = ref(false);
+import { ref } from 'vue'
+import { ipcRenderer } from 'electron'
+import IPC from '@/ipc/ipcChannel'
+import { loadAPIdata, store } from '@/web/APIdata'
+import SettingWindow from '@/web/components/SettingWindow/SettingWindow.vue'
+const overlayWindowShow = ref(false)
 function closeOverlay() {
-  overlayWindowShow.value = false;
-  closeSettingWindow();
-  ipcRenderer.send(IPC.FORCE_POE, true);
+  overlayWindowShow.value = false
+  closeSettingWindow()
+  ipcRenderer.send(IPC.FORCE_POE, true)
 }
 
-const settingWindowShow = ref(false);
+const settingWindowShow = ref(false)
 function closeSettingWindow() {
-  settingWindowShow.value = false;
+  settingWindowShow.value = false
 }
 
 const emit = defineEmits<{
-  (event: 'reloadLeagues'): void
-}>();
+  (event: 'reloadLeagues'): void;
+}>()
 function reloadAPIdata() {
   let configTemp = store.get('config')
-  store.clear();
-  store.set('config', configTemp);
+  store.clear()
+  store.set('config', configTemp)
   ipcRenderer
     .invoke(IPC.RELOAD_APIDATA)
     .then(({ status, error }) => {
@@ -49,15 +49,15 @@ function reloadAPIdata() {
       }
     })
     .catch((error) => {
-      console.error(error);
-    });
+      console.error(error)
+    })
 }
 
 ipcRenderer.on(IPC.OVERLAY_SHOW, () => {
-  overlayWindowShow.value = true;
-});
+  overlayWindowShow.value = true
+})
 ipcRenderer.on(IPC.POE_ACTIVE, () => {
   overlayWindowShow.value = false
   closeSettingWindow()
-});
+})
 </script>

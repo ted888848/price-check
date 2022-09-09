@@ -1,4 +1,4 @@
-import { Tray, Menu, app } from 'electron';
+import { Tray, Menu, app } from 'electron'
 import { win } from './overlayWindow'
 import { checkForUpdate } from './setupAPI'
 import path from 'path'

@@ -1,4 +1,4 @@
-import { OverlayWindow } from 'electron-overlay-window';
+import { OverlayWindow } from 'electron-overlay-window'
 import { EventEmitter } from 'events'
 import type { BrowserWindow } from 'electron'
 class POEWindowClass extends EventEmitter {

@@ -48,7 +48,8 @@ function setupAPIItems(itemsJson: any) {
   }
   let hiestReward: any = []
   itemsJson.result.forEach((itemGroup: any) => {
-    switch (itemGroup.id) {
+    let groupID = itemGroup.id as keyof IAPIitems
+    switch (groupID) {
       case 'accessories':
       case 'armour':
       case 'flasks':
@@ -58,19 +59,19 @@ function setupAPIItems(itemsJson: any) {
       case 'heistequipment':
       case 'heistmission':
       case 'logbook':
-        APIitems[itemGroup.id as keyof IAPIitems] = {
+        APIitems[groupID] = {
           id: itemGroup.id, label: itemGroup.label, entries: setupItemArray(itemGroup.entries, hiestReward) 
         }
         break
       case 'maps':
-        APIitems[itemGroup.id as keyof IAPIitems] = {
+        APIitems[groupID] = {
           id: itemGroup.id, label: itemGroup.label, entries: setupItemArray(itemGroup.entries.filter((ele: any) => ele.disc === 'warfortheatlas'), hiestReward) 
         }
         break
       case 'cards':
       case 'currency':
       case 'gems':
-        APIitems[itemGroup.id as keyof IAPIitems] = itemGroup
+        APIitems[groupID] = itemGroup
         if (itemGroup.id === 'gems') hiestReward.push(...itemGroup.entries)
         break
       default:
@@ -124,7 +125,7 @@ function setupAPIMods(statsJson: any) {
             .map((stat: any) => ({
               id: stat.id,
               text: stat.text.substring(4).replace(/（階級 [123]）/, ''),
-              value :{
+              value: {
                 option: 1 
               }
             })),
@@ -134,7 +135,7 @@ function setupAPIMods(statsJson: any) {
       case '隨機屬性':
         APImods.forbiddenJewel = {
           label: statsGroup.label,
-          entries: statsGroup.entries.filter((ele: any) => /^若你在禁忌(烈焰|血肉)上有符合的詞綴，配置 #$/.test(ele.text)) ,
+          entries: statsGroup.entries.filter((ele: any) => /^若你在禁忌(烈焰|血肉)上有符合的詞綴，配置 #$/.test(ele.text)),
           type: '隨機' 
         }
         APImods.explicit = {
@@ -283,7 +284,7 @@ autoUpdater.on('update-downloaded', () => {
     .then((result) => {
       if (result.response === 0) {
         setImmediate(() => {
-          autoUpdater.quitAndInstall();
+          autoUpdater.quitAndInstall()
         })
       }
     })

@@ -5,61 +5,61 @@ import { isUndefined, isNumber, countBy } from 'lodash-es'
 import type { AxiosResponseHeaders } from 'axios'
 import type { IItem, IItemStat } from './interface'
 export interface ISearchJson {
-  query:{
-    type?: string
-    name?: string
+  query: {
+    type?: string;
+    name?: string;
     filters: {
       trade_filters: {
         filters: {
           price?: {
-            min: number
-          },
-          collapse?: {
-            option: boolean
-          }
+            min: number;
+          };
+          collapse: {
+            option: boolean;
+          };
           indexed?: {
-            option: string
-          }
-        }
-      }
+            option: string;
+          };
+        };
+      };
       misc_filters: {
         filters: {
-          corrupted?: { option: boolean }
-          identified?: { option: boolean }
-          gem_alternate_quality?: {option: number}
-          ilvl?: { min?: number, max?: number }
-          gem_level?: { min?: number, max?: number }
-          quality?: { min?: number, max?: number }
-        }
-      }
+          corrupted?: { option: boolean };
+          identified?: { option: boolean };
+          gem_alternate_quality?: { option: number };
+          ilvl?: { min?: number; max?: number };
+          gem_level?: { min?: number; max?: number };
+          quality?: { min?: number; max?: number };
+        };
+      };
       type_filters: {
         filters: {
-          category?: { option: string }
-          rarity?: { option: string }
-        }
-      }
+          category?: { option: string };
+          rarity?: { option: string };
+        };
+      };
       map_filters: {
         filters: {
-          map_tier?: { min?: number, max?: number }
-          map_blighted?: { option: boolean }
-          map_uberblighted?: { option: boolean }
-        }
-      }
+          map_tier?: { min?: number; max?: number };
+          map_blighted?: { option: boolean };
+          map_uberblighted?: { option: boolean };
+        };
+      };
       socket_filters?: {
-        disabled: boolean
+        disabled: boolean;
         filters: {
-          links: { min?: number, max?: number }
-        }
-      }
-    }
-    stats: [{ type: 'and', filters: IItemStat[] }]
-    status:{
-      option: 'any' | 'online' | 'onlineleague'
-    }
-  }
-  sort:{
-    price: 'asc'
-  }
+          links: { min?: number; max?: number };
+        };
+      };
+    };
+    stats: [{ type: 'and'; filters: IItemStat[] }];
+    status: {
+      option: 'any' | 'online' | 'onlineleague';
+    };
+  };
+  sort: {
+    price: 'asc';
+  };
 }
 
 export const selectOptions = {
@@ -156,96 +156,123 @@ export function getSearchJSON(item: IItem) {
   let searchJSON: ISearchJson = {
     query: {
       filters: {
-        trade_filters:{
-          filters:{
+        trade_filters: {
+          filters: {
             price: {
               min: 2
+            },
+            collapse: {
+              option: false
             }
           }
         },
-        misc_filters:{
-          filters:{
+        misc_filters: {
+          filters: {
           }
         },
-        type_filters:{
-          filters:{
+        type_filters: {
+          filters: {
           }
         },
-        map_filters:{
-          filters:{
+        map_filters: {
+          filters: {
           }
         }
       },
       stats: [{
         type: 'and', filters: []
       }],
-      status:{
+      status: {
         option: 'online'
       }
     },
-    sort:{
+    sort: {
       price: 'asc'
     }
   }
-  if (!item.type.searchByType) searchJSON.query.type = item.baseType //如果沒有要依照類別搜尋
-  if (item.raritySearch.id === 'unique') searchJSON.query.name = item.name || undefined
-  if (!isUndefined(item.isCorrupt)) searchJSON.query.filters.misc_filters.filters.corrupted = {
-    option: item.isCorrupt 
+  if (!item.type.searchByType) {//如果沒有要依照類別搜尋
+    searchJSON.query.type = item.baseType
   }
-  if (!isUndefined(item.isIdentify)) searchJSON.query.filters.misc_filters.filters.identified = {
-    option: item.isIdentify 
+  if (item.raritySearch.id === 'unique') {
+    searchJSON.query.name = item.name || undefined
   }
-  if (!isUndefined(item.altQType)) searchJSON.query.filters.misc_filters.filters.gem_alternate_quality = {
-    option: item.altQType 
+  if (!isUndefined(item.isCorrupt)) {
+    searchJSON.query.filters.misc_filters.filters.corrupted = {
+      option: item.isCorrupt
+    }
   }
-  if (item.itemLevel?.search) searchJSON.query.filters.misc_filters.filters.ilvl = {
-    min: item.itemLevel.min, max: item.itemLevel.max 
+  if (!isUndefined(item.isIdentify)) {
+    searchJSON.query.filters.misc_filters.filters.identified = {
+      option: item.isIdentify
+    }
   }
-  if (item.gemLevel?.search) searchJSON.query.filters.misc_filters.filters.gem_level = {
-    min: item.gemLevel.min, max: item.gemLevel.max 
+  if (!isUndefined(item.altQType)) {
+    searchJSON.query.filters.misc_filters.filters.gem_alternate_quality = {
+      option: item.altQType
+    }
   }
-  if (item.mapTier?.search) searchJSON.query.filters.map_filters.filters.map_tier = {
-    min: item.mapTier.min, max: item.mapTier.max
+  if (item.itemLevel?.search) {
+    searchJSON.query.filters.misc_filters.filters.ilvl = {
+      min: item.itemLevel.min, max: item.itemLevel.max
+    }
   }
-  if (!isUndefined(item.type.option)) searchJSON.query.filters.type_filters.filters.category = {
-    option: item.type.option
+  if (item.gemLevel?.search) {
+    searchJSON.query.filters.misc_filters.filters.gem_level = {
+      min: item.gemLevel.min, max: item.gemLevel.max
+    }
   }
-  if (item.quality.search) searchJSON.query.filters.misc_filters.filters.quality = {
-    min: item.quality.min, max: item.quality.max 
+  if (item.mapTier?.search) {
+    searchJSON.query.filters.map_filters.filters.map_tier = {
+      min: item.mapTier.min, max: item.mapTier.max
+    }
   }
-  if (item.elderMap || item.conquerorMap) searchJSON.query.stats[0].filters.push(item.elderMap! || item.conquerorMap!)
-  if (item.search6L) searchJSON.query.filters.socket_filters = {
-    disabled: false,
-    filters: {
-      links: {
-        min: 6 
-      } 
-    } 
+  if (!isUndefined(item.type.option)) {
+    searchJSON.query.filters.type_filters.filters.category = {
+      option: item.type.option
+    }
   }
-  if (item.raritySearch.id) searchJSON.query.filters.type_filters.filters.rarity = {
-    option: item.raritySearch.id 
+  if (item.quality.search) {
+    searchJSON.query.filters.misc_filters.filters.quality = {
+      min: item.quality.min, max: item.quality.max
+    }
+  }
+  if (item.elderMap || item.conquerorMap) {
+    searchJSON.query.stats[0].filters.push(item.elderMap! || item.conquerorMap!)
+  }
+  if (item.search6L) {
+    searchJSON.query.filters.socket_filters = {
+      disabled: false,
+      filters: {
+        links: {
+          min: 6
+        }
+      }
+    }
+  }
+  if (item.raritySearch.id) {
+    searchJSON.query.filters.type_filters.filters.rarity = {
+      option: item.raritySearch.id
+    }
   }
   if (item.searchTwoWeekOffline) {
     searchJSON.query.filters.trade_filters.filters.indexed = {
-      option: '2weeks' 
+      option: '2weeks'
     }
     searchJSON.query.status.option = 'any'
   }
 
-  searchJSON.query.stats[0].filters.push(...(item.enchant))
-  searchJSON.query.stats[0].filters.push(...(item.implicit))
-  searchJSON.query.stats[0].filters.push(...(item.explicit))
-  searchJSON.query.stats[0].filters.push(...(item.fractured))
-  searchJSON.query.stats[0].filters.push(...(item.crafted))
-  searchJSON.query.stats[0].filters.push(...(item.pseudo))
-  searchJSON.query.stats[0].filters.push(...(item.temple))
+  searchJSON.query.stats[0].filters.push(...(item.stats))
   searchJSON.query.stats[0].filters.push(...(item.influences))
 
-  if (!isUndefined(item.blightedMap)) searchJSON.query.filters.map_filters.filters.map_blighted = {
-    option: true 
+  if (!isUndefined(item.blightedMap)) {
+    searchJSON.query.filters.map_filters.filters.map_blighted = {
+      option: true
+    }
   }
-  if (!isUndefined(item.UberBlightedMap)) searchJSON.query.filters.map_filters.filters.map_uberblighted = {
-    option: true 
+  if (!isUndefined(item.UberBlightedMap)) {
+    searchJSON.query.filters.map_filters.filters.map_uberblighted = {
+      option: true
+    }
   }
   return searchJSON
 }
@@ -256,7 +283,7 @@ const rateTimeLimitArr = {
   }, {
     limit: 10,
     time: 2
-  },],
+  }],
   search: [{
     limit: 25,
     time: 120
@@ -266,7 +293,7 @@ const rateTimeLimitArr = {
   }, {
     limit: 3,
     time: 3
-  },],
+  }],
   exchange: [{
     limit: 40,
     time: 200
@@ -276,14 +303,14 @@ const rateTimeLimitArr = {
   }, {
     limit: 3,
     time: 8
-  },]
+  }]
 }
 let rateTimeLimit = ref({
-  flag: false, second: 0 
+  flag: false, second: 0
 })
 export function getIsCounting() {
   return {
-    rateTimeLimit 
+    rateTimeLimit
   }
 }
 let interval: NodeJS.Timeout | undefined
@@ -305,7 +332,7 @@ function startCountdown(time: number) {
 }
 
 function parseRateTimeLimit(header?: AxiosResponseHeaders) {
-  if(!header) return
+  if (!header) return
   let type = header['x-rate-limit-policy'].split('-')[1] as keyof typeof rateTimeLimitArr
   if (Object.keys(rateTimeLimitArr).includes(type)) {
     let timesArr = header['x-rate-limit-ip-state'].split(',').map(ele => parseInt(ele.substring(0, ele.indexOf(':')))).reverse()
@@ -330,16 +357,16 @@ function cleanupJSON(searchJson: ISearchJson) {
   }
   return searchJson
 }
-export interface ISearchResult{
+export interface ISearchResult {
   searchID: {
-    ID?: string
-    type: 'search'
-  }
-  result: string[]
-  totalCount: number
-  nowFetched: number
-  errData?: string
-  err: boolean
+    ID?: string;
+    type: 'search';
+  };
+  result: string[];
+  totalCount: number;
+  nowFetched: number;
+  errData?: string;
+  err: boolean;
 }
 export async function searchItem(searchJson: ISearchJson, league: string) {
   let searchResult: ISearchResult = {
@@ -347,8 +374,8 @@ export async function searchItem(searchJson: ISearchJson, league: string) {
       type: 'search'
     },
     result: [],
-    totalCount:0,
-    nowFetched:0,
+    totalCount: 0,
+    nowFetched: 0,
     err: false
   }
   searchJson = cleanupJSON(searchJson)
@@ -384,10 +411,10 @@ export async function searchItem(searchJson: ISearchJson, league: string) {
   }
 }
 export interface IFetchResult {
-  price: string | number
-  currency: string
-  amount: number
-  image: string
+  price: string | number;
+  currency: string;
+  amount: number;
+  image: string;
 }
 
 export async function fetchItem(fetchList: string[], searchID: string, oldFetchResult?: IFetchResult[]) {
@@ -431,18 +458,18 @@ export async function fetchItem(fetchList: string[], searchID: string, oldFetchR
   }
   return fetchResult
 }
-export interface IExchangeJson{
+export interface IExchangeJson {
   query: {
     status: {
-      option: 'online'
-    }
-    have: string[]
-    want: string[]
-  }
+      option: 'online';
+    };
+    have: string[];
+    want: string[];
+  };
   sort: {
-    have: 'asc'
-  }
-  engine: 'new'
+    have: 'asc';
+  };
+  engine: 'new';
 }
 export async function getDivineToChaos(league: string) {
   let exchangeJSON: IExchangeJson = {
@@ -480,15 +507,15 @@ export async function getDivineToChaos(league: string) {
 }
 export interface IExchangeResult {
   searchID: {
-    ID?: string
-    type: 'exchange'
-  }
-  result: IFetchResult[]
-  totalCount: number
-  nowFetched: number
-  err: boolean
-  errData?: string
-  currency2?: string
+    ID?: string;
+    type: 'exchange';
+  };
+  result: IFetchResult[];
+  totalCount: number;
+  nowFetched: number;
+  err: boolean;
+  errData?: string;
+  currency2?: string;
 }
 export async function searchExchange(item: IItem, league: string) {
   let exchangeResult: IExchangeResult = {
@@ -496,8 +523,8 @@ export async function searchExchange(item: IItem, league: string) {
       type: 'exchange'
     },
     result: [] as IFetchResult[],
-    totalCount:0,
-    nowFetched:0,
+    totalCount: 0,
+    nowFetched: 0,
     err: false
   }
   let tempResult: any = []

@@ -5,20 +5,20 @@ import type { IAPIitems, IAPIMods } from './APIdata'
 import type { IItem, IItemUniques, IItemStat } from './interface'
 
 const PARSE_SECTION_FAIL = 0, PARSE_SECTION_SUCC = 1, PARSE_SECTION_SKIP = 2, PARSE_ITEM_SKIP = 3
-const parseFuns: ((section: string[]) => number) [] = [
+const parseFuns: ((section: string[]) => number)[] = [
   parseRequirement,
   parseSocket,
   parseItemLevel,
   parseInfluence,
   parseCorrupt,
+  parseEnchantMod,
   parseImplicitMod,
   parseIdentify,
-  parseEnchantMod,
   parseExplicitMod,
 ]
 let itemParsed: IItem
-function findUnique(type: string, isFinded: { flag:boolean }): void {
-  if (isFinded.flag) return null
+function findUnique(type: string, isFinded: { flag: boolean }): void {
+  if (isFinded.flag) return
   let temp: IItemUniques[] = []
   for (const ele of APIitems[type as keyof IAPIitems].entries) {
     if (ele.type === itemParsed.baseType) {
@@ -48,13 +48,7 @@ export function itemAnalyze(item: string) {
     },
     isWeaponOrArmor: false,
     isCorrupt: false,
-    enchant: [],
-    implicit: [],
-    explicit: [],
-    fractured: [],
-    crafted: [],
-    pseudo: [],
-    temple: [],
+    stats: [],
     influences: [],
     quality: {
       search: false 
@@ -415,7 +409,7 @@ function parseMod(section: string[], type: keyof IAPIMods) {
     }
   })
   if (tempArr.length) {
-    itemParsed[type].push(...tempArr)
+    itemParsed.stats.push(...tempArr)
     return PARSE_SECTION_SUCC
   }
   return PARSE_SECTION_SKIP
@@ -451,7 +445,7 @@ function parseExplicitMod(section: string[]) {
     }
   })
   if (craftedSection.length) parsed = parseMod(craftedSection, 'crafted') === PARSE_SECTION_SUCC || parsed
-  if (fracturedSection.length) parsed = parseMod(fracturedSection, 'fractured') === PARSE_SECTION_SUCC || parsed
+  if (fracturedSection.length) parsed = parseMod(fracturedSection, 'fractured') === PARSE_SECTION_SUCC || parsed  
   explicitSection = explicitSection.filter(line => !(line === '隱匿前綴' || line === '隱匿後綴'))
   if (explicitSection.length) parsed = parseMod(explicitSection, 'explicit') === PARSE_SECTION_SUCC || parsed
   if (parsed) return PARSE_SECTION_SUCC
@@ -493,7 +487,7 @@ function parseInfluence(section: string[]) {
       break
     }
     const influence = influences.find(inf => inf.text === line)
-    if (influence) itemParsed.influences?.push(influence)
+    if (influence) itemParsed.influences.push(influence)
   }
   if (itemParsed.influences.length > 0) {
     return PARSE_SECTION_SUCC
@@ -516,27 +510,21 @@ function parseIdentify(section: string[]) {
 }
 function parsePseudoEleResistance() {
   let eleRes = 0
-  function fun(arr: IItemStat[] | undefined) {
-    arr?.forEach(mod => {
-      switch (true) {
-        case mod.id.endsWith('stat_3372524247') || mod.id.endsWith('stat_1671376347') || mod.id.endsWith('stat_4220027924'):
-          eleRes += mod.value?.min ?? 0
-          break
-        case mod.id.endsWith('stat_3441501978') || mod.id.endsWith('stat_4277795662') || mod.id.endsWith('stat_2915988346'):
-          eleRes += (mod.value?.min ?? 0 * 2)
-          break
-        case mod.id.endsWith('stat_2901986750'):
-          eleRes += (mod.value?.min ?? 0 * 3)
-          break
-      }
-    })
-  }
-  fun(itemParsed.implicit)
-  fun(itemParsed.explicit)
-  fun(itemParsed.fractured)
-  fun(itemParsed.crafted)
+  itemParsed.stats?.forEach(mod => {
+    switch (true) {
+      case mod.id.endsWith('stat_3372524247') || mod.id.endsWith('stat_1671376347') || mod.id.endsWith('stat_4220027924'):
+        eleRes += mod.value?.min ?? 0
+        break
+      case mod.id.endsWith('stat_3441501978') || mod.id.endsWith('stat_4277795662') || mod.id.endsWith('stat_2915988346'):
+        eleRes += (mod.value?.min ?? 0 * 2)
+        break
+      case mod.id.endsWith('stat_2901986750'):
+        eleRes += (mod.value?.min ?? 0 * 3)
+        break
+    }
+  })
   if (eleRes) {
-    itemParsed.pseudo?.push({
+    itemParsed.stats.push({
       id: 'pseudo.pseudo_total_elemental_resistance',
       text: '+#% 元素抗性',
       type: '偽屬性',
@@ -635,36 +623,36 @@ function parseClusterJewel(item: string[][]) {
   item.shift()
   if (itemParsed.rarity !== '傳奇') {
     parseEnchantMod(item[0].slice(0, 2))
-    let temp: number | string
+    let temp: number | string | undefined
     switch (itemParsed.baseType) {
       case '巨型星團珠寶':
       case '小型星團珠寶':
-        itemParsed.enchant[0].value.max = itemParsed.enchant[0].value.min
+        itemParsed.stats[0].value.max = itemParsed.stats[0].value.min
         break
       case '中型星團珠寶':
-        temp = itemParsed.enchant[0].value.min
-        itemParsed.enchant[0].value.min = temp === 6 ? 6 : 4
-        itemParsed.enchant[0].value.max = temp === 6 ? 6 : 5
+        temp = itemParsed.stats[0].value.min
+        itemParsed.stats[0].value.min = temp === 6 ? 6 : 4
+        itemParsed.stats[0].value.max = temp === 6 ? 6 : 5
         break
     }
     temp = item[0].find(ele => ele.startsWith('附加的小型天賦給予：'))
-    temp = temp.substring(10, temp.indexOf(' (enchant)'))
+    temp = temp?.substring(10, temp.indexOf(' (enchant)'))
     let tempMod = APImods.clusterJewel.entries.find(mod => mod.text.includes(temp as string))
-    if (tempMod.text.endsWith('(古典)') && itemParsed.baseType === '小型星團珠寶') {
+    if (tempMod?.text.endsWith('(古典)') && itemParsed.baseType === '小型星團珠寶') {
       const tempText = tempMod.text.substring(0, tempMod.text.length - 5)
       console.log(tempText)
       tempMod = APImods.clusterJewel.entries.reverse().find(mod => mod.text.includes(tempText))
     }
-    itemParsed.enchant.push({
+    itemParsed.stats.push({
       id: 'enchant.stat_3948993189',
-      text: tempMod.text.split('\n'),
+      text: tempMod?.text.split('\n'),
       value: {
-        option: Number(tempMod.id)
+        option: Number(tempMod?.id)
       },
       type: '附魔',
       disabled: false 
     })
-    itemParsed.enchant.forEach(ele => ele.disabled = false)
+    itemParsed.stats.forEach(ele => ele.disabled = false)
     item.shift()
   }
   const _parseFuns = [
@@ -685,12 +673,12 @@ function parseForbiddenJewel(item: string[][]) {
       const type = match[1]
       const passive = match[2]
       const matchStat = APImods.forbiddenJewel.entries.find(e => e.text.indexOf(type) > -1)
-      const matchPassive = matchStat.option.options.find(e => e.text === passive)
-      itemParsed.explicit.push({
+      const matchPassive = matchStat?.option?.options.find(e => e.text === passive)
+      itemParsed.stats.push({
         id: matchStat.id,
         text: matchStat.text.replace('#', passive),
         value: {
-          option: matchPassive.id 
+          option: matchPassive?.id 
         },
         disabled: false 
       })
@@ -879,7 +867,7 @@ function parseTample(item: string[][]) {
   item.shift()
   item[0] = item[0].map(line => line.replace(/ \(階級 [123]\)/, ''))
   parseMod(item[0], 'temple')
-  itemParsed.temple = itemParsed.temple.filter(ele => ['多里亞尼之院', '腐敗之地', '祭祀之巔'].includes(ele.text as string))
+  itemParsed.stats = itemParsed.stats.filter(ele => ['多里亞尼之院', '腐敗之地', '祭祀之巔'].includes(ele.text as string))
 }
 function parseFlask(item: string[][]) {
   item[0].forEach(line => {
@@ -907,8 +895,8 @@ function parseLogbook(item: string[][]) {
   for (const section of item) {
     if (section.length >= 2) {
       if (Object.keys(logbookTypes).includes(section[1])) {
-        if (!itemParsed.explicit.find(e => section[1] === e.text)) {
-          itemParsed.explicit.push({
+        if (!itemParsed.stats.find(e => section[1] === e.text)) {
+          itemParsed.stats.push({
             id: logbookTypes[section[1] as keyof typeof logbookTypes], text: section[1], disabled: true 
           })
         }
