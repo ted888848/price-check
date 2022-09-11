@@ -207,7 +207,7 @@ function setupAPIMods(statsJson: any) {
 function setupAPIStatic(data: any) {
   let APIStatic: IStatic[] = []
   data.forEach((group: any) => {
-    if (group.label?.match(/^地圖（(階級\d+|傳奇)）|命運卡$/)) return
+    if (group.label?.match(/^地圖|命運卡/)) return
     APIStatic = APIStatic.concat(cloneDeep(group.entries))
   })
   return APIStatic

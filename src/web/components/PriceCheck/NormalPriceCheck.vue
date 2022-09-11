@@ -52,9 +52,7 @@
            class="flex p-2 items-center justify-center hover:cursor-pointer flex-grow"
            @click="item.searchExchange.have = ('divine' === item.searchExchange.have) ? 'chaos' : 'divine'">
         <span class="mx-1 text-white">神聖價</span>
-        <FontAwesomeIcon v-if="item.searchExchange.have === 'divine'" icon="circle-check"
-                         class="text-green-600 text-xl" />
-        <FontAwesomeIcon v-else icon="circle-xmark" class="text-red-600 text-xl" />
+        <CircleCheck :checked="item.searchExchange.have === 'divine'" />
       </div>
       <div v-else-if="item.itemLevel" class="flex p-2 items-center justify-center "
            :class="{ 'opacity-30': !item.itemLevel.search }" @click.self="item.itemLevel.search = !item.itemLevel.search">
@@ -103,11 +101,10 @@
                  label="label" :searchable="false" multiple />
       </div>
     </div>
-    <div v-if="item.isWeaponOrArmor" class="flex items-center justify-center py-1 hover:cursor-pointer"
+    <div v-if="item.search6L ?? false" class="flex items-center justify-center py-1 hover:cursor-pointer"
          @click="item.search6L = !item.search6L">
       <span class="mx-1 text-white text-xl">6L?</span>
-      <FontAwesomeIcon v-if="item.search6L" icon="circle-check" class="text-green-600 text-xl" />
-      <FontAwesomeIcon v-else icon="circle-xmark" class="text-red-600 text-xl" />
+      <CircleCheck :checked="item.search6L" />
     </div>
     <div class="flex items-center justify-center py-1">
       <span class="mx-1 text-white hover:cursor-default">稀有度:</span>
@@ -117,8 +114,7 @@
     <div class="flex items-center justify-center py-1 hover:cursor-pointer"
          @click="item.searchTwoWeekOffline = !item.searchTwoWeekOffline">
       <span class="mx-1 text-white">2周離線</span>
-      <FontAwesomeIcon v-if="item.searchTwoWeekOffline" icon="circle-check" class="text-green-600 text-xl" />
-      <FontAwesomeIcon v-else icon="circle-xmark" class="text-red-600 text-xl" />
+      <CircleCheck :checked="item.searchTwoWeekOffline" />
     </div>
   </div>
   <table v-if="item.stats.length" class="bg-gray-700 text-center mt-1 text-white text-sm">
@@ -144,8 +140,7 @@
     <tbody v-show="modTbodyToggle" class="modsTbody" style="">
       <tr v-for="mod in item.stats" :key="mod.id" class=" border-b-2 border-gray-400">
         <td class="text-base" @click="mod.disabled = !mod.disabled">
-          <FontAwesomeIcon v-if="!mod.disabled" icon="circle-check" class="text-green-600 text-lg" />
-          <FontAwesomeIcon v-else icon="circle-xmark" class="text-red-600 text-lg" />
+          <CircleCheck :checked="!mod.disabled" />
         </td>
         <td class=" text-lg font-semibold hover:cursor-default" :style="{ color: modTextColor(mod.type) }"
             @click="mod.disabled = !mod.disabled">
@@ -171,26 +166,22 @@
     </tbody>
   </table>
   <div v-if="!isSearching" class="my-2 justify-center flex text-xl">
-    <button
-      class="mx-2 bg-gray-500 text-white rounded px-1 hover:bg-gray-400 disabled:cursor-default disabled:opacity-60 disabled:bg-gray-500"
-      :disabled="rateTimeLimit.flag" @click="searchBtn">
+    <button class="mx-2 bg-gray-500 text-white rounded px-1 hover:bg-gray-400 disabled:cursor-default disabled:opacity-60 disabled:bg-gray-500"
+            :disabled="rateTimeLimit.flag" @click="searchBtn">
       Search
     </button>
     <div v-if="searchResult.err || searchResult.searchID.ID">
-      <button
-        class="mx-2 bg-green-400 text-black rounded px-1 hover:bg-green-300 disabled:cursor-default disabled:opacity-60 disabled:bg-green-400"
-        :disabled="rateTimeLimit.flag || searchResult.nowFetched >= searchResult.totalCount" @click="fetchMore">
+      <button class="mx-2 bg-green-400 text-black rounded px-1 hover:bg-green-300 disabled:cursor-default disabled:opacity-60 disabled:bg-green-400"
+              :disabled="rateTimeLimit.flag || searchResult.nowFetched >= searchResult.totalCount" @click="fetchMore">
         在20筆
       </button>
-      <button
-        class="mx-2 bg-blue-800 text-white rounded px-4 hover:bg-blue-700 disabled:cursor-default disabled:opacity-60 disabled:bg-blue-800"
-        :disabled="rateTimeLimit.flag" @click="openBrower">
+      <button class="mx-2 bg-blue-800 text-white rounded px-4 hover:bg-blue-700 disabled:cursor-default disabled:opacity-60 disabled:bg-blue-800"
+              :disabled="rateTimeLimit.flag" @click="openBrower">
         B
       </button>
     </div>
-    <button
-      class="mx-2 bg-blue-800 text-white rounded px-4 hover:bg-blue-700 disabled:cursor-default disabled:opacity-60 disabled:bg-blue-800"
-      :disabled="rateTimeLimit.flag" @click="openWebView">
+    <button class="mx-2 bg-blue-800 text-white rounded px-4 hover:bg-blue-700 disabled:cursor-default disabled:opacity-60 disabled:bg-blue-800"
+            :disabled="rateTimeLimit.flag" @click="openWebView">
       BV
     </button>
   </div>
@@ -236,6 +227,7 @@ import { maxBy } from 'lodash-es'
 import { computed, ref, nextTick } from 'vue'
 import { getSearchJSON, searchItem, fetchItem, getIsCounting, searchExchange, selectOptions } from '@/web/tradeSide'
 import { APIStatic } from '@/web/APIdata'
+import CircleCheck from '../utility/CircleCheck.vue'
 import type { IItem } from '@/web/interface'
 import type { ISearchResult, IExchangeResult, IFetchResult } from '@/web/tradeSide'
 const props = defineProps<  {

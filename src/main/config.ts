@@ -19,9 +19,6 @@ export function setupConfig() {
     config.set('config', JSON.parse(configData))
     setCookie()
   }) 
-  ipcMain.handle(IPC.GET_CONFIG, () => {
-    return config.get('config')
-  })
   ipcMain.on(IPC.GET_CONFIG, (e) => {
     e.returnValue = config.get('config')
   })

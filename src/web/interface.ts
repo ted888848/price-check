@@ -21,7 +21,7 @@ export interface IItem{
   name?: string;
   uniques?: IItemUniques[];
   raritySearch: {
-    id: string | undefined;
+    value: string | undefined;
     label: string;
   };
   rarity: string;

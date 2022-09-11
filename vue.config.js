@@ -36,9 +36,9 @@ module.exports = defineConfig({
         options.compilerOptions = {
           ...(options.compilerOptions),
           isCustomElement: (tag) => (tag === 'webview'),
-        };
-        return options;
-      });
+        }
+        return options
+      })
   }
 
 })

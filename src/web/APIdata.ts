@@ -1,4 +1,4 @@
-import { IItemUniques } from './interface';
+import { IItemUniques } from './interface'
 import Store from 'electron-store'
 export const baseURL = 'https://web.poe.garena.tw/api/'
 export const store = new Store()

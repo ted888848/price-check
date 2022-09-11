@@ -11,30 +11,25 @@
   </div>
   <div class="flex items-center justify-center py-1 hover:cursor-pointer" @click="twoWeekOffline = !twoWeekOffline">
     <span class="mx-1 text-white">2周離線</span>
-    <FontAwesomeIcon v-if="twoWeekOffline" icon="circle-check" class="text-green-600 text-xl" />
-    <FontAwesomeIcon v-else icon="circle-xmark" class="text-red-600 text-xl" />
+    <CircleCheck :checked="twoWeekOffline" />
   </div>
   <div v-if="!isSearching" class="my-2 justify-center flex text-xl">
-    <button 
-      class="mx-2 bg-gray-500 text-white rounded px-1 hover:bg-gray-400 disabled:cursor-default disabled:opacity-60 disabled:bg-gray-500"
-      :disabled="rateTimeLimit.flag" @click="searchBtn">
+    <button class="mx-2 bg-gray-500 text-white rounded px-1 hover:bg-gray-400 disabled:cursor-default disabled:opacity-60 disabled:bg-gray-500"
+            :disabled="rateTimeLimit.flag" @click="searchBtn">
       Search
     </button>
     <div v-if="searchResult.err || searchResult.searchID.ID">
-      <button
-        class="mx-2 bg-green-400 text-black rounded px-1 hover:bg-green-300 disabled:cursor-default disabled:opacity-60 disabled:bg-green-400"
-        :disabled="rateTimeLimit.flag || searchResult.nowFetched >= searchResult.totalCount" @click="fetchMore">
+      <button class="mx-2 bg-green-400 text-black rounded px-1 hover:bg-green-300 disabled:cursor-default disabled:opacity-60 disabled:bg-green-400"
+              :disabled="rateTimeLimit.flag || searchResult.nowFetched >= searchResult.totalCount" @click="fetchMore">
         在20筆
       </button>
-      <button
-        class="mx-2 bg-blue-800 text-white rounded px-4 hover:bg-blue-700 disabled:cursor-default disabled:opacity-60 disabled:bg-blue-800"
-        :disabled="rateTimeLimit.flag" @click="openBrower">
+      <button class="mx-2 bg-blue-800 text-white rounded px-4 hover:bg-blue-700 disabled:cursor-default disabled:opacity-60 disabled:bg-blue-800"
+              :disabled="rateTimeLimit.flag" @click="openBrower">
         B
       </button>
     </div>
-    <button
-      class="mx-2 bg-blue-800 text-white rounded px-4 hover:bg-blue-700 disabled:cursor-default disabled:opacity-60 disabled:bg-blue-800"
-      :disabled="rateTimeLimit.flag" @click="openWebView">
+    <button class="mx-2 bg-blue-800 text-white rounded px-4 hover:bg-blue-700 disabled:cursor-default disabled:opacity-60 disabled:bg-blue-800"
+            :disabled="rateTimeLimit.flag" @click="openWebView">
       BV
     </button>
   </div>
@@ -76,6 +71,7 @@ import { computed, ref, watch } from 'vue'
 import { maxBy } from 'lodash-es'
 import { searchItem, fetchItem, getIsCounting, selectOptions } from '@/web/tradeSide'
 import { hiestReward as gemReplicaOptions, IHiestReward } from '@/web/APIdata'
+import CircleCheck from '../utility/CircleCheck.vue'
 import type { ISearchResult, ISearchJson, IFetchResult } from '@/web/tradeSide'
 const props = defineProps(['itemProp', 'leagueSelect', 'divineToChaos', 'isOverflow'])
 const { rateTimeLimit } = getIsCounting()
@@ -87,31 +83,34 @@ const gemAltQSelect = ref(gemAltQOptions[0])
 let searchJSON: ISearchJson = {
   query: {
     filters: {
-      trade_filters:{
-        filters:{
+      trade_filters: {
+        filters: {
+          collapse: {
+            option: true
+          }
         }
       },
-      misc_filters:{
-        filters:{
+      misc_filters: {
+        filters: {
         }
       },
-      type_filters:{
-        filters:{
+      type_filters: {
+        filters: {
         }
       },
-      map_filters:{
-        filters:{
+      map_filters: {
+        filters: {
         }
       }
     },
     stats: [{
       type: 'and', filters: []
     }],
-    status:{
+    status: {
       option: 'online'
     }
   },
-  sort:{
+  sort: {
     price: 'asc'
   }
 }
@@ -162,7 +161,7 @@ async function fetchMore() {
   isSearching.value = false
 }
 async function searchBtn() {
-  if (rateTimeLimit.value.flag) return;
+  if (rateTimeLimit.value.flag) return
   resetSearchData()
   isSearching.value = true
   searchJSON.query.name = gemReplicaSelect.value?.name

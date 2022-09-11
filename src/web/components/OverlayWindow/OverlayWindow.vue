@@ -36,8 +36,7 @@ function reloadAPIdata() {
   let configTemp = store.get('config')
   store.clear()
   store.set('config', configTemp)
-  ipcRenderer
-    .invoke(IPC.RELOAD_APIDATA)
+  ipcRenderer.invoke(IPC.RELOAD_APIDATA)
     .then(({ status, error }) => {
       if (status) {
         emit('reloadLeagues')

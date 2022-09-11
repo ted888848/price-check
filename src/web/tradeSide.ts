@@ -132,22 +132,22 @@ export const selectOptions = {
     label: '圖拉克斯'
   }],
   rarityOptions: [{
-    id: undefined,
+    value: undefined,
     label: '任何'
   }, {
-    id: 'normal',
+    value: 'normal',
     label: '普通'
   }, {
-    id: 'magic',
+    value: 'magic',
     label: '魔法'
   }, {
-    id: 'rare',
+    value: 'rare',
     label: '稀有'
   }, {
-    id: 'unique',
+    value: 'unique',
     label: '傳奇'
   }, {
-    id: 'nonunique',
+    value: 'nonunique',
     label: '非傳奇'
   }],
 }
@@ -193,7 +193,7 @@ export function getSearchJSON(item: IItem) {
   if (!item.type.searchByType) {//如果沒有要依照類別搜尋
     searchJSON.query.type = item.baseType
   }
-  if (item.raritySearch.id === 'unique') {
+  if (item.raritySearch.value === 'unique') {
     searchJSON.query.name = item.name || undefined
   }
   if (!isUndefined(item.isCorrupt)) {
@@ -249,9 +249,9 @@ export function getSearchJSON(item: IItem) {
       }
     }
   }
-  if (item.raritySearch.id) {
+  if (item.raritySearch.value) {
     searchJSON.query.filters.type_filters.filters.rarity = {
-      option: item.raritySearch.id
+      option: item.raritySearch.value
     }
   }
   if (item.searchTwoWeekOffline) {
@@ -315,7 +315,7 @@ export function getIsCounting() {
 }
 let interval: NodeJS.Timeout | undefined
 function startCountdown(time: number) {
-  if (time < rateTimeLimit.value.second) return;
+  if (time < rateTimeLimit.value.second) return
   if (interval) {
     clearInterval(interval)
     interval = undefined
@@ -418,7 +418,7 @@ export interface IFetchResult {
 }
 
 export async function fetchItem(fetchList: string[], searchID: string, oldFetchResult?: IFetchResult[]) {
-  if (!fetchList.length) return oldFetchResult ?? [];
+  if (!fetchList.length) return oldFetchResult ?? []
   let fetchResult: IFetchResult[] = []
   let itemJsonUrl: string[] = []
   for (let i = 0; i < fetchList.length; i += 10) {
