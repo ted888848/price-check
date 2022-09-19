@@ -1,7 +1,6 @@
 import { IItemUniques } from './interface'
 import Store from 'electron-store'
 export const baseURL = 'https://web.poe.garena.tw/api/'
-export const store = new Store()
 
 export interface IHiestReward{
   name?: string;
@@ -80,6 +79,9 @@ export let APImods: IAPIMods
 export let APIStatic: IStatic[]
 export let currencyImageUrl: IStatic[]
 
+export const store = new Store({
+  name: 'APIData'
+})
 export function loadAPIdata() {
   leagues = store.get('Leagues') as string[]
   APIitems = store.get('APIitems') as IAPIitems

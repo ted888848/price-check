@@ -18,40 +18,62 @@ export function setupShortcut() {
   })
 }
 
-function registShortcut() {
-  globalShortcut.register('CmdOrCtrl+D', () => {
+export function registShortcut() {
+  globalShortcut.register(config.priceCheckHotkey, () => {
     getClopboard()
       .then((clip) => togglePriceCheck(clip))
       .catch((err) => console.log(err))
     uIOhook.keyTap(UiohookKey.C, [UiohookKey.Ctrl])
   })
-  globalShortcut.register('CmdOrCtrl+F2', () => {
+  globalShortcut.register(config.settingHotkey, () => {
     toggleOverlay()
   })
-  globalShortcut.register('F5', () => pasteTextToChat('/hideout'))
-  globalShortcut.register('F4', () => pasteTextToChat(`/kick ${config.get('config.characterName')}`))
-  globalShortcut.register('F3', () => pasteTextToChat('%TY'))
-  globalShortcut.register('F2', () => pasteTextToChat('/invite ', true))
+  config.shortcuts.forEach((shortcut) => {
+    if(!shortcut.hotkey.length) return
+    let typeText = ''
+    let moveToFront = false
+    let lastMsg = false
+    if(shortcut.outputText.startsWith('@last')){
+      lastMsg = true
+      typeText = shortcut.outputText.substring(5).trim()
+    }
+    else if(shortcut.outputText.endsWith('@last')){
+      lastMsg = true
+      moveToFront = true
+      typeText = shortcut.outputText.substring(0, shortcut.outputText.length - 5)
+    }
+    else if(shortcut.outputText.includes('@char')){
+      typeText = shortcut.outputText.replace('@char', config.characterName)
+    }
+    else{
+      typeText = shortcut.outputText
+    }
+    globalShortcut.register(shortcut.hotkey, () => pasteTextToChat(typeText, lastMsg, moveToFront))
+  })
 }
-function unRegistShortcut() {
+export function unRegistShortcut() {
   globalShortcut.unregisterAll()
 }
 let isClipStored = true
-function pasteTextToChat(text: string, moveToFront?: boolean) {
+function pasteTextToChat(text: string, lastMsg?: boolean, moveToFront?: boolean) {
   if (!isClipStored) {
     return
   }
   isClipStored = false
   let clipSave = clipboard.readText()
-  if (moveToFront) {
-    clipboard.writeText(text)
+  clipboard.writeText(text)
+  if(lastMsg){
     uIOhook.keyTap(UiohookKey.Enter, [UiohookKey.Ctrl])
+  }
+  else{
+    uIOhook.keyTap(UiohookKey.Enter)
+  }
+
+  if (moveToFront) {
     uIOhook.keyTap(UiohookKey.Home)
     uIOhook.keyTap(UiohookKey.Delete)
   }
-  else {
-    clipboard.writeText(text)
-    uIOhook.keyTap(UiohookKey.Enter)
+  else if(/^[#%$&/]/.test(text)) {
     uIOhook.keyTap(UiohookKey.A, [UiohookKey.Ctrl])
   }
   uIOhook.keyTap(UiohookKey.V, [UiohookKey.Ctrl])

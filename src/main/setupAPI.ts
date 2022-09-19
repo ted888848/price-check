@@ -6,7 +6,9 @@ import { autoUpdater } from 'electron-updater'
 import { setImmediate } from 'timers'
 import { buildTray } from './tray'
 import type {IAPIitems, IAPIMods, IStatic} from '@/web/APIdata'
-let store = new Store()
+let store = new Store({
+  name: 'APIData'
+})
 
 function setupItemArray(itemArray: any[], hiestReward: any[]) {
   let itemBaseType: any[] = []

@@ -138,9 +138,9 @@ export function itemAnalyze(item: string) {
     case '可堆疊通貨':
     case '地圖碎片':
     case '掘獄可堆疊有插槽通貨': {
-      if(APIStatic.some((ele: IStatic) => ele.text === itemParsed.baseType)){
+      itemParsed.autoSearch = true
+      if (APIStatic.some((ele: IStatic) => ele.text === itemParsed.baseType)) {
         itemParsed.searchExchange.option = true
-        itemParsed.autoSearch = true
         const searchExchangeDivine = ipcRenderer.sendSync(IPC.GET_CONFIG).searchExchangeDivine as boolean
         itemParsed.searchExchange.have = searchExchangeDivine ? 'divine' : 'chaos'
       }
@@ -231,7 +231,7 @@ function parseItemName(section: string[], itemSection: string[][]) {
     value: 'nonunique',
     label: '非傳奇'
   }]
-  const temp = section[0].match(/物品種類: ([^\n]+)/)?.[1] ?? ''
+  const temp = section[0].match(/物品種類: ([^\n]+)/)[1]
   itemParsed.type = {
     text: temp, option: typeTrans[temp as keyof typeof typeTrans], searchByType: false
   }
@@ -509,20 +509,24 @@ function parseIdentify(section: string[]) {
 }
 function parsePseudoEleResistance() {
   let eleRes = 0
-  itemParsed.stats?.forEach(mod => {
+  let flag = false
+  itemParsed.stats.forEach(mod => {
     switch (true) {
       case mod.id.endsWith('stat_3372524247') || mod.id.endsWith('stat_1671376347') || mod.id.endsWith('stat_4220027924'):
-        eleRes += mod.value?.min ?? 0
+        eleRes += mod.value.min
+        flag = true
         break
       case mod.id.endsWith('stat_3441501978') || mod.id.endsWith('stat_4277795662') || mod.id.endsWith('stat_2915988346'):
-        eleRes += (mod.value?.min ?? 0 * 2)
+        eleRes += (mod.value.min * 2)
+        flag = true
         break
       case mod.id.endsWith('stat_2901986750'):
-        eleRes += (mod.value?.min ?? 0 * 3)
+        eleRes += (mod.value.min * 3)
+        flag = true
         break
     }
   })
-  if (eleRes) {
+  if (flag) {
     itemParsed.stats.push({
       id: 'pseudo.pseudo_total_elemental_resistance',
       text: '+#% 元素抗性',

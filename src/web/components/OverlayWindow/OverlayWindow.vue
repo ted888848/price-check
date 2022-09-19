@@ -15,7 +15,7 @@
 import { ref } from 'vue'
 import { ipcRenderer } from 'electron'
 import IPC from '@/ipc/ipcChannel'
-import { loadAPIdata, store } from '@/web/APIdata'
+import { loadAPIdata } from '@/web/APIdata'
 import SettingWindow from '@/web/components/SettingWindow/SettingWindow.vue'
 const overlayWindowShow = ref(false)
 function closeOverlay() {
@@ -33,9 +33,6 @@ const emit = defineEmits<{
   (event: 'reloadLeagues'): void;
 }>()
 function reloadAPIdata() {
-  let configTemp = store.get('config')
-  store.clear()
-  store.set('config', configTemp)
   ipcRenderer.invoke(IPC.RELOAD_APIDATA)
     .then(({ status, error }) => {
       if (status) {

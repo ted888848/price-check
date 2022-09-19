@@ -162,7 +162,7 @@ export function getSearchJSON(item: IItem) {
               min: 2
             },
             collapse: {
-              option: false
+              option: true
             }
           }
         },
