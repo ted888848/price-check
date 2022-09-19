@@ -90,12 +90,11 @@ export function setupConfig() {
   setCookie()
 }
 function setCookie() {
-  let poesessid = store.get('POESESSID', '')
-  if (poesessid) {
+  if (config.POESESSID) {
     session.defaultSession.cookies.set({
       url: 'https://web.poe.garena.tw',
       name: 'POESESSID',
-      value: poesessid,
+      value: config.POESESSID,
       path: '/',
       httpOnly: true,
       secure: true,
