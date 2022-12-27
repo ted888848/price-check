@@ -1,6 +1,5 @@
 import { IItemUniques } from './interface'
 import Store from 'electron-store'
-export const baseURL = 'https://web.poe.garena.tw/api/'
 
 export interface IHiestReward{
   name?: string;

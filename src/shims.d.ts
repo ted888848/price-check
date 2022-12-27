@@ -6,3 +6,4 @@ declare module '*.vue'{
 }
 
 declare const __static: string
+declare type ArrayValueType<T> = T extends (infer E)[] ? E : never

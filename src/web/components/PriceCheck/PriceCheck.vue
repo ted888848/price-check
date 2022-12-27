@@ -9,7 +9,7 @@
         <div class="flex justify-start mr-auto ml-1 flex-1">
           <VSelect v-model="currentPriceCheck" class="text-sm style-chooser style-chooser-inf text-center"
                    :options="priceCheckOptions" label="label" :searchable="false" :clearable="false"
-                   :reduce="(option: any) => option.value" />
+                   :reduce="(option: ArrayValueType<typeof priceCheckOptions>) => option.value" />
         </div>
         <div class="flex justify-center flex-1">
           <div class="relative exaltedImg ">
@@ -122,7 +122,12 @@ ipcRenderer.on(IPC.PRICE_CHECK_SHOW, (e, clip, pos) => {
   windowShowHide.value = true
   currentPriceCheck.value = 'NormalPriceCheck'
   priceCheckPos.value.right = pos
-  item.value = itemAnalyze(clip)
+  try{
+    item.value = itemAnalyze(clip)
+  }
+  catch(e){
+    console.log(e)
+  }
 })
 ipcRenderer.on(IPC.POE_ACTIVE, () => {
   windowShowHide.value = false

@@ -3,9 +3,8 @@ import Store from 'electron-store'
 import { cloneDeep } from 'lodash-es'
 import { app, session, dialog } from 'electron' //, shell
 import { autoUpdater } from 'electron-updater'
-import { setImmediate } from 'timers'
 import { buildTray } from './tray'
-import type {IAPIitems, IAPIMods, IStatic} from '@/web/APIdata'
+import type {IAPIitems, IAPIMods, IStatic, IHiestReward} from '@/web/APIdata'
 let store = new Store({
   name: 'APIData'
 })
@@ -33,22 +32,8 @@ function setupItemArray(itemArray: any[], hiestReward: any[]) {
   return itemBaseType
 }
 function setupAPIItems(itemsJson: any) {
-  let APIitems: IAPIitems = {
-    accessories: undefined,
-    armour: undefined,
-    cards: undefined,
-    currency: undefined,
-    flasks: undefined,
-    gems: undefined,
-    jewels: undefined,
-    maps: undefined,
-    weapons: undefined,
-    watchstones: undefined,
-    heistequipment: undefined,
-    heistmission: undefined,
-    logbook: undefined
-  }
-  let hiestReward: any = []
+  let APIitems: IAPIitems
+  let hiestReward: IHiestReward[] = []
   itemsJson.result.forEach((itemGroup: any) => {
     let groupID = itemGroup.id as keyof IAPIitems
     switch (groupID) {
@@ -81,7 +66,7 @@ function setupAPIItems(itemsJson: any) {
     }
   })
   return {
-    APIitems, hiestReward
+    APIitems: APIitems!, hiestReward
   }
 }
 function checkNewline(statsGroup: any, type: string) {
@@ -99,17 +84,7 @@ function checkNewline(statsGroup: any, type: string) {
   return undefined
 }
 function setupAPIMods(statsJson: any) {
-  let APImods: IAPIMods = {
-    pseudo: undefined,
-    explicit: undefined,
-    implicit: undefined,
-    fractured: undefined,
-    enchant: undefined,
-    crafted: undefined,
-    temple: undefined,
-    clusterJewel: undefined,
-    forbiddenJewel: undefined,
-  }
+  let APImods: IAPIMods
   statsJson.result.forEach((statsGroup: any) => {
     switch (statsGroup.label) {
       case '偽屬性':
@@ -204,7 +179,7 @@ function setupAPIMods(statsJson: any) {
         return
     }
   })
-  return APImods
+  return APImods!
 }
 function setupAPIStatic(data: any) {
   let APIStatic: IStatic[] = []
@@ -262,14 +237,15 @@ export const updateState = {
   canClick: true
 }
 
-autoUpdater.on('update-available', ({ version }) => {
+autoUpdater.on('update-available', ({version, releaseNotes}) => {
   updateState.label = `下載新版本 v${version}中`
   updateState.canClick = false
   buildTray()
   dialog.showMessageBox({
     title: '有新版本',
     type: 'info',
-    message: `有新版本 v${version}，並已經開始在背景下載`,
+    message: `有新版本 v${version}，並已經開始在背景下載\n
+    ${releaseNotes!.toString().replaceAll(/<[/]?(ul|li)>/g, '')}`,
   })
 })
 autoUpdater.on('update-downloaded', () => {
@@ -280,7 +256,7 @@ autoUpdater.on('update-downloaded', () => {
     title: '下載完成',
     type: 'info',
     message: '更新安裝擋已經下載完成，如果沒有自動重新啟動，\n請手動離開後稍等安裝完畢再打開',
-    buttons: ['重新開啟並安裝更新(可能會沒用)', '稍後再安裝'],
+    buttons: ['重新開啟並安裝更新', '稍後再安裝'],
     defaultId: 0
   })
     .then((result) => {

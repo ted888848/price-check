@@ -46,7 +46,7 @@
     </thead>
     <tbody class="">
       <tr v-for="ele in fetchResultSorted" :key="`${ele.price}|${ele.currency}`" class=" border-b-2 border-gray-600"
-          :class="{ 'text-red-500 text-xl bg-indigo-600 font-bold': ele.amount === maxAmount.amount }">
+          :class="{ 'text-red-500 text-xl bg-indigo-600 font-bold': ele.amount === maxAmount!.amount }">
         <td class="flex justify-center items-center">
           {{ ele.price }}<img :src="ele.image" class=" w-7 h-7">
         </td>
@@ -76,7 +76,7 @@ import type { ISearchResult, ISearchJson, IFetchResult } from '@/web/tradeSide'
 const props = defineProps(['itemProp', 'leagueSelect', 'divineToChaos', 'isOverflow'])
 const { rateTimeLimit } = getIsCounting()
 
-const gemReplicaSelect = ref<IHiestReward>(null)
+const gemReplicaSelect = ref<IHiestReward>()
 const { gemAltQOptions } = selectOptions
 const gemAltQSelect = ref(gemAltQOptions[0])
 
@@ -87,6 +87,9 @@ let searchJSON: ISearchJson = {
         filters: {
           collapse: {
             option: true
+          },
+          price: {
+            min: 2
           }
         }
       },
@@ -157,7 +160,7 @@ async function fetchMore() {
   let fetchEndPos = (searchResult.value.nowFetched + 20) <= (searchResult.value.totalCount) ? (searchResult.value.nowFetched + 20) : (searchResult.value.totalCount)
   searchResult.value.nowFetched = fetchEndPos
   let fetchList = searchResult.value.result.slice(fetchStartPos, fetchEndPos)
-  fetchResult.value = await fetchItem(fetchList, searchResult.value.searchID.ID, fetchResult.value)
+  fetchResult.value = await fetchItem(fetchList, searchResult.value.searchID.ID!, fetchResult.value)
   isSearching.value = false
 }
 async function searchBtn() {
@@ -177,7 +180,7 @@ async function searchBtn() {
     let fetchEndPos = (searchResult.value.nowFetched + 20) <= (searchResult.value.totalCount) ? (searchResult.value.nowFetched + 20) : (searchResult.value.totalCount)
     searchResult.value.nowFetched = fetchEndPos
     let fetchList = searchResult.value.result.slice(fetchStartPos, fetchEndPos)
-    fetchResult.value = await fetchItem(fetchList, searchResult.value.searchID.ID)
+    fetchResult.value = await fetchItem(fetchList, searchResult.value.searchID.ID!)
   }
   isSearching.value = false
 }

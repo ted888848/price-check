@@ -8,45 +8,45 @@
     <span>{{ item.type.text }}</span>
   </div>
   <VSelect v-if="undefinedUnqiue && item.uniques.length > 0" v-model="item.name" class="text-sm style-chooser"
-           :options="item.uniques" label="name" :reduce="(ele: any) => ele.name" />
+           :options="item.uniques" label="name" :reduce="(ele: ArrayValueType<typeof item['uniques']>) => ele.name" />
   <div class="mx-0  bg-blue-900 grid grid-cols-3">
     <div class="flex p-2 items-center justify-center">
       <span class="mx-1 text-white hover:cursor-default">汙染:</span>
       <VSelect v-model="item.isCorrupt" class="text-sm style-chooser flex-grow" :options="generalOption" label="label"
-               :reduce="(ele: any) => ele.value" :clearable="false" :searchable="false" />
+               :reduce="(ele: ArrayValueType<typeof generalOption>) => ele.value" :clearable="false" :searchable="false" />
     </div>
     <div>
       <div v-if="!item.type.text.endsWith('技能寶石')" class="flex p-2 items-center justify-center">
         <span class="mx-1 text-white hover:cursor-default">已鑑定:</span>
         <VSelect v-model="item.isIdentify" class="text-sm style-chooser flex-grow" :options="generalOption"
-                 label="label" :reduce="(ele: any) => ele.value" :clearable="false" :searchable="false" />
+                 label="label" :reduce="(ele: ArrayValueType<typeof generalOption>) => ele.value" :clearable="false" :searchable="false" />
       </div>
       <div v-else class="flex p-2 items-center justify-center">
         <span class="mx-1 text-white hover:cursor-default">相異品:</span>
         <VSelect v-model="item.altQType" class="text-sm style-chooser flex-grow" :options="gemAltQOptions" label="label"
-                 :reduce="(ele: any) => ele.value" :clearable="false" :searchable="false" />
+                 :reduce="(ele: ArrayValueType<typeof gemAltQOptions>) => ele.value" :clearable="false" :searchable="false" />
       </div>
     </div>
     <div class="flex items-center justify-center">
       <div v-if="item.gemLevel" class="flex p-2 items-center justify-center"
-           :class="{ 'opacity-30': !item.gemLevel.search }" @click.self="item.gemLevel.search = !item.gemLevel.search">
+           :class="{ 'opacity-30': !item.gemLevel.search }" @click.self="item.gemLevel!.search = !item.gemLevel!.search">
         <span class="mx-1 text-white hover:cursor-default"
-              @click.self="item.gemLevel.search = !item.gemLevel.search">寶石等級:</span>
+              @click.self="item.gemLevel!.search = !item.gemLevel!.search">寶石等級:</span>
         <input v-model.number="item.gemLevel.min"
                class="w-8 appearance-none rounded bg-gray-400 text-center mx-1 font-bold" type="number"
-               :disabled="!item.gemLevel.search" @dblclick="delete item.gemLevel.min">
+               :disabled="!item.gemLevel.search" @dblclick="delete item.gemLevel!.min">
         <input v-model.number="item.gemLevel.max" class="w-8 appearance-none rounded bg-gray-400 text-center font-bold"
-               type="number" :disabled="!item.gemLevel.search" @dblclick="delete item.gemLevel.max">
+               type="number" :disabled="!item.gemLevel.search" @dblclick="delete item.gemLevel!.max">
       </div>
       <div v-else-if="item.mapTier" class="flex p-2 items-center justify-center"
-           :class="{ 'opacity-30': !item.mapTier.search }" @click.self="item.mapTier.search = !item.mapTier.search">
+           :class="{ 'opacity-30': !item.mapTier.search }" @click.self="item.mapTier!.search = !item.mapTier!.search">
         <span class="mx-1 text-white hover:cursor-default"
-              @click.self="item.mapTier.search = !item.mapTier.search">地圖階級:</span>
+              @click.self="item.mapTier!.search = !item.mapTier!.search">地圖階級:</span>
         <input v-model.number="item.mapTier.min"
                class="w-8 appearance-none rounded bg-gray-400 text-center mx-1 font-bold" type="number"
-               :disabled="!item.mapTier.search" @dblclick="delete item.mapTier.min">
+               :disabled="!item.mapTier.search" @dblclick="delete item.mapTier!.min">
         <input v-model.number="item.mapTier.max" class="w-8 appearance-none rounded bg-gray-400 text-center font-bold"
-               type="number" :disabled="!item.mapTier.search" @dblclick="delete item.mapTier.max">
+               type="number" :disabled="!item.mapTier.search" @dblclick="delete item.mapTier!.max">
       </div>
       <div v-else-if="item.searchExchange.option"
            class="flex p-2 items-center justify-center hover:cursor-pointer flex-grow"
@@ -55,14 +55,14 @@
         <CircleCheck :checked="item.searchExchange.have === 'divine'" />
       </div>
       <div v-else-if="item.itemLevel" class="flex p-2 items-center justify-center "
-           :class="{ 'opacity-30': !item.itemLevel.search }" @click.self="item.itemLevel.search = !item.itemLevel.search">
+           :class="{ 'opacity-30': !item.itemLevel.search }" @click.self="item.itemLevel!.search = !item.itemLevel!.search">
         <span class="mx-1 text-white hover:cursor-default"
-              @click.self="item.itemLevel.search = !item.itemLevel.search">物品等級:</span>
+              @click.self="item.itemLevel!.search = !item.itemLevel!.search">物品等級:</span>
         <input v-model.number="item.itemLevel.min"
                class="w-8 appearance-none rounded bg-gray-400 text-center mx-1 font-bold" type="number"
-               :disabled="!item.itemLevel.search" @dblclick="delete item.itemLevel.min">
+               :disabled="!item.itemLevel.search" @dblclick="delete item.itemLevel!.min">
         <input v-model.number="item.itemLevel.max" class="w-8 appearance-none rounded bg-gray-400 text-center font-bold"
-               type="number" :disabled="!item.itemLevel.search" @dblclick="delete item.itemLevel.max">
+               type="number" :disabled="!item.itemLevel.search" @dblclick="delete item.itemLevel!.max">
       </div>
     </div>
     <div class="flex p-2 items-center justify-center" :class="{ 'opacity-30': !item.quality.search }"
@@ -77,14 +77,14 @@
     </div>
     <div v-if="item.elderMap" class="flex col-span-2 items-center justify-center">
       <span class="mx-1 text-white hover:cursor-default">尊師守衛:</span>
-      <VSelect v-model="item.elderMap.value.option" class="text-sm style-chooser style-chooser-inf "
-               :options="elderMapOptions" :reduce="(ele: any) => ele.value" label="label" :searchable="false"
+      <VSelect v-model="item.elderMap.value!.option" class="text-sm style-chooser style-chooser-inf "
+               :options="elderMapOptions" :reduce="(ele: ArrayValueType<typeof elderMapOptions>) => ele.value" label="label" :searchable="false"
                :clearable="false" />
     </div>
     <div v-if="item.conquerorMap" class="flex col-span-2 items-center justify-center">
       <span class="mx-1 text-white hover:cursor-default">征服者:</span>
-      <VSelect v-model="item.conquerorMap.value.option" class="text-sm style-chooser style-chooser-inf "
-               :options="conquerorMapOptions" :reduce="(ele: any) => ele.value" label="label" :searchable="false"
+      <VSelect v-model="item.conquerorMap.value!.option" class="text-sm style-chooser style-chooser-inf "
+               :options="conquerorMapOptions" :reduce="(ele: ArrayValueType<typeof conquerorMapOptions>) => ele.value" label="label" :searchable="false"
                :clearable="false" />
     </div>
     <div v-else-if="item.blightedMap" class="flex items-center justify-center">
@@ -101,7 +101,7 @@
                  label="label" :searchable="false" multiple />
       </div>
     </div>
-    <div v-if="item.search6L ?? false" class="flex items-center justify-center py-1 hover:cursor-pointer"
+    <div v-if="item.search6L!==undefined" class="flex items-center justify-center py-1 hover:cursor-pointer"
          @click="item.search6L = !item.search6L">
       <span class="mx-1 text-white text-xl">6L?</span>
       <CircleCheck :checked="item.search6L" />
@@ -155,12 +155,12 @@
         <td>
           <input v-if="mod.value && !mod.value.option" v-model.number="mod.value.min" type="number"
                  class="w-8 appearance-none rounded bg-gray-400 text-center text-black font-bold"
-                 @dblclick="delete mod.value.min">
+                 @dblclick="delete mod.value!.min">
         </td>
         <td>
           <input v-if="mod.value && !mod.value.option" v-model.number="mod.value.max" type="number"
                  class="w-8 appearance-none rounded bg-gray-400 text-center text-black font-bold"
-                 @dblclick="delete mod.value.max">
+                 @dblclick="delete mod.value!.max">
         </td>
       </tr>
     </tbody>
@@ -198,7 +198,7 @@
     </thead>
     <tbody class="">
       <tr v-for="ele in fetchResultSorted" :key="`${ele.price}|${ele.currency}`" class=" border-b-2 border-gray-600"
-          :class="{ 'text-yellow-400 text-xl bg-indigo-700 font-bold': ele.amount === maxAmount.amount }">
+          :class="{ 'text-yellow-400 text-xl bg-indigo-700 font-bold': ele.amount === maxAmount!.amount }">
         <td v-if="item.searchExchange.option" class="flex justify-center items-center">
           <img :src="ele.image" class=" w-7 h-7">{{ ele.price }}<img :src="currency2Img" class=" w-7 h-7">
         </td>
@@ -245,7 +245,7 @@ const {
   generalOption, gemAltQOptions, influencesOptions, elderMapOptions,
   conquerorMapOptions, rarityOptions
 } = selectOptions
-function modTextColor(type: string) {
+function modTextColor(type?: string) {
   switch (type) {
     case '固定':
       return '#346beb'
@@ -257,8 +257,9 @@ function modTextColor(type: string) {
       return 'red'
     case '偽屬性':
       return '#9936eb'
+    default:
+      return 'white'
   }
-  return 'white'
 }
 
 const searchResult = ref<ISearchResult | IExchangeResult>({
@@ -296,7 +297,7 @@ async function fetchMore() {
   let fetchEndPos = (searchResult.value.nowFetched + 20) <= (searchResult.value.totalCount) ? (searchResult.value.nowFetched + 20) : (searchResult.value.totalCount)
   searchResult.value.nowFetched = fetchEndPos
   let fetchList = searchResult.value.result.slice(fetchStartPos, fetchEndPos) as string[]
-  fetchResult.value = await fetchItem(fetchList, searchResult.value.searchID.ID, fetchResult.value)
+  fetchResult.value = await fetchItem(fetchList, searchResult.value.searchID.ID!, fetchResult.value)
   isSearching.value = false
   nextTick(() => { modTbodyToggle.value = !props.isOverflow() })
 }
@@ -307,7 +308,7 @@ async function searchBtn() {
   if (item.value.searchExchange.option) {
     searchResult.value = await searchExchange(item.value, props.leagueSelect)
     if (!searchResult.value.err) {
-      currency2Img.value = `https://web.poe.garena.tw${APIStatic.find(ele => ele.id === (searchResult.value as IExchangeResult).currency2).image}`
+      currency2Img.value = `https://web.poe.garena.tw${APIStatic.find(ele => ele.id === (searchResult.value as IExchangeResult).currency2)!.image}`
       fetchResult.value = searchResult.value.result
     }
   }
@@ -318,7 +319,7 @@ async function searchBtn() {
       let fetchEndPos = (searchResult.value.nowFetched + 20) <= (searchResult.value.totalCount) ? (searchResult.value.nowFetched + 20) : (searchResult.value.totalCount)
       searchResult.value.nowFetched = fetchEndPos
       let fetchList = searchResult.value.result.slice(fetchStartPos, fetchEndPos)
-      fetchResult.value = await fetchItem(fetchList, searchResult.value.searchID.ID)
+      fetchResult.value = await fetchItem(fetchList, searchResult.value.searchID.ID!)
     }
   }
   isSearching.value = false

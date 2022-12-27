@@ -19,7 +19,7 @@ export interface IItem{
     searchByType: boolean;
   };
   name?: string;
-  uniques?: IItemUniques[];
+  uniques: IItemUniques[];
   raritySearch: {
     value: string | undefined;
     label: string;
@@ -41,6 +41,7 @@ export interface IItem{
     search: boolean;
   };
   altQType?: number;
+  vaalVer?: boolean;
   requireLevel?: number;
   requireInt?: number;
   requireStr?: number;
@@ -84,7 +85,7 @@ export interface IItem{
     have: 'chaos' | 'divine';
   };
   search6L?: boolean;
-  [key: string]: any;
+  // [key: string]: any;
 }
 
 export interface IItemUniques{

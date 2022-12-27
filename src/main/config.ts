@@ -2,7 +2,7 @@ import Store, {Schema} from 'electron-store'
 import { ipcMain, session } from 'electron'
 import IPC from '@/ipc/ipcChannel'
 import {registShortcut, unRegistShortcut} from './shortcuts'
-type hotkeyType= 'price-check' | 'type-in-chat' | 'open-setting'
+type hotkeyType= 'type-in-chat'
 export interface IConfig {
   characterName: string;
   searchExchangeDivine: boolean;
@@ -13,7 +13,7 @@ export interface IConfig {
   shortcuts: {
     hotkey: string;
     type: hotkeyType;
-    outputText?: string;
+    outputText: string;
   }[]; 
 }
 const defaultStore: IConfig = {

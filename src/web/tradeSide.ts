@@ -304,7 +304,7 @@ const rateTimeLimitArr = {
     limit: 3,
     time: 8
   }]
-}
+} as const
 let rateTimeLimit = ref({
   flag: false, second: 0
 })
