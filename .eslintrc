@@ -1,0 +1,103 @@
+{
+  "env": {
+    "node": true,
+    "browser": true
+  },
+  "extends": [
+    "eslint:recommended",
+    "plugin:vue/vue3-recommended",
+    "plugin:@typescript-eslint/recommended"
+  ],
+  "plugins": [
+    "@typescript-eslint"
+  ],
+  "parserOptions": {
+    "parser": "@typescript-eslint/parser"
+  },
+  "parser": "vue-eslint-parser",
+  "rules": {
+    "quotes": [
+      "warn",
+      "single"
+    ],
+    "prefer-const": "off",
+    "no-fallthrough": "off",
+    "vue/max-attributes-per-line": "off",
+    "vue/first-attribute-linebreak": "off",
+    "vue/html-closing-bracket-newline": [
+      "warn",
+      {
+        "multiline": "never"
+      }
+    ],
+    "vue/require-prop-types": "off",
+    "vue/arrow-spacing": [
+      "warn",
+      {
+        "before": true,
+        "after": true
+      }
+    ],
+    "indent": "off",
+    "semi": [
+      "warn",
+      "never"
+    ],
+    "@typescript-eslint/indent": [
+      "warn",
+      2,
+      {
+        "SwitchCase": 1
+      }
+    ],
+    "space-infix-ops": "warn",
+    "arrow-spacing": [
+      "warn",
+      {
+        "before": true,
+        "after": true
+      }
+    ],
+    "switch-colon-spacing": [
+      "warn",
+      {
+        "after": true,
+        "before": false
+      }
+    ],
+    "object-property-newline": [
+      "warn",
+      {
+        "allowAllPropertiesOnSameLine": false,
+        "allowMultiplePropertiesPerLine": true
+      }
+    ],
+    "object-curly-newline": [
+      "warn",
+      {
+        "ObjectExpression": "always",
+        "ObjectPattern": {
+          "multiline": true
+        },
+        "ImportDeclaration": "never",
+        "ExportDeclaration": {
+          "multiline": true,
+          "minProperties": 3
+        }
+      }
+    ],
+    "array-bracket-spacing": "warn",
+    "key-spacing": "warn",
+    "@typescript-eslint/no-non-null-assertion": "off",
+    "@typescript-eslint/no-explicit-any": "off",
+    "@typescript-eslint/member-delimiter-style": "warn",
+    "@typescript-eslint/type-annotation-spacing": "warn",
+    "@typescript-eslint/comma-spacing": "warn"
+  },
+  "globals": {
+    "defineEmits": "writable",
+    "defineExpose": "writable",
+    "defineProps": "writable",
+    "__static": "readonly"
+  }
+}
