@@ -1,7 +1,6 @@
 import { ipcRenderer } from 'electron'
 import IPC from '@/ipc/ipcChannel'
 import { APIitems, APImods, APIStatic } from './APIdata'
-
 enum ParseResult {
   PARSE_SECTION_FAIL,
   PARSE_SECTION_SUCC,
@@ -9,6 +8,7 @@ enum ParseResult {
   PARSE_ITEM_SKIP
 }
 const parseFuns: ((section: string[]) => ParseResult)[] = [
+  parseRGB,
   parseRequirement,
   parseSocket,
   parseItemLevel,
@@ -20,8 +20,8 @@ const parseFuns: ((section: string[]) => ParseResult)[] = [
   parseExplicitMod,
 ]
 let itemParsed: IItem
-function findUnique(type: keyof IAPIitems, isFinded: { flag: boolean }): void {
-  if (isFinded.flag) return
+function findUnique(type: keyof IAPIitems, isFonded: { flag: boolean }): void {
+  if (isFonded.flag) return
   let temp: IItemUniques[] = []
   for (const ele of APIitems[type].entries) {
     if (ele.type === itemParsed.baseType) {
@@ -30,7 +30,7 @@ function findUnique(type: keyof IAPIitems, isFinded: { flag: boolean }): void {
     }
   }
   if (temp.length) itemParsed.uniques = temp
-  isFinded.flag = true
+  isFonded.flag = true
 }
 export function itemAnalyze(item: string) {
   itemParsed = {
@@ -78,9 +78,7 @@ export function itemAnalyze(item: string) {
   }, itemSection[0])
   if (parseItemName(itemSection[0], itemSection) === ParseResult.PARSE_SECTION_FAIL) return null
   itemSection.shift()
-  const isFindUnique = {
-    flag: false
-  }
+  const isFindUnique = { flag: false }
   switch (itemParsed.type.text) {
     case '爪':
     case '匕首':
@@ -259,16 +257,9 @@ function parseItemName(section: string[], itemSection: string[][]) {
     if (section[2].startsWith('追憶之')) section[2] = section[2].substring(4)
     if (itemParsed.rarity === '魔法') {
       const tempName = section[2]
-      let index = tempName.lastIndexOf('之')
-      if (index > -1) {
-        itemParsed.baseType = tempName.substring(index + 1)
-        itemParsed.name = tempName.substring(0, index + 1)
-      }
-      else {
-        index = tempName.lastIndexOf('的')
-        itemParsed.baseType = tempName.substring(index + 1)
-        itemParsed.name = tempName.substring(0, index + 1)
-      }
+      const itemType = itemParsed.type.option?.substring(0, itemParsed.type.option.indexOf('.')) as keyof typeof APIitems
+      itemParsed.baseType = APIitems[itemType].entries.find((entry) => tempName.endsWith(entry.type))?.type ?? tempName
+      itemParsed.name = tempName.substring(0, tempName.indexOf(itemParsed.baseType))
     }
     else {
       itemParsed.baseType = section[2]
@@ -276,7 +267,7 @@ function parseItemName(section: string[], itemSection: string[][]) {
   }
   return ParseResult.PARSE_SECTION_SUCC
 }
-function parseRequirement(section: string[]) { 
+function parseRequirement(section: string[]) {
   if (!section[0].startsWith('需求:')) return ParseResult.PARSE_SECTION_SKIP
   section.forEach(line => {
     let lineMatch: RegExpMatchArray | null
@@ -328,21 +319,21 @@ function parseMultilineMod(regSection: RegExp[], section: string[], type: keyof 
   if (!APImods[type].mutiLines) return []
   const tempArr: IItemStat[] = []
   for (let i = 0; i < regSection.length; ++i) {
-    const matchMod = APImods[type].mutiLines?.filter(s => regSection[i].test(s.text[0]))
-    if(!matchMod) continue
+    const matchModList = APImods[type].mutiLines?.filter(s => regSection[i].test(s.text[0]))
+    if (!matchModList) continue
     outer:
-    for (const mMod of matchMod) {
+    for (const matchMod of matchModList) {
       let flag = true
-      for (const index in mMod.text) {
-        if ((i + (+index)) >= regSection.length || !regSection[i + (+index)].test(mMod.text[+index])) {
+      for (const index in matchMod.text) {
+        if ((i + (+index)) >= regSection.length || !regSection[i + (+index)].test(matchMod.text[+index])) {
           flag = false
           break
         }
       }
       if (flag) {
-        const matchReg = mMod.text.map(mod => new RegExp(mod.replace(/#/g, String.raw`[+-]?(\d+(?:\.\d+)?)`).replace(' (部分)', '').replace(/減少|增加/, String.raw`(?:減少|增加)`)))
+        const matchReg = matchMod.text.map(mod => new RegExp(mod.replace(/#/g, String.raw`[+-]?(\d+(?:\.\d+)?)`).replace(' (部分)', '').replace(/減少|增加/, String.raw`(?:減少|增加)`)))
         const tempGroup = {
-          ...mMod
+          ...matchMod
         }
         let tempValue = 0
         let valueCount = 0
@@ -431,7 +422,7 @@ function parseImplicitMod(section: string[]) {
   return ParseResult.PARSE_SECTION_FAIL
 }
 function parseExplicitMod(section: string[]) {
-  if (!['魔法', '稀有', '傳奇'].includes(itemParsed.rarity)) ParseResult.PARSE_SECTION_SKIP
+  if (!['魔法', '稀有', '傳奇'].includes(itemParsed.rarity)) return ParseResult.PARSE_SECTION_SKIP
   let explicitSection: string[] = [],
     fracturedSection: string[] = [],
     craftedSection: string[] = []
@@ -538,9 +529,7 @@ function parsePseudoEleResistance() {
       id: 'pseudo.pseudo_total_elemental_resistance',
       text: '+#% 元素抗性',
       type: '偽屬性',
-      value: {
-        min: eleRes
-      },
+      value: { min: eleRes },
       disabled: true
     })
   }
@@ -571,7 +560,7 @@ function parseWeapon(item: string[][]) {
     }
     else if ((lineMatch = line.match(/物理傷害: (\d+)-(\d+)/))) {
       itemParsed.phyDamage = {
-        min: parseInt(lineMatch[1]), 
+        min: parseInt(lineMatch[1]),
         max: parseInt(lineMatch[2])
       }
     }
@@ -579,11 +568,11 @@ function parseWeapon(item: string[][]) {
       lineMatch.shift()
       itemParsed.eleDamage = {
         min: lineMatch.reduce((pre, curr, index) => {
-          if(curr && index % 2 == 0)  return pre += parseInt(curr)
+          if (curr && index % 2 == 0) return pre += parseInt(curr)
           return pre
-        }, 0), 
+        }, 0),
         max: lineMatch.reduce((pre, curr, index) => {
-          if(curr && index % 2 == 1)  return pre += parseInt(curr)          
+          if (curr && index % 2 == 1) return pre += parseInt(curr)
           return pre
         }, 0)
       }
@@ -655,9 +644,7 @@ function parseClusterJewel(item: string[][]) {
     itemParsed.stats.push({
       id: 'enchant.stat_3948993189',
       text: tempMod!.text.split('\n'),
-      value: {
-        option: Number(tempMod?.id)
-      },
+      value: { option: Number(tempMod?.id) },
       type: '附魔',
       disabled: false
     })
@@ -685,9 +672,7 @@ function parseForbiddenJewel(item: string[][]) {
       itemParsed.stats.push({
         id: matchStat!.id,
         text: matchStat!.text.replace('#', passive),
-        value: {
-          option: matchPassive?.id
-        },
+        value: { option: matchPassive?.id },
         disabled: false
       })
     }
@@ -725,37 +710,23 @@ function parseMap(item: string[][]) {
     id: 'implicit.stat_3624393862',
     text: '地圖被 # 佔據',
     type: 'implicit',
-    options: [{
-      value: 1,
-      text: '異界．奴役'
-    }, {
-      value: 2,
-      text: '異界．根除'
-    }, {
-      value: 3,
-      text: '異界．干擾'
-    }, {
-      value: 4,
-      text: '異界．淨化'
-    }]
+    options: [
+      { value: 1, text: '異界．奴役' },
+      { value: 2, text: '異界．根除' },
+      { value: 3, text: '異界．干擾' },
+      { value: 4, text: '異界．淨化' }
+    ]
   } as const
   const conquerorMap = {
     id: 'implicit.stat_2563183002',
     text: '地圖含有 # 的壁壘',
     type: 'implicit',
-    options: [{
-      value: 1,
-      text: '巴倫'
-    }, {
-      value: 2,
-      text: '維羅提尼亞'
-    }, {
-      value: 3,
-      text: '奧赫茲明'
-    }, {
-      value: 4,
-      text: '圖拉克斯'
-    }]
+    options: [
+      { value: 1, text: '巴倫' },
+      { value: 2, text: '維羅提尼亞' },
+      { value: 3, text: '奧赫茲明' },
+      { value: 4, text: '圖拉克斯' }
+    ]
   } as const
   item[0].forEach(line => {
     let lineMatch = line.match(/地圖階級: (\d+)/)
@@ -789,9 +760,7 @@ function parseMap(item: string[][]) {
         itemParsed.elderMap = {
           id: 'implicit.stat_3624393862',
           text: match.text,
-          value: {
-            option: match.value
-          },
+          value: { option: match.value },
           disabled: false
         }
       }
@@ -804,9 +773,7 @@ function parseMap(item: string[][]) {
         itemParsed.conquerorMap = {
           id: 'implicit.stat_2563183002',
           text: match.text,
-          value: {
-            option: match.value
-          },
+          value: { option: match.value },
           disabled: false
         }
       }
@@ -915,4 +882,14 @@ function parseLogbook(item: string[][]) {
       }
     }
   }
+}
+
+function parseRGB(item: string[]) {
+  for (const line of item) {
+    if (line.startsWith('貼模傳奇')) {
+      itemParsed.isRGB = true
+      return ParseResult.PARSE_SECTION_SUCC
+    }
+  }
+  return ParseResult.PARSE_SECTION_SKIP
 }

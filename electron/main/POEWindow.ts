@@ -2,7 +2,7 @@ import { OverlayController } from 'electron-overlay-window'
 import { EventEmitter } from 'events'
 import type { BrowserWindow } from 'electron'
 class POEWindowClass extends EventEmitter {
-  private _isActive: boolean;
+  private _isActive: boolean
   constructor() {
     super()
     this._isActive = false
@@ -22,7 +22,7 @@ class POEWindowClass extends EventEmitter {
   get isActive() {
     return this._isActive
   }
-  attach(win: BrowserWindow, windowName: string ) {
+  attach(win: BrowserWindow, windowName: string) {
     OverlayController.events.on('focus', () => this.isActive = true)
     OverlayController.events.on('blur', () => this.isActive = false)
     OverlayController.attachByTitle(win, windowName)

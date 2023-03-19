@@ -4,24 +4,24 @@
     <span v-if="item.name" class="mr-3">{{ item.name }}</span>
     <span :class="{ 'text-red-500': item.type.searchByType }">{{ item.baseType }}</span>
   </div>
-  <div v-if="item.type.text" class="text-base text-white text-center" :class="{ 'text-3xl': item.type.searchByType }">
+  <div v-if="item.type.text" class="text-white text-center" :class="{ 'text-3xl': item.type.searchByType }">
     <span>{{ item.type.text }}</span>
   </div>
   <VSelect v-if="undefinedUnique && item.uniques.length > 0" v-model="item.name" class="text-sm style-chooser"
     :options="item.uniques" label="name" :reduce="(ele: ArrayValueType<typeof item['uniques']>) => ele.name" />
-  <div class="mx-0  bg-blue-900 grid grid-cols-3">
+  <div class="mx-0  bg-blue-900 grid grid-cols-3 select-none">
     <div class="flex p-2 items-center justify-center">
       <span class="mx-1 text-white hover:cursor-default">汙染:</span>
       <VSelect v-model="item.isCorrupt" class="text-sm style-chooser flex-grow" :options="generalOption" label="label"
         :reduce="(ele: ArrayValueType<typeof generalOption>) => ele.value" :clearable="false" :searchable="false" />
     </div>
     <div>
-      <div v-if="!item.type.text.endsWith('技能寶石')" class="flex p-2 items-center justify-center">
+      <div v-if="!item.type.text.endsWith('技能寶石')" class="flex p-2 items-center justify-center select-none">
         <span class="mx-1 text-white hover:cursor-default">已鑑定:</span>
         <VSelect v-model="item.isIdentify" class="text-sm style-chooser flex-grow" :options="generalOption" label="label"
           :reduce="(ele: ArrayValueType<typeof generalOption>) => ele.value" :clearable="false" :searchable="false" />
       </div>
-      <div v-else class="flex p-2 items-center justify-center">
+      <div v-else class="flex p-2 items-center justify-center select-none">
         <span class="mx-1 text-white hover:cursor-default">相異品:</span>
         <VSelect v-model="item.altQType" class="text-sm style-chooser flex-grow" :options="gemAltQOptions" label="label"
           :reduce="(ele: ArrayValueType<typeof gemAltQOptions>) => ele.value" :clearable="false" :searchable="false" />
@@ -47,13 +47,13 @@
     <ValueMinMax v-model="item.quality" class="flex p-2 items-center justify-center">
       品質:
     </ValueMinMax>
-    <div v-if="item.elderMap" class="flex col-span-2 items-center justify-center">
+    <div v-if="item.elderMap" class="flex col-span-2 items-center justify-center select-none">
       <span class="mx-1 text-white hover:cursor-default">尊師守衛:</span>
       <VSelect v-model="item.elderMap.value!.option" class="text-sm style-chooser style-chooser-inf "
         :options="elderMapOptions" :reduce="(ele: ArrayValueType<typeof elderMapOptions>) => ele.value" label="label"
         :searchable="false" :clearable="false" />
     </div>
-    <div v-if="item.conquerorMap" class="flex col-span-2 items-center justify-center">
+    <div v-if="item.conquerorMap" class="flex col-span-2 items-center justify-center select-none">
       <span class="mx-1 text-white hover:cursor-default">征服者:</span>
       <VSelect v-model="item.conquerorMap.value!.option" class="text-sm style-chooser style-chooser-inf "
         :options="conquerorMapOptions" :reduce="(ele: ArrayValueType<typeof conquerorMapOptions>) => ele.value"
@@ -66,19 +66,24 @@
       <span class="mx-1 text-white hover:cursor-default">Uber凋落圖</span>
     </div>
     <div v-else-if="item.isWeaponOrArmor || ['項鍊', '戒指', '腰帶', '箭袋'].includes(item.type.text)"
-      class="flex col-span-2 items-center justify-center">
+      class="flex col-span-2 items-center justify-center select-none">
       <span class="mx-1 text-white hover:cursor-default">勢力:</span>
       <div class=" flex-grow mx-1">
-        <VSelect v-model="item.influences" class="text-sm style-chooser style-chooser-inf " :options="influencesOptions"
+        <VSelect v-model="item.influences" class="text-sm style-chooser style-chooser-inf" :options="influencesOptions"
           label="label" :searchable="false" multiple />
       </div>
     </div>
     <div v-if="item.search6L !== undefined" class="flex items-center justify-center py-1 hover:cursor-pointer"
       @click="_event => item.search6L = !item.search6L">
-      <span class="mx-1 text-white text-xl">6L?</span>
-      <CircleCheck :checked="item.search6L" />
+      <span class="mx-1 text-white">6L?</span>
+      <CircleCheck :have-undefined="true" :checked="item.search6L" />
     </div>
-    <div class="flex items-center justify-center py-1">
+    <div v-if="item.isRGB !== undefined" class="flex items-center justify-center py-1 hover:cursor-pointer"
+      @click="_event => item.isRGB = !item.isRGB">
+      <span class="mx-1 text-white">RGB?</span>
+      <CircleCheck :checked="item.isRGB" />
+    </div>
+    <div class="flex items-center justify-center py-1 select-none">
       <span class="mx-1 text-white hover:cursor-default">稀有度:</span>
       <VSelect v-model="item.raritySearch" class="text-sm style-chooser w-24" :options="rarityOptions" label="label"
         :searchable="false" :clearable="false" />
@@ -192,7 +197,7 @@
     共{{ searchResult.totalCount }}筆,顯示{{ searchResult.nowFetched }}筆
   </span>
   <div v-if="isSearching" class=" text-8xl text-white my-5 text-center flex justify-center">
-    <FontAwesomeIcon icon="spinner" spin />
+    <FontAwesomeIcon icon="spinner" :spin="true" />
   </div>
   <span v-if="rateTimeLimit.flag" class="text-white bg-red-600 text-xl text-center my-2 hover:cursor-default">
     API次數限制 {{ rateTimeLimit.second }} 秒後再回來
@@ -242,9 +247,7 @@ const searchResult = ref<ISearchResult | IExchangeResult>({
   result: [],
   totalCount: 0,
   nowFetched: 0,
-  searchID: {
-    ID: '', type: 'search'
-  },
+  searchID: { ID: '', type: 'search' },
   err: false
 })
 const fetchResult = ref<IFetchResult[]>([])
@@ -257,9 +260,7 @@ function resetSearchData() {
     result: [],
     totalCount: 0,
     nowFetched: 0,
-    searchID: {
-      ID: '', type: 'search'
-    },
+    searchID: { ID: '', type: 'search' },
     err: false
   }
   fetchResult.value = []
@@ -282,7 +283,7 @@ async function searchBtn() {
   resetSearchData()
   isSearching.value = true
   if (item.value.searchExchange.option) {
-    searchResult.value = await searchExchange(item.value, props.leagueSelect)
+    searchResult.value = (await searchExchange(item.value, props.leagueSelect))
     if (!searchResult.value.err) {
       currency2Img.value = `https://web.poe.garena.tw${APIStatic.find(ele => ele.id === (searchResult.value as IExchangeResult).currency2)!.image}`
       fetchResult.value = searchResult.value.result

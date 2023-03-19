@@ -66,7 +66,7 @@
     共{{ searchResult.totalCount }}筆,顯示{{ searchResult.nowFetched }}筆
   </span>
   <div v-if="isSearching" class=" text-8xl text-white my-5 text-center flex justify-center">
-    <FontAwesomeIcon icon="spinner" spin />
+    <FontAwesomeIcon icon="spinner" :spin="true" />
   </div>
   <span v-if="rateTimeLimit.flag" class="text-white bg-red-600 text-xl text-center my-2 hover:cursor-default">API次數限制
     {{ rateTimeLimit.second }} 秒後再回來 </span>
@@ -85,7 +85,7 @@ const gemReplicaSelect = ref<IHeistReward>()
 const { gemAltQOptions } = selectOptions
 const gemAltQSelect = ref(gemAltQOptions[0])
 
-let searchJSON: ISearchJson = {
+const searchJSON: ISearchJson = {
   query: {
     filters: {
       trade_filters: {
@@ -99,16 +99,13 @@ let searchJSON: ISearchJson = {
         }
       },
       misc_filters: {
-        filters: {
-        }
+        filters: {}
       },
       type_filters: {
-        filters: {
-        }
+        filters: {}
       },
       map_filters: {
-        filters: {
-        }
+        filters: {}
       }
     },
     stats: [{
@@ -127,9 +124,7 @@ const searchResult = ref<ISearchResult>({
   err: false,
   totalCount: 0,
   nowFetched: 0,
-  searchID: {
-    ID: '', type: 'search'
-  }
+  searchID: { ID: '', type: 'search' }
 })
 const fetchResult = ref<IFetchResult[]>([])
 const isSearching = ref(false)
@@ -152,9 +147,7 @@ function resetSearchData() {
     err: false,
     totalCount: 0,
     nowFetched: 0,
-    searchID: {
-      ID: '', type: 'search'
-    }
+    searchID: { ID: '', type: 'search' }
   }
   fetchResult.value = []
   isSearching.value = false

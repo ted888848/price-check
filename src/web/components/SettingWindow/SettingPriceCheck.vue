@@ -11,12 +11,12 @@
         class="shadow appearance-none w-[310px] border rounded py-1 px-2 text-gray-700 leading-tight" type="text">
     </div>
     <div class="flex mt-5 hover:cursor-pointer items-center"
-      @click="CConfig.searchExchangeDivine = !CConfig.searchExchangeDivine">
+      @click="() => CConfig.searchExchangeDivine = !CConfig.searchExchangeDivine">
       <span class="text-xl text-white mr-2">可堆疊通貨優先使用神聖:</span>
       <CircleCheck :checked="CConfig.searchExchangeDivine" />
     </div>
     <div class="flex mt-5 hover:cursor-pointer items-center"
-      @click="CConfig.searchTwoWeekOffline = !CConfig.searchTwoWeekOffline">
+      @click="() => CConfig.searchTwoWeekOffline = !CConfig.searchTwoWeekOffline">
       <span class="text-xl text-white mr-2">搜尋兩周內上架包含離線:</span>
       <CircleCheck :checked="CConfig.searchTwoWeekOffline" />
     </div>

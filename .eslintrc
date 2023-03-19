@@ -15,6 +15,14 @@
     "parser": "@typescript-eslint/parser"
   },
   "parser": "vue-eslint-parser",
+  "overrides": [
+    {
+      "files": ["*.ts", "*.vue"],
+      "rules": {
+        "no-undef": "off"
+      }
+    }
+  ],
   "rules": {
     "quotes": [
       "warn",
@@ -81,18 +89,20 @@
         },
         "ImportDeclaration": "never",
         "ExportDeclaration": {
-          "multiline": true,
-          "minProperties": 3
-        }
+          "multiline": true
+        },
+        "minProperties": 3
       }
     ],
+    "object-curly-spacing": [ "warn","never"],
     "array-bracket-spacing": "warn",
     "key-spacing": "warn",
     "@typescript-eslint/no-non-null-assertion": "off",
     "@typescript-eslint/no-explicit-any": "off",
     "@typescript-eslint/member-delimiter-style": "warn",
     "@typescript-eslint/type-annotation-spacing": "warn",
-    "@typescript-eslint/comma-spacing": "warn"
+    "@typescript-eslint/comma-spacing": "warn",
+    "@typescript-eslint/ban-types": "off"
   },
   "globals": {
     "defineEmits": "writable",

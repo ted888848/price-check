@@ -1,3 +1,4 @@
+declare type ArrayValueType<T> = T extends (infer E)[] ? E : never
 interface IHeistReward{
   name?: string;
   type: string;
@@ -12,6 +13,19 @@ interface IAPIItemsItem{
     unique: IItemUniques[];
   }[];
 }
+
+interface IIPCChannel{
+  PRICE_CHECK_SHOW: 'priceCheck';
+  OVERLAY_SHOW: 'overlay';
+  FORCE_POE: 'forcePOE';
+  POE_ACTIVE: 'poeActive';
+  GET_CONFIG: 'getConfig';
+  SET_CONFIG: 'setConfig';
+  RELOAD_APIDATA: 'reloadAPIData';
+  GET_COOKIE: 'getCookie';
+}
+
+
 interface IAPIitems{
   accessories: IAPIItemsItem;
   armour: IAPIItemsItem;
@@ -154,6 +168,7 @@ interface IItem{
     have: 'chaos' | 'divine';
   };
   search6L?: boolean;
+  isRGB?: boolean;
   // [key: string]: any;
 }
 

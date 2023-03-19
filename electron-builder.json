@@ -11,6 +11,9 @@
   ],
   "artifactName": "${productName}${version}.${ext}",
   "copyright": "Copyright©2023 zhou",
+  "publish": [
+    "github"
+  ],
   "win": {
     "requestedExecutionLevel": "requireAdministrator",
     "target": [

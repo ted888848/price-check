@@ -1,7 +1,7 @@
-import Store, {Schema} from 'electron-store'
+import Store, { Schema } from 'electron-store'
 import { ipcMain, session } from 'electron'
-import IPC from './ipc/ipcChannel'
-import {registerShortcut, unRegisterShortcut} from './shortcuts'
+import IPC from './ipcChannel'
+import { registerShortcut, unRegisterShortcut } from './shortcuts'
 const defaultStore: IConfig = {
   characterName: '',
   searchExchangeDivine: false,
@@ -33,27 +33,13 @@ const defaultStore: IConfig = {
   ]
 }
 const storeSchema: Schema<IConfig> = {
-  characterName: {
-    type: 'string'
-  },
-  searchExchangeDivine: {
-    type: 'boolean'
-  },
-  POESESSID: {
-    type: 'string'
-  },
-  searchTwoWeekOffline: {
-    type: 'boolean'
-  },
-  priceCheckHotkey: {
-    type: 'string'
-  },
-  settingHotkey: {
-    type: 'string'
-  },
-  shortcuts: {
-    type: 'array',
-  }
+  characterName: { type: 'string' },
+  searchExchangeDivine: { type: 'boolean' },
+  POESESSID: { type: 'string' },
+  searchTwoWeekOffline: { type: 'boolean' },
+  priceCheckHotkey: { type: 'string' },
+  settingHotkey: { type: 'string' },
+  shortcuts: { type: 'array' }
 }
 export let store = new Store({
   name: 'appConfig',
@@ -69,7 +55,7 @@ export function setupConfig() {
     unRegisterShortcut()
     registerShortcut()
     setCookie()
-  }) 
+  })
   ipcMain.on(IPC.GET_CONFIG, (e) => {
     e.returnValue = config
   })

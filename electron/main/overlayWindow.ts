@@ -1,9 +1,8 @@
 import { BrowserWindow, ipcMain, shell } from 'electron'
 import { OverlayController, OVERLAY_WINDOW_OPTS } from 'electron-overlay-window'
 import { PoeWindow } from './POEWindow'
-import { overlayEvent, priceCheckEvent } from './ipc/ipcHandler'
-import IPC from './ipc/ipcChannel'
-import path from 'path'
+import IPC from './ipcChannel'
+import { join } from 'path'
 export let win: BrowserWindow
 let isOverlayOpen: boolean
 export async function createWindow() {
@@ -11,7 +10,7 @@ export async function createWindow() {
     width: 800,
     height: 600,
     ...OVERLAY_WINDOW_OPTS,
-    icon: path.join(process.env.PUBLIC, 'MavenOrb256.ico'),
+    icon: join(process.env.PUBLIC, 'MavenOrb256.ico'),
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
@@ -21,12 +20,10 @@ export async function createWindow() {
   })
   if (process.env.VITE_DEV_SERVER_URL) {
     await win.loadURL(process.env.VITE_DEV_SERVER_URL)
-    win.webContents.openDevTools({
-      'mode': 'detach', 'activate': false 
-    })
+    win.webContents.openDevTools({ mode: 'detach', activate: false })
   }
   else {
-    await win.loadFile(path.join(process.env.DIST, 'index.html'))
+    await win.loadFile(join(process.env.DIST, 'index.html'))
   }
   ipcMain.on(IPC.FORCE_POE, () => {
     forcePOE()
@@ -39,9 +36,7 @@ export async function createWindow() {
   })
   win.webContents.setWindowOpenHandler((details) => {
     shell.openExternal(details.url)
-    return {
-      action: 'deny' 
-    }
+    return { action: 'deny' }
   })
 }
 
@@ -68,12 +63,12 @@ function handleBIEvent(event: Electron.Event, input: Electron.Input) {
 }
 
 export function toggleOverlay() {
+  win.webContents.send(IPC.OVERLAY_SHOW)
   forceOverlay()
-  overlayEvent()
 }
 
 export function togglePriceCheck(clip: string | null = null) {
-  priceCheckEvent(clip, PoeWindow.priceCheckPos)
+  win.webContents.send(IPC.PRICE_CHECK_SHOW, clip, PoeWindow.priceCheckPos)
   forceOverlay()
 }
 export function forceOverlay() {

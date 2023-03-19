@@ -3,7 +3,7 @@ module.exports = {
   content: ['./public/**/*.html', './src/**/*.{vue,js,ts,jsx,tsx}'],
   theme: {
     extend: {
-      spacing:{
+      spacing: {
         '300px': '300px',
         '400px': '400px'
       }
@@ -13,8 +13,8 @@ module.exports = {
   variants: {
     extend: {
       opacity: ['disabled'],
-      cursor:['disabled','hover'],
-      backgroundColor:['disabled'],
+      cursor: ['disabled', 'hover'],
+      backgroundColor: ['disabled'],
     },
   },
   plugins: [],

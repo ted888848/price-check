@@ -29,6 +29,7 @@ export interface ISearchJson {
           ilvl?: { min?: number; max?: number };
           gem_level?: { min?: number; max?: number };
           quality?: { min?: number; max?: number };
+          alternate_art?: { option: boolean };
         };
       };
       type_filters: {
@@ -273,6 +274,11 @@ export function getSearchJSON(item: IItem) {
       option: true
     }
   }
+  if (!isUndefined(item.isRGB)) {
+    searchJSON.query.filters.misc_filters.filters.alternate_art = {
+      option: item.isRGB
+    }
+  }
   return searchJSON
 }
 const rateTimeLimitArr = {
@@ -334,7 +340,7 @@ function parseRateTimeLimit(header?: AxiosResponseHeaders) {
   if (!header) return
   let type = header['x-rate-limit-policy'].split('-')[1] as keyof typeof rateTimeLimitArr
   if (Object.keys(rateTimeLimitArr).includes(type)) {
-    let timesArr = header['x-rate-limit-ip-state'].split(',').map((ele: string)=> parseInt(ele.substring(0, ele.indexOf(':')))).reverse()
+    let timesArr = header['x-rate-limit-ip-state'].split(',').map((ele: string) => parseInt(ele.substring(0, ele.indexOf(':')))).reverse()
     for (let i = 0; i < timesArr.length; ++i) {
       if (timesArr[i] >= rateTimeLimitArr[type][i].limit) {
         startCountdown(rateTimeLimitArr[type][i].time)
@@ -516,11 +522,9 @@ export interface IExchangeResult {
   errData?: string;
   currency2?: string;
 }
-export async function searchExchange(item: IItem, league: string) {
+export async function searchExchange(item: IItem, league: string): Promise<IExchangeResult> {
   let exchangeResult: IExchangeResult = {
-    searchID: {
-      type: 'exchange'
-    },
+    searchID: { type: 'exchange' },
     result: [] as IFetchResult[],
     totalCount: 0,
     nowFetched: 0,

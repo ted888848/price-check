@@ -52,9 +52,7 @@ import HeistPriceCheck from './HeistPriceCheck.vue'
 
 const isWebViewOpen = ref(false)
 const webView = ref<HTMLIFrameElement>()
-const priceCheckPos = ref({
-  right: '0px',
-})
+const priceCheckPos = ref({ right: '0px' })
 function openWebView(extendUrl: string) {
   priceCheckPos.value.right = '0px'
   isWebViewOpen.value = true
@@ -115,7 +113,7 @@ function isOverflow() {
   return priceCheckDiv.value.scrollHeight > priceCheckDiv.value.offsetHeight
 }
 
-ipcRenderer.on(IPC.PRICE_CHECK_SHOW, (e, clip, pos) => {
+ipcRenderer.on(IPC.PRICE_CHECK_SHOW, (e, clip: string, pos: string) => {
   closeWebView()
   windowShowHide.value = true
   currentPriceCheck.value = 'NormalPriceCheck'

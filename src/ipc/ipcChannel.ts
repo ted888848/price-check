@@ -6,5 +6,5 @@ export default {
   GET_CONFIG: 'getConfig',
   SET_CONFIG: 'setConfig',
   RELOAD_APIDATA: 'reloadAPIData',
-  GET_COOKIE: 'getCookie'
-}
+  GET_COOKIE: 'getCookie',
+} satisfies IIPCChannel

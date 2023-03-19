@@ -1,7 +1,7 @@
 import { Tray, Menu, app } from 'electron'
 import { win } from './overlayWindow'
 import { checkForUpdate } from './setupAPI'
-import path from 'path'
+import { join } from 'path'
 import { updateState } from './setupAPI'
 let tray: Tray
 export function buildTray() {
@@ -10,9 +10,7 @@ export function buildTray() {
       label: 'DevTool',
       type: 'normal',
       click() {
-        win.webContents.openDevTools({
-          mode: 'detach', activate: false 
-        })
+        win.webContents.openDevTools({ mode: 'detach', activate: false })
       }
     },
     {
@@ -39,6 +37,6 @@ export function buildTray() {
 }
 
 export function setupTray() {
-  tray = new Tray(path.join(process.env.PUBLIC, 'MavenOrb.ico'))
+  tray = new Tray(join(process.env.PUBLIC, 'MavenOrb.ico'))
   buildTray()
 }

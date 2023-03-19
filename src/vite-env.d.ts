@@ -5,3 +5,12 @@ declare module '*.vue' {
   const component: DefineComponent<{}, {}, any>
   export default component
 }
+
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import vSelect from 'vue-select'
+declare module '@vue/runtime-core' {
+  export interface GlobalComponents {
+    FontAwesomeIcon: typeof FontAwesomeIcon,
+    VSelect: typeof vSelect
+  }
+}

@@ -3,7 +3,9 @@
   <FontAwesomeIcon v-else icon="circle-xmark" class="text-red-600 text-xl" />
 </template>
 <script setup lang="ts">
-const props = defineProps<{
+interface IProps {
   checked: boolean;
-}>()
+}
+const props = defineProps<IProps>()
+
 </script>
