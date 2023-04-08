@@ -1,7 +1,7 @@
 {
   "appId": "com.electron.price-check",
   "asar": true,
-  "icon": "public/MavenOrb256.ico",
+  "icon": "public/SextantOrb256.ico",
   "directories": {
     "output": "release/${version}"
   },
@@ -29,8 +29,8 @@
     "oneClick": false,
     "perMachine": false,
     "allowToChangeInstallationDirectory": true,
-    "installerIcon": "public/MavenOrb256.ico",
-    "uninstallerIcon": "public/MavenOrb256.ico",
+    "installerIcon": "public/SextantOrb256.ico",
+    "uninstallerIcon": "public/SextantOrb256.ico",
     "deleteAppDataOnUninstall": true
   }
 }

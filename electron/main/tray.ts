@@ -37,6 +37,6 @@ export function buildTray() {
 }
 
 export function setupTray() {
-  tray = new Tray(join(process.env.PUBLIC, 'MavenOrb.ico'))
+  tray = new Tray(join(process.env.PUBLIC, 'SextantOrb128.ico'))
   buildTray()
 }

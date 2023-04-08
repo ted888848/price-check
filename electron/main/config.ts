@@ -23,7 +23,7 @@ const defaultStore: IConfig = {
     {
       hotkey: 'F4',
       type: 'type-in-chat',
-      outputText: '/kick @char'
+      outputText: '/leave'
     },
     {
       hotkey: 'F5',
@@ -39,7 +39,16 @@ const storeSchema: Schema<IConfig> = {
   searchTwoWeekOffline: { type: 'boolean' },
   priceCheckHotkey: { type: 'string' },
   settingHotkey: { type: 'string' },
-  shortcuts: { type: 'array' }
+  shortcuts: {
+    type: 'array',
+    items: {
+      type: 'object',
+      properties: {
+        hotkey: { type: 'string' },
+        outputText: { type: 'string' },
+      }
+    }
+  }
 }
 export let store = new Store({
   name: 'appConfig',
@@ -49,6 +58,13 @@ export let store = new Store({
 export let config: IConfig
 export function setupConfig() {
   config = store.store
+  //TODO 移除舊版的設定
+  for (const sc of config.shortcuts) {
+    if (sc.outputText === '/kick @char') {
+      sc.outputText = '/leave'
+      store.store = config
+    }
+  }
   ipcMain.on(IPC.SET_CONFIG, (_e, configData: string) => {
     store.store = JSON.parse(configData) as IConfig
     config = store.store

@@ -10,7 +10,7 @@ export async function createWindow() {
     width: 800,
     height: 600,
     ...OVERLAY_WINDOW_OPTS,
-    icon: join(process.env.PUBLIC, 'MavenOrb256.ico'),
+    icon: join(process.env.PUBLIC, 'SextantOrb128.ico'),
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
