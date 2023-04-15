@@ -4,8 +4,10 @@
     <span v-if="item.name" class="mr-3">{{ item.name }}</span>
     <span :class="{ 'text-red-500': item.type.searchByType }">{{ item.baseType }}</span>
   </div>
-  <div v-if="item.type.text" class="text-white text-center" :class="{ 'text-3xl': item.type.searchByType }">
-    <span>{{ item.type.text }}</span>
+  <div class="text-white text-center flex justify-between px-2">
+    <span :style="{ visibility: item.pDPS ? 'visible' : 'hidden' }" class=" w-40">PDps: {{ item.pDPS }}</span>
+    <span v-if="item.type.text" class="flex-1" :class="{ 'text-3xl': item.type.searchByType }">{{ item.type.text }}</span>
+    <span :style="{ visibility: item.eDPS ? 'visible' : 'hidden' }" class=" w-40">EDps: {{ item.eDPS }}</span>
   </div>
   <VSelect v-if="undefinedUnique && item.uniques.length > 0" v-model="item.name" class="text-sm style-chooser"
     :options="item.uniques" label="name" :reduce="(ele: ArrayValueType<typeof item['uniques']>) => ele.name" />

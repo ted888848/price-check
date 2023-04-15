@@ -155,6 +155,7 @@ export function itemAnalyze(item: string) {
       parseLogbook(itemSection)
       break
     case '命運卡':
+    case '遺鑰':
       itemParsed.autoSearch = true
       break
     case '其它':
@@ -257,8 +258,15 @@ function parseItemName(section: string[], itemSection: string[][]) {
     if (section[2].startsWith('追憶之')) section[2] = section[2].substring(4)
     if (itemParsed.rarity === '魔法') {
       const tempName = section[2]
-      const itemType = itemParsed.type.option?.substring(0, itemParsed.type.option.indexOf('.')) as keyof typeof APIitems
-      itemParsed.baseType = APIitems[itemType].entries.find((entry) => tempName.endsWith(entry.type))?.type ?? tempName
+      const _itemType = itemParsed.type.option?.substring(0, itemParsed.type.option.indexOf('.'))
+      const itemType = (_itemType === 'weapon' ? 'weapons' : _itemType) as keyof typeof APIitems
+      let tempBaseType = APIitems[itemType]?.entries.find((entry) => tempName.endsWith(entry.type))?.type
+      console.log(tempName)
+      if (tempBaseType === undefined) {
+        tempBaseType = tempName.indexOf('之') > -1 ? tempName.substring(tempName.indexOf('之') + 1) :
+          tempName.indexOf('的') > -1 ? tempName.substring(tempName.indexOf('的') + 1) : tempName
+      }
+      itemParsed.baseType = tempBaseType
       itemParsed.name = tempName.substring(0, tempName.indexOf(itemParsed.baseType))
     }
     else {

@@ -194,7 +194,7 @@ export async function getAPIdata() {
     }
   })
   store.set('APIVersion', app.getVersion())
-  if (error.length) throw error
+  if (error?.length) throw error
 }
 
 export const updateState = { label: '', canClick: true }
