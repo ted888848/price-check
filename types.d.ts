@@ -1,10 +1,10 @@
 declare type ArrayValueType<T> = T extends (infer E)[] ? E : never
-interface IHeistReward{
+interface IHeistReward {
   name?: string;
   type: string;
   text: string;
 }
-interface IAPIItemsItem{
+interface IAPIItemsItem {
   id: string;
   label: string;
   entries: {
@@ -14,7 +14,7 @@ interface IAPIItemsItem{
   }[];
 }
 
-interface IIPCChannel{
+interface IIPCChannel {
   PRICE_CHECK_SHOW: 'priceCheck';
   OVERLAY_SHOW: 'overlay';
   FORCE_POE: 'forcePOE';
@@ -26,7 +26,7 @@ interface IIPCChannel{
 }
 
 
-interface IAPIitems{
+interface IAPIitems {
   accessories: IAPIItemsItem;
   armour: IAPIItemsItem;
   cards: IAPIItemsItem;
@@ -41,7 +41,7 @@ interface IAPIitems{
   heistmission: IAPIItemsItem;
   logbook: IAPIItemsItem;
 }
-interface IAPIModsMod{
+interface IAPIModsMod {
   label: string;
   type: string;
   entries: {
@@ -65,7 +65,7 @@ interface IAPIModsMod{
     };
   }[];
 }
-interface IAPIMods{
+interface IAPIMods {
   pseudo: IAPIModsMod;
   explicit: IAPIModsMod;
   implicit: IAPIModsMod;
@@ -76,25 +76,25 @@ interface IAPIMods{
   clusterJewel: IAPIModsMod;
   forbiddenJewel: IAPIModsMod;
 }
-interface IStatic{
+interface IStatic {
   id: string;
   text: string;
   image: string;
 }
-interface IItemStat{
+interface IItemStat {
   id: string;
   text: string[] | string;
   type?: string;
   min?: number;
   max?: number;
   disabled?: boolean;
-  value?: { 
+  value?: {
     min?: number;
     max?: number;
     option?: number;
   };
 }
-interface IItem{
+interface IItem {
   baseType: string;
   type: {
     text: string;
@@ -169,14 +169,15 @@ interface IItem{
   };
   search6L?: boolean;
   isRGB?: boolean;
+  onlyChaos?: boolean;
   // [key: string]: any;
 }
 
-interface IItemUniques{
+interface IItemUniques {
   text: string;
   name: string;
 }
-type hotkeyType= 'type-in-chat'
+type hotkeyType = 'type-in-chat'
 
 interface IConfig {
   characterName: string;
@@ -189,5 +190,5 @@ interface IConfig {
     hotkey: string;
     type: hotkeyType;
     outputText: string;
-  }[]; 
+  }[];
 }

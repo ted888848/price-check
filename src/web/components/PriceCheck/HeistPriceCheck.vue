@@ -20,6 +20,11 @@
       :disabled="rateTimeLimit.flag" @click="searchBtn">
       Search
     </button>
+    <button
+      class="mx-2 bg-gray-500 text-white rounded px-1 hover:bg-gray-400 disabled:cursor-default disabled:opacity-60 disabled:bg-gray-500"
+      :disabled="rateTimeLimit.flag" @click="searchOnlyChaos">
+      SearchC
+    </button>
     <div v-if="searchResult.err || searchResult.searchID.ID">
       <button
         class="mx-2 bg-green-400 text-black rounded px-1 hover:bg-green-300 disabled:cursor-default disabled:opacity-60 disabled:bg-green-400"
@@ -160,6 +165,10 @@ async function fetchMore() {
   let fetchList = searchResult.value.result.slice(fetchStartPos, fetchEndPos)
   fetchResult.value = await fetchItem(fetchList, searchResult.value.searchID.ID!, fetchResult.value)
   isSearching.value = false
+}
+function searchOnlyChaos() {
+  searchJSON.query.filters.trade_filters.filters.price.option = 'chaos'
+  searchBtn().then(() => { delete searchJSON.query.filters.trade_filters.filters.price.option })
 }
 async function searchBtn() {
   if (rateTimeLimit.value.flag) return

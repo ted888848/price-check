@@ -10,8 +10,9 @@ export interface ISearchJson {
     filters: {
       trade_filters: {
         filters: {
-          price?: {
+          price: {
             min: number;
+            option?: string;
           };
           collapse: {
             option: boolean;
@@ -260,7 +261,9 @@ export function getSearchJSON(item: IItem) {
     }
     searchJSON.query.status.option = 'any'
   }
-
+  if (item.onlyChaos) {
+    searchJSON.query.filters.trade_filters.filters.price.option = 'chaos'
+  }
   searchJSON.query.stats[0].filters.push(...(item.stats))
   searchJSON.query.stats[0].filters.push(...(item.influences))
 
@@ -279,6 +282,7 @@ export function getSearchJSON(item: IItem) {
       option: item.isRGB
     }
   }
+
   return searchJSON
 }
 const rateTimeLimitArr = {

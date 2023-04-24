@@ -150,6 +150,11 @@
       :disabled="rateTimeLimit.flag" @click="searchBtn">
       Search
     </button>
+    <button
+      class="mx-2 bg-gray-500 text-white rounded px-1 hover:bg-gray-400 disabled:cursor-default disabled:opacity-60 disabled:bg-gray-500"
+      :disabled="rateTimeLimit.flag" @click="searchOnlyChaos">
+      SearchC
+    </button>
     <div v-if="searchResult.err || searchResult.searchID.ID">
       <button
         class="mx-2 bg-green-400 text-black rounded px-1 hover:bg-green-300 disabled:cursor-default disabled:opacity-60 disabled:bg-green-400"
@@ -256,7 +261,10 @@ const fetchResult = ref<IFetchResult[]>([])
 const isSearching = ref(false)
 const modTbodyToggle = ref(true)
 const currency2Img = ref('')
-
+function searchOnlyChaos() {
+  item.value.onlyChaos = true
+  searchBtn().then(() => { item.value.onlyChaos = false })
+}
 function resetSearchData() {
   searchResult.value = {
     result: [],

@@ -261,7 +261,6 @@ function parseItemName(section: string[], itemSection: string[][]) {
       const _itemType = itemParsed.type.option?.substring(0, itemParsed.type.option.indexOf('.'))
       const itemType = (_itemType === 'weapon' ? 'weapons' : _itemType) as keyof typeof APIitems
       let tempBaseType = APIitems[itemType]?.entries.find((entry) => tempName.endsWith(entry.type))?.type
-      console.log(tempName)
       if (tempBaseType === undefined) {
         tempBaseType = tempName.indexOf('之') > -1 ? tempName.substring(tempName.indexOf('之') + 1) :
           tempName.indexOf('的') > -1 ? tempName.substring(tempName.indexOf('的') + 1) : tempName
