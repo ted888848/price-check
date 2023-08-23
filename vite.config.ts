@@ -4,7 +4,7 @@ import vue from '@vitejs/plugin-vue'
 import electron from 'vite-plugin-electron'
 import renderer from 'vite-plugin-electron-renderer'
 import pkg from './package.json'
-
+import UnoCSS from 'unocss/vite'
 // https://vitejs.dev/config/
 export default defineConfig(({ command }) => {
   rmSync('dist-electron', { recursive: true, force: true })
@@ -22,6 +22,7 @@ export default defineConfig(({ command }) => {
           }
         }
       }),
+      UnoCSS(),
       electron([
         {
           // Main-Process entry file of the Electron App.

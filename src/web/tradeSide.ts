@@ -152,45 +152,46 @@ export const selectOptions = {
     label: '非傳奇'
   }],
 }
-
-export function getSearchJSON(item: IItem) {
-  let searchJSON: ISearchJson = {
-    query: {
-      filters: {
-        trade_filters: {
-          filters: {
-            price: {
-              min: 2
-            },
-            collapse: {
-              option: true
-            }
-          }
-        },
-        misc_filters: {
-          filters: {
-          }
-        },
-        type_filters: {
-          filters: {
-          }
-        },
-        map_filters: {
-          filters: {
+const defaultSearchJson: ISearchJson = {
+  query: {
+    filters: {
+      trade_filters: {
+        filters: {
+          price: {
+            min: 2,
+            option: 'chaos_divine'
+          },
+          collapse: {
+            option: true
           }
         }
       },
-      stats: [{
-        type: 'and', filters: []
-      }],
-      status: {
-        option: 'online'
+      misc_filters: {
+        filters: {
+        }
+      },
+      type_filters: {
+        filters: {
+        }
+      },
+      map_filters: {
+        filters: {
+        }
       }
     },
-    sort: {
-      price: 'asc'
+    stats: [{
+      type: 'and', filters: []
+    }],
+    status: {
+      option: 'online'
     }
+  },
+  sort: {
+    price: 'asc'
   }
+}
+export function getSearchJSON(item: IItem) {
+  let searchJSON: ISearchJson = structuredClone(defaultSearchJson)
   if (!item.type.searchByType) {//如果沒有要依照類別搜尋
     searchJSON.query.type = item.baseType
   }
@@ -503,7 +504,8 @@ export async function getDivineToChaos(league: string) {
       return response.data
     }).then((data) => {
       let temp = Object.keys(data.result).slice(0, 5)
-      chaos = temp.reduce((pre, curr) => pre + (data.result[curr].listing.offers[0].item.amount / data.result[curr].listing.offers[0].exchange.amount), chaos)
+      chaos = temp.reduce((pre, curr) =>
+        pre + (data.result[curr].listing.offers[0].item.amount / data.result[curr].listing.offers[0].exchange.amount), chaos)
       chaos /= temp.length
     })
     .catch((err) => {

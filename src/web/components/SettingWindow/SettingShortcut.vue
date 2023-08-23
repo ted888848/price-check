@@ -5,7 +5,7 @@
       最後密語的人使用"@last"並只能放在最前面或最後面。
     </div>
     <div class="text-white flex items-center">
-      <span class="text-xl mr-2 w-[80px]">
+      <span class="text-xl mr-2 w-80px">
         查價
       </span>
       <KeyInput v-model:hotkey="CConfig.priceCheckHotkey" />
@@ -14,7 +14,7 @@
       </span>
     </div>
     <div class="text-white flex items-center">
-      <span class="text-xl mr-2 w-[80px]">
+      <span class="text-xl mr-2 w-80px">
         設定
       </span>
       <KeyInput v-model:hotkey="CConfig.settingHotkey" />
@@ -23,7 +23,7 @@
       </span>
     </div>
     <div v-for="(shortcut, index) in CConfig.shortcuts" :key="index" class="text-white flex items-center">
-      <span class="text-xl mr-2 w-[80px]">
+      <span class="text-xl mr-2 w-80px">
         聊天室
       </span>
       <KeyInput v-model:hotkey="shortcut.hotkey" />
@@ -33,7 +33,7 @@
         <FontAwesomeIcon icon="rectangle-xmark" size="2x" />
       </button>
     </div>
-    <button class=" bg-white rounded p-1 w-[400px]" @click="createChatShortcut">
+    <button class=" bg-white rounded p-1 w-400px" @click="createChatShortcut">
       新增聊天室快捷鍵
     </button>
   </div>

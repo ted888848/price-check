@@ -3,12 +3,12 @@
     <div class="flex mt-5">
       <label for="characterName" class="text-xl text-white mr-2 hover:cursor-default">角色名字:</label>
       <input id="characterName" v-model="CConfig.characterName"
-        class="shadow appearance-none w-[200px] border rounded py-1 px-2 text-gray-700 leading-tight" type="text">
+        class="shadow appearance-none w-200px border rounded py-1 px-2 text-gray-700 leading-tight" type="text">
     </div>
     <div class="flex mt-5">
       <label for="POESESSID" class="text-xl text-white mr-2 hover:cursor-default">POESESSID:</label>
       <input id="POESESSID" v-model="CConfig.POESESSID"
-        class="shadow appearance-none w-[310px] border rounded py-1 px-2 text-gray-700 leading-tight" type="text">
+        class="shadow appearance-none w-310px border rounded py-1 px-2 text-gray-700 leading-tight" type="text">
     </div>
     <div class="flex mt-5 hover:cursor-pointer items-center"
       @click="() => CConfig.searchExchangeDivine = !CConfig.searchExchangeDivine">

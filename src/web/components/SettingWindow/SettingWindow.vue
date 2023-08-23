@@ -1,6 +1,6 @@
 <template>
   <div v-if="config" class="absolute left-0 right-0 mx-auto bg-gray-700 text-center w-1/2 h-1/2 flex flex-1">
-    <div class="flex flex-col gap-2 w-[150px] mt-5 text-white">
+    <div class="flex flex-col gap-2 w-150px mt-5 text-white">
       <button :class="{ 'text-amber-600 text-xl bg-slate-600 font-bold p-2': currentSettingPage === 'SettingPriceCheck' }"
         @click="() => currentSettingPage = 'SettingPriceCheck'">
         查價設定

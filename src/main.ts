@@ -1,6 +1,9 @@
 import { createApp } from 'vue'
 import App from '@/App.vue'
-import './assets/tailwind.css'
+// import './assets/tailwind.css'
+import '@unocss/reset/tailwind.css'
+import 'virtual:uno.css'
+import './index.css'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { faGear, faRotate, faCircleCheck, faCircleXmark, faSpinner, faRectangleXmark, faArrowsSpin }
   from '@fortawesome/free-solid-svg-icons'

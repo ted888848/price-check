@@ -19,6 +19,35 @@ const parseFuns: ((section: string[]) => ParseResult)[] = [
   parseIdentify,
   parseExplicitMod,
 ]
+const defaultItemParsed: IItem = {
+  type: {
+    text: '',
+    searchByType: false
+  },
+  baseType: '',
+  name: undefined,
+  uniques: [],
+  raritySearch: {
+    value: '',
+    label: ''
+  },
+  rarity: '',
+  itemLevel: {
+    search: false
+  },
+  isWeaponOrArmor: false,
+  isCorrupt: false,
+  stats: [],
+  influences: [],
+  quality: {
+    search: false
+  },
+  autoSearch: false,
+  searchTwoWeekOffline: false,
+  searchExchange: {
+    option: false, have: 'chaos'
+  }
+}
 let itemParsed: IItem
 function findUnique(type: keyof IAPIitems, isFonded: { flag: boolean }): void {
   if (isFonded.flag) return
@@ -33,35 +62,7 @@ function findUnique(type: keyof IAPIitems, isFonded: { flag: boolean }): void {
   isFonded.flag = true
 }
 export function itemAnalyze(item: string) {
-  itemParsed = {
-    type: {
-      text: '',
-      searchByType: false
-    },
-    baseType: '',
-    name: undefined,
-    uniques: [],
-    raritySearch: {
-      value: '',
-      label: ''
-    },
-    rarity: '',
-    itemLevel: {
-      search: false
-    },
-    isWeaponOrArmor: false,
-    isCorrupt: false,
-    stats: [],
-    influences: [],
-    quality: {
-      search: false
-    },
-    autoSearch: false,
-    searchTwoWeekOffline: false,
-    searchExchange: {
-      option: false, have: 'chaos'
-    }
-  }
+  itemParsed = structuredClone(defaultItemParsed)
   const itemArr = item.split(/\r?\n/)
   itemArr.pop()
   const itemSection: string[][] = [[]]
@@ -318,7 +319,8 @@ function getStrReg(section: string[], type: string) {
   section.forEach(line => {
     let _line = line.substring(0, line.indexOf(` (${type})`))
     _line = _line ? _line : line
-    retArr.push(new RegExp(String.raw`^${_line.replace(/[+-]?\d+(\.\d+)?/g, String.raw`[+-]?(\d+|#)`).replace(/減少|增加/, String.raw`(?:減少|增加)`)}( \(部分\))?$`))
+    retArr.push(new RegExp(String.raw`^${_line.replace(/[+-]?\d+(\.\d+)?/g, String.raw`[+-]?(\d+|#)`)
+      .replace(/減少|增加/, String.raw`(?:減少|增加)`)}( \(部分\))?$`))
   })
   return retArr
 }
@@ -338,7 +340,8 @@ function parseMultilineMod(regSection: RegExp[], section: string[], type: keyof 
         }
       }
       if (flag) {
-        const matchReg = matchMod.text.map(mod => new RegExp(mod.replace(/#/g, String.raw`[+-]?(\d+(?:\.\d+)?)`).replace(' (部分)', '').replace(/減少|增加/, String.raw`(?:減少|增加)`)))
+        const matchReg = matchMod.text.map(mod => new RegExp(mod.replace(/#/g, String.raw`[+-]?(\d+(?:\.\d+)?)`)
+          .replace(' (部分)', '').replace(/減少|增加/, String.raw`(?:減少|增加)`)))
         const tempGroup = {
           ...matchMod
         }
@@ -388,7 +391,8 @@ function parseMod(section: string[], type: keyof IAPIMods) {
       }
     }
     if (!matchMod.length) return false
-    const matchReg = new RegExp(matchMod[0].text.replace(/#/g, String.raw`([+-]?\d+(?:\.\d+)?)`).replace(' (部分)', '').replace(/減少|增加/, String.raw`(?:減少|增加)`))
+    const matchReg = new RegExp(matchMod[0].text.replace(/#/g, String.raw`([+-]?\d+(?:\.\d+)?)`)
+      .replace(' (部分)', '').replace(/減少|增加/, String.raw`(?:減少|增加)`))
     const regGroup = section[index].match(matchReg)
     regGroup?.shift()
     if (regGroup?.length) {
