@@ -340,7 +340,7 @@ function parseMultilineMod(regSection: RegExp[], section: string[], type: keyof 
         }
       }
       if (flag) {
-        const matchReg = matchMod.text.map(mod => new RegExp(mod.replace(/#/g, String.raw`[+-]?(\d+(?:\.\d+)?)`)
+        const matchReg = matchMod.text.map(mod => new RegExp(mod.replace(/[+-]?#/g, String.raw`[+-]?(\d+(?:\.\d+)?)`)
           .replace(' (部分)', '').replace(/減少|增加/, String.raw`(?:減少|增加)`)))
         const tempGroup = {
           ...matchMod
@@ -391,7 +391,8 @@ function parseMod(section: string[], type: keyof IAPIMods) {
       }
     }
     if (!matchMod.length) return false
-    const matchReg = new RegExp(matchMod[0].text.replace(/#/g, String.raw`([+-]?\d+(?:\.\d+)?)`)
+    console.log(matchMod[0])
+    const matchReg = new RegExp(matchMod[0].text.replace(/[+-]?#/g, String.raw`([+-]?\d+(?:\.\d+)?)`)
       .replace(' (部分)', '').replace(/減少|增加/, String.raw`(?:減少|增加)`))
     const regGroup = section[index].match(matchReg)
     regGroup?.shift()
