@@ -29,6 +29,7 @@
     "oneClick": false,
     "perMachine": false,
     "allowToChangeInstallationDirectory": true,
+    "createDesktopShortcut": true,
     "installerIcon": "public/SextantOrb256.ico",
     "uninstallerIcon": "public/SextantOrb256.ico",
     "deleteAppDataOnUninstall": true

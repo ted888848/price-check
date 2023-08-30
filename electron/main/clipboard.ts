@@ -11,9 +11,9 @@ export async function getClipboard() {
   clipboard.writeText('')
 
   clipboardPromise = new Promise((resolve, reject) => {
-    function foo(){
+    function foo() {
       const clipAfter = clipboard.readText()
-      if (clipAfter.startsWith('物品種類:')){
+      if (clipAfter.startsWith('物品種類:')) {
         clipboard.writeText(clipBefore)
         clipboardPromise = null
         resolve(clipAfter)

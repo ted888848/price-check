@@ -148,8 +148,8 @@ export function itemAnalyze(item: string) {
       }
       break
     }
-    case '主動技能寶石':
-    case '輔助技能寶石':
+    case '技能寶石':
+    case '輔助寶石':
       parseGem(itemSection)
       break
     case '探險日誌':

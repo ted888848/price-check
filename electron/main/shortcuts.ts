@@ -55,13 +55,18 @@ export function unRegisterShortcut() {
   globalShortcut.unregisterAll()
 }
 let isClipStored = true
-function pasteTextToChat(text: string, lastMsg?: boolean, moveToFront?: boolean) {
+async function pasteTextToChat(text: string, lastMsg?: boolean, moveToFront?: boolean) {
   if (!isClipStored) {
     return
   }
   isClipStored = false
   let clipSave = clipboard.readText()
   clipboard.writeText(text)
+  for (let i = 0; i < 5; ++i) {
+    await new Promise((resolve) => setTimeout(resolve, 20))
+    if (clipboard.readText() === text) break
+    clipboard.writeText(text)
+  }
   if (lastMsg) {
     uIOhook.keyTap(UiohookKey.Enter, [UiohookKey.Ctrl])
   }
