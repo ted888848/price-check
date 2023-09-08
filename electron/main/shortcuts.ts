@@ -92,6 +92,6 @@ async function pasteTextToChat(text: string, lastMsg?: boolean, moveToFront?: bo
   setTimeout(() => {
     clipboard.writeText(clipSave)
     isClipStored = true
-  }, 120)
+  }, 250)
 }
 

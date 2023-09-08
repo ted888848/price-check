@@ -37,8 +37,10 @@
         地圖階級:
       </ValueMinMax>
       <div v-else-if="item.searchExchange.option"
-        class="flex p-2 items-center justify-center hover:cursor-pointer flex-grow"
-        @click="_event => item.searchExchange.have = ('divine' === item.searchExchange.have) ? 'chaos' : 'divine'">
+        class="flex p-2 items-center justify-center hover:cursor-pointer flex-grow" @click="_event => {
+          item.searchExchange.have = ('divine' === item.searchExchange.have) ? 'chaos' : 'divine';
+          searchBtn()
+        }">
         <span class="mx-1 text-white">神聖價</span>
         <CircleCheck :checked="item.searchExchange.have === 'divine'" />
       </div>
