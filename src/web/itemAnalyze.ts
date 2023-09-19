@@ -159,6 +159,9 @@ export function itemAnalyze(item: string) {
     case '遺鑰':
       itemParsed.autoSearch = true
       break
+    case '聖物':
+      parseRelic(itemSection)
+      break;
     case '其它':
       break
     default:
@@ -904,4 +907,13 @@ function parseRGB(item: string[]) {
     }
   }
   return ParseResult.PARSE_SECTION_SKIP
+}
+
+function parseRelic(item: string[][]) {
+  for (const line of item) {
+    if (parseIdentify(line) === ParseResult.PARSE_ITEM_SKIP) return
+    parseItemLevel(line)
+  }
+  item.shift()
+  parseMod(item[0], 'sanctum')
 }

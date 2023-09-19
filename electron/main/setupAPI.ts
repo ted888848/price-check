@@ -146,6 +146,13 @@ function setupAPIMods(statsJson: any) {
         }
         APImods.crafted.mutiLines = checkNewline(statsGroup, '工藝')
         break
+      case '聖域':
+        APImods.sanctum = {
+          label: statsGroup.label,
+          entries: statsGroup.entries.map((ele: any) => ({ ...ele })).filter((stat: any) => !stat.text.includes('\n')),
+          type: '聖域'
+        }
+        APImods.sanctum.mutiLines = checkNewline(statsGroup, '聖域')
       default:
         return
     }

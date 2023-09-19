@@ -75,6 +75,7 @@ interface IAPIMods {
   temple: IAPIModsMod;
   clusterJewel: IAPIModsMod;
   forbiddenJewel: IAPIModsMod;
+  sanctum: IAPIModsMod;
 }
 interface IStatic {
   id: string;

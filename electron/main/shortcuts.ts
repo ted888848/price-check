@@ -84,14 +84,14 @@ async function pasteTextToChat(text: string, lastMsg?: boolean, moveToFront?: bo
   uIOhook.keyTap(UiohookKey.V, [UiohookKey.Ctrl])
   uIOhook.keyTap(UiohookKey.Enter)
   //return to latest message
-  uIOhook.keyTap(UiohookKey.Enter)
-  uIOhook.keyTap(UiohookKey.ArrowUp)
-  uIOhook.keyTap(UiohookKey.ArrowUp)
-  uIOhook.keyTap(UiohookKey.Escape)
+  // uIOhook.keyTap(UiohookKey.Enter)
+  // uIOhook.keyTap(UiohookKey.ArrowUp)
+  // uIOhook.keyTap(UiohookKey.ArrowUp)
+  // uIOhook.keyTap(UiohookKey.Escape)
 
   setTimeout(() => {
     clipboard.writeText(clipSave)
     isClipStored = true
-  }, 250)
+  }, 180)
 }
 
