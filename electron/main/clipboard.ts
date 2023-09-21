@@ -2,6 +2,18 @@ import { clipboard } from 'electron'
 const DELAY = 50
 const LIMIT = 250
 let clipboardPromise: Promise<string> | null
+export class MyClipBoard {
+  private static isClipStored = true
+  public static delayRestoreClipboard(callback: () => void) {
+    if (!this.isClipStored) return
+    const clipSave = clipboard.readText()
+    callback()
+    setTimeout(() => {
+      this.isClipStored = true
+      clipboard.writeText(clipSave)
+    }, 166)
+  }
+}
 export async function getClipboard() {
   let timeLimit = 0
   if (clipboardPromise) {

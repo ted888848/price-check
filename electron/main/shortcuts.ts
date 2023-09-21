@@ -1,7 +1,7 @@
 import { clipboard, globalShortcut } from 'electron'
 import { toggleOverlay, togglePriceCheck } from './overlayWindow'
 import { PoeWindow } from './POEWindow'
-import { getClipboard } from './clipboard'
+import { MyClipBoard, getClipboard } from './clipboard'
 import { config } from './config'
 import { uIOhook, UiohookKey } from 'uiohook-napi'
 export function setupShortcut() {
@@ -54,44 +54,35 @@ export function registerShortcut() {
 export function unRegisterShortcut() {
   globalShortcut.unregisterAll()
 }
-let isClipStored = true
-async function pasteTextToChat(text: string, lastMsg?: boolean, moveToFront?: boolean) {
-  if (!isClipStored) {
-    return
-  }
-  isClipStored = false
-  let clipSave = clipboard.readText()
-  clipboard.writeText(text)
-  for (let i = 0; i < 5; ++i) {
-    await new Promise((resolve) => setTimeout(resolve, 20))
-    if (clipboard.readText() === text) break
+
+function pasteTextToChat(text: string, lastMsg?: boolean, moveToFront?: boolean) {
+  MyClipBoard.delayRestoreClipboard(() => {
     clipboard.writeText(text)
-  }
-  if (lastMsg) {
-    uIOhook.keyTap(UiohookKey.Enter, [UiohookKey.Ctrl])
-  }
-  else {
+    for (let i = 0; i < 5; ++i) {
+      if (clipboard.readText() === text) break
+      clipboard.writeText(text)
+    }
+    if (lastMsg) {
+      uIOhook.keyTap(UiohookKey.Enter, [UiohookKey.Ctrl])
+    }
+    else {
+      uIOhook.keyTap(UiohookKey.Enter)
+    }
+
+    if (moveToFront) {
+      uIOhook.keyTap(UiohookKey.Home)
+      uIOhook.keyTap(UiohookKey.Delete)
+    }
+    else if (/^[#%$&/]/.test(text)) {
+      uIOhook.keyTap(UiohookKey.A, [UiohookKey.Ctrl])
+    }
+    uIOhook.keyTap(UiohookKey.V, [UiohookKey.Ctrl])
     uIOhook.keyTap(UiohookKey.Enter)
-  }
-
-  if (moveToFront) {
-    uIOhook.keyTap(UiohookKey.Home)
-    uIOhook.keyTap(UiohookKey.Delete)
-  }
-  else if (/^[#%$&/]/.test(text)) {
-    uIOhook.keyTap(UiohookKey.A, [UiohookKey.Ctrl])
-  }
-  uIOhook.keyTap(UiohookKey.V, [UiohookKey.Ctrl])
-  uIOhook.keyTap(UiohookKey.Enter)
-  //return to latest message
-  // uIOhook.keyTap(UiohookKey.Enter)
-  // uIOhook.keyTap(UiohookKey.ArrowUp)
-  // uIOhook.keyTap(UiohookKey.ArrowUp)
-  // uIOhook.keyTap(UiohookKey.Escape)
-
-  setTimeout(() => {
-    clipboard.writeText(clipSave)
-    isClipStored = true
-  }, 180)
+    //return to latest message
+    // uIOhook.keyTap(UiohookKey.Enter)
+    // uIOhook.keyTap(UiohookKey.ArrowUp)
+    // uIOhook.keyTap(UiohookKey.ArrowUp)
+    // uIOhook.keyTap(UiohookKey.Escape)
+  })
 }
 
