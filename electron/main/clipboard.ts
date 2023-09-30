@@ -6,12 +6,13 @@ export class MyClipBoard {
   private static isClipStored = true
   public static delayRestoreClipboard(callback: () => void) {
     if (!this.isClipStored) return
+    this.isClipStored = false
     const clipSave = clipboard.readText()
     callback()
     setTimeout(() => {
       this.isClipStored = true
       clipboard.writeText(clipSave)
-    }, 166)
+    }, 120)
   }
 }
 export async function getClipboard() {
