@@ -22,7 +22,7 @@
     "@fortawesome/fontawesome-svg-core": "^6.4.2",
     "@fortawesome/free-solid-svg-icons": "^6.4.2",
     "@fortawesome/vue-fontawesome": "^3.0.3",
-    "@types/lodash-es": "^4.17.8",
+    "@types/lodash-es": "^4.17.10",
     "@types/node": "^20.5.3",
     "@types/vue-select": "^3.16.2",
     "@typescript-eslint/eslint-plugin": "^5.62.0",
