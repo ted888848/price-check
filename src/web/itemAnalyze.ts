@@ -53,7 +53,8 @@ function findUnique(type: keyof IAPIitems, isFonded: { flag: boolean }): void {
   if (isFonded.flag) return
   let temp: IItemUniques[] = []
   for (const ele of APIitems[type].entries) {
-    if (ele.type === itemParsed.baseType) {
+    if (type !== 'gems' && ele.type === itemParsed.baseType) {
+      //@ts-ignore
       temp = [...ele.unique]
       break
     }
@@ -162,6 +163,9 @@ export function itemAnalyze(item: string) {
     case '聖物':
       parseRelic(itemSection)
       break;
+    case '咒語':
+      parseCharm(itemSection);
+      break;
     case '其它':
       break
     default:
@@ -216,7 +220,8 @@ function parseItemName(section: string[], itemSection: string[][]) {
     飾品: 'accessory.trinket',
     異界地圖: 'map',
     輿圖地區升級道具: 'watchstone',
-    記憶: 'memoryline'
+    記憶: 'memoryline',
+    技能寶石: 'gem.activegem'
   } as const
   const rarityOptions = [{
     value: undefined,
@@ -271,6 +276,16 @@ function parseItemName(section: string[], itemSection: string[][]) {
       }
       itemParsed.baseType = tempBaseType
       itemParsed.name = tempName.substring(0, tempName.indexOf(itemParsed.baseType))
+    }
+    else if (itemType === '技能寶石') {
+      itemParsed.baseType = section[2]
+      const transGemInfo = APIitems.gems.entries.find(ele => ele.trans.some(({ text }) => text === itemParsed.baseType))
+      if (transGemInfo) {
+        itemParsed.transGem = {
+          option: transGemInfo.type,
+          discriminator: transGemInfo.trans.find(g => g.text === itemParsed.baseType)!.disc
+        }
+      }
     }
     else {
       itemParsed.baseType = section[2]
@@ -801,12 +816,7 @@ function parseMap(item: string[][]) {
 }
 function parseGem(item: string[][]) {
   itemParsed.autoSearch = true
-  let isAltQ = false
-  const altQTrans = {
-    異常的: 1,
-    相異的: 2,
-    幻影的: 3
-  } as const
+
   item[0].forEach(line => {
     let lineMatch: RegExpMatchArray | null
     if ((lineMatch = line.match(/等級: (\d+)/))) {
@@ -819,11 +829,8 @@ function parseGem(item: string[][]) {
         min: parseInt(lineMatch[1]), max: undefined, search: true
       }
     }
-    else if (line.startsWith('替代品質')) {
-      isAltQ = true
-    }
   })
-  itemParsed.quality.search = !(/啟蒙|賦予|增幅/.test(itemParsed.baseType) || isAltQ)
+  itemParsed.quality.search = !(/啟蒙|賦予|增幅/.test(itemParsed.baseType))
   item.shift()
   let vaalLine: string
   endFor:
@@ -837,22 +844,6 @@ function parseGem(item: string[][]) {
         }
       }
     }
-  }
-  if (isAltQ) {
-    if (itemParsed.vaalVer) {
-      itemParsed.altQType = altQTrans[vaalLine!.slice(0, 3) as keyof typeof altQTrans]
-      itemParsed.baseType = vaalLine!.substring(4)
-    }
-    else {
-      itemParsed.altQType = altQTrans[itemParsed.baseType.slice(0, 3) as keyof typeof altQTrans]
-      itemParsed.baseType = itemParsed.baseType.substring(4)
-    }
-  }
-  else {
-    if (itemParsed.vaalVer) {
-      itemParsed.baseType = vaalLine!
-    }
-    itemParsed.altQType = 0
   }
 }
 function parseTemple(item: string[][]) {
@@ -916,4 +907,9 @@ function parseRelic(item: string[][]) {
   }
   item.shift()
   parseMod(item[0], 'sanctum')
+}
+
+function parseCharm(item: string[][]) {
+  parseItemLevel(item[0])
+  parseMod(item[0], 'explicit')
 }

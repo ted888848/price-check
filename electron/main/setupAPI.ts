@@ -23,6 +23,25 @@ function setupItemArray(itemArray: any[], heistReward: any[]) {
   })
   return itemBaseType
 }
+function parseGams(gemEntries: any[]) {
+  const result: any[] = []
+  gemEntries.forEach((gem) => {
+    if (gem.disc && !gem.disc.startsWith('alt_')) return
+    if (gem.disc && gem.disc.startsWith('alt_')) {
+      const sameTypeGem = result.find(resultGem => resultGem.type === gem.type)
+      if (sameTypeGem) {
+        sameTypeGem.trans.push({ text: gem.text, disc: gem.disc })
+      }
+      else {
+        result.push({ type: gem.type, text: gem.type, trans: [{ text: gem.text, disc: gem.disc }] })
+      }
+    }
+    else {
+      result.push({ type: gem.type, text: gem.type, trans: [] })
+    }
+  })
+  return result
+}
 function setupAPIItems(itemsJson: any) {
   let APIitems: Partial<IAPIitems> = {}
   let heistReward: IHeistReward[] = []
@@ -51,9 +70,11 @@ function setupAPIItems(itemsJson: any) {
         break
       case 'cards':
       case 'currency':
-      case 'gems':
         APIitems[groupID] = itemGroup
-        if (itemGroup.id === 'gems') heistReward.push(...itemGroup.entries)
+        break;
+      case 'gems':
+        APIitems[groupID] = { ...itemGroup, entries: parseGams(itemGroup.entries) }
+        if (itemGroup.id === 'gems') heistReward.push(...parseGams(itemGroup.entries))
         break
       default:
         return

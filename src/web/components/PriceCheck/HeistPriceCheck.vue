@@ -4,10 +4,11 @@
     <VSelect v-model="gemReplicaSelect" class="text-sm style-chooser flex-grow" :options="gemReplicaOptions"
       label="text" />
   </div>
-  <div v-show="!(gemReplicaSelect?.text.startsWith('贗品') ?? true)" class="flex p-2 items-center justify-center">
-    <span class="mx-1 text-white hover:cursor-default">相異品質:</span>
-    <VSelect v-model="gemAltQSelect" class="text-sm style-chooser flex-grow" :options="gemAltQOptions" label="label"
-      :clearable="false" :searchable="false" />
+  <div v-show="!((gemReplicaSelect?.text.startsWith('贗品') && gemReplicaSelect?.trans) ?? true)"
+    class="flex p-2 items-center justify-center">
+    <span class="mx-1 text-white hover:cursor-default">寶石版本:</span>
+    <VSelect v-model="gemTransSelect" class="text-sm style-chooser flex-grow" :options="gemReplicaSelect?.trans"
+      label="text" :clearable="true" :searchable="false" />
   </div>
   <div class="flex items-center justify-center py-1 hover:cursor-pointer"
     @click="_event => twoWeekOffline = !twoWeekOffline">
@@ -87,9 +88,9 @@ const props = defineProps(['itemProp', 'leagueSelect', 'divineToChaos', 'isOverf
 const { rateTimeLimit } = getIsCounting()
 
 const gemReplicaSelect = ref<IHeistReward>()
-const { gemAltQOptions } = selectOptions
-const gemAltQSelect = ref(gemAltQOptions[0])
-
+// const { gemAltQOptions } = selectOptions
+// const gemAltQSelect = ref(gemAltQOptions[0])
+const gemTransSelect = ref<ArrayValueType<IHeistReward['trans']>>()
 const searchJSON: ISearchJson = {
   query: {
     filters: {
@@ -176,10 +177,8 @@ async function searchBtn() {
   isSearching.value = true
   searchJSON.query.name = gemReplicaSelect.value?.name
   searchJSON.query.type = gemReplicaSelect.value?.type
-  if (!gemReplicaSelect.value?.name?.startsWith('贗品')) {
-    searchJSON.query.filters.misc_filters.filters.gem_alternate_quality = {
-      option: gemAltQSelect.value.value
-    }
+  if (!gemReplicaSelect.value?.name?.startsWith('贗品') && gemTransSelect.value) {
+    searchJSON.query.type = { option: gemReplicaSelect.value?.type ?? '', discriminator: gemTransSelect.value?.disc }
   }
   searchResult.value = await searchItem(searchJSON, props.leagueSelect)
   if (!searchResult.value.err) {

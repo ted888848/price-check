@@ -3,6 +3,10 @@ interface IHeistReward {
   name?: string;
   type: string;
   text: string;
+  trans?: {
+    text: string;
+    disc: string;
+  }[]
 }
 interface IAPIItemsItem {
   id: string;
@@ -13,7 +17,17 @@ interface IAPIItemsItem {
     unique: IItemUniques[];
   }[];
 }
-
+interface IAPIGemsItem {
+  label: 'gems';
+  entries: {
+    type: string;
+    text: string;
+    trans: {
+      text: string;
+      disc: string;
+    }[]
+  }[]
+}
 interface IIPCChannel {
   PRICE_CHECK_SHOW: 'priceCheck';
   OVERLAY_SHOW: 'overlay';
@@ -32,7 +46,7 @@ interface IAPIitems {
   cards: IAPIItemsItem;
   currency: IAPIItemsItem;
   flasks: IAPIItemsItem;
-  gems: IAPIItemsItem;
+  gems: IAPIGemsItem;
   jewels: IAPIItemsItem;
   maps: IAPIItemsItem;
   weapons: IAPIItemsItem;
@@ -171,6 +185,10 @@ interface IItem {
   search6L?: boolean;
   isRGB?: boolean;
   onlyChaos?: boolean;
+  transGem?: {
+    discriminator: string;
+    option: string
+  };
   // [key: string]: any;
 }
 

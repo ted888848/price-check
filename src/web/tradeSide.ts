@@ -5,7 +5,10 @@ import { isUndefined, isNumber, countBy } from 'lodash-es'
 import type { AxiosResponseHeaders } from 'axios'
 export interface ISearchJson {
   query: {
-    type?: string;
+    type?: {
+      discriminator: string;
+      option: string
+    } | string;
     name?: string;
     filters: {
       trade_filters: {
@@ -184,7 +187,7 @@ const defaultSearchJson: ISearchJson = {
     }],
     status: {
       option: 'online'
-    }
+    },
   },
   sort: {
     price: 'asc'
@@ -250,6 +253,10 @@ export function getSearchJSON(item: IItem) {
         }
       }
     }
+  }
+
+  if (item.transGem) {
+    searchJSON.query.type = item.transGem
   }
   if (item.raritySearch.value) {
     searchJSON.query.filters.type_filters.filters.rarity = {
@@ -362,7 +369,7 @@ function cleanupJSON(searchJson: ISearchJson) {
       if (!isNumber(ele.value.max)) delete ele.value.max
     }
   })
-  if (searchJson.query.type?.endsWith('虛空石')) {
+  if (typeof searchJson.query.type === 'string' && searchJson.query.type?.endsWith('虛空石')) {
     delete searchJson.query.type
   }
   return searchJson
