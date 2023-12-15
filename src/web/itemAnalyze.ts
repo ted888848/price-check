@@ -164,7 +164,8 @@ export function itemAnalyze(item: string) {
       parseRelic(itemSection)
       break;
     case '咒語':
-      parseCharm(itemSection);
+    case "萃取物":
+      parseCharmAndTincture(itemSection);
       break;
     case '其它':
       break
@@ -269,6 +270,7 @@ function parseItemName(section: string[], itemSection: string[][]) {
       const tempName = section[2]
       const _itemType = itemParsed.type.option?.substring(0, itemParsed.type.option.indexOf('.'))
       const itemType = (_itemType === 'weapon' ? 'weapons' : _itemType) as keyof typeof APIitems
+      //@ts-ignore
       let tempBaseType = APIitems[itemType]?.entries.find((entry) => tempName.endsWith(entry.type))?.type
       if (tempBaseType === undefined) {
         tempBaseType = tempName.indexOf('之') > -1 ? tempName.substring(tempName.indexOf('之') + 1) :
@@ -394,6 +396,7 @@ function parseMultilineMod(regSection: RegExp[], section: string[], type: keyof 
   return tempArr
 }
 function parseMod(section: string[], type: keyof IAPIMods) {
+  console.log(section, type)
   const regSection = getStrReg(section, type)
   const tempArr = parseMultilineMod(regSection, section, type)
   regSection.forEach((line, index) => {
@@ -909,7 +912,10 @@ function parseRelic(item: string[][]) {
   parseMod(item[0], 'sanctum')
 }
 
-function parseCharm(item: string[][]) {
+function parseCharmAndTincture(item: string[][]) {
   parseItemLevel(item[0])
-  parseMod(item[0], 'explicit')
+  item.shift()
+  for (const lines of item) {
+    if (parseMod(lines, 'explicit') === ParseResult.PARSE_SECTION_SUCC) break;
+  }
 }

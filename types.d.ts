@@ -10,7 +10,7 @@ interface IHeistReward {
 }
 interface IAPIItemsItem {
   id: string;
-  label: string;
+  label: 'accessories' | 'armour' | 'cards' | 'currency' | 'flasks' | 'gems' | 'jewels' | 'maps' | 'weapons' | 'watchstones' | 'heistequipment' | 'heistmission' | 'logbook';
   entries: {
     type: string;
     text: string;
