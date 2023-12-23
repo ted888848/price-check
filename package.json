@@ -1,6 +1,6 @@
 {
   "name": "price-check",
-  "version": "3.23.0",
+  "version": "3.23.1",
   "main": "dist-electron/main/index.js",
   "description": "就只是一個POE查價",
   "author": "ted <ted888848@gmail.com>",

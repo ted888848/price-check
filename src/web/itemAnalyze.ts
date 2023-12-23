@@ -158,6 +158,7 @@ export function itemAnalyze(item: string) {
       break
     case '命運卡':
     case '遺鑰':
+    case '屍體':
       itemParsed.autoSearch = true
       break
     case '聖物':
@@ -222,7 +223,8 @@ function parseItemName(section: string[], itemSection: string[][]) {
     異界地圖: 'map',
     輿圖地區升級道具: 'watchstone',
     記憶: 'memoryline',
-    技能寶石: 'gem.activegem'
+    技能寶石: 'gem.activegem',
+    咒語: 'azmeri.charm'
   } as const
   const rarityOptions = [{
     value: undefined,
@@ -723,6 +725,27 @@ function parseWatchstone(item: string[][]) {
       return
   }
 }
+function parseImpossibleEscape(item: string[][]) {
+  itemParsed.autoSearch = true
+  itemParsed.isCorrupt = true
+  outer:
+  for (const section of item) {
+    for (const line of section) {
+      const result = line.match(/範圍 (.+) 內的天賦可以在沒有連結你的天賦樹下被配置/)
+      if (result) {
+        const statDetail = APImods.explicit.entries.find(ele => ele.id === 'explicit.stat_2422708892')!
+        const matchOption = statDetail.option?.options.find(ele => ele.text === result[1])
+        itemParsed.stats.push({
+          id: statDetail.id,
+          text: statDetail.text.replace('#', result[1]),
+          value: { option: matchOption?.id },
+          disabled: false
+        })
+        break outer
+      }
+    }
+  }
+}
 function parseOtherNeedMods(item: string[][]) {
   if (itemParsed.baseType.endsWith('星團珠寶')) {
     parseClusterJewel(item)
@@ -736,7 +759,16 @@ function parseOtherNeedMods(item: string[][]) {
     parseForbiddenJewel(item)
     return
   }
+  else if (itemParsed.name === '逃脫不能') {
+    parseImpossibleEscape(item)
+    return
+  }
   parseAllfuns(item, parseFuns)
+  if (itemParsed.type.option === 'memoryline') {
+    itemParsed.stats.forEach(ele => ele.disabled = false)
+    itemParsed.itemLevel && (itemParsed.itemLevel.search = false)
+    itemParsed.autoSearch = true
+  }
 }
 function parseMap(item: string[][]) {
   const elderMap = {
@@ -829,7 +861,7 @@ function parseGem(item: string[][]) {
     }
     else if ((lineMatch = line.match(/品質: \+(\d+)%/))) {
       itemParsed.quality = {
-        min: parseInt(lineMatch[1]), max: undefined, search: true
+        min: parseInt(lineMatch[1]), max: undefined, search: false
       }
     }
   })
@@ -917,5 +949,8 @@ function parseCharmAndTincture(item: string[][]) {
   item.shift()
   for (const lines of item) {
     if (parseMod(lines, 'explicit') === ParseResult.PARSE_SECTION_SUCC) break;
+  }
+  if (itemParsed.type.text === '咒語') {
+    itemParsed.type.searchByType = true
   }
 }
