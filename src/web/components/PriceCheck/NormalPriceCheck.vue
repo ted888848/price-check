@@ -334,7 +334,7 @@ if (item.value.autoSearch)
   searchBtn()
 
 const emit = defineEmits<{
-  (event: 'open-web-view', extendUrl: string): void;
+  'open-web-view': [extendUrl: string]
 }>()
 function openWebView() {
   emit('open-web-view', `${searchResult.value.searchID.type}/${props.leagueSelect}/${searchResult.value.searchID.ID}`)

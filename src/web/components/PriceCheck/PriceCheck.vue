@@ -33,8 +33,11 @@
           :searchable="false" />
       </div>
       <KeepAlive>
-        <component :is="priceCheckTabs[currentPriceCheck]" :item-prop="item" :league-select="leagueSelect"
+        <NormalPriceCheck v-if="currentPriceCheck === 'NormalPriceCheck'" :item-prop="item!" :league-select="leagueSelect"
           :divine-to-chaos="divineToChaos" :is-overflow="isOverflow" @open-web-view="openWebView" />
+        <HeistPriceCheck v-else-if="currentPriceCheck === 'HeistPriceCheck'" :item-prop="item!"
+          :divine-to-chaos="divineToChaos" :league-select="leagueSelect" :is-overflow="isOverflow"
+          @open-web-view="openWebView" />
       </KeepAlive>
     </div>
   </div>
@@ -109,7 +112,7 @@ const divineToChaosDec = computed(() => {
 
 const priceCheckDiv = ref<HTMLDivElement>()
 function isOverflow() {
-  if (!priceCheckDiv.value) return
+  if (!priceCheckDiv.value) return false
   return priceCheckDiv.value.scrollHeight > priceCheckDiv.value.offsetHeight
 }
 
