@@ -3,16 +3,17 @@ const DELAY = 50
 const LIMIT = 250
 let clipboardPromise: Promise<string> | null
 export class MyClipBoard {
-  private static isClipStored = true
+  private static timeoutSave: ReturnType<typeof setTimeout> = null
   public static delayRestoreClipboard(callback: () => void) {
-    if (!this.isClipStored) return
-    this.isClipStored = false
-    const clipSave = clipboard.readText()
+    let clipSave: string | null = null
+    if (!this.timeoutSave) {
+      clipSave = clipboard.readText()
+    }
     callback()
-    setTimeout(() => {
-      this.isClipStored = true
-      clipboard.writeText(clipSave)
-    }, 120)
+    this.timeoutSave = setTimeout(() => {
+      if (clipSave) clipboard.writeText(clipSave)
+      this.timeoutSave = null
+    }, 200)
   }
 }
 export async function getClipboard() {

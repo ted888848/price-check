@@ -590,7 +590,7 @@ function parseWeapon(item: string[][]) {
     let lineMatch: RegExpMatchArray | null
     if ((lineMatch = line.match(/品質: \+(\d+)%/))) {
       itemParsed.quality = {
-        min: parseInt(lineMatch[1]), max: undefined, search: true
+        min: parseInt(lineMatch[1]), max: undefined, search: false
       }
     }
     else if ((lineMatch = line.match(/物理傷害: (\d+)-(\d+)/))) {
@@ -880,6 +880,7 @@ function parseGem(item: string[][]) {
       }
     }
   }
+  itemParsed.quality.search = !!(itemParsed.isCorrupt && itemParsed.quality.search)
 }
 function parseTemple(item: string[][]) {
   item.shift()
