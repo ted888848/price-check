@@ -1,19 +1,20 @@
 import { clipboard } from 'electron'
+import { debounce } from 'lodash'
 const DELAY = 50
 const LIMIT = 250
 let clipboardPromise: Promise<string> | null
 export class MyClipBoard {
-  private static timeoutSave: ReturnType<typeof setTimeout> = null
+  private static clipSave: string | null = null
+  private static debounceFun = debounce(() => {
+    if (this.clipSave !== null) clipboard.writeText(this.clipSave)
+    this.clipSave = null
+  }, 250)
   public static delayRestoreClipboard(callback: () => void) {
-    let clipSave: string | null = null
-    if (!this.timeoutSave) {
-      clipSave = clipboard.readText()
+    if (this.clipSave === null) {
+      this.clipSave = clipboard.readText()
     }
     callback()
-    this.timeoutSave = setTimeout(() => {
-      if (clipSave) clipboard.writeText(clipSave)
-      this.timeoutSave = null
-    }, 200)
+    this.debounceFun()
   }
 }
 export async function getClipboard() {
