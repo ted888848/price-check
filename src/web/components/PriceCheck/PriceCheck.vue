@@ -44,7 +44,7 @@
 </template>
 <script setup lang="ts">
 import { ipcRenderer } from 'electron'
-import { ref, computed, nextTick, } from 'vue'
+import { ref, computed, nextTick, onMounted, } from 'vue'
 import { range } from 'lodash-es'
 import IPC from '@/ipc/ipcChannel'
 import { itemAnalyze } from '@/web/itemAnalyze'
@@ -130,6 +130,9 @@ ipcRenderer.on(IPC.PRICE_CHECK_SHOW, (e, clip: string, pos: string) => {
 })
 ipcRenderer.on(IPC.POE_ACTIVE, () => {
   windowShowHide.value = false
+})
+onMounted(() => {
+  refreshDivineToChaos()
 })
 </script>
 

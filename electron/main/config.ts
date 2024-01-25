@@ -58,13 +58,6 @@ export let store = new Store({
 export let config: IConfig
 export function setupConfig() {
   config = store.store
-  //TODO 移除舊版的設定
-  for (const sc of config.shortcuts) {
-    if (sc.outputText === '/kick @char') {
-      sc.outputText = '/leave'
-      store.store = config
-    }
-  }
   ipcMain.on(IPC.SET_CONFIG, (_e, configData: string) => {
     store.store = JSON.parse(configData) as IConfig
     config = store.store
@@ -86,7 +79,7 @@ function setCookie() {
       path: '/',
       httpOnly: true,
       secure: true,
-      sameSite: 'no_restriction'
+      sameSite: 'lax'
     })
   }
 }

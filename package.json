@@ -47,6 +47,7 @@
     "axios": "^1.6.5",
     "electron-overlay-window": "^3.3.0",
     "electron-store": "^8.1.0",
+    "lodash": "^4.17.21",
     "lodash-es": "^4.17.21",
     "uiohook-napi": "^1.5.3"
   },
