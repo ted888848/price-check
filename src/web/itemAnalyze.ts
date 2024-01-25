@@ -421,14 +421,15 @@ function parseMod(section: string[], type: keyof IAPIMods) {
     regGroup?.shift()
     if (regGroup?.length) {
       let minValue = regGroup.reduce((pre, ele) => pre + Number(ele), 0) / regGroup.length
-      if (matchMod[0].text.match(/減少|增加/)?.[0] !== section[index].match(/減少|增加/)?.[0]) { //數字前增加與減少不相等，把數字變負數
+      const diffSign = matchMod[0].text.match(/減少|增加/)?.[0] !== section[index].match(/減少|增加/)?.[0]
+      if (diffSign) { //數字前增加與減少不相等，把數字變負數
         minValue = -minValue
       }
       tempArr.push({
         ...matchMod[0],
         value: {
-          max: minValue < 0 ? minValue : undefined,
-          min: minValue < 0 ? undefined : minValue
+          max: diffSign ? minValue : undefined,
+          min: diffSign ? undefined : minValue
         },
         disabled: true,
         type: APImods[type].type
@@ -546,15 +547,15 @@ function parsePseudoEleResistance() {
   itemParsed.stats.forEach(mod => {
     switch (true) {
       case mod.id.endsWith('stat_3372524247') || mod.id.endsWith('stat_1671376347') || mod.id.endsWith('stat_4220027924'):
-        eleRes += mod.value!.min!
+        eleRes += mod.value!.min! ?? mod.value!.max ?? 0
         flag = true
         break
       case mod.id.endsWith('stat_3441501978') || mod.id.endsWith('stat_4277795662') || mod.id.endsWith('stat_2915988346'):
-        eleRes += (mod.value!.min! * 2)
+        eleRes += ((mod.value!.min! ?? mod.value!.max ?? 0) * 2)
         flag = true
         break
       case mod.id.endsWith('stat_2901986750'):
-        eleRes += (mod.value!.min! * 3)
+        eleRes += ((mod.value!.min! ?? mod.value!.max ?? 0) * 3)
         flag = true
         break
     }
