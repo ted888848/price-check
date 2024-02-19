@@ -44,7 +44,7 @@
 </template>
 <script setup lang="ts">
 import { ipcRenderer } from 'electron'
-import { ref, computed, nextTick, onMounted, } from 'vue'
+import { ref, computed, nextTick, onMounted, onUnmounted, } from 'vue'
 import { range } from 'lodash-es'
 import IPC from '@/ipc/ipcChannel'
 import { itemAnalyze } from '@/web/itemAnalyze'
@@ -84,12 +84,9 @@ function loadLeagues() {
 defineExpose({
   loadLeagues
 })
-const currentPriceCheck = ref<keyof typeof priceCheckTabs>('NormalPriceCheck')
-const priceCheckTabs = {
-  'NormalPriceCheck': NormalPriceCheck,
-  'HeistPriceCheck': HeistPriceCheck
-}
-const priceCheckOptions = [{
+type PriceCheckTabs = 'NormalPriceCheck' | 'HeistPriceCheck'
+const currentPriceCheck = ref<PriceCheckTabs>('NormalPriceCheck')
+const priceCheckOptions: { label: string, value: PriceCheckTabs }[] = [{
   label: '普通查價',
   value: 'NormalPriceCheck'
 }, {
@@ -104,6 +101,9 @@ let chaosImage = 'https://web.poe.garena.tw' + currencyImageUrl.find(ele => ele.
 async function refreshDivineToChaos() {
   divineToChaos.value = await getDivineToChaos(leagueSelect.value)
 }
+const divToCInterval = setInterval(() => {
+  refreshDivineToChaos()
+}, 10 * 60 * 1000)
 const divineToChaosDec = computed(() => {
   return range(0.1, 1, 0.1).map(ele => ({
     e: ele.toFixed(1), c: (ele * divineToChaos.value).toFixed(0)
@@ -133,6 +133,9 @@ ipcRenderer.on(IPC.POE_ACTIVE, () => {
 })
 onMounted(() => {
   refreshDivineToChaos()
+})
+onUnmounted(() => {
+  clearInterval(divToCInterval)
 })
 </script>
 

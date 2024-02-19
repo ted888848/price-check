@@ -19,7 +19,7 @@ const parseFuns: ((section: string[]) => ParseResult)[] = [
   parseIdentify,
   parseExplicitMod,
 ]
-const defaultItemParsed: IItem = {
+const defaultItemParsed: IItem = Object.freeze({
   type: {
     text: '',
     searchByType: false
@@ -45,9 +45,9 @@ const defaultItemParsed: IItem = {
   autoSearch: false,
   searchTwoWeekOffline: false,
   searchExchange: {
-    option: false, have: 'chaos'
+    option: false, have: 'chaos' as const
   }
-}
+})
 let itemParsed: IItem
 function findUnique(type: keyof IAPIitems, isFonded: { flag: boolean }): void {
   if (isFonded.flag) return
@@ -55,7 +55,7 @@ function findUnique(type: keyof IAPIitems, isFonded: { flag: boolean }): void {
   for (const ele of APIitems[type].entries) {
     if (type !== 'gems' && ele.type === itemParsed.baseType) {
       //@ts-ignore
-      temp = [...ele.unique]
+      temp = structuredClone(ele.unique)
       break
     }
   }
@@ -81,6 +81,7 @@ export function itemAnalyze(item: string) {
   if (parseItemName(itemSection[0], itemSection) === ParseResult.PARSE_SECTION_FAIL) return null
   itemSection.shift()
   const isFindUnique = { flag: false }
+  const config = ipcRenderer.sendSync(IPC.GET_CONFIG) as IConfig
   switch (itemParsed.type.text) {
     case '爪':
     case '匕首':
@@ -144,7 +145,7 @@ export function itemAnalyze(item: string) {
       itemParsed.autoSearch = true
       if (APIStatic.some((ele: IStatic) => ele.text === itemParsed.baseType)) {
         itemParsed.searchExchange.option = true
-        const searchExchangeDivine = ipcRenderer.sendSync(IPC.GET_CONFIG).searchExchangeDivine as boolean
+        const searchExchangeDivine = config.searchExchangeDivine
         itemParsed.searchExchange.have = searchExchangeDivine ? 'divine' : 'chaos'
       }
       break
@@ -176,8 +177,8 @@ export function itemAnalyze(item: string) {
   parsePseudoEleResistance()
   if (itemParsed.raritySearch.label === '傳奇' && itemParsed.name) itemParsed.autoSearch = true
   if (itemParsed.baseType === '阿茲瓦特史記') parseTemple(itemSection)
-  else if (itemParsed.baseType === '充能的羅盤') parseWatchstone(itemSection)
-  itemParsed.searchTwoWeekOffline = ipcRenderer.sendSync(IPC.GET_CONFIG)?.searchTwoWeekOffline ?? false
+  else if (itemParsed.baseType === '充能的羅盤') parseSextant(itemSection)
+  itemParsed.searchTwoWeekOffline = config.searchTwoWeekOffline ?? false
   return itemParsed
 }
 function parseItemName(section: string[], itemSection: string[][]) {
@@ -244,7 +245,7 @@ function parseItemName(section: string[], itemSection: string[][]) {
   }, {
     value: 'nonunique',
     label: '非傳奇'
-  }]
+  }] as const
   const itemType = section[0].match(/物品種類: ([^\n]+)/)![1] as keyof typeof typeTrans
   itemParsed.type = {
     text: itemType, option: typeTrans[itemType], searchByType: false
@@ -714,7 +715,7 @@ function parseForbiddenJewel(item: string[][]) {
     }
   }
 }
-function parseWatchstone(item: string[][]) {
+function parseSextant(item: string[][]) {
   itemParsed.autoSearch = true
   for (const section of item) {
     for (const index in section) {
@@ -753,7 +754,7 @@ function parseOtherNeedMods(item: string[][]) {
     return
   }
   else if (itemParsed.baseType.endsWith('虛空石')) {
-    parseWatchstone(item)
+    parseSextant(item)
     return
   }
   else if (/^禁忌(血肉|烈焰)$/.test(itemParsed.name!)) {
@@ -829,6 +830,7 @@ function parseMap(item: string[][]) {
           value: { option: match.value },
           disabled: false
         }
+        if (itemParsed.mapTier?.search) itemParsed.mapTier.search = false
       }
     }
     else if (section[0].startsWith('地圖含有') && section.length > 1) {
@@ -842,6 +844,7 @@ function parseMap(item: string[][]) {
           value: { option: match.value },
           disabled: false
         }
+        if (itemParsed.mapTier?.search) itemParsed.mapTier.search = false
       }
     }
   }

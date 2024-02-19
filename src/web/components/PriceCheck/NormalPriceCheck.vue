@@ -23,11 +23,11 @@
         <VSelect v-model="item.isIdentify" class="text-sm style-chooser flex-grow" :options="generalOption" label="label"
           :reduce="(ele: ArrayValueType<typeof generalOption>) => ele.value" :clearable="false" :searchable="false" />
       </div>
-      <div v-else class="flex p-2 items-center justify-center select-none">
+      <!-- <div v-else class="flex p-2 items-center justify-center select-none">
         <span class="mx-1 text-white hover:cursor-default">相異品:</span>
         <VSelect v-model="item.altQType" class="text-sm style-chooser flex-grow" :options="gemAltQOptions" label="label"
           :reduce="(ele: ArrayValueType<typeof gemAltQOptions>) => ele.value" :clearable="false" :searchable="false" />
-      </div>
+      </div> -->
     </div>
     <div class="flex items-center justify-center">
       <ValueMinMax v-if="item.gemLevel" v-model="item.gemLevel" class="flex p-2 items-center justify-center">
