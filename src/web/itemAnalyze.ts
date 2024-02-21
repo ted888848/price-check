@@ -273,7 +273,6 @@ function parseItemName(section: string[], itemSection: string[][]) {
       const tempName = section[2]
       const _itemType = itemParsed.type.option?.substring(0, itemParsed.type.option.indexOf('.'))
       const itemType = (_itemType === 'weapon' ? 'weapons' : _itemType) as keyof typeof APIitems
-      //@ts-ignore
       let tempBaseType = APIitems[itemType]?.entries.find((entry) => tempName.endsWith(entry.type))?.type
       if (tempBaseType === undefined) {
         tempBaseType = tempName.indexOf('之') > -1 ? tempName.substring(tempName.indexOf('之') + 1) :
@@ -284,11 +283,12 @@ function parseItemName(section: string[], itemSection: string[][]) {
     }
     else if (itemType === '技能寶石') {
       itemParsed.baseType = section[2]
-      const transGemInfo = APIitems.gems.entries.find(ele => ele.trans.some(({ text }) => text === itemParsed.baseType))
+
+      const transGemInfo = APIitems.gems.entries.find(ele => ele.trans?.some(({ text }) => text === itemParsed.baseType))
       if (transGemInfo) {
         itemParsed.transGem = {
           option: transGemInfo.type,
-          discriminator: transGemInfo.trans.find(g => g.text === itemParsed.baseType)!.disc
+          discriminator: transGemInfo.trans!.find(g => g.text === itemParsed.baseType)!.disc
         }
       }
     }

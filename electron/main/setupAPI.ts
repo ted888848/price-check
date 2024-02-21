@@ -7,9 +7,9 @@ let store = new Store({
   name: 'APIData'
 })
 
-function setupItemArray(itemArray: any[], heistReward: any[]) {
-  let itemBaseType: any[] = []
-  itemArray.slice().reverse().forEach((item: any) => {
+function setupItemArray(itemArray: RawItemsItem['entries'], heistReward: IHeistReward[]) {
+  let itemBaseType: IAPIItemsItem['entries'] = []
+  itemArray.slice().reverse().forEach((item) => {
     let index = itemBaseType.findIndex(element => element.type === item.type)
     if (index === -1) {
       itemBaseType.push({ ...item, unique: [] })
@@ -23,8 +23,8 @@ function setupItemArray(itemArray: any[], heistReward: any[]) {
   })
   return itemBaseType
 }
-function parseGams(gemEntries: any[]) {
-  const result: any[] = []
+function parseGams(gemEntries: RawItemsItem['entries']) {
+  const result: IAPIGemsItem['entries'] = []
   gemEntries.forEach((gem) => {
     if (gem.disc && !gem.disc.startsWith('alt_')) return
     if (gem.disc && gem.disc.startsWith('alt_')) {
@@ -42,10 +42,10 @@ function parseGams(gemEntries: any[]) {
   })
   return result
 }
-function setupAPIItems(itemsJson: any) {
+function setupAPIItems(itemsJson: RawItems) {
   let APIitems: Partial<IAPIitems> = {}
   let heistReward: IHeistReward[] = []
-  itemsJson.result.forEach((itemGroup: any) => {
+  itemsJson.result.forEach((itemGroup) => {
     let groupID = itemGroup.id as keyof IAPIitems
     switch (groupID) {
       case 'accessories':
@@ -65,7 +65,7 @@ function setupAPIItems(itemsJson: any) {
       case 'maps':
         APIitems[groupID] = {
           id: itemGroup.id, label: itemGroup.label,
-          entries: setupItemArray(itemGroup.entries.filter((ele: any) => ele.disc === 'warfortheatlas'), heistReward)
+          entries: setupItemArray(itemGroup.entries.filter((ele) => ele.disc === 'warfortheatlas'), heistReward)
         }
         break
       case 'cards':
@@ -82,32 +82,32 @@ function setupAPIItems(itemsJson: any) {
   })
   return { APIitems, heistReward }
 }
-function checkNewline(statsGroup: any, type: string) {
-  let mutiLines: any[] = []
+function checkNewline(statsGroup: RawStatsItem) {
+  let mutiLines: IAPIModsMod['mutiLines'] = []
   statsGroup.entries.forEach((stat: any) => {
     if (stat.text.includes('\n')) {
       let lines = stat.text.split('\n')
-      mutiLines.push({ id: stat.id, text: lines, type })
+      mutiLines.push({ id: stat.id, text: lines })
     }
   })
   if (mutiLines.length) return mutiLines.slice()
   return undefined
 }
-function setupAPIMods(statsJson: any) {
+function setupAPIMods(statsJson: RawStats) {
   let APImods: Partial<IAPIMods> = {}
-  statsJson.result.forEach((statsGroup: any) => {
-    switch (statsGroup.label) {
-      case '偽屬性':
+  statsJson.result.forEach((statsGroup) => {
+    switch (statsGroup.id) {
+      case 'pseudo':
         APImods.pseudo = {
           label: statsGroup.label,
-          entries: statsGroup.entries.filter((stat: any) => stat.text.indexOf('有房間：') === -1)
-            .map((stat: any) => ({ id: stat.id, text: stat.text, option: stat.option })),
+          entries: statsGroup.entries.filter((stat) => stat.text.indexOf('有房間：') === -1)
+            .map((stat) => ({ id: stat.id, text: stat.text, option: stat.option })),
           type: '偽屬性'
         }
         APImods.temple = {
           label: statsGroup.label,
-          entries: statsGroup.entries.filter((stat: any) => stat.text.indexOf('有房間：') > -1)
-            .map((stat: any) => ({
+          entries: statsGroup.entries.filter((stat) => stat.text.indexOf('有房間：') > -1)
+            .map((stat) => ({
               id: stat.id,
               text: stat.text.substring(4).replace(/（階級 [123]）/, ''),
               value: { option: 1 }
@@ -115,74 +115,76 @@ function setupAPIMods(statsJson: any) {
           type: '神廟'
         }
         break
-      case '隨機屬性':
+      case 'explicit':
         APImods.forbiddenJewel = {
           label: statsGroup.label,
-          entries: statsGroup.entries.filter((ele: any) => /^若你在禁忌(烈焰|血肉)上有符合的詞綴，配置 #$/.test(ele.text)),
+          entries: statsGroup.entries.filter((ele) => /^若你在禁忌(烈焰|血肉)上有符合的詞綴，配置 #$/.test(ele.text)),
           type: '隨機'
         }
         APImods.explicit = {
           label: statsGroup.label,
-          entries: statsGroup.entries.map((ele: any) => ({ ...ele })).filter((stat: any) => !stat.text.includes('\n')),
+          entries: statsGroup.entries.map((ele) => ({ ...ele })).filter((stat) => !stat.text.includes('\n')),
           type: '隨機'
         }
-        APImods.explicit.mutiLines = checkNewline(statsGroup, '隨機')
+        APImods.explicit.mutiLines = checkNewline(statsGroup)
         break
-      case '固性屬性':
+      case 'implicit':
         APImods.implicit = {
           label: statsGroup.label,
-          entries: statsGroup.entries.map((ele: any) => ({ ...ele })).filter((stat: any) => !stat.text.includes('\n')),
+          entries: statsGroup.entries.map((ele) => ({ ...ele })).filter((stat) => !stat.text.includes('\n')),
           type: '固定'
         }
-        APImods.implicit.mutiLines = checkNewline(statsGroup, '固定')
+        APImods.implicit.mutiLines = checkNewline(statsGroup)
         break
-      case '破裂':
+      case 'fractured':
         APImods.fractured = {
           label: statsGroup.label,
-          entries: statsGroup.entries.map((ele: any) => ({ ...ele })).filter((stat: any) => !stat.text.includes('\n')),
+          entries: statsGroup.entries.map((ele) => ({ ...ele })).filter((stat) => !stat.text.includes('\n')),
           type: '破裂'
         }
-        APImods.fractured.mutiLines = checkNewline(statsGroup, '破裂')
+        APImods.fractured.mutiLines = checkNewline(statsGroup)
         break
-      case '附魔':
+      case 'enchant':
         APImods.clusterJewel = {
           label: statsGroup.label,
-          entries: statsGroup.entries.splice(statsGroup.entries
-            .findIndex((ele: any) => ele.text === '附加的小型天賦給予：#'), 1)[0].option.options,
+          entries:
+            statsGroup.entries.splice(statsGroup.entries
+              .findIndex((ele) => ele.text === '附加的小型天賦給予：#'), 1)[0].option.options
+              .map(option => ({ id: option.id.toString(), text: option.text })),
           type: '附魔'
         }
         APImods.enchant = {
           label: statsGroup.label,
-          entries: statsGroup.entries.map((ele: any) => ({ ...ele }))
-            .filter((stat: any) => !stat.text.includes('\n')),
+          entries: statsGroup.entries.map((ele) => ({ ...ele }))
+            .filter((stat) => !stat.text.includes('\n')),
           type: '附魔'
         }
-        APImods.enchant.mutiLines = checkNewline(statsGroup, '附魔')
+        APImods.enchant.mutiLines = checkNewline(statsGroup)
         break
-      case '已工藝':
+      case 'crafted':
         APImods.crafted = {
           label: statsGroup.label,
-          entries: statsGroup.entries.map((ele: any) => ({ ...ele })).filter((stat: any) => !stat.text.includes('\n')),
+          entries: statsGroup.entries.map((ele) => ({ ...ele })).filter((stat) => !stat.text.includes('\n')),
           type: '工藝'
         }
-        APImods.crafted.mutiLines = checkNewline(statsGroup, '工藝')
+        APImods.crafted.mutiLines = checkNewline(statsGroup)
         break
-      case '聖域':
+      case 'sanctum':
         APImods.sanctum = {
           label: statsGroup.label,
-          entries: statsGroup.entries.map((ele: any) => ({ ...ele })).filter((stat: any) => !stat.text.includes('\n')),
+          entries: statsGroup.entries.map((ele) => ({ ...ele })).filter((stat) => !stat.text.includes('\n')),
           type: '聖域'
         }
-        APImods.sanctum.mutiLines = checkNewline(statsGroup, '聖域')
+        APImods.sanctum.mutiLines = checkNewline(statsGroup)
       default:
         return
     }
   })
   return APImods
 }
-function setupAPIStatic(data: any) {
+function setupAPIStatic(data: RawStaticItem[]) {
   let APIStatic: IStatic[] = []
-  data.forEach((group: any) => {
+  data.forEach((group) => {
     if (group.label?.match(/^地圖|命運卡/)) return
     APIStatic = APIStatic.concat(structuredClone(group.entries))
   })
@@ -190,25 +192,25 @@ function setupAPIStatic(data: any) {
 }
 async function getLeagues() {
   const response = await GGCapi.get('trade/data/leagues')
-  const data = response.data
-  const leagues = data.result.map((l: any) => l.text)
+  const data = response.data as RawLeagues
+  const leagues = data.result.map((l) => l.text)
   store.set('Leagues', leagues)
 }
 async function getItems() {
   const response = await GGCapi.get('trade/data/items')
-  const data = response.data
+  const data = response.data as RawItems
   const { APIitems, heistReward } = setupAPIItems(data)
   store.set('APIitems', APIitems)
   store.set('heistReward', heistReward)
 }
 async function getStats() {
   const response = await GGCapi.get('trade/data/stats')
-  const data = response.data
+  const data = response.data as RawStats
   store.set('APImods', setupAPIMods(data))
 }
 async function getStatic() {
   const response = await GGCapi.get('trade/data/static')
-  const data = response.data
+  const data = response.data as RawStatic
   const _currencyImageUrl = data.result[0].entries
   store.set('currencyImageUrl', _currencyImageUrl)
   store.set('APIStatic', setupAPIStatic(data.result))

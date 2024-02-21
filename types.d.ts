@@ -10,19 +10,19 @@ interface IHeistReward {
 }
 interface IAPIItemsItem {
   id: string;
-  label: 'accessories' | 'armour' | 'cards' | 'currency' | 'flasks' | 'gems' | 'jewels' | 'maps' | 'weapons' | 'watchstones' | 'heistequipment' | 'heistmission' | 'logbook';
+  label: string;
   entries: {
     type: string;
     text: string;
-    unique: IItemUniques[];
+    unique?: IItemUniques[];
   }[];
 }
 interface IAPIGemsItem {
-  label: 'gems';
+  label: string;
   entries: {
     type: string;
     text: string;
-    trans: {
+    trans?: {
       text: string;
       disc: string;
     }[]
@@ -54,6 +54,7 @@ interface IAPIitems {
   heistequipment: IAPIItemsItem;
   heistmission: IAPIItemsItem;
   logbook: IAPIItemsItem;
+  [key: string]: IAPIItemsItem | IAPIGemsItem;
 }
 interface IAPIModsMod {
   label: string;
@@ -94,7 +95,7 @@ interface IAPIMods {
 interface IStatic {
   id: string;
   text: string;
-  image: string;
+  image?: string;
 }
 interface IItemStat {
   id: string;
@@ -209,5 +210,63 @@ interface IConfig {
     hotkey: string;
     type: hotkeyType;
     outputText: string;
+  }[];
+}
+
+interface RawStaticItem {
+  id: string;
+  label: null | string;
+  entries: {
+    id: string;
+    text: string;
+    image?: string;
+  }[]
+}
+interface RawStatic {
+  result: RawStaticItem[]
+}
+interface RawItems {
+  result: RawItemsItem[];
+}
+
+interface RawItemsItem {
+  id: string;
+  label: string;
+  entries: {
+    name?: string;
+    type: string;
+    text: string;
+    flags?: {
+      unique: boolean;
+    };
+    disc?: 'alt_x' | 'alt_y' | 'atlasofworlds' | 'blighted' | 'original' | 'theawakening' | 'uberblighted' | 'warfortheatlas';
+  }[];
+}
+type StatsID = 'crafted' | 'crucible' | 'delve' | 'enchant' | 'explicit' | 'fractured' | 'implicit' | 'pseudo' | 'sanctum' | 'scourge' | 'ultimatum' | 'veiled';
+interface RawStats {
+  result: RawStatsItem[];
+}
+
+interface RawStatsItem {
+  id: StatsID;
+  label: string;
+  entries: {
+    id: string;
+    text: string;
+    type: StatsID;
+    option?: {
+      options: {
+        id: number;
+        text: string;
+      }[];
+    };
+  }[];
+}
+
+interface RawLeagues {
+  result: {
+    id: string;
+    realm: string;
+    text: string;
   }[];
 }
