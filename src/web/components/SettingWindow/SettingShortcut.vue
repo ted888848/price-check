@@ -8,8 +8,8 @@
       <span class="text-xl mr-2 w-80px">
         查價
       </span>
-      <KeyInput v-model:hotkey="CConfig.priceCheckHotkey" />
-      <span v-if="!CConfig.priceCheckHotkey.length" class="ml-2 text-red-600 font-bold">
+      <KeyInput v-model:hotkey="config.priceCheckHotkey" />
+      <span v-if="!config.priceCheckHotkey.length" class="ml-2 text-red-600 font-bold">
         此欄位不能為空
       </span>
     </div>
@@ -17,12 +17,12 @@
       <span class="text-xl mr-2 w-80px">
         設定
       </span>
-      <KeyInput v-model:hotkey="CConfig.settingHotkey" />
-      <span v-if="!CConfig.settingHotkey.length" class="ml-2 text-red-600 font-bold">
+      <KeyInput v-model:hotkey="config.settingHotkey" />
+      <span v-if="!config.settingHotkey.length" class="ml-2 text-red-600 font-bold">
         此欄位不能為空
       </span>
     </div>
-    <div v-for="(shortcut, index) in CConfig.shortcuts" :key="index" class="text-white flex items-center">
+    <div v-for="(shortcut, index) in config.shortcuts" :key="index" class="text-white flex items-center">
       <span class="text-xl mr-2 w-80px">
         聊天室
       </span>
@@ -39,31 +39,17 @@
   </div>
 </template>
 <script setup lang="ts">
-import { computed } from 'vue'
 import KeyInput from '../utility/KeyInput.vue'
-const props = defineProps<{
-  config: IConfig;
-}>()
-const emit = defineEmits<{
-  (event: 'update:config', newValue: IConfig): void;
-}>()
-const CConfig = computed({
-  get() {
-    return props.config
-  },
-  set(newValue) {
-    emit('update:config', newValue)
-  }
-})
+const config = defineModel<IConfig>('config', { required: true })
 
 function createChatShortcut() {
-  CConfig.value.shortcuts.push({
+  config.value.shortcuts.push({
     hotkey: '',
     type: 'type-in-chat',
     outputText: ''
   })
 }
 function deleteChatShortcut(_e: MouseEvent, index: number) {
-  CConfig.value.shortcuts.splice(index, 1)
+  config.value.shortcuts.splice(index, 1)
 }
 </script>

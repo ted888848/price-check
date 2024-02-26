@@ -297,7 +297,7 @@ async function searchBtn() {
   if (item.value.searchExchange.option) {
     searchResult.value = (await searchExchange(item.value, props.leagueSelect))
     if (!searchResult.value.err) {
-      currency2Img.value = `https://web.poe.garena.tw${APIStatic.find(ele => ele.id === (searchResult.value as IExchangeResult).currency2)!.image}`
+      currency2Img.value = `${import.meta.env.VITE_URL_BASE}${APIStatic.find(ele => ele.id === (searchResult.value as IExchangeResult).currency2)!.image}`
       fetchResult.value = searchResult.value.result
     }
   }
@@ -340,7 +340,7 @@ function openWebView() {
   emit('open-web-view', `${searchResult.value.searchID.type}/${props.leagueSelect}/${searchResult.value.searchID.ID}`)
 }
 function openBrowser() {
-  window.open(encodeURI(`https://web.poe.garena.tw/trade/${searchResult.value.searchID.type}/${props.leagueSelect}/${searchResult.value.searchID.ID}`))
+  window.open(encodeURI(`${import.meta.env.VITE_URL_BASE}/trade/${searchResult.value.searchID.type}/${props.leagueSelect}/${searchResult.value.searchID.ID}`))
 }
 </script>
 <style></style>

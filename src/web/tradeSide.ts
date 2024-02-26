@@ -436,7 +436,7 @@ export interface IFetchResult {
 
 export async function fetchItem(fetchList: string[], searchID: string, oldFetchResult?: IFetchResult[]) {
   if (!fetchList.length) return oldFetchResult ?? []
-  let fetchResult: IFetchResult[] = []
+  let fetchPriceResult: string[] = []
   let itemJsonUrl: string[] = []
   for (let i = 0; i < fetchList.length; i += 10) {
     itemJsonUrl.push('trade/fetch/' + fetchList.slice(i, i + 10).join(',') + `?query=${searchID}`)
@@ -444,8 +444,8 @@ export async function fetchItem(fetchList: string[], searchID: string, oldFetchR
   await Promise.all(itemJsonUrl.map((url) => GGCapi.get(encodeURI(url))))
     .then((responses) => {
       responses.forEach(res => {
-        let tempResult = res.data.result.map((ele: any) => `${ele.listing.price.amount}|${ele.listing.price.currency}`)
-        fetchResult.push(...tempResult)
+        let tempResult = res.data.result.map((ele: any) => `${ele.listing.price.amount}|${ele.listing.price.currency}`) as string[]
+        fetchPriceResult = fetchPriceResult.concat(tempResult)
       })
       parseRateTimeLimit(responses.pop()?.headers as AxiosResponseHeaders)
     })
@@ -455,8 +455,8 @@ export async function fetchItem(fetchList: string[], searchID: string, oldFetchR
         startCountdown(parseInt(err.response.headers['retry-after']))
       }
     })
-  let countByFetchResult = countBy(fetchResult)
-  fetchResult = oldFetchResult ?? []
+  let countByFetchResult = countBy(fetchPriceResult)
+  let fetchResult = oldFetchResult ?? []
   for (let key in countByFetchResult) {
     let [price, currency] = key.split('|')
     let numPrice = Number(price)
@@ -469,7 +469,7 @@ export async function fetchItem(fetchList: string[], searchID: string, oldFetchR
         price: numPrice,
         currency,
         amount: countByFetchResult[key],
-        image: `https://web.poe.garena.tw${currencyImageUrl.find(ele => ele.id === currency)?.image}`
+        image: `${import.meta.env.VITE_URL_BASE}${currencyImageUrl.find(ele => ele.id === currency)?.image}`
       })
     }
   }
@@ -494,16 +494,14 @@ export async function getDivineToChaos(league: string) {
       'status': {
         'option': 'online'
       },
-      'have': [],
-      'want': []
+      'have': ['divine'],
+      'want': ['chaos']
     },
     'sort': {
       'have': 'asc'
     },
     'engine': 'new'
   }
-  exchangeJSON.query.have = ['divine']
-  exchangeJSON.query.want = ['chaos']
   let chaos = 0
   await GGCapi.post(encodeURI(`trade/exchange/${league}`), JSON.stringify(exchangeJSON))
     .then((response) => {
@@ -521,7 +519,7 @@ export async function getDivineToChaos(league: string) {
         startCountdown(parseInt(err.response.headers['retry-after']))
       }
     })
-  return Math.round(chaos * 0.2) * 5
+  return Math.round(chaos / 5) * 5
 }
 export interface IExchangeResult {
   searchID: {
@@ -538,27 +536,25 @@ export interface IExchangeResult {
 export async function searchExchange(item: IItem, league: string): Promise<IExchangeResult> {
   let exchangeResult: IExchangeResult = {
     searchID: { type: 'exchange' },
-    result: [] as IFetchResult[],
+    result: [],
     totalCount: 0,
     nowFetched: 0,
     err: false
   }
-  let tempResult: any = []
+  let tempResult: string[] = []
   let exchangeJSON: IExchangeJson = {
     'query': {
       'status': {
         'option': 'online'
       },
-      'have': [],
-      'want': []
+      'have': [item.searchExchange.have],
+      'want': [APIStatic.find(e => e.text === item.baseType)?.id ?? '']
     },
     'sort': {
       'have': 'asc'
     },
     'engine': 'new'
   }
-  exchangeJSON.query.have = [item.searchExchange.have]
-  exchangeJSON.query.want = [APIStatic.find(e => e.text === item.baseType)?.id ?? '']
   await GGCapi.post(encodeURI(`trade/exchange/${league}`), JSON.stringify(exchangeJSON))
     .then((response) => {
       parseRateTimeLimit(response.headers as AxiosResponseHeaders)
@@ -590,7 +586,7 @@ export async function searchExchange(item: IItem, league: string): Promise<IExch
       price,
       currency,
       amount: tempResultCountBy[key],
-      image: `https://web.poe.garena.tw${currencyImageUrl.find(ele => ele.id === currency)?.image}`
+      image: `${import.meta.env.VITE_URL_BASE}${currencyImageUrl.find(ele => ele.id === currency)?.image}`
     })
   }
   if (exchangeResult.errData) return {

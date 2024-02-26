@@ -1,31 +1,19 @@
 <template>
-  <input class=" text-black rounded text-center caret-transparent placeholder-black" :placeholder="inputValue"
+  <input class=" text-black rounded text-center caret-transparent placeholder-black" :placeholder="hotkey"
     @keydown.prevent @keyup="handelKeydown">
 </template>
 <script setup lang="ts">
-import { computed } from 'vue'
 import { keyToElectron } from '@/web/keyToElectron'
-const props = defineProps<{
-  hotkey: string;
-}>()
-const emit = defineEmits<{
-  (event: 'update:hotkey', newValue: string): void;
-}>()
-const inputValue = computed({
-  get() {
-    return props.hotkey
-  },
-  set(newValue) {
-    emit('update:hotkey', newValue)
-  }
-})
+
+const hotkey = defineModel<string>('hotkey')
+
 function handelKeydown(event: KeyboardEvent) {
   event.preventDefault()
   event.stopPropagation()
   const { code, key, altKey, ctrlKey, shiftKey } = event
   if (['Control', 'Alt', 'Shift'].includes(key)) return
   if (code === 'Backspace' || code === 'Delete') {
-    inputValue.value = ''
+    hotkey.value = ''
     return
   }
   let keyCode = ''
@@ -41,6 +29,6 @@ function handelKeydown(event: KeyboardEvent) {
       keyCode = code
     }
   }
-  inputValue.value = keyToElectron(keyCode, altKey, ctrlKey, shiftKey)
+  hotkey.value = keyToElectron(keyCode, altKey, ctrlKey, shiftKey)
 }
 </script>

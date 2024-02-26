@@ -1,5 +1,5 @@
 import axios from 'axios'
-const baseURL = 'https://web.poe.garena.tw/api/'
+const baseURL = `${import.meta.env.VITE_URL_BASE}/api/`
 export const GGCapi = axios.create({
   baseURL: baseURL,
   timeout: 4000,

@@ -60,7 +60,7 @@ function openWebView(extendUrl: string) {
   priceCheckPos.value.right = '0px'
   isWebViewOpen.value = true
   nextTick(() => {
-    webView.value!.src = encodeURI(`https://web.poe.garena.tw/trade/${extendUrl}`)
+    webView.value!.src = encodeURI(`${import.meta.env.VITE_URL_BASE}/trade/${extendUrl}`)
   })
 }
 function closeWebView() {
@@ -96,8 +96,8 @@ const priceCheckOptions: { label: string, value: PriceCheckTabs }[] = [{
 const item = ref<IItem | null>(null)
 
 const divineToChaos = ref(0)
-let divineImage = 'https://web.poe.garena.tw' + currencyImageUrl.find(ele => ele.id === 'divine')?.image
-let chaosImage = 'https://web.poe.garena.tw' + currencyImageUrl.find(ele => ele.id === 'chaos')?.image
+let divineImage = import.meta.env.VITE_URL_BASE + currencyImageUrl.find(ele => ele.id === 'divine')?.image
+let chaosImage = import.meta.env.VITE_URL_BASE + currencyImageUrl.find(ele => ele.id === 'chaos')?.image
 async function refreshDivineToChaos() {
   divineToChaos.value = await getDivineToChaos(leagueSelect.value)
 }

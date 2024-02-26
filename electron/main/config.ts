@@ -73,7 +73,7 @@ export function setupConfig() {
 function setCookie() {
   if (config.POESESSID) {
     session.defaultSession.cookies.set({
-      url: 'https://web.poe.garena.tw',
+      url: import.meta.env.VITE_URL_BASE,
       name: 'POESESSID',
       value: config.POESESSID,
       path: '/',
