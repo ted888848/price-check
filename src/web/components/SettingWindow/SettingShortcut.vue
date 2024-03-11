@@ -30,7 +30,7 @@
       <input v-model.trim="shortcut.outputText" type="text" class="ml-2 rounded text-black pl-1">
       <button class=" hover:text-red-600 ml-1 flex justify-center items-center"
         @click="(e) => deleteChatShortcut(e, index)">
-        <FontAwesomeIcon icon="rectangle-xmark" size="2x" />
+        <div class="i-material-symbols:delete text-white text-xl" />
       </button>
     </div>
     <button class=" bg-white rounded p-1 w-400px" @click="createChatShortcut">
@@ -38,9 +38,12 @@
     </button>
   </div>
 </template>
+
 <script setup lang="ts">
 import KeyInput from '../utility/KeyInput.vue'
-const config = defineModel<IConfig>('config', { required: true })
+const config = defineModel<IConfig>('config', {
+  required: true
+})
 
 function createChatShortcut() {
   config.value.shortcuts.push({

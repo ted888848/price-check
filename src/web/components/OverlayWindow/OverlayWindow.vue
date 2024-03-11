@@ -3,10 +3,10 @@
     @click.self="closeOverlay">
     <button class="absolute top-10 left-10 bg-blue-600 hover:bg-gray-900 rounded-xl px-1 py-0.5"
       @click="_event => settingWindowShow = !settingWindowShow">
-      <FontAwesomeIcon icon="gear" class="text-red-600 text-4xl" />
+      <div class="i-material-symbols:settings text-red-600 text-4xl" />
     </button>
     <button class="absolute top-28 left-10 bg-red-600 hover:bg-gray-900 rounded-xl px-1 py-0.5" @click="reloadAPIdata">
-      <FontAwesomeIcon icon="rotate" class="text-blue-600 text-4xl" />
+      <div class="i-material-symbols:refresh text-blue-600 text-4xl" />
     </button>
     <SettingWindow v-if="settingWindowShow" @close-setting-window="closeSettingWindow" />
   </div>

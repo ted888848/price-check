@@ -185,7 +185,7 @@ function setupAPIMods(statsJson: RawStats) {
 function setupAPIStatic(data: RawStaticItem[]) {
   let APIStatic: IStatic[] = []
   data.forEach((group) => {
-    if (group.label?.match(/^地圖|命運卡/)) return
+    if (group.label?.match(/^地圖(（|\s\()|命運卡/)) return
     APIStatic = APIStatic.concat(structuredClone(group.entries))
   })
   return APIStatic

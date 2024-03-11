@@ -72,15 +72,16 @@
     共{{ searchResult.totalCount }}筆,顯示{{ searchResult.nowFetched }}筆
   </span>
   <div v-if="isSearching" class=" text-8xl text-white my-5 text-center flex justify-center">
-    <FontAwesomeIcon icon="spinner" :spin="true" />
+    <div class="i-svg-spinners:tadpole" />
   </div>
   <span v-if="rateTimeLimit.flag" class="text-white bg-red-600 text-xl text-center my-2 hover:cursor-default">API次數限制
     {{ rateTimeLimit.second }} 秒後再回來 </span>
 </template>
+
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { maxBy } from 'lodash-es'
-import { searchItem, fetchItem, getIsCounting, selectOptions } from '@/web/tradeSide'
+import { searchItem, fetchItem, getIsCounting } from '@/web/tradeSide'
 import { heistReward as gemReplicaOptions } from '@/web/APIdata'
 import CircleCheck from '../utility/CircleCheck.vue'
 import type { ISearchResult, ISearchJson, IFetchResult } from '@/web/tradeSide'
@@ -105,13 +106,16 @@ const searchJSON: ISearchJson = {
         }
       },
       misc_filters: {
-        filters: {}
+        filters: {
+        }
       },
       type_filters: {
-        filters: {}
+        filters: {
+        }
       },
       map_filters: {
-        filters: {}
+        filters: {
+        }
       }
     },
     stats: [{
@@ -130,7 +134,9 @@ const searchResult = ref<ISearchResult>({
   err: false,
   totalCount: 0,
   nowFetched: 0,
-  searchID: { ID: '', type: 'search' }
+  searchID: {
+    ID: '', type: 'search'
+  }
 })
 const fetchResult = ref<IFetchResult[]>([])
 const isSearching = ref(false)
@@ -153,7 +159,9 @@ function resetSearchData() {
     err: false,
     totalCount: 0,
     nowFetched: 0,
-    searchID: { ID: '', type: 'search' }
+    searchID: {
+      ID: '', type: 'search'
+    }
   }
   fetchResult.value = []
   isSearching.value = false
@@ -178,7 +186,9 @@ async function searchBtn() {
   searchJSON.query.name = gemReplicaSelect.value?.name
   searchJSON.query.type = gemReplicaSelect.value?.type
   if (!gemReplicaSelect.value?.name?.startsWith('贗品') && gemTransSelect.value) {
-    searchJSON.query.type = { option: gemReplicaSelect.value?.type ?? '', discriminator: gemTransSelect.value?.disc }
+    searchJSON.query.type = {
+      option: gemReplicaSelect.value?.type ?? '', discriminator: gemTransSelect.value?.disc
+    }
   }
   searchResult.value = await searchItem(searchJSON, props.leagueSelect)
   if (!searchResult.value.err) {
@@ -209,7 +219,7 @@ const maxAmount = computed(() => {
 })
 
 const emit = defineEmits<{
-  'open-web-view': [extendUrl: string]
+  'open-web-view': [extendUrl: string];
 }>()
 function openWebView() {
   emit('open-web-view', `search/${props.leagueSelect}/${searchResult.value.searchID.ID}`)
@@ -218,4 +228,5 @@ function openBrowser() {
   window.open(encodeURI(`${import.meta.env.VITE_URL_BASE}/trade/${searchResult.value.searchID.type}/${props.leagueSelect}/${searchResult.value.searchID.ID}`))
 }
 </script>
+
 <style></style>

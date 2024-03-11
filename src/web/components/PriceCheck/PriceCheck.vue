@@ -1,5 +1,6 @@
 <template>
-  <div v-if="windowShowHide" class="absolute top-0 left-0 w-screen h-screen priceCheckRoot bg-gray-400 bg-opacity-25 flex"
+  <div v-if="windowShowHide"
+    class="absolute top-0 left-0 w-screen h-screen priceCheckRoot bg-gray-400 bg-opacity-25 flex"
     @click.self="closePriceCheck">
     <webview v-if="isWebViewOpen" ref="webView" class=" flex-1" src="" />
     <div ref="priceCheckDiv" class="bg-gray-900 priceCheck h-full flex flex-col" :style="priceCheckPos"
@@ -13,7 +14,8 @@
         <div class="flex justify-center flex-1">
           <div class="relative exaltedImg ">
             <img :src="divineImage" class=" w-8 h-8 ">
-            <ul v-if="divineToChaos" class="exaltedImgTooltip invisible bg-gray-700 z-10 text-center absolute text-white">
+            <ul v-if="divineToChaos"
+              class="exaltedImgTooltip invisible bg-gray-700 z-10 text-center absolute text-white rounded">
               <li v-for="line in divineToChaosDec" :key="line.e" class="flex px-2 min-w-max text-xl">
                 {{ line.e }} : {{ line.c }}
               </li>
@@ -24,17 +26,18 @@
         </div>
         <div class="flex justify-end mr-1 ml-auto flex-1">
           <button class=" text-white hover:text-red-500" @click="closePriceCheck">
-            <FontAwesomeIcon icon="rectangle-xmark" size="2x" />
+            <div class="i-material-symbols:add-circle-rounded text-3xl rotate-45" />
           </button>
         </div>
       </div>
       <div class="p-1">
-        <VSelect v-model="leagueSelect" class=" text-base style-chooser text-center" :options="leagues" :clearable="false"
-          :searchable="false" />
+        <VSelect v-model="leagueSelect" class=" text-base style-chooser text-center" :options="leagues"
+          :clearable="false" :searchable="false" />
       </div>
       <KeepAlive>
-        <NormalPriceCheck v-if="currentPriceCheck === 'NormalPriceCheck'" :item-prop="item!" :league-select="leagueSelect"
-          :divine-to-chaos="divineToChaos" :is-overflow="isOverflow" @open-web-view="openWebView" />
+        <NormalPriceCheck v-if="currentPriceCheck === 'NormalPriceCheck'" :item-prop="item!"
+          :league-select="leagueSelect" :divine-to-chaos="divineToChaos" :is-overflow="isOverflow"
+          @open-web-view="openWebView" />
         <HeistPriceCheck v-else-if="currentPriceCheck === 'HeistPriceCheck'" :item-prop="item!"
           :divine-to-chaos="divineToChaos" :league-select="leagueSelect" :is-overflow="isOverflow"
           @open-web-view="openWebView" />
@@ -42,6 +45,7 @@
     </div>
   </div>
 </template>
+
 <script setup lang="ts">
 import { ipcRenderer } from 'electron'
 import { ref, computed, nextTick, onMounted, onUnmounted, } from 'vue'
@@ -52,10 +56,11 @@ import { getDivineToChaos } from '@/web/tradeSide'
 import { leagues, currencyImageUrl } from '@/web/APIdata'
 import NormalPriceCheck from './NormalPriceCheck.vue'
 import HeistPriceCheck from './HeistPriceCheck.vue'
-
 const isWebViewOpen = ref(false)
 const webView = ref<HTMLIFrameElement>()
-const priceCheckPos = ref({ right: '0px' })
+const priceCheckPos = ref({
+  right: '0px'
+})
 function openWebView(extendUrl: string) {
   priceCheckPos.value.right = '0px'
   isWebViewOpen.value = true
@@ -85,14 +90,18 @@ defineExpose({
   loadLeagues
 })
 type PriceCheckTabs = 'NormalPriceCheck' | 'HeistPriceCheck'
-const currentPriceCheck = ref<PriceCheckTabs>('NormalPriceCheck')
-const priceCheckOptions: { label: string, value: PriceCheckTabs }[] = [{
+type PriceCheckOption = {
+  label: string;
+  value: PriceCheckTabs;
+}
+const priceCheckOptions: PriceCheckOption[] = [{
   label: '普通查價',
   value: 'NormalPriceCheck'
 }, {
   label: '劫盜查價',
   value: 'HeistPriceCheck'
 }]
+const currentPriceCheck = ref<PriceCheckTabs>('NormalPriceCheck')
 const item = ref<IItem | null>(null)
 
 const divineToChaos = ref(0)

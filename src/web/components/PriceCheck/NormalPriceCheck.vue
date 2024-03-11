@@ -6,7 +6,8 @@
   </div>
   <div class="text-white text-center flex justify-between px-2">
     <span :style="{ visibility: item.pDPS ? 'visible' : 'hidden' }" class=" w-40">PDps: {{ item.pDPS }}</span>
-    <span v-if="item.type.text" class="flex-1" :class="{ 'text-3xl': item.type.searchByType }">{{ item.type.text }}</span>
+    <span v-if="item.type.text" class="flex-1" :class="{ 'text-3xl': item.type.searchByType }">{{ item.type.text
+      }}</span>
     <span :style="{ visibility: item.eDPS ? 'visible' : 'hidden' }" class=" w-40">EDps: {{ item.eDPS }}</span>
   </div>
   <VSelect v-if="undefinedUnique && item.uniques.length > 0" v-model="item.name" class="text-sm style-chooser"
@@ -20,14 +21,10 @@
     <div>
       <div v-if="!item.type.text.endsWith('技能寶石')" class="flex p-2 items-center justify-center select-none">
         <span class="mx-1 text-white hover:cursor-default">已鑑定:</span>
-        <VSelect v-model="item.isIdentify" class="text-sm style-chooser flex-grow" :options="generalOption" label="label"
-          :reduce="(ele: ArrayValueType<typeof generalOption>) => ele.value" :clearable="false" :searchable="false" />
+        <VSelect v-model="item.isIdentify" class="text-sm style-chooser flex-grow" :options="generalOption"
+          label="label" :reduce="(ele: ArrayValueType<typeof generalOption>) => ele.value" :clearable="false"
+          :searchable="false" />
       </div>
-      <!-- <div v-else class="flex p-2 items-center justify-center select-none">
-        <span class="mx-1 text-white hover:cursor-default">相異品:</span>
-        <VSelect v-model="item.altQType" class="text-sm style-chooser flex-grow" :options="gemAltQOptions" label="label"
-          :reduce="(ele: ArrayValueType<typeof gemAltQOptions>) => ele.value" :clearable="false" :searchable="false" />
-      </div> -->
     </div>
     <div class="flex items-center justify-center">
       <ValueMinMax v-if="item.gemLevel" v-model="item.gemLevel" class="flex p-2 items-center justify-center">
@@ -38,9 +35,9 @@
       </ValueMinMax>
       <div v-else-if="item.searchExchange.option"
         class="flex p-2 items-center justify-center hover:cursor-pointer flex-grow" @click="_event => {
-          item.searchExchange.have = ('divine' === item.searchExchange.have) ? 'chaos' : 'divine';
-          searchBtn()
-        }">
+      item.searchExchange.have = ('divine' === item.searchExchange.have) ? 'chaos' : 'divine';
+      searchBtn()
+    }">
         <span class="mx-1 text-white">神聖價</span>
         <CircleCheck :checked="item.searchExchange.have === 'divine'" />
       </div>
@@ -206,16 +203,19 @@
     共{{ searchResult.totalCount }}筆,顯示{{ searchResult.nowFetched }}筆
   </span>
   <div v-if="isSearching" class=" text-8xl text-white my-5 text-center flex justify-center">
-    <FontAwesomeIcon icon="spinner" :spin="true" />
+    <div class="i-svg-spinners:tadpole" />
   </div>
   <span v-if="rateTimeLimit.flag" class="text-white bg-red-600 text-xl text-center my-2 hover:cursor-default">
     API次數限制 {{ rateTimeLimit.second }} 秒後再回來
   </span>
 </template>
+
 <script setup lang="ts">
 import { maxBy } from 'lodash-es'
 import { computed, ref, nextTick } from 'vue'
-import { getSearchJSON, searchItem, fetchItem, getIsCounting, searchExchange, selectOptions } from '@/web/tradeSide'
+import {
+  getSearchJSON, searchItem, fetchItem, getIsCounting, searchExchange, selectOptions
+} from '@/web/tradeSide'
 import { APIStatic } from '@/web/APIdata'
 import CircleCheck from '../utility/CircleCheck.vue'
 import ValueMinMax from '../utility/ValueMinMax.vue'
@@ -232,7 +232,7 @@ if (process.env.NODE_ENV === 'development') console.log(item.value)
 const undefinedUnique = item.value.isIdentify === false && item.value.raritySearch.label === '傳奇'
 
 const {
-  generalOption, gemAltQOptions, influencesOptions, elderMapOptions,
+  generalOption, influencesOptions, elderMapOptions,
   conquerorMapOptions, rarityOptions
 } = selectOptions
 function modTextColor(type?: string) {
@@ -256,7 +256,9 @@ const searchResult = ref<ISearchResult | IExchangeResult>({
   result: [],
   totalCount: 0,
   nowFetched: 0,
-  searchID: { ID: '', type: 'search' },
+  searchID: {
+    ID: '', type: 'search'
+  },
   err: false
 })
 const fetchResult = ref<IFetchResult[]>([])
@@ -272,7 +274,9 @@ function resetSearchData() {
     result: [],
     totalCount: 0,
     nowFetched: 0,
-    searchID: { ID: '', type: 'search' },
+    searchID: {
+      ID: '', type: 'search'
+    },
     err: false
   }
   fetchResult.value = []
@@ -334,7 +338,7 @@ if (item.value.autoSearch)
   searchBtn()
 
 const emit = defineEmits<{
-  'open-web-view': [extendUrl: string]
+  'open-web-view': [extendUrl: string];
 }>()
 function openWebView() {
   emit('open-web-view', `${searchResult.value.searchID.type}/${props.leagueSelect}/${searchResult.value.searchID.ID}`)
@@ -343,4 +347,5 @@ function openBrowser() {
   window.open(encodeURI(`${import.meta.env.VITE_URL_BASE}/trade/${searchResult.value.searchID.type}/${props.leagueSelect}/${searchResult.value.searchID.ID}`))
 }
 </script>
+
 <style></style>
