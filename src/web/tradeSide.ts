@@ -7,7 +7,7 @@ export interface ISearchJson {
   query: {
     type?: {
       discriminator: string;
-      option: string
+      option: string;
     } | string;
     name?: string;
     filters: {
@@ -56,7 +56,7 @@ export interface ISearchJson {
         };
       };
     };
-    stats: [{ type: 'and'; filters: IItemStat[] }];
+    stats: [{ type: 'and'; filters: ItemStat[] }];
     status: {
       option: 'any' | 'online' | 'onlineleague';
     };
@@ -193,8 +193,8 @@ const defaultSearchJson: ISearchJson = {
     price: 'asc'
   }
 }
-export function getSearchJSON(item: IItem) {
-  let searchJSON: ISearchJson = structuredClone(defaultSearchJson)
+export function getSearchJSON(item: ParsedItem) {
+  const searchJSON: ISearchJson = structuredClone(defaultSearchJson)
   if (!item.type.searchByType) {//如果沒有要依照類別搜尋
     searchJSON.query.type = item.baseType
   }
@@ -322,7 +322,7 @@ const rateTimeLimitArr = {
     time: 8
   }]
 } as const
-let rateTimeLimit = ref({
+const rateTimeLimit = ref({
   flag: false, second: 0
 })
 export function getIsCounting() {
@@ -350,9 +350,9 @@ function startCountdown(time: number) {
 
 function parseRateTimeLimit(header?: AxiosResponseHeaders) {
   if (!header) return
-  let type = header['x-rate-limit-policy'].split('-')[1] as keyof typeof rateTimeLimitArr
+  const type = header['x-rate-limit-policy'].split('-')[1] as keyof typeof rateTimeLimitArr
   if (Object.keys(rateTimeLimitArr).includes(type)) {
-    let timesArr = header['x-rate-limit-ip-state'].split(',').map((ele: string) => parseInt(ele.substring(0, ele.indexOf(':')))).reverse()
+    const timesArr = header['x-rate-limit-ip-state'].split(',').map((ele: string) => parseInt(ele.substring(0, ele.indexOf(':')))).reverse()
     for (let i = 0; i < timesArr.length; ++i) {
       if (timesArr[i] >= rateTimeLimitArr[type][i].limit) {
         startCountdown(rateTimeLimitArr[type][i].time)
@@ -386,7 +386,7 @@ export interface ISearchResult {
   err: boolean;
 }
 export async function searchItem(searchJson: ISearchJson, league: string) {
-  let searchResult: ISearchResult = {
+  const searchResult: ISearchResult = {
     searchID: {
       type: 'search'
     },
@@ -420,9 +420,10 @@ export async function searchItem(searchJson: ISearchJson, league: string) {
         startCountdown(parseInt(err.response.headers['retry-after']))
       }
     })
-  if (searchResult.errData) return {
-    ...searchResult, err: true
-  }
+  if (searchResult.errData)
+    return {
+      ...searchResult, err: true
+    }
   return {
     ...searchResult
   }
@@ -437,14 +438,14 @@ export interface IFetchResult {
 export async function fetchItem(fetchList: string[], searchID: string, oldFetchResult?: IFetchResult[]) {
   if (!fetchList.length) return oldFetchResult ?? []
   let fetchPriceResult: string[] = []
-  let itemJsonUrl: string[] = []
+  const itemJsonUrl: string[] = []
   for (let i = 0; i < fetchList.length; i += 10) {
     itemJsonUrl.push('trade/fetch/' + fetchList.slice(i, i + 10).join(',') + `?query=${searchID}`)
   }
   await Promise.all(itemJsonUrl.map((url) => GGCapi.get(encodeURI(url))))
     .then((responses) => {
       responses.forEach(res => {
-        let tempResult = res.data.result.map((ele: any) => `${ele.listing.price.amount}|${ele.listing.price.currency}`) as string[]
+        const tempResult = res.data.result.map((ele: any) => `${ele.listing.price.amount}|${ele.listing.price.currency}`) as string[]
         fetchPriceResult = fetchPriceResult.concat(tempResult)
       })
       parseRateTimeLimit(responses.pop()?.headers as AxiosResponseHeaders)
@@ -455,12 +456,12 @@ export async function fetchItem(fetchList: string[], searchID: string, oldFetchR
         startCountdown(parseInt(err.response.headers['retry-after']))
       }
     })
-  let countByFetchResult = countBy(fetchPriceResult)
-  let fetchResult = oldFetchResult ?? []
-  for (let key in countByFetchResult) {
-    let [price, currency] = key.split('|')
-    let numPrice = Number(price)
-    let fetchResultFind = fetchResult.find((e) => (e.price === numPrice && e.currency === currency))
+  const countByFetchResult = countBy(fetchPriceResult)
+  const fetchResult = oldFetchResult ?? []
+  for (const key in countByFetchResult) {
+    const [price, currency] = key.split('|')
+    const numPrice = Number(price)
+    const fetchResultFind = fetchResult.find((e) => (e.price === numPrice && e.currency === currency))
     if (fetchResultFind) {
       fetchResultFind.amount += countByFetchResult[key]
     }
@@ -489,7 +490,7 @@ export interface IExchangeJson {
   engine: 'new';
 }
 export async function getDivineToChaos(league: string) {
-  let exchangeJSON: IExchangeJson = {
+  const exchangeJSON: IExchangeJson = {
     'query': {
       'status': {
         'option': 'online'
@@ -508,7 +509,7 @@ export async function getDivineToChaos(league: string) {
       parseRateTimeLimit(response.headers as AxiosResponseHeaders)
       return response.data
     }).then((data) => {
-      let temp = Object.keys(data.result).slice(0, 5)
+      const temp = Object.keys(data.result).slice(0, 5)
       chaos = temp.reduce((pre, curr) =>
         pre + (data.result[curr].listing.offers[0].item.amount / data.result[curr].listing.offers[0].exchange.amount), chaos)
       chaos /= temp.length
@@ -533,16 +534,18 @@ export interface IExchangeResult {
   errData?: string;
   currency2?: string;
 }
-export async function searchExchange(item: IItem, league: string): Promise<IExchangeResult> {
-  let exchangeResult: IExchangeResult = {
-    searchID: { type: 'exchange' },
+export async function searchExchange(item: ParsedItem, league: string): Promise<IExchangeResult> {
+  const exchangeResult: IExchangeResult = {
+    searchID: {
+      type: 'exchange'
+    },
     result: [],
     totalCount: 0,
     nowFetched: 0,
     err: false
   }
-  let tempResult: string[] = []
-  let exchangeJSON: IExchangeJson = {
+  const tempResult: string[] = []
+  const exchangeJSON: IExchangeJson = {
     'query': {
       'status': {
         'option': 'online'
@@ -562,7 +565,7 @@ export async function searchExchange(item: IItem, league: string): Promise<IExch
     }).then((data) => {
       exchangeResult.searchID.ID = data.id
       exchangeResult.currency2 = exchangeJSON.query.want[0]
-      for (let key in data.result) {
+      for (const key in data.result) {
         tempResult.push(data.result[key].listing.offers[0].exchange.amount + '：' + data.result[key].listing.offers[0].item.amount + '|' + item.searchExchange.have)
       }
       exchangeResult.nowFetched = exchangeResult.totalCount = tempResult.length
@@ -579,9 +582,9 @@ export async function searchExchange(item: IItem, league: string): Promise<IExch
         startCountdown(parseInt(err.response.headers['retry-after']))
       }
     })
-  let tempResultCountBy = countBy(tempResult)
-  for (let key in tempResultCountBy) {
-    let [price, currency] = key.split('|')
+  const tempResultCountBy = countBy(tempResult)
+  for (const key in tempResultCountBy) {
+    const [price, currency] = key.split('|')
     exchangeResult.result.push({
       price,
       currency,

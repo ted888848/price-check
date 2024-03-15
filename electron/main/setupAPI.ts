@@ -3,50 +3,67 @@ import Store from 'electron-store'
 import { app, session, dialog } from 'electron' //, shell
 import { autoUpdater } from 'electron-updater'
 import { buildTray } from './tray'
-let store = new Store({
+const store = new Store({
   name: 'APIData'
 })
 
-function setupItemArray(itemArray: RawItemsItem['entries'], heistReward: IHeistReward[]) {
-  let itemBaseType: IAPIItemsItem['entries'] = []
+function setupItemArray(itemArray: APIItem['entries'], heistReward: HeistReward[]) {
+  const itemBaseType: Item['entries'] = []
   itemArray.slice().reverse().forEach((item) => {
-    let index = itemBaseType.findIndex(element => element.type === item.type)
+    const index = itemBaseType.findIndex(element => element.type === item.type)
     if (index === -1) {
-      itemBaseType.push({ ...item, unique: [] })
+      itemBaseType.push({
+        ...item, unique: []
+      })
     }
     if (item.flags?.unique === true) {
-      itemBaseType[index].unique.push({ name: item.name, text: item.text })
+      itemBaseType[index].unique.push({
+        name: item.name, text: item.text
+      })
       if (item.name.startsWith('贗品')) {
-        heistReward.push({ name: item.name, type: item.type, text: item.text })
+        heistReward.push({
+          name: item.name, type: item.type, text: item.text
+        })
       }
     }
   })
   return itemBaseType
 }
-function parseGams(gemEntries: RawItemsItem['entries']) {
-  const result: IAPIGemsItem['entries'] = []
+function parseGams(gemEntries: APIItem['entries']) {
+  const result: ItemGem['entries'] = []
   gemEntries.forEach((gem) => {
     if (gem.disc && !gem.disc.startsWith('alt_')) return
     if (gem.disc && gem.disc.startsWith('alt_')) {
       const sameTypeGem = result.find(resultGem => resultGem.type === gem.type)
       if (sameTypeGem) {
-        sameTypeGem.trans.push({ text: gem.text, disc: gem.disc })
+        sameTypeGem.trans.push({
+          text: gem.text, disc: gem.disc
+        })
       }
       else {
-        result.push({ type: gem.type, text: gem.type, trans: [{ text: gem.text, disc: gem.disc }] })
+        result.push({
+          type: gem.type,
+          text: gem.type,
+          trans: [{
+            text: gem.text, disc: gem.disc
+          }]
+        })
       }
     }
     else {
-      result.push({ type: gem.type, text: gem.type, trans: [] })
+      result.push({
+        type: gem.type, text: gem.type, trans: []
+      })
     }
   })
   return result
 }
-function setupAPIItems(itemsJson: RawItems) {
-  let APIitems: Partial<IAPIitems> = {}
-  let heistReward: IHeistReward[] = []
+function setupAPIItems(itemsJson: APIItems) {
+  const APIitems: Partial<ParsedAPIitems> = {
+  }
+  const heistReward: HeistReward[] = []
   itemsJson.result.forEach((itemGroup) => {
-    let groupID = itemGroup.id as keyof IAPIitems
+    const groupID = itemGroup.id as keyof ParsedAPIitems
     switch (groupID) {
       case 'accessories':
       case 'armour':
@@ -58,50 +75,61 @@ function setupAPIItems(itemsJson: RawItems) {
       case 'heistmission':
       case 'logbook':
         APIitems[groupID] = {
-          id: itemGroup.id, label: itemGroup.label,
+          id: itemGroup.id,
+          label: itemGroup.label,
           entries: setupItemArray(itemGroup.entries, heistReward)
         }
         break
       case 'maps':
         APIitems[groupID] = {
-          id: itemGroup.id, label: itemGroup.label,
+          id: itemGroup.id,
+          label: itemGroup.label,
           entries: setupItemArray(itemGroup.entries.filter((ele) => ele.disc === 'warfortheatlas'), heistReward)
         }
         break
       case 'cards':
       case 'currency':
         APIitems[groupID] = itemGroup
-        break;
+        break
       case 'gems':
-        APIitems[groupID] = { ...itemGroup, entries: parseGams(itemGroup.entries) }
+        APIitems[groupID] = {
+          ...itemGroup, entries: parseGams(itemGroup.entries)
+        }
         if (itemGroup.id === 'gems') heistReward.push(...parseGams(itemGroup.entries))
         break
       default:
         return
     }
   })
-  return { APIitems, heistReward }
+  return {
+    APIitems, heistReward
+  }
 }
-function checkNewline(statsGroup: RawStatsItem) {
-  let mutiLines: IAPIModsMod['mutiLines'] = []
+function checkNewline(statsGroup: APIStatsItem) {
+  const mutiLines: ParsedAPIMod['mutiLines'] = []
   statsGroup.entries.forEach((stat: any) => {
     if (stat.text.includes('\n')) {
-      let lines = stat.text.split('\n')
-      mutiLines.push({ id: stat.id, text: lines })
+      const lines = stat.text.split('\n')
+      mutiLines.push({
+        id: stat.id, text: lines
+      })
     }
   })
   if (mutiLines.length) return mutiLines.slice()
   return undefined
 }
-function setupAPIMods(statsJson: RawStats) {
-  let APImods: Partial<IAPIMods> = {}
+function setupAPIMods(statsJson: APIStats) {
+  const APImods: Partial<ParsedAPIMods> = {
+  }
   statsJson.result.forEach((statsGroup) => {
     switch (statsGroup.id) {
       case 'pseudo':
         APImods.pseudo = {
           label: statsGroup.label,
           entries: statsGroup.entries.filter((stat) => stat.text.indexOf('有房間：') === -1)
-            .map((stat) => ({ id: stat.id, text: stat.text, option: stat.option })),
+            .map((stat) => ({
+              id: stat.id, text: stat.text, option: stat.option
+            })),
           type: '偽屬性'
         }
         APImods.temple = {
@@ -110,7 +138,9 @@ function setupAPIMods(statsJson: RawStats) {
             .map((stat) => ({
               id: stat.id,
               text: stat.text.substring(4).replace(/（階級 [123]）/, ''),
-              value: { option: 1 }
+              value: {
+                option: 1
+              }
             })),
           type: '神廟'
         }
@@ -123,7 +153,9 @@ function setupAPIMods(statsJson: RawStats) {
         }
         APImods.explicit = {
           label: statsGroup.label,
-          entries: statsGroup.entries.map((ele) => ({ ...ele })).filter((stat) => !stat.text.includes('\n')),
+          entries: statsGroup.entries.map((ele) => ({
+            ...ele
+          })).filter((stat) => !stat.text.includes('\n')),
           type: '隨機'
         }
         APImods.explicit.mutiLines = checkNewline(statsGroup)
@@ -131,7 +163,9 @@ function setupAPIMods(statsJson: RawStats) {
       case 'implicit':
         APImods.implicit = {
           label: statsGroup.label,
-          entries: statsGroup.entries.map((ele) => ({ ...ele })).filter((stat) => !stat.text.includes('\n')),
+          entries: statsGroup.entries.map((ele) => ({
+            ...ele
+          })).filter((stat) => !stat.text.includes('\n')),
           type: '固定'
         }
         APImods.implicit.mutiLines = checkNewline(statsGroup)
@@ -139,7 +173,9 @@ function setupAPIMods(statsJson: RawStats) {
       case 'fractured':
         APImods.fractured = {
           label: statsGroup.label,
-          entries: statsGroup.entries.map((ele) => ({ ...ele })).filter((stat) => !stat.text.includes('\n')),
+          entries: statsGroup.entries.map((ele) => ({
+            ...ele
+          })).filter((stat) => !stat.text.includes('\n')),
           type: '破裂'
         }
         APImods.fractured.mutiLines = checkNewline(statsGroup)
@@ -150,12 +186,16 @@ function setupAPIMods(statsJson: RawStats) {
           entries:
             statsGroup.entries.splice(statsGroup.entries
               .findIndex((ele) => ele.text === '附加的小型天賦給予：#'), 1)[0].option.options
-              .map(option => ({ id: option.id.toString(), text: option.text })),
+              .map(option => ({
+                id: option.id.toString(), text: option.text
+              })),
           type: '附魔'
         }
         APImods.enchant = {
           label: statsGroup.label,
-          entries: statsGroup.entries.map((ele) => ({ ...ele }))
+          entries: statsGroup.entries.map((ele) => ({
+            ...ele
+          }))
             .filter((stat) => !stat.text.includes('\n')),
           type: '附魔'
         }
@@ -164,7 +204,9 @@ function setupAPIMods(statsJson: RawStats) {
       case 'crafted':
         APImods.crafted = {
           label: statsGroup.label,
-          entries: statsGroup.entries.map((ele) => ({ ...ele })).filter((stat) => !stat.text.includes('\n')),
+          entries: statsGroup.entries.map((ele) => ({
+            ...ele
+          })).filter((stat) => !stat.text.includes('\n')),
           type: '工藝'
         }
         APImods.crafted.mutiLines = checkNewline(statsGroup)
@@ -172,7 +214,9 @@ function setupAPIMods(statsJson: RawStats) {
       case 'sanctum':
         APImods.sanctum = {
           label: statsGroup.label,
-          entries: statsGroup.entries.map((ele) => ({ ...ele })).filter((stat) => !stat.text.includes('\n')),
+          entries: statsGroup.entries.map((ele) => ({
+            ...ele
+          })).filter((stat) => !stat.text.includes('\n')),
           type: '聖域'
         }
         APImods.sanctum.mutiLines = checkNewline(statsGroup)
@@ -182,8 +226,8 @@ function setupAPIMods(statsJson: RawStats) {
   })
   return APImods
 }
-function setupAPIStatic(data: RawStaticItem[]) {
-  let APIStatic: IStatic[] = []
+function setupAPIStatic(data: APIStaticItem[]) {
+  let APIStatic: Static[] = []
   data.forEach((group) => {
     if (group.label?.match(/^地圖(（|\s\()|命運卡/)) return
     APIStatic = APIStatic.concat(structuredClone(group.entries))
@@ -192,25 +236,25 @@ function setupAPIStatic(data: RawStaticItem[]) {
 }
 async function getLeagues() {
   const response = await GGCapi.get('trade/data/leagues')
-  const data = response.data as RawLeagues
+  const data = response.data as APILeagues
   const leagues = data.result.map((l) => l.text)
   store.set('Leagues', leagues)
 }
 async function getItems() {
   const response = await GGCapi.get('trade/data/items')
-  const data = response.data as RawItems
+  const data = response.data as APIItems
   const { APIitems, heistReward } = setupAPIItems(data)
   store.set('APIitems', APIitems)
   store.set('heistReward', heistReward)
 }
 async function getStats() {
   const response = await GGCapi.get('trade/data/stats')
-  const data = response.data as RawStats
+  const data = response.data as APIStats
   store.set('APImods', setupAPIMods(data))
 }
 async function getStatic() {
   const response = await GGCapi.get('trade/data/static')
-  const data = response.data as RawStatic
+  const data = response.data as APIStatic
   const _currencyImageUrl = data.result[0].entries
   store.set('currencyImageUrl', _currencyImageUrl)
   store.set('APIStatic', setupAPIStatic(data.result))
@@ -227,7 +271,9 @@ export async function getAPIdata() {
   if (error?.length) throw error
 }
 
-export const updateState = { label: '', canClick: true }
+export const updateState = {
+  label: '', canClick: true
+}
 
 autoUpdater.on('update-available', ({ version, releaseNotes }) => {
   updateState.label = `下載新版本 v${version}中`
@@ -266,7 +312,8 @@ export async function checkForUpdate() {
   if ((await session.defaultSession?.getCacheSize() >>> 20) >= 30) { //大於30MB
     session.defaultSession.clearCache()
       .catch(err => console.log(err))
-    session.defaultSession.clearCodeCaches({})
+    session.defaultSession.clearCodeCaches({
+    })
       .catch(err => console.log(err))
   }
   updateState.label = '檢查更新中'

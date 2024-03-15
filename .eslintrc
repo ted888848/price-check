@@ -28,7 +28,6 @@
       "warn",
       "single"
     ],
-    "prefer-const": "off",
     "no-fallthrough": "off",
     "vue/max-attributes-per-line": "off",
     "vue/first-attribute-linebreak": "off",

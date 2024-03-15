@@ -24,5 +24,7 @@
 </template>
 <script setup lang="ts">
 import CircleCheck from '../utility/CircleCheck.vue'
-const config = defineModel<IConfig>('config', { required: true })
+const config = defineModel<Config>('config', {
+  required: true
+})
 </script>

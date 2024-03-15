@@ -41,7 +41,7 @@
 
 <script setup lang="ts">
 import KeyInput from '../utility/KeyInput.vue'
-const config = defineModel<IConfig>('config', {
+const config = defineModel<Config>('config', {
   required: true
 })
 

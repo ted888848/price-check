@@ -1,13 +1,14 @@
 <template>
-  <div class=" text-xl text-white my-1 text-center"
-    @click="_event => item.type.searchByType = Boolean(!item.type.searchByType && item.type.option)">
+  <div class="text-xl text-white my-1 text-center"
+    @click="() => item.type.searchByType = Boolean(!item.type.searchByType && item.type.option)">
     <span v-if="item.name" class="mr-3">{{ item.name }}</span>
     <span :class="{ 'text-red-500': item.type.searchByType }">{{ item.baseType }}</span>
   </div>
   <div class="text-white text-center flex justify-between px-2">
     <span :style="{ visibility: item.pDPS ? 'visible' : 'hidden' }" class=" w-40">PDps: {{ item.pDPS }}</span>
-    <span v-if="item.type.text" class="flex-1" :class="{ 'text-3xl': item.type.searchByType }">{{ item.type.text
-      }}</span>
+    <span v-if="item.type.text" class="flex-1" :class="{ 'text-3xl': item.type.searchByType }">
+      {{ item.type.text }}
+    </span>
     <span :style="{ visibility: item.eDPS ? 'visible' : 'hidden' }" class=" w-40">EDps: {{ item.eDPS }}</span>
   </div>
   <VSelect v-if="undefinedUnique && item.uniques.length > 0" v-model="item.name" class="text-sm style-chooser"
@@ -18,13 +19,10 @@
       <VSelect v-model="item.isCorrupt" class="text-sm style-chooser flex-grow" :options="generalOption" label="label"
         :reduce="(ele: ArrayValueType<typeof generalOption>) => ele.value" :clearable="false" :searchable="false" />
     </div>
-    <div>
-      <div v-if="!item.type.text.endsWith('技能寶石')" class="flex p-2 items-center justify-center select-none">
-        <span class="mx-1 text-white hover:cursor-default">已鑑定:</span>
-        <VSelect v-model="item.isIdentify" class="text-sm style-chooser flex-grow" :options="generalOption"
-          label="label" :reduce="(ele: ArrayValueType<typeof generalOption>) => ele.value" :clearable="false"
-          :searchable="false" />
-      </div>
+    <div v-if="!item.type.text.endsWith('技能寶石')" class="flex p-2 items-center justify-center select-none">
+      <span class="mx-1 text-white hover:cursor-default">已鑑定:</span>
+      <VSelect v-model="item.isIdentify" class="text-sm style-chooser flex-grow" :options="generalOption" label="label"
+        :reduce="(ele: ArrayValueType<typeof generalOption>) => ele.value" :clearable="false" :searchable="false" />
     </div>
     <div class="flex items-center justify-center">
       <ValueMinMax v-if="item.gemLevel" v-model="item.gemLevel" class="flex p-2 items-center justify-center">
@@ -34,7 +32,7 @@
         地圖階級:
       </ValueMinMax>
       <div v-else-if="item.searchExchange.option"
-        class="flex p-2 items-center justify-center hover:cursor-pointer flex-grow" @click="_event => {
+        class="flex p-2 items-center justify-center hover:cursor-pointer flex-grow" @click="() => {
       item.searchExchange.have = ('divine' === item.searchExchange.have) ? 'chaos' : 'divine';
       searchBtn()
     }">
@@ -54,7 +52,7 @@
         :options="elderMapOptions" :reduce="(ele: ArrayValueType<typeof elderMapOptions>) => ele.value" label="label"
         :searchable="false" :clearable="false" />
     </div>
-    <div v-if="item.conquerorMap" class="flex col-span-2 items-center justify-center select-none">
+    <div v-else-if="item.conquerorMap" class="flex col-span-2 items-center justify-center select-none">
       <span class="mx-1 text-white hover:cursor-default">征服者:</span>
       <VSelect v-model="item.conquerorMap.value!.option" class="text-sm style-chooser style-chooser-inf "
         :options="conquerorMapOptions" :reduce="(ele: ArrayValueType<typeof conquerorMapOptions>) => ele.value"
@@ -75,12 +73,12 @@
       </div>
     </div>
     <div v-if="item.search6L !== undefined" class="flex items-center justify-center py-1 hover:cursor-pointer"
-      @click="_event => item.search6L = !item.search6L">
+      @click="() => item.search6L = !item.search6L">
       <span class="mx-1 text-white">6L?</span>
       <CircleCheck :have-undefined="true" :checked="item.search6L" />
     </div>
     <div v-if="item.isRGB !== undefined" class="flex items-center justify-center py-1 hover:cursor-pointer"
-      @click="_event => item.isRGB = !item.isRGB">
+      @click="() => item.isRGB = !item.isRGB">
       <span class="mx-1 text-white">RGB?</span>
       <CircleCheck :checked="item.isRGB" />
     </div>
@@ -90,7 +88,7 @@
         :searchable="false" :clearable="false" />
     </div>
     <div class="flex items-center justify-center py-1 hover:cursor-pointer"
-      @click="_event => item.searchTwoWeekOffline = !item.searchTwoWeekOffline">
+      @click="() => item.searchTwoWeekOffline = !item.searchTwoWeekOffline">
       <span class="mx-1 text-white">2周離線</span>
       <CircleCheck :checked="item.searchTwoWeekOffline" />
     </div>
@@ -117,14 +115,14 @@
     </thead>
     <tbody v-show="modTbodyToggle" class="modsTbody" style="">
       <tr v-for="mod in item.stats" :key="mod.id" class=" border-b-2 border-gray-400">
-        <td class="text-base" @click="_event => mod.disabled = !mod.disabled">
+        <td class="text-base" @click="() => mod.disabled = !mod.disabled">
           <CircleCheck :checked="!mod.disabled" />
         </td>
         <td class=" text-lg font-semibold hover:cursor-default" :style="{ color: modTextColor(mod.type) }"
-          @click="_event => mod.disabled = !mod.disabled">
+          @click="() => mod.disabled = !mod.disabled">
           {{ mod.type }}
         </td>
-        <td @click="_event => mod.disabled = !mod.disabled">
+        <td @click="() => mod.disabled = !mod.disabled">
           <span v-if="!Array.isArray(mod.text)">{{ mod.text }}</span>
           <div v-else class=" text-center">
             <span v-for="t in mod.text" :key="t">{{ t }}<br></span>
@@ -133,12 +131,12 @@
         <td>
           <input v-if="mod.value && !mod.value.option" v-model.number="mod.value.min" type="number"
             class="w-8 appearance-none rounded bg-gray-400 text-center text-black font-bold"
-            @dblclick="_event => delete mod.value!.min">
+            @dblclick="() => delete mod.value!.min">
         </td>
         <td>
           <input v-if="mod.value && !mod.value.option" v-model.number="mod.value.max" type="number"
             class="w-8 appearance-none rounded bg-gray-400 text-center text-black font-bold"
-            @dblclick="_event => delete mod.value!.max">
+            @dblclick="() => delete mod.value!.max">
         </td>
       </tr>
     </tbody>
@@ -221,7 +219,7 @@ import CircleCheck from '../utility/CircleCheck.vue'
 import ValueMinMax from '../utility/ValueMinMax.vue'
 import type { ISearchResult, IExchangeResult, IFetchResult } from '@/web/tradeSide'
 const props = defineProps<{
-  itemProp: IItem;
+  itemProp: ParsedItem;
   leagueSelect: string;
   divineToChaos: number;
   isOverflow: () => boolean;
@@ -286,10 +284,10 @@ function resetSearchData() {
 }
 async function fetchMore() {
   isSearching.value = true
-  let fetchStartPos = searchResult.value.nowFetched
-  let fetchEndPos = (searchResult.value.nowFetched + 20) <= (searchResult.value.totalCount) ? (searchResult.value.nowFetched + 20) : (searchResult.value.totalCount)
+  const fetchStartPos = searchResult.value.nowFetched
+  const fetchEndPos = Math.min(searchResult.value.nowFetched + 20, searchResult.value.totalCount)
   searchResult.value.nowFetched = fetchEndPos
-  let fetchList = searchResult.value.result.slice(fetchStartPos, fetchEndPos) as string[]
+  const fetchList = searchResult.value.result.slice(fetchStartPos, fetchEndPos) as string[]
   fetchResult.value = await fetchItem(fetchList, searchResult.value.searchID.ID!, fetchResult.value)
   isSearching.value = false
   nextTick(() => { modTbodyToggle.value = !props.isOverflow() })
@@ -301,17 +299,18 @@ async function searchBtn() {
   if (item.value.searchExchange.option) {
     searchResult.value = (await searchExchange(item.value, props.leagueSelect))
     if (!searchResult.value.err) {
-      currency2Img.value = `${import.meta.env.VITE_URL_BASE}${APIStatic.find(ele => ele.id === (searchResult.value as IExchangeResult).currency2)!.image}`
+      currency2Img.value =
+        `${import.meta.env.VITE_URL_BASE}${APIStatic.find(ele => ele.id === (searchResult.value as IExchangeResult).currency2)!.image}`
       fetchResult.value = searchResult.value.result
     }
   }
   else {
     searchResult.value = await searchItem(getSearchJSON(item.value), props.leagueSelect)
     if (!searchResult.value.err) {
-      let fetchStartPos = searchResult.value.nowFetched
-      let fetchEndPos = (searchResult.value.nowFetched + 20) <= (searchResult.value.totalCount) ? (searchResult.value.nowFetched + 20) : (searchResult.value.totalCount)
+      const fetchStartPos = searchResult.value.nowFetched
+      const fetchEndPos = Math.min(searchResult.value.nowFetched + 20, searchResult.value.totalCount)
       searchResult.value.nowFetched = fetchEndPos
-      let fetchList = searchResult.value.result.slice(fetchStartPos, fetchEndPos)
+      const fetchList = searchResult.value.result.slice(fetchStartPos, fetchEndPos)
       fetchResult.value = await fetchItem(fetchList, searchResult.value.searchID.ID!)
     }
   }
@@ -324,16 +323,14 @@ const fetchResultSorted = computed(() => {
     return fetchResult.value.slice().sort((a, b) => {
       if (!['divine', 'chaos'].includes(a.currency)) return 1
       if (!['divine', 'chaos'].includes(b.currency)) return -1
-      let ca = a.currency === 'divine' ? (a.price as number) * props.divineToChaos : a.price as number
-      let cb = b.currency === 'divine' ? (b.price as number) * props.divineToChaos : b.price as number
+      const ca = a.currency === 'divine' ? (a.price as number) * props.divineToChaos : a.price as number
+      const cb = b.currency === 'divine' ? (b.price as number) * props.divineToChaos : b.price as number
       return ca - cb
     })
   else
     return fetchResult.value
 })
-const maxAmount = computed(() => {
-  return maxBy(fetchResult.value, ele => ele.amount)
-})
+const maxAmount = computed(() => maxBy(fetchResult.value, ele => ele.amount))
 if (item.value.autoSearch)
   searchBtn()
 

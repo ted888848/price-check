@@ -2,7 +2,7 @@ import Store, { Schema } from 'electron-store'
 import { ipcMain, session } from 'electron'
 import IPC from './ipcChannel'
 import { registerShortcut, unRegisterShortcut } from './shortcuts'
-const defaultStore: IConfig = {
+const defaultStore: Config = {
   characterName: '',
   searchExchangeDivine: false,
   POESESSID: '',
@@ -32,34 +32,50 @@ const defaultStore: IConfig = {
     }
   ]
 }
-const storeSchema: Schema<IConfig> = {
-  characterName: { type: 'string' },
-  searchExchangeDivine: { type: 'boolean' },
-  POESESSID: { type: 'string' },
-  searchTwoWeekOffline: { type: 'boolean' },
-  priceCheckHotkey: { type: 'string' },
-  settingHotkey: { type: 'string' },
+const storeSchema: Schema<Config> = {
+  characterName: {
+    type: 'string'
+  },
+  searchExchangeDivine: {
+    type: 'boolean'
+  },
+  POESESSID: {
+    type: 'string'
+  },
+  searchTwoWeekOffline: {
+    type: 'boolean'
+  },
+  priceCheckHotkey: {
+    type: 'string'
+  },
+  settingHotkey: {
+    type: 'string'
+  },
   shortcuts: {
     type: 'array',
     items: {
       type: 'object',
       properties: {
-        hotkey: { type: 'string' },
-        outputText: { type: 'string' },
+        hotkey: {
+          type: 'string'
+        },
+        outputText: {
+          type: 'string'
+        },
       }
     }
   }
 }
-export let store = new Store({
+export const store = new Store({
   name: 'appConfig',
   defaults: defaultStore,
   schema: storeSchema
 })
-export let config: IConfig
+export let config: Config
 export function setupConfig() {
   config = store.store
   ipcMain.on(IPC.SET_CONFIG, (_e, configData: string) => {
-    store.store = JSON.parse(configData) as IConfig
+    store.store = JSON.parse(configData) as Config
     config = store.store
     unRegisterShortcut()
     registerShortcut()

@@ -102,7 +102,7 @@ const priceCheckOptions: PriceCheckOption[] = [{
   value: 'HeistPriceCheck'
 }]
 const currentPriceCheck = ref<PriceCheckTabs>('NormalPriceCheck')
-const item = ref<IItem | null>(null)
+const item = ref<ParsedItem | null>(null)
 
 const divineToChaos = ref(0)
 let divineImage = import.meta.env.VITE_URL_BASE + currencyImageUrl.find(ele => ele.id === 'divine')?.image

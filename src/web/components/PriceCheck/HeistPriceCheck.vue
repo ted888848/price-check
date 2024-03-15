@@ -88,10 +88,8 @@ import type { ISearchResult, ISearchJson, IFetchResult } from '@/web/tradeSide'
 const props = defineProps(['itemProp', 'leagueSelect', 'divineToChaos', 'isOverflow'])
 const { rateTimeLimit } = getIsCounting()
 
-const gemReplicaSelect = ref<IHeistReward>()
-// const { gemAltQOptions } = selectOptions
-// const gemAltQSelect = ref(gemAltQOptions[0])
-const gemTransSelect = ref<ArrayValueType<IHeistReward['trans']>>()
+const gemReplicaSelect = ref<HeistReward>()
+const gemTransSelect = ref<ArrayValueType<HeistReward['trans']>>()
 const searchJSON: ISearchJson = {
   query: {
     filters: {
@@ -168,10 +166,10 @@ function resetSearchData() {
 }
 async function fetchMore() {
   isSearching.value = true
-  let fetchStartPos = searchResult.value.nowFetched
-  let fetchEndPos = (searchResult.value.nowFetched + 20) <= (searchResult.value.totalCount) ? (searchResult.value.nowFetched + 20) : (searchResult.value.totalCount)
+  const fetchStartPos = searchResult.value.nowFetched
+  const fetchEndPos = Math.min(searchResult.value.nowFetched + 20, searchResult.value.totalCount)
   searchResult.value.nowFetched = fetchEndPos
-  let fetchList = searchResult.value.result.slice(fetchStartPos, fetchEndPos)
+  const fetchList = searchResult.value.result.slice(fetchStartPos, fetchEndPos)
   fetchResult.value = await fetchItem(fetchList, searchResult.value.searchID.ID!, fetchResult.value)
   isSearching.value = false
 }
@@ -192,10 +190,10 @@ async function searchBtn() {
   }
   searchResult.value = await searchItem(searchJSON, props.leagueSelect)
   if (!searchResult.value.err) {
-    let fetchStartPos = searchResult.value.nowFetched
-    let fetchEndPos = (searchResult.value.nowFetched + 20) <= (searchResult.value.totalCount) ? (searchResult.value.nowFetched + 20) : (searchResult.value.totalCount)
+    const fetchStartPos = searchResult.value.nowFetched
+    const fetchEndPos = Math.min(searchResult.value.nowFetched + 20, searchResult.value.totalCount)
     searchResult.value.nowFetched = fetchEndPos
-    let fetchList = searchResult.value.result.slice(fetchStartPos, fetchEndPos)
+    const fetchList = searchResult.value.result.slice(fetchStartPos, fetchEndPos)
     fetchResult.value = await fetchItem(fetchList, searchResult.value.searchID.ID!)
   }
   isSearching.value = false

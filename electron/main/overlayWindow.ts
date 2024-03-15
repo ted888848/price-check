@@ -20,7 +20,9 @@ export async function createWindow() {
   })
   if (process.env.VITE_DEV_SERVER_URL) {
     await win.loadURL(process.env.VITE_DEV_SERVER_URL)
-    win.webContents.openDevTools({ mode: 'detach', activate: false })
+    win.webContents.openDevTools({
+      mode: 'detach', activate: false
+    })
   }
   else {
     await win.loadFile(join(process.env.DIST, 'index.html'))
@@ -36,7 +38,9 @@ export async function createWindow() {
   })
   win.webContents.setWindowOpenHandler((details) => {
     shell.openExternal(details.url)
-    return { action: 'deny' }
+    return {
+      action: 'deny'
+    }
   })
 }
 
@@ -48,7 +52,8 @@ function handlePoeActive(isActive: boolean) {
 }
 function handleBIEvent(event: Electron.Event, input: Electron.Input) {
   if (input.type !== 'keyDown') return
-  let { code, control, alt, shift } = input
+  let { code } = input
+  const { control, alt, shift } = input
   if (code.indexOf('Key') !== -1) code = code.substring(code.indexOf('Key') + 3)
   if (control && !alt && !shift) code = 'Ctrl+' + code
   switch (code) {

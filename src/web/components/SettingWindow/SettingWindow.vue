@@ -28,7 +28,7 @@ import { onMounted, ref } from 'vue'
 import IPC from '@/ipc/ipcChannel'
 import SettingPriceCheck from './SettingPriceCheck.vue'
 import SettingShortcut from './SettingShortcut.vue'
-const config = ref<IConfig>()
+const config = ref<Config>()
 onMounted(() => {
   config.value = ipcRenderer.sendSync(IPC.GET_CONFIG)
 })

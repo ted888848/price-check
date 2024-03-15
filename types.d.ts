@@ -1,23 +1,23 @@
 declare type ArrayValueType<T> = T extends (infer E)[] ? E : never
-interface IHeistReward {
+interface HeistReward {
   name?: string;
   type: string;
   text: string;
   trans?: {
     text: string;
     disc: string;
-  }[]
+  }[];
 }
-interface IAPIItemsItem {
+interface Item {
   id: string;
   label: string;
   entries: {
     type: string;
     text: string;
-    unique?: IItemUniques[];
+    unique?: ItemUniques[];
   }[];
 }
-interface IAPIGemsItem {
+interface ItemGem {
   label: string;
   entries: {
     type: string;
@@ -25,10 +25,10 @@ interface IAPIGemsItem {
     trans?: {
       text: string;
       disc: string;
-    }[]
-  }[]
+    }[];
+  }[];
 }
-interface IIPCChannel {
+interface IPCChannel {
   PRICE_CHECK_SHOW: 'priceCheck';
   OVERLAY_SHOW: 'overlay';
   FORCE_POE: 'forcePOE';
@@ -40,23 +40,23 @@ interface IIPCChannel {
 }
 
 
-interface IAPIitems {
-  accessories: IAPIItemsItem;
-  armour: IAPIItemsItem;
-  cards: IAPIItemsItem;
-  currency: IAPIItemsItem;
-  flasks: IAPIItemsItem;
-  gems: IAPIGemsItem;
-  jewels: IAPIItemsItem;
-  maps: IAPIItemsItem;
-  weapons: IAPIItemsItem;
-  watchstones: IAPIItemsItem;
-  heistequipment: IAPIItemsItem;
-  heistmission: IAPIItemsItem;
-  logbook: IAPIItemsItem;
-  [key: string]: IAPIItemsItem | IAPIGemsItem;
+interface ParsedAPIitems {
+  accessories: Item;
+  armour: Item;
+  cards: Item;
+  currency: Item;
+  flasks: Item;
+  gems: ItemGem;
+  jewels: Item;
+  maps: Item;
+  weapons: Item;
+  watchstones: Item;
+  heistequipment: Item;
+  heistmission: Item;
+  logbook: Item;
+  [key: string]: Item | ItemGem;
 }
-interface IAPIModsMod {
+interface ParsedAPIMod {
   label: string;
   type: string;
   entries: {
@@ -80,24 +80,24 @@ interface IAPIModsMod {
     };
   }[];
 }
-interface IAPIMods {
-  pseudo: IAPIModsMod;
-  explicit: IAPIModsMod;
-  implicit: IAPIModsMod;
-  fractured: IAPIModsMod;
-  enchant: IAPIModsMod;
-  crafted: IAPIModsMod;
-  temple: IAPIModsMod;
-  clusterJewel: IAPIModsMod;
-  forbiddenJewel: IAPIModsMod;
-  sanctum: IAPIModsMod;
+interface ParsedAPIMods {
+  pseudo: ParsedAPIMod;
+  explicit: ParsedAPIMod;
+  implicit: ParsedAPIMod;
+  fractured: ParsedAPIMod;
+  enchant: ParsedAPIMod;
+  crafted: ParsedAPIMod;
+  temple: ParsedAPIMod;
+  clusterJewel: ParsedAPIMod;
+  forbiddenJewel: ParsedAPIMod;
+  sanctum: ParsedAPIMod;
 }
-interface IStatic {
+interface Static {
   id: string;
   text: string;
   image?: string;
 }
-interface IItemStat {
+interface ItemStat {
   id: string;
   text: string[] | string;
   type?: string;
@@ -110,7 +110,7 @@ interface IItemStat {
     option?: number;
   };
 }
-interface IItem {
+interface ParsedItem {
   baseType: string;
   type: {
     text: string;
@@ -118,7 +118,7 @@ interface IItem {
     searchByType: boolean;
   };
   name?: string;
-  uniques: IItemUniques[];
+  uniques: ItemUniques[];
   raritySearch: {
     value: string | undefined;
     label: string;
@@ -173,10 +173,10 @@ interface IItem {
   critChance?: number;
   attackSpeed?: number;
   weaponArea?: number;
-  stats: IItemStat[];
-  influences: IItemStat[];
-  elderMap?: IItemStat;
-  conquerorMap?: IItemStat;
+  stats: ItemStat[];
+  influences: ItemStat[];
+  elderMap?: ItemStat;
+  conquerorMap?: ItemStat;
   autoSearch: boolean;
   searchTwoWeekOffline: boolean;
   searchExchange: {
@@ -188,18 +188,18 @@ interface IItem {
   onlyChaos?: boolean;
   transGem?: {
     discriminator: string;
-    option: string
+    option: string;
   };
   // [key: string]: any;
 }
 
-interface IItemUniques {
+interface ItemUniques {
   text: string;
   name: string;
 }
 type hotkeyType = 'type-in-chat'
 
-interface IConfig {
+interface Config {
   characterName: string;
   searchExchangeDivine: boolean;
   POESESSID: string;
@@ -213,23 +213,23 @@ interface IConfig {
   }[];
 }
 
-interface RawStaticItem {
+interface APIStaticItem {
   id: string;
   label: null | string;
   entries: {
     id: string;
     text: string;
     image?: string;
-  }[]
+  }[];
 }
-interface RawStatic {
-  result: RawStaticItem[]
+interface APIStatic {
+  result: APIStaticItem[];
 }
-interface RawItems {
-  result: RawItemsItem[];
+interface APIItems {
+  result: APIItem[];
 }
 
-interface RawItemsItem {
+interface APIItem {
   id: string;
   label: string;
   entries: {
@@ -243,11 +243,11 @@ interface RawItemsItem {
   }[];
 }
 type StatsID = 'crafted' | 'crucible' | 'delve' | 'enchant' | 'explicit' | 'fractured' | 'implicit' | 'pseudo' | 'sanctum' | 'scourge' | 'ultimatum' | 'veiled';
-interface RawStats {
-  result: RawStatsItem[];
+interface APIStats {
+  result: APIStatsItem[];
 }
 
-interface RawStatsItem {
+interface APIStatsItem {
   id: StatsID;
   label: string;
   entries: {
@@ -263,7 +263,7 @@ interface RawStatsItem {
   }[];
 }
 
-interface RawLeagues {
+interface APILeagues {
   result: {
     id: string;
     realm: string;

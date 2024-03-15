@@ -7,4 +7,4 @@ export default {
   SET_CONFIG: 'setConfig',
   RELOAD_APIDATA: 'reloadAPIData',
   GET_COOKIE: 'getCookie',
-} satisfies IIPCChannel
+} satisfies IPCChannel

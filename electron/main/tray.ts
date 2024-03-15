@@ -10,7 +10,9 @@ export function buildTray() {
       label: 'DevTool',
       type: 'normal',
       click() {
-        win.webContents.openDevTools({ mode: 'detach', activate: false })
+        win.webContents.openDevTools({
+          mode: 'detach', activate: false
+        })
       }
     },
     {

@@ -33,7 +33,7 @@ app.on('ready', async () => {
   try {
     await checkForUpdate()
   } catch (error: any) {
-    let detailMessage = error instanceof Error ? error?.stack ?? error.message : error
+    const detailMessage = error instanceof Error ? error?.stack ?? error.message : error
     dialog.showMessageBox({
       title: '讀取API資料錯誤',
       message: '請稍後重新讀取API資料',
@@ -48,16 +48,20 @@ app.on('ready', async () => {
   ipcMain.handle(IPC.RELOAD_APIDATA, async () => {
     try {
       await getAPIdata()
-      return { status: true }
+      return {
+        status: true
+      }
     } catch (error: any) {
-      let detailMessage = error instanceof Error ? error?.stack ?? error.message : error
+      const detailMessage = error instanceof Error ? error?.stack ?? error.message : error
       dialog.showMessageBox({
         title: '讀取API資料錯誤',
         message: '請稍後重新讀取API資料',
         detail: detailMessage,
         type: 'error',
       })
-      return { status: false, error }
+      return {
+        status: false, error
+      }
     }
   })
 
