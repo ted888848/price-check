@@ -18,6 +18,7 @@ interface Item {
   }[];
 }
 interface ItemGem {
+  id: 'gems';
   label: string;
   entries: {
     type: string;
@@ -54,7 +55,7 @@ interface ParsedAPIitems {
   heistequipment: Item;
   heistmission: Item;
   logbook: Item;
-  [key: string]: Item | ItemGem;
+  [key: string]: Item;
 }
 interface ParsedAPIMod {
   label: string;

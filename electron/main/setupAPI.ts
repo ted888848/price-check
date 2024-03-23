@@ -7,7 +7,7 @@ const store = new Store({
   name: 'APIData'
 })
 
-function setupItemArray(itemArray: APIItem['entries'], heistReward: HeistReward[]) {
+function setupItemEntries(itemArray: APIItem['entries'], heistReward: HeistReward[]) {
   const itemBaseType: Item['entries'] = []
   itemArray.slice().reverse().forEach((item) => {
     const index = itemBaseType.findIndex(element => element.type === item.type)
@@ -77,14 +77,14 @@ function setupAPIItems(itemsJson: APIItems) {
         APIitems[groupID] = {
           id: itemGroup.id,
           label: itemGroup.label,
-          entries: setupItemArray(itemGroup.entries, heistReward)
+          entries: setupItemEntries(itemGroup.entries, heistReward)
         }
         break
       case 'maps':
         APIitems[groupID] = {
           id: itemGroup.id,
           label: itemGroup.label,
-          entries: setupItemArray(itemGroup.entries.filter((ele) => ele.disc === 'warfortheatlas'), heistReward)
+          entries: setupItemEntries(itemGroup.entries.filter((ele) => ele.disc === 'warfortheatlas'), heistReward)
         }
         break
       case 'cards':
@@ -93,11 +93,14 @@ function setupAPIItems(itemsJson: APIItems) {
         break
       case 'gems':
         APIitems[groupID] = {
-          ...itemGroup, entries: parseGams(itemGroup.entries)
+          ...itemGroup, entries: parseGams(itemGroup.entries), id: 'gems'
         }
         if (itemGroup.id === 'gems') heistReward.push(...parseGams(itemGroup.entries))
         break
       default:
+        APIitems[groupID] = {
+          ...itemGroup, entries: setupItemEntries(itemGroup.entries, heistReward), id: 'gems'
+        }
         return
     }
   })

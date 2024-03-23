@@ -14,3 +14,11 @@ declare module '@vue/runtime-core' {
     VSelect: typeof vSelect;
   }
 }
+
+interface ImportMetaEnv {
+  readonly VITE_URL_BASE: string;
+}
+
+interface ImportMeta {
+  readonly env: ImportMetaEnv;
+}

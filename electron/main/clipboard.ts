@@ -1,5 +1,5 @@
 import { clipboard } from 'electron'
-import debounce from 'lodash/debounce'
+import { debounce } from 'lodash-es'
 const DELAY = 50
 const LIMIT = 250
 let clipboardPromise: Promise<string> | null

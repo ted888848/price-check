@@ -900,17 +900,18 @@ function parseGem(item: string[][]) {
   })
   itemParsed.quality.search = !(/啟蒙|賦予|增幅/.test(itemParsed.baseType))
   item.shift()
-  let vaalLine: string
-  endFor:
-  for (let section of item.reverse()) {
+  // let vaalLine: string
+  // endFor:
+  for (const section of item.reverse()) {
     if (parseCorrupt(section) === ParseResult.PARSE_SECTION_SUCC) {
-      for (section of item) {
-        if (section[0].includes('瓦爾．')) {
-          itemParsed.vaalVer = true
-          vaalLine = section[0]
-          break endFor
-        }
-      }
+      break
+      // for (section of item) {
+      //   if (section[0].includes('瓦爾．')) {
+      //     itemParsed.vaalVer = true
+      //     // vaalLine = section[0]
+      //     break endFor
+      //   }
+      // }
     }
   }
   itemParsed.quality.search = !!(itemParsed.isCorrupt && itemParsed.quality.search)

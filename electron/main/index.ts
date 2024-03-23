@@ -6,9 +6,11 @@ import { setupTray } from './tray'
 import { getAPIdata, checkForUpdate } from './setupAPI'
 import { setupConfig } from './config'
 import IPC from './ipcChannel'
-import { join } from 'node:path'
+import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 const isDevelopment = process.env.NODE_ENV !== 'production'
-process.env.DIST_ELECTRON = join(__dirname, '..')
+const _dirname = typeof __dirname !== 'undefined' ? __dirname : dirname(fileURLToPath(import.meta.url))
+process.env.DIST_ELECTRON = join(_dirname, '..')
 process.env.DIST = join(process.env.DIST_ELECTRON, '../dist')
 process.env.PUBLIC = process.env.VITE_DEV_SERVER_URL
   ? join(process.env.DIST_ELECTRON, '../public')

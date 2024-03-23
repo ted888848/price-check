@@ -1,11 +1,12 @@
 {
   "name": "price-check",
   "version": "3.23.3",
-  "main": "dist-electron/main/index.js",
+  "main": "dist-electron/main/index.mjs",
   "description": "就只是一個POE查價",
   "author": "ted <ted888848@gmail.com>",
   "license": "MIT",
   "private": true,
+  "type": "module",
   "debug": {
     "env": {
       "VITE_DEV_SERVER_URL": "http://127.0.0.1:3344/"
@@ -45,7 +46,6 @@
   },
   "dependencies": {
     "@headlessui/vue": "^1.7.19",
-    "@vueform/multiselect": "^2.6.6",
     "axios": "^1.6.7",
     "electron-overlay-window": "^3.3.0",
     "electron-store": "^8.1.0",
