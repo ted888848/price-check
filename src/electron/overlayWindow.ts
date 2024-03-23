@@ -2,7 +2,8 @@ import { BrowserWindow, ipcMain, shell } from 'electron'
 import { OverlayController, OVERLAY_WINDOW_OPTS } from 'electron-overlay-window'
 import { PoeWindow } from './POEWindow'
 import IPC from './ipcChannel'
-import { join } from 'path'
+import { join } from 'node:path'
+import { __dirname } from './index'
 export let win: BrowserWindow
 let isOverlayOpen: boolean
 export async function createWindow() {
@@ -18,14 +19,22 @@ export async function createWindow() {
       webviewTag: true
     },
   })
-  if (process.env.VITE_DEV_SERVER_URL) {
-    await win.loadURL(process.env.VITE_DEV_SERVER_URL)
+  // if (process.env.VITE_DEV_SERVER_URL) {
+  //   await win.loadURL(process.env.VITE_DEV_SERVER_URL)
+  //   win.webContents.openDevTools({
+  //     mode: 'detach', activate: false
+  //   })
+  // }
+  // else {
+  //   await win.loadFile(join(process.env.DIST, 'index.html'))
+  // }
+  if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
+    await win.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL)
     win.webContents.openDevTools({
       mode: 'detach', activate: false
     })
-  }
-  else {
-    await win.loadFile(join(process.env.DIST, 'index.html'))
+  } else {
+    await win.loadFile(join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`))
   }
   ipcMain.on(IPC.FORCE_POE, () => {
     forcePOE()

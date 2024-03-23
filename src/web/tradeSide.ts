@@ -1,4 +1,4 @@
-import { GGCapi } from '../api'
+import { GGCapi } from './api'
 import { APIStatic, currencyImageUrl } from './APIdata'
 import { ref } from 'vue'
 import { isUndefined, isNumber, countBy } from 'lodash-es'

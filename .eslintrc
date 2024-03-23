@@ -1,13 +1,33 @@
 {
   "env": {
-    "node": true,
-    "browser": true
+    "browser": true,
+    "es6": true,
+    "node": true
   },
   "extends": [
     "eslint:recommended",
     "plugin:vue/vue3-recommended",
-    "plugin:@typescript-eslint/recommended"
+    "plugin:@typescript-eslint/recommended",
+    // "plugin:import/recommended",
+    // "plugin:import/electron",
+    // "plugin:import/typescript"
   ],
+  // "settings": {
+  //   "import/recommended": {
+  //     "alias": {
+  //       "map": [
+  //         [
+  //           "@",
+  //           "./src"
+  //         ],
+  //         [
+  //           "@ipc/*",
+  //           "ipc/*"
+  //         ]
+  //       ]
+  //     }
+  //   }
+  // },
   "plugins": [
     "@typescript-eslint"
   ],
@@ -17,7 +37,10 @@
   "parser": "vue-eslint-parser",
   "overrides": [
     {
-      "files": ["*.ts", "*.vue"],
+      "files": [
+        "*.ts",
+        "*.vue"
+      ],
       "rules": {
         "no-undef": "off"
       }
@@ -45,7 +68,7 @@
         "after": true
       }
     ],
-    "vue/html-indent":"off",
+    "vue/html-indent": "off",
     "indent": "off",
     "semi": [
       "warn",
@@ -87,7 +110,7 @@
         "ObjectPattern": {
           "multiline": true
         },
-        "ImportDeclaration":  {
+        "ImportDeclaration": {
           "multiline": true,
           "minProperties": 6
         },
@@ -97,7 +120,10 @@
         }
       }
     ],
-    "object-curly-spacing": [ "warn","always"],
+    "object-curly-spacing": [
+      "warn",
+      "always"
+    ],
     "array-bracket-spacing": "warn",
     "key-spacing": "warn",
     "@typescript-eslint/no-non-null-assertion": "off",

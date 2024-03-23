@@ -6,15 +6,16 @@ import { setupTray } from './tray'
 import { getAPIdata, checkForUpdate } from './setupAPI'
 import { setupConfig } from './config'
 import IPC from './ipcChannel'
-import { dirname, join } from 'node:path'
+import { dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import Module from 'node:module'
+const require = Module.createRequire(import.meta.url)
+if (require('electron-squirrel-startup')) {
+  app.quit()
+}
+export const __dirname = dirname(fileURLToPath(import.meta.url))
 const isDevelopment = process.env.NODE_ENV !== 'production'
-const _dirname = typeof __dirname !== 'undefined' ? __dirname : dirname(fileURLToPath(import.meta.url))
-process.env.DIST_ELECTRON = join(_dirname, '..')
-process.env.DIST = join(process.env.DIST_ELECTRON, '../dist')
-process.env.PUBLIC = process.env.VITE_DEV_SERVER_URL
-  ? join(process.env.DIST_ELECTRON, '../public')
-  : process.env.DIST
+process.env.PUBLIC = __dirname
 
 if (process.platform === 'win32') app.setAppUserModelId(app.getName())
 app.disableHardwareAcceleration()

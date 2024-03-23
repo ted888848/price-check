@@ -1,11 +1,16 @@
 {
   "compilerOptions": {
     "composite": true,
-    "module": "ESNext",
-    "moduleResolution": "Bundler",
-    "target": "ESNext",
+    "module": "CommonJS",
+    "moduleResolution": "Node10",
     "resolveJsonModule": true,
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
   },
-  "include": ["vite.config.ts", "package.json", "electron", "types.d.ts"]
+  "include": [
+    "vite.base.config.ts",
+    "vite.main.config.ts",
+    "vite.preload.config.ts",
+    "vite.renderer.config.ts",
+    "forge.env.d.ts"
+  ]
 }

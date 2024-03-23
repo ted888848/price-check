@@ -17,10 +17,10 @@ function setupItemEntries(itemArray: APIItem['entries'], heistReward: HeistRewar
       })
     }
     if (item.flags?.unique === true) {
-      itemBaseType[index].unique.push({
-        name: item.name, text: item.text
+      itemBaseType[index].unique!.push({
+        name: item.name!, text: item.text
       })
-      if (item.name.startsWith('贗品')) {
+      if (item.name?.startsWith('贗品')) {
         heistReward.push({
           name: item.name, type: item.type, text: item.text
         })
@@ -36,7 +36,7 @@ function parseGams(gemEntries: APIItem['entries']) {
     if (gem.disc && gem.disc.startsWith('alt_')) {
       const sameTypeGem = result.find(resultGem => resultGem.type === gem.type)
       if (sameTypeGem) {
-        sameTypeGem.trans.push({
+        sameTypeGem.trans?.push({
           text: gem.text, disc: gem.disc
         })
       }
@@ -188,7 +188,7 @@ function setupAPIMods(statsJson: APIStats) {
           label: statsGroup.label,
           entries:
             statsGroup.entries.splice(statsGroup.entries
-              .findIndex((ele) => ele.text === '附加的小型天賦給予：#'), 1)[0].option.options
+              .findIndex((ele) => ele.text === '附加的小型天賦給予：#'), 1)[0].option!.options
               .map(option => ({
                 id: option.id.toString(), text: option.text
               })),
