@@ -1,7 +1,8 @@
 <template>
   <div v-if="config" class="absolute left-0 right-0 mx-auto bg-gray-700 text-center w-1/2 h-1/2 flex flex-1">
     <div class="flex flex-col gap-2 w-150px mt-5 text-white">
-      <button :class="{ 'text-amber-600 text-xl bg-slate-600 font-bold p-2': currentSettingPage === 'SettingPriceCheck' }"
+      <button
+        :class="{ 'text-amber-600 text-xl bg-slate-600 font-bold p-2': currentSettingPage === 'SettingPriceCheck' }"
         @click="() => currentSettingPage = 'SettingPriceCheck'">
         查價設定
       </button>
@@ -23,18 +24,19 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ipcRenderer } from 'electron'
+// import { ipcRenderer } from 'electron'
 import { onMounted, ref } from 'vue'
 import IPC from '@/ipc/ipcChannel'
 import SettingPriceCheck from './SettingPriceCheck.vue'
 import SettingShortcut from './SettingShortcut.vue'
 const config = ref<Config>()
 onMounted(() => {
-  config.value = ipcRenderer.sendSync(IPC.GET_CONFIG)
+  config.value = window.electron.sendSync(IPC.GET_CONFIG) //ipcRenderer.sendSync(IPC.GET_CONFIG)
 })
 const emit = defineEmits(['close-setting-window'])
 function save() {
-  ipcRenderer.send(IPC.SET_CONFIG, JSON.stringify(config.value))
+  // ipcRenderer.send(IPC.SET_CONFIG, JSON.stringify(config.value))
+  window.electron.send(IPC.SET_CONFIG, JSON.stringify(config.value))
   emit('close-setting-window')
 }
 function cancel() {

@@ -22,3 +22,10 @@ interface ImportMetaEnv {
 interface ImportMeta {
   readonly env: ImportMetaEnv;
 }
+
+declare global {
+  interface Window {
+    electron: typeof import('@/preload/preload').api;
+    apiStore: typeof import('@/preload/preload').storeApi;
+  }
+}

@@ -13,7 +13,7 @@
 </template>
 <script setup lang="ts">
 import { ref } from 'vue'
-import { ipcRenderer } from 'electron'
+// import { ipcRenderer } from 'electron'
 import IPC from '@/ipc/ipcChannel'
 import { loadAPIdata } from '@/web/APIdata'
 import SettingWindow from '@/web/components/SettingWindow/SettingWindow.vue'
@@ -21,7 +21,8 @@ const overlayWindowShow = ref(false)
 function closeOverlay() {
   overlayWindowShow.value = false
   closeSettingWindow()
-  ipcRenderer.send(IPC.FORCE_POE, true)
+  // ipcRenderer.send(IPC.FORCE_POE, true)
+  window.electron.send(IPC.FORCE_POE, true)
 }
 
 const settingWindowShow = ref(false)
@@ -33,7 +34,8 @@ const emit = defineEmits<{
   (event: 'reloadLeagues'): void;
 }>()
 function reloadAPIdata() {
-  ipcRenderer.invoke(IPC.RELOAD_APIDATA)
+  // ipcRenderer.invoke(IPC.RELOAD_APIDATA)
+  window.electron.invoke(IPC.RELOAD_APIDATA)
     .then(({ status, error }) => {
       if (status) {
         emit('reloadLeagues')
@@ -49,10 +51,17 @@ function reloadAPIdata() {
     })
 }
 
-ipcRenderer.on(IPC.OVERLAY_SHOW, () => {
+// ipcRenderer.on(IPC.OVERLAY_SHOW, () => {
+//   overlayWindowShow.value = true
+// })
+window.electron.on(IPC.OVERLAY_SHOW, () => {
   overlayWindowShow.value = true
 })
-ipcRenderer.on(IPC.POE_ACTIVE, () => {
+// ipcRenderer.on(IPC.POE_ACTIVE, () => {
+//   overlayWindowShow.value = false
+//   closeSettingWindow()
+// })
+window.electron.on(IPC.POE_ACTIVE, () => {
   overlayWindowShow.value = false
   closeSettingWindow()
 })

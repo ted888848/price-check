@@ -7,11 +7,17 @@ import { FuseV1Options, FuseVersion } from '@electron/fuses'
 const config: ForgeConfig = {
   packagerConfig: {
     asar: true,
+    icon: 'public/SextantOrb256.ico',
+    appBundleId: 'com.electron.price-check',
+    quiet: false,
   },
   rebuildConfig: {
   },
   makers: [
     new MakerSquirrel({
+      authors: 'zhou',
+      setupIcon: 'public/SextantOrb256.ico',
+      iconUrl: 'https://raw.githubusercontent.com/ted888848/price-check/master/public/SextantOrb256.ico',
     })],
   plugins: [
     new VitePlugin({
@@ -23,10 +29,10 @@ const config: ForgeConfig = {
           entry: 'src/electron/index.ts',
           config: 'vite.main.config.ts',
         },
-        // {
-        //   entry: 'src/preload.ts',
-        //   config: 'vite.preload.config.ts',
-        // },
+        {
+          entry: 'src/preload/preload.ts',
+          config: 'vite.preload.config.ts',
+        },
       ],
       renderer: [
         {
@@ -47,6 +53,18 @@ const config: ForgeConfig = {
       [FuseV1Options.OnlyLoadAppFromAsar]: true,
     }),
   ],
+  publishers: [
+    {
+      name: '@electron-forge/publisher-github',
+      config: {
+        repository: {
+          owner: 'ted888848',
+          name: 'price-check'
+        },
+        prerelease: true,
+      }
+    }
+  ]
 }
 
 export default config

@@ -15,7 +15,7 @@ if (require('electron-squirrel-startup')) {
 }
 export const __dirname = dirname(fileURLToPath(import.meta.url))
 const isDevelopment = process.env.NODE_ENV !== 'production'
-process.env.PUBLIC = __dirname
+process.env.DIST = __dirname
 
 if (process.platform === 'win32') app.setAppUserModelId(app.getName())
 app.disableHardwareAcceleration()

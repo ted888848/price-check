@@ -3,7 +3,7 @@ import { OverlayController, OVERLAY_WINDOW_OPTS } from 'electron-overlay-window'
 import { PoeWindow } from './POEWindow'
 import IPC from './ipcChannel'
 import { join } from 'node:path'
-import { __dirname } from './index'
+import { __dirname } from '.'
 export let win: BrowserWindow
 let isOverlayOpen: boolean
 export async function createWindow() {
@@ -11,23 +11,15 @@ export async function createWindow() {
     width: 800,
     height: 600,
     ...OVERLAY_WINDOW_OPTS,
-    icon: join(process.env.PUBLIC, 'SextantOrb128.ico'),
+    icon: join(process.env.DIST, 'SextantOrb128.ico'),
     webPreferences: {
       nodeIntegration: true,
-      contextIsolation: false,
+      contextIsolation: true,
       webSecurity: false,
-      webviewTag: true
+      webviewTag: true,
+      preload: join(process.env.DIST, 'preload.cjs')
     },
   })
-  // if (process.env.VITE_DEV_SERVER_URL) {
-  //   await win.loadURL(process.env.VITE_DEV_SERVER_URL)
-  //   win.webContents.openDevTools({
-  //     mode: 'detach', activate: false
-  //   })
-  // }
-  // else {
-  //   await win.loadFile(join(process.env.DIST, 'index.html'))
-  // }
   if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
     await win.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL)
     win.webContents.openDevTools({

@@ -23,7 +23,8 @@ release
 *.njsproj
 *.sln
 *.sw?
-
+.vite
+out
 # lockfile
 pnpm-lock.yaml
 yarn.lock

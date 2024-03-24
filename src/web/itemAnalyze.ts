@@ -1,4 +1,4 @@
-import { ipcRenderer } from 'electron'
+// import { ipcRenderer } from 'electron'
 import IPC from '@/ipc/ipcChannel'
 import { APIitems, APImods, APIStatic } from './APIdata'
 enum ParseResult {
@@ -83,7 +83,7 @@ export function itemAnalyze(item: string) {
   const isFindUnique = {
     flag: false
   }
-  const config = ipcRenderer.sendSync(IPC.GET_CONFIG) as Config
+  const config = window.electron.sendSync(IPC.GET_CONFIG) as Config//ipcRenderer.sendSync(IPC.GET_CONFIG) as Config
   switch (itemParsed.type.text) {
     case '爪':
     case '匕首':
