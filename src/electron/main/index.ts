@@ -5,15 +5,15 @@ import { createWindow } from './overlayWindow'
 import { setupTray } from './tray'
 import { getAPIdata, checkForUpdate } from './setupAPI'
 import { setupConfig } from './config'
-import IPC from './ipcChannel'
+import IPC from '../../ipc'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 const isDevelopment = process.env.NODE_ENV !== 'production'
 const _dirname = typeof __dirname !== 'undefined' ? __dirname : dirname(fileURLToPath(import.meta.url))
-process.env.DIST_ELECTRON = join(_dirname, '..')
-process.env.DIST = join(process.env.DIST_ELECTRON, '../dist')
+console.log('dirname:', _dirname)
+process.env.DIST = _dirname
 process.env.PUBLIC = process.env.VITE_DEV_SERVER_URL
-  ? join(process.env.DIST_ELECTRON, '../public')
+  ? join(process.env.DIST, '../public')
   : process.env.DIST
 
 if (process.platform === 'win32') app.setAppUserModelId(app.getName())

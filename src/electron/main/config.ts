@@ -1,6 +1,6 @@
 import Store, { Schema } from 'electron-store'
 import { ipcMain, session } from 'electron'
-import IPC from './ipcChannel'
+import IPC from '@/ipc'
 import { registerShortcut, unRegisterShortcut } from './shortcuts'
 const defaultStore: Config = {
   characterName: '',

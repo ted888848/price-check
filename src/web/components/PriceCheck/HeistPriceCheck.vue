@@ -81,10 +81,10 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { maxBy } from 'lodash-es'
-import { searchItem, fetchItem, getIsCounting } from '@/web/tradeSide'
-import { heistReward as gemReplicaOptions } from '@/web/APIdata'
+import { searchItem, fetchItem, getIsCounting } from '@/web/lib/tradeSide'
+import { heistReward as gemReplicaOptions } from '@/web/lib/APIdata'
 import CircleCheck from '../utility/CircleCheck.vue'
-import type { ISearchResult, ISearchJson, IFetchResult } from '@/web/tradeSide'
+import type { ISearchResult, ISearchJson, IFetchResult } from '@/web/lib/tradeSide'
 const props = defineProps(['itemProp', 'leagueSelect', 'divineToChaos', 'isOverflow'])
 const { rateTimeLimit } = getIsCounting()
 
@@ -227,4 +227,4 @@ function openBrowser() {
 }
 </script>
 
-<style></style>
+<style></style>@/web/lib/APIdata@/web/lib/tradeSide@/web/lib/tradeSide

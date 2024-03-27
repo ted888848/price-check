@@ -10,7 +10,7 @@
     "dist"
   ],
   "artifactName": "${productName}${version}.${ext}",
-  "copyright": "Copyright©2023 zhou",
+  "copyright": "Copyright©2024 zhou",
   "publish": [
     "github"
   ],

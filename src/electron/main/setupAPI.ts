@@ -1,4 +1,4 @@
-import { GGCapi } from './api'
+import { GGCapi } from '@/lib/api'
 import Store from 'electron-store'
 import { app, session, dialog } from 'electron' //, shell
 import { autoUpdater } from 'electron-updater'

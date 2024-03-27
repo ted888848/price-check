@@ -13,15 +13,14 @@
 </template>
 <script setup lang="ts">
 import { ref } from 'vue'
-import { ipcRenderer } from 'electron'
-import IPC from '@/ipc/ipcChannel'
-import { loadAPIdata } from '@/web/APIdata'
+import IPC from '@/ipc'
+import { loadAPIdata } from '@/web/lib/APIdata'
 import SettingWindow from '@/web/components/SettingWindow/SettingWindow.vue'
 const overlayWindowShow = ref(false)
 function closeOverlay() {
   overlayWindowShow.value = false
   closeSettingWindow()
-  ipcRenderer.send(IPC.FORCE_POE, true)
+  window.ipc.send(IPC.FORCE_POE)
 }
 
 const settingWindowShow = ref(false)
@@ -33,7 +32,7 @@ const emit = defineEmits<{
   (event: 'reloadLeagues'): void;
 }>()
 function reloadAPIdata() {
-  ipcRenderer.invoke(IPC.RELOAD_APIDATA)
+  window.ipc.invoke(IPC.RELOAD_APIDATA)
     .then(({ status, error }) => {
       if (status) {
         emit('reloadLeagues')
@@ -49,11 +48,12 @@ function reloadAPIdata() {
     })
 }
 
-ipcRenderer.on(IPC.OVERLAY_SHOW, () => {
+window.ipc.on(IPC.OVERLAY_SHOW, () => {
   overlayWindowShow.value = true
 })
-ipcRenderer.on(IPC.POE_ACTIVE, () => {
+window.ipc.on(IPC.POE_ACTIVE, () => {
   overlayWindowShow.value = false
   closeSettingWindow()
 })
 </script>
+ipc/preload@/web/lib/APIdata

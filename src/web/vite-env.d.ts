@@ -15,10 +15,9 @@ declare module '@vue/runtime-core' {
   }
 }
 
-interface ImportMetaEnv {
-  readonly VITE_URL_BASE: string;
-}
-
-interface ImportMeta {
-  readonly env: ImportMetaEnv;
+declare global {
+  interface Window {
+    ipc: typeof import('../electron/preload').ipc;
+    store: typeof import('../electron/preload').store;
+  }
 }

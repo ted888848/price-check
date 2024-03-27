@@ -3,7 +3,7 @@
     @keydown.prevent @keyup="handelKeydown">
 </template>
 <script setup lang="ts">
-import { keyToElectron } from '@/web/keyToElectron'
+import { keyToElectron } from '@/web/lib/keyToElectron'
 
 const hotkey = defineModel<string>('hotkey')
 
@@ -31,4 +31,4 @@ function handelKeydown(event: KeyboardEvent) {
   }
   hotkey.value = keyToElectron(keyCode, altKey, ctrlKey, shiftKey)
 }
-</script>
+</script>@/web/lib/keyToElectron

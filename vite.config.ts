@@ -1,4 +1,4 @@
-import { rmSync } from 'node:fs'
+// import { rmSync } from 'node:fs'
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import electron from 'vite-plugin-electron/simple'
@@ -7,9 +7,9 @@ import pkg from './package.json'
 import UnoCSS from 'unocss/vite'
 // https://vitejs.dev/config/
 export default defineConfig(({ command }) => {
-  rmSync('dist-electron', {
-    recursive: true, force: true
-  })
+  // rmSync('dist-electron', {
+  //   recursive: true, force: true
+  // })
 
   const isServe = command === 'serve'
   const isBuild = command === 'build'
@@ -27,22 +27,41 @@ export default defineConfig(({ command }) => {
       UnoCSS(),
       electron({
         main: {
-          entry: 'electron/main/index.ts',
+          entry: 'src/electron/main/index.ts',
           vite: {
             build: {
               sourcemap,
-              outDir: 'dist-electron/main',
+              outDir: 'dist',
               minify: isBuild,
               rollupOptions: {
                 external: ['uiohook-napi', 'electron-overlay-window'],
                 output: {
                   format: 'esm',
-                  entryFileNames: '[name].mjs'
+                  entryFileNames: 'main.mjs'
                 },
               },
             },
+            resolve: {
+              alias: {
+                '@': `${__dirname}/src`,
+              }
+            }
           },
         },
+        preload: {
+          input: 'src/electron/preload/index.ts',
+          vite: {
+            build: {
+              outDir: 'dist',
+              rollupOptions: {
+                output: {
+                  format: 'esm',
+                  entryFileNames: 'preload.mjs'
+                },
+              },
+            }
+          }
+        }
       }),
       renderer(),
 
@@ -58,7 +77,6 @@ export default defineConfig(({ command }) => {
     resolve: {
       alias: {
         '@': `${__dirname}/src`,
-        '@utility': `${__dirname}/utility`
       }
     }
   }

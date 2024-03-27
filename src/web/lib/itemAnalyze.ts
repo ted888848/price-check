@@ -1,5 +1,4 @@
-import { ipcRenderer } from 'electron'
-import IPC from '@/ipc/ipcChannel'
+import IPC from '@/ipc'
 import { APIitems, APImods, APIStatic } from './APIdata'
 enum ParseResult {
   PARSE_SECTION_FAIL,
@@ -83,7 +82,7 @@ export function itemAnalyze(item: string) {
   const isFindUnique = {
     flag: false
   }
-  const config = ipcRenderer.sendSync(IPC.GET_CONFIG) as Config
+  const config = window.ipc.sendSync(IPC.GET_CONFIG) as Config
   switch (itemParsed.type.text) {
     case '爪':
     case '匕首':
@@ -401,7 +400,6 @@ function parseMultilineMod(regSection: RegExp[], section: string[], type: keyof 
   return tempArr
 }
 function parseMod(section: string[], type: keyof ParsedAPIMods) {
-  console.log(section, type)
   const regSection = getStrReg(section, type)
   const tempArr = parseMultilineMod(regSection, section, type)
   regSection.forEach((line, index) => {
@@ -417,7 +415,6 @@ function parseMod(section: string[], type: keyof ParsedAPIMods) {
       }
     }
     if (!matchMod.length) return false
-    console.log(matchMod[0])
     const matchReg = new RegExp(matchMod[0].text.replace(/[+-]?#/g, String.raw`([+-]?\d+(?:\.\d+)?)`)
       .replace(' (部分)', '').replace(/減少|增加/, String.raw`(?:減少|增加)`))
     const regGroup = section[index].match(matchReg)
@@ -678,7 +675,6 @@ function parseClusterJewel(item: string[][]) {
     let tempMod = APImods.clusterJewel.entries.find(mod => mod.text.includes(clusterType))
     if (tempMod!.text.endsWith('(古典)') && itemParsed.baseType === '小型星團珠寶') {
       const tempText = tempMod!.text.substring(0, tempMod!.text.length - 5)
-      console.log(tempText)
       tempMod = APImods.clusterJewel.entries.reverse().find(mod => mod.text.includes(tempText))
     }
     itemParsed.stats.push({

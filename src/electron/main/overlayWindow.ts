@@ -1,7 +1,7 @@
 import { BrowserWindow, ipcMain, shell } from 'electron'
 import { OverlayController, OVERLAY_WINDOW_OPTS } from 'electron-overlay-window'
 import { PoeWindow } from './POEWindow'
-import IPC from './ipcChannel'
+import IPC from '../../ipc'
 import { join } from 'path'
 export let win: BrowserWindow
 let isOverlayOpen: boolean
@@ -13,9 +13,10 @@ export async function createWindow() {
     icon: join(process.env.PUBLIC, 'SextantOrb128.ico'),
     webPreferences: {
       nodeIntegration: true,
-      contextIsolation: false,
+      contextIsolation: true,
       webSecurity: false,
-      webviewTag: true
+      webviewTag: true,
+      preload: join(process.env.DIST, 'preload.mjs'),
     },
   })
   if (process.env.VITE_DEV_SERVER_URL) {

@@ -47,13 +47,12 @@
 </template>
 
 <script setup lang="ts">
-import { ipcRenderer } from 'electron'
 import { ref, computed, nextTick, onMounted, onUnmounted, } from 'vue'
 import { range } from 'lodash-es'
-import IPC from '@/ipc/ipcChannel'
-import { itemAnalyze } from '@/web/itemAnalyze'
-import { getDivineToChaos } from '@/web/tradeSide'
-import { leagues, currencyImageUrl } from '@/web/APIdata'
+import IPC from '@/ipc'
+import { itemAnalyze } from '@/web/lib/itemAnalyze'
+import { getDivineToChaos } from '@/web/lib/tradeSide'
+import { leagues, currencyImageUrl } from '@/web/lib/APIdata'
 import NormalPriceCheck from './NormalPriceCheck.vue'
 import HeistPriceCheck from './HeistPriceCheck.vue'
 const isWebViewOpen = ref(false)
@@ -78,7 +77,7 @@ function closeWebView() {
 const windowShowHide = ref(false)
 function closePriceCheck() {
   windowShowHide.value = false
-  ipcRenderer.send(IPC.FORCE_POE)
+  window.ipc.send(IPC.FORCE_POE)
   isWebViewOpen.value = false
 }
 
@@ -125,7 +124,7 @@ function isOverflow() {
   return priceCheckDiv.value.scrollHeight > priceCheckDiv.value.offsetHeight
 }
 
-ipcRenderer.on(IPC.PRICE_CHECK_SHOW, (e, clip: string, pos: string) => {
+window.ipc.on(IPC.PRICE_CHECK_SHOW, (e, clip: string, pos: string) => {
   closeWebView()
   windowShowHide.value = true
   currentPriceCheck.value = 'NormalPriceCheck'
@@ -137,7 +136,7 @@ ipcRenderer.on(IPC.PRICE_CHECK_SHOW, (e, clip: string, pos: string) => {
     console.log(e)
   }
 })
-ipcRenderer.on(IPC.POE_ACTIVE, () => {
+window.ipc.on(IPC.POE_ACTIVE, () => {
   windowShowHide.value = false
 })
 onMounted(() => {
@@ -201,4 +200,4 @@ tbody.modsTbody>tr>td {
 .exaltedImg:hover .exaltedImgTooltip {
   visibility: visible;
 }
-</style>
+</style>ipc/preload@/web/lib/APIdata@/web/lib/itemAnalyze@/web/lib/tradeSide
