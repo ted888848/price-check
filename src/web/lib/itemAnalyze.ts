@@ -82,7 +82,7 @@ export function itemAnalyze(item: string) {
   const isFindUnique = {
     flag: false
   }
-  const config = window.ipc.sendSync(IPC.GET_CONFIG) as Config
+  const config = window.ipc.sendSync(IPC.GET_CONFIG)
   switch (itemParsed.type.text) {
     case '爪':
     case '匕首':

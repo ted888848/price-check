@@ -1,18 +1,19 @@
+import { IpcArgs, IpcReturn } from './../../ipc/index'
 import { Channel } from '@/ipc'
 import { contextBridge, ipcRenderer } from 'electron'
 import Store from 'electron-store'
 
 export const ipc = {
-  send(channel: Channel, ...args: any[]): void {
+  send<C extends Channel>(channel: C, ...args: IpcArgs<C>): void {
     return ipcRenderer.send(channel, ...args)
   },
-  sendSync(channel: Channel, ...args: any[]) {
+  sendSync<C extends Channel>(channel: C, ...args: IpcArgs<C>): IpcReturn<C> {
     return ipcRenderer.sendSync(channel, ...args)
   },
-  invoke(channel: Channel, ...args: any[]) {
+  invoke<C extends Channel>(channel: C, ...args: IpcArgs<C>): Promise<IpcReturn<C>> {
     return ipcRenderer.invoke(channel, ...args)
   },
-  on(channel: Channel, listener: (event: Electron.IpcRendererEvent, ...args: any[]) => void) {
+  on<C extends Channel>(channel: C, listener: (event: Electron.IpcRendererEvent, ...args: IpcArgs<C>) => void) {
     return ipcRenderer.on(channel, listener)
   }
 }

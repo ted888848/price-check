@@ -9,21 +9,40 @@ const channels = {
 } as const
 export type Channel = typeof channels[keyof typeof channels];
 
-// export interface IpcHandler extends Record<Channel, unknown> {
-//   priceCheck: (itemString: string, windowPos: string) => void;
-//   overlay: () => void;
-//   forcePOE: () => void;
-//   poeActive: () => void;
-//   getConfig: () => Config;
-//   setConfig: (config: Config) => void;
-//   reloadAPIData: () => ({
-//     status: true;
-//   } | {
-//     status: false; error: unknown;
-//   });
-// }
-// export type IpcReturn<C extends Channel> = ReturnType<IpcHandler[C]>;
-// export type IpcArgs<C extends Channel> = Parameters<IpcHandler[C]>;
-
+type IpcPriceCheck = {
+  name: 'priceCheck';
+  handler: (itemString: string, windowPos: string) => void;
+}
+type IpcOverlay = {
+  name: 'overlay';
+  handler: () => void;
+}
+type IpcForcePOE = {
+  name: 'forcePOE';
+  handler: () => void;
+}
+type IpcPOEActive = {
+  name: 'poeActive';
+  handler: () => void;
+}
+type IpcGetConfig = {
+  name: 'getConfig';
+  handler: () => Config;
+}
+type IpcSetConfig = {
+  name: 'setConfig';
+  handler: (config: Config) => void;
+}
+type IpcReloadAPIData = {
+  name: 'reloadAPIData';
+  handler: () => ({
+    status: true; error: never;
+  } | {
+    status: false; error: unknown;
+  });
+}
+export type IpcEvent = IpcPriceCheck | IpcOverlay | IpcForcePOE | IpcPOEActive | IpcGetConfig | IpcSetConfig | IpcReloadAPIData;
+export type IpcReturn<C extends Channel> = ReturnType<Extract<IpcEvent, { name: C }>['handler']>;
+export type IpcArgs<C extends Channel> = Parameters<Extract<IpcEvent, { name: C }>['handler']>;
 
 export default channels

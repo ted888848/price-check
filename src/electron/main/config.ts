@@ -74,8 +74,8 @@ export const store = new Store({
 export let config: Config
 export function setupConfig() {
   config = store.store
-  ipcMain.on(IPC.SET_CONFIG, (_e, configData: string) => {
-    store.store = JSON.parse(configData) as Config
+  ipcMain.on(IPC.SET_CONFIG, (_e, configData: Config) => {
+    store.store = configData // JSON.parse(configData) as Config
     config = store.store
     unRegisterShortcut()
     registerShortcut()

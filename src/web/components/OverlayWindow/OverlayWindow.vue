@@ -56,4 +56,3 @@ window.ipc.on(IPC.POE_ACTIVE, () => {
   closeSettingWindow()
 })
 </script>
-ipc/preload@/web/lib/APIdata
