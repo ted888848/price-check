@@ -45,4 +45,4 @@ const settingPage = {
   'SettingShortcut': SettingShortcut
 }
 const currentSettingPage = ref<keyof typeof settingPage>('SettingPriceCheck')
-</script>ipc/preload
+</script>

@@ -1,4 +1,4 @@
-import { IpcArgs, IpcReturn } from './../../ipc/index'
+import { IpcArgs, IpcReturn } from '@/ipc'
 import { Channel } from '@/ipc'
 import { contextBridge, ipcRenderer } from 'electron'
 import Store from 'electron-store'
@@ -14,7 +14,7 @@ export const ipc = {
     return ipcRenderer.invoke(channel, ...args)
   },
   on<C extends Channel>(channel: C, listener: (event: Electron.IpcRendererEvent, ...args: IpcArgs<C>) => void) {
-    return ipcRenderer.on(channel, listener)
+    return ipcRenderer.on(channel, listener as any)
   }
 }
 contextBridge.exposeInMainWorld('ipc', ipc)

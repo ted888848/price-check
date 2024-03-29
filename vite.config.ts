@@ -27,7 +27,7 @@ export default defineConfig(({ command }) => {
       UnoCSS(),
       electron({
         main: {
-          entry: 'src/electron/main/index.ts',
+          entry: 'src/electron/index.ts',
           vite: {
             build: {
               sourcemap,
@@ -49,7 +49,7 @@ export default defineConfig(({ command }) => {
           },
         },
         preload: {
-          input: 'src/electron/preload/index.ts',
+          input: 'src/preload/index.ts',
           vite: {
             build: {
               outDir: 'dist',

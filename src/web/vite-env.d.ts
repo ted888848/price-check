@@ -17,7 +17,7 @@ declare module '@vue/runtime-core' {
 
 declare global {
   interface Window {
-    ipc: typeof import('../electron/preload').ipc;
-    store: typeof import('../electron/preload').store;
+    ipc: typeof import('@/preload').ipc;
+    store: typeof import('@/preload').store;
   }
 }

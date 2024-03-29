@@ -1,7 +1,7 @@
 import { BrowserWindow, ipcMain, shell } from 'electron'
 import { OverlayController, OVERLAY_WINDOW_OPTS } from 'electron-overlay-window'
 import { PoeWindow } from './POEWindow'
-import IPC from '../../ipc'
+import IPC from '@/ipc'
 import { join } from 'path'
 export let win: BrowserWindow
 let isOverlayOpen: boolean
