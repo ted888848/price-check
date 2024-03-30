@@ -47,7 +47,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, nextTick, onMounted, onUnmounted, } from 'vue'
+import { ref, computed, nextTick, onMounted, onUnmounted } from 'vue'
 import { range } from 'lodash-es'
 import IPC from '@/ipc'
 import { itemAnalyze } from '@/web/lib/itemAnalyze'
@@ -81,9 +81,21 @@ function closePriceCheck() {
   isWebViewOpen.value = false
 }
 
-const leagueSelect = ref(leagues[0])
+const leagueSelectRef = ref()
+const leagueSelect = computed({
+  get: () => leagueSelectRef.value,
+  set: (val: string) => {
+    const config = window.ipc.sendSync(IPC.GET_CONFIG)
+    leagueSelectRef.value = val
+    window.ipc.send(IPC.SET_CONFIG, JSON.stringify({
+      ...config, league: val
+    }))
+    refreshDivineToChaos()
+  }
+})
 function loadLeagues() {
-  leagueSelect.value = leagues[0]
+  const configLeagues = window.ipc.sendSync(IPC.GET_CONFIG).league
+  leagueSelect.value = leagues.includes(configLeagues) ? configLeagues : (leagues.find(ele => !ele.match('^(標準|殘暴|專家)')) ?? leagues[0])
 }
 defineExpose({
   loadLeagues
@@ -140,7 +152,7 @@ window.ipc.on(IPC.POE_ACTIVE, () => {
   windowShowHide.value = false
 })
 onMounted(() => {
-  refreshDivineToChaos()
+  loadLeagues()
 })
 onUnmounted(() => {
   clearInterval(divToCInterval)

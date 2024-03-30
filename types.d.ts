@@ -202,6 +202,7 @@ interface Config {
     type: hotkeyType;
     outputText: string;
   }[];
+  league: string;
 }
 
 interface APIStaticItem {

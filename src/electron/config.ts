@@ -30,7 +30,8 @@ const defaultStore: Config = {
       type: 'type-in-chat',
       outputText: '/hideout'
     }
-  ]
+  ],
+  league: '',
 }
 const storeSchema: Schema<Config> = {
   characterName: {
@@ -64,6 +65,9 @@ const storeSchema: Schema<Config> = {
         },
       }
     }
+  },
+  league: {
+    type: 'string'
   }
 }
 export const store = new Store({
