@@ -34,7 +34,7 @@ onMounted(() => {
 })
 const emit = defineEmits(['close-setting-window'])
 function save() {
-  window.ipc.send(IPC.SET_CONFIG, config.value!)
+  window.ipc.send(IPC.SET_CONFIG, JSON.stringify(config.value!))
   emit('close-setting-window')
 }
 function cancel() {

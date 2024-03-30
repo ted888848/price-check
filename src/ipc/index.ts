@@ -31,7 +31,7 @@ type IpcGetConfig = {
 }
 type IpcSetConfig = {
   name: 'setConfig';
-  handler: (config: Config) => void;
+  handler: (config: string) => void;
 }
 type IpcReloadAPIData = {
   name: 'reloadAPIData';
