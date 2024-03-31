@@ -9,24 +9,31 @@ const store = new Store({
 
 function setupItemEntries(itemArray: APIItem['entries'], heistReward: HeistReward[]) {
   const itemBaseType: Item['entries'] = []
-  itemArray.slice().reverse().forEach((item) => {
-    const index = itemBaseType.findIndex(element => element.type === item.type)
-    if (index === -1) {
-      itemBaseType.push({
-        ...item, unique: []
-      })
-    }
-    if (item.flags?.unique === true) {
-      itemBaseType[index].unique.push({
-        name: item.name, text: item.text
-      })
-      if (item.name.startsWith('贗品')) {
-        heistReward.push({
-          name: item.name, type: item.type, text: item.text
-        })
+  try {
+    itemArray.slice().forEach((item) => {
+      let tempItem = itemBaseType.find(element => element.type === item.type)
+      if (!tempItem) {
+        tempItem = {
+          type: item.type,
+          text: item.type,
+          unique: []
+        }
       }
-    }
-  })
+      if (item.flags?.unique === true) {
+        tempItem.unique.push({
+          name: item.name, text: item.text
+        })
+        if (item.name.startsWith('贗品')) {
+          heistReward.push({
+            name: item.name, type: item.type, text: item.text
+          })
+        }
+      }
+      itemBaseType.push(tempItem)
+    })
+  } catch (e) {
+    console.log(e)
+  }
   return itemBaseType
 }
 function parseGams(gemEntries: APIItem['entries']) {
