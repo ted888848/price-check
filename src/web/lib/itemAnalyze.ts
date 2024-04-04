@@ -144,6 +144,10 @@ export function itemAnalyze(item: string) {
     case '地圖碎片':
     case '掘獄可堆疊有插槽通貨': {
       itemParsed.autoSearch = true
+      if (itemParsed.baseType === '滿靈柩') {
+        parseCoffin(itemSection)
+        break
+      }
       if (APIStatic.some((ele: Static) => ele.text === itemParsed.baseType)) {
         itemParsed.searchExchange.option = true
         const searchExchangeDivine = config.searchExchangeDivine
@@ -169,6 +173,9 @@ export function itemAnalyze(item: string) {
     case '咒語':
     case '萃取物':
       parseCharmAndTincture(itemSection)
+      break
+    case '不滅之火餘燼':
+      parseImmortalFire(itemSection)
       break
     case '其它':
       break
@@ -226,7 +233,8 @@ function parseItemName(section: string[], itemSection: string[][]) {
     輿圖地區升級道具: 'watchstone',
     記憶: 'memoryline',
     技能寶石: 'gem.activegem',
-    咒語: 'azmeri.charm'
+    咒語: 'azmeri.charm',
+    不滅之火餘燼: undefined
   } as const
   const rarityOptions = [{
     value: undefined,
@@ -251,8 +259,11 @@ function parseItemName(section: string[], itemSection: string[][]) {
   itemParsed.type = {
     text: itemType, option: typeTrans[itemType], searchByType: false
   }
-  itemParsed.rarity = section[1].match(/稀有度: ([^\n]+)/)![1] ?? ''
-
+  itemParsed.rarity = section[1].match(/稀有度: ([^\n]+)/)?.[1] ?? ''
+  if (itemType === '不滅之火餘燼') {
+    itemParsed.baseType = section[1]
+    return ParseResult.PARSE_SECTION_SUCC
+  }
   if (['普通', '魔法', '稀有'].includes(itemParsed.rarity)) {
     itemParsed.raritySearch = rarityOptions[5]
   }
@@ -983,5 +994,29 @@ function parseCharmAndTincture(item: string[][]) {
   }
   if (itemParsed.type.text === '咒語') {
     itemParsed.type.searchByType = true
+  }
+}
+
+function parseCoffin(item: string[][]) {
+  function parseBodyLevel(section: string[]) {
+    const sectionMatch = section[1]?.match(/^屍體等級: (\d+)/)
+    if (!sectionMatch) return ParseResult.PARSE_SECTION_SKIP
+    const il = parseInt(sectionMatch[1])
+    itemParsed.itemLevel = {
+      min: il > 86 ? 86 : il, max: undefined, search: true
+    }
+    return ParseResult.PARSE_SECTION_SUCC
+  }
+  for (const section of item) {
+    if (parseBodyLevel(section) === ParseResult.PARSE_SECTION_SUCC) continue
+    if (parseMod(section.map(line => line.replace(' (implicit)', '')), 'necropolis') === ParseResult.PARSE_SECTION_SUCC) break
+  }
+  itemParsed.stats.map(ele => ele.disabled = false)
+}
+
+function parseImmortalFire(item: string[][]) {
+  itemParsed.autoSearch = true
+  for (const section of item) {
+    if (parseItemLevel(section) === ParseResult.PARSE_SECTION_SUCC) break
   }
 }

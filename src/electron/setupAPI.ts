@@ -106,7 +106,7 @@ function setupAPIItems(itemsJson: APIItems) {
         break
       default:
         APIitems[groupID] = {
-          ...itemGroup, entries: setupItemEntries(itemGroup.entries, heistReward), id: 'gems'
+          ...itemGroup, entries: setupItemEntries(itemGroup.entries, heistReward), id: groupID as string
         }
         return
     }
@@ -230,6 +230,15 @@ function setupAPIMods(statsJson: APIStats) {
           type: '聖域'
         }
         APImods.sanctum.mutiLines = checkNewline(statsGroup)
+      case 'necropolis':
+        APImods.necropolis = {
+          label: statsGroup.label,
+          entries: statsGroup.entries.map((ele) => ({
+            ...ele
+          })).filter((stat) => !stat.text.includes('\n')),
+          type: '棺材'
+        }
+        APImods.necropolis.mutiLines = checkNewline(statsGroup)
       default:
         return
     }

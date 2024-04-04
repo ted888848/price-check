@@ -5,4 +5,7 @@ export default defineConfig({
     presetUno(),
     presetIcons(),
   ],
+  shortcuts: {
+    'center': 'flex items-center justify-center',
+  }
 })

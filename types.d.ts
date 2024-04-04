@@ -82,6 +82,7 @@ interface ParsedAPIMods {
   clusterJewel: ParsedAPIMod;
   forbiddenJewel: ParsedAPIMod;
   sanctum: ParsedAPIMod;
+  necropolis: ParsedAPIMod;
 }
 interface Static {
   id: string;
@@ -234,7 +235,7 @@ interface APIItem {
     disc?: 'alt_x' | 'alt_y' | 'atlasofworlds' | 'blighted' | 'original' | 'theawakening' | 'uberblighted' | 'warfortheatlas';
   }[];
 }
-type StatsID = 'crafted' | 'crucible' | 'delve' | 'enchant' | 'explicit' | 'fractured' | 'implicit' | 'pseudo' | 'sanctum' | 'scourge' | 'ultimatum' | 'veiled';
+type StatsID = 'crafted' | 'crucible' | 'delve' | 'enchant' | 'explicit' | 'fractured' | 'implicit' | 'pseudo' | 'sanctum' | 'scourge' | 'ultimatum' | 'veiled' | 'necropolis';
 interface APIStats {
   result: APIStatsItem[];
 }

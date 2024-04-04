@@ -1,8 +1,12 @@
 <template>
-  <div class="text-xl text-white my-1 text-center"
+  <div class="text-xl text-white my-1 text-center center gap-8px"
     @click="() => item.type.searchByType = Boolean(!item.type.searchByType && item.type.option)">
-    <span v-if="item.name" class="mr-3">{{ item.name }}</span>
-    <span :class="{ 'text-red-500': item.type.searchByType }">{{ item.baseType }}</span>
+    <span v-if="item.name">{{ item.name }}</span>
+    <div class="center gap-12px">
+      <img v-if="itemProp.baseType === '滿靈柩'" class="h-28px" src="/coffin-dance.gif">
+      <span :class="{ 'text-red-500': item.type.searchByType }">{{ item.baseType }}</span>
+      <img v-if="itemProp.baseType === '滿靈柩'" class="h-28px" src="/coffin-dance.gif">
+    </div>
   </div>
   <div class="text-white text-center flex justify-between px-2">
     <span :style="{ visibility: item.pDPS ? 'visible' : 'hidden' }" class=" w-40">PDps: {{ item.pDPS }}</span>
