@@ -1,6 +1,6 @@
 {
   "name": "price-check",
-  "version": "3.24.5",
+  "version": "3.24.6",
   "main": "dist/main.mjs",
   "description": "就只是一個POE查價",
   "author": "ted <ted888848@gmail.com>",
