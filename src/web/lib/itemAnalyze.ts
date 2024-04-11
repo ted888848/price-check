@@ -1003,163 +1003,17 @@ function parseCoffin(item: string[][]) {
     if (!sectionMatch) return ParseResult.PARSE_SECTION_SKIP
     const il = parseInt(sectionMatch[1])
     itemParsed.itemLevel = {
-      min: il > 86 ? 86 : il, max: undefined, search: true
+      min: il > 86 ? 86 : il, max: undefined, search: false
     }
     return ParseResult.PARSE_SECTION_SUCC
   }
   for (const section of item) {
+    console.log(section)
     if (parseBodyLevel(section) === ParseResult.PARSE_SECTION_SUCC) continue
     if (parseMod(section.map(line => line.replace(' (implicit)', '')), 'necropolis') === ParseResult.PARSE_SECTION_SUCC) break
   }
-  itemParsed.stats.map(ele => ele.disabled = false)
 
-  if (itemParsed.stats.length === 0) {
-    itemParsed.stats.push({
-      text: '增加速度',
-      'id': 'necropolis.stat_4030721122',
-      'value': {
-        'min': 500
-      },
-      'type': '棺材',
-      'disabled': true
-    }, {
-      text: '增加暴擊',
-      'id': 'necropolis.stat_3463034098',
-      'value': {
-        'min': 500
-      },
-      'type': '棺材',
-      'disabled': true
-    }, {
-      text: '增加混沌',
-      'id': 'necropolis.stat_1819445176',
-      'value': {
-        'min': 500
-      },
-      'type': '棺材',
-      'disabled': true
-    }, {
-      text: '增加物理',
-      'id': 'necropolis.stat_2170132760',
-      'value': {
-        'min': 500
-      },
-      'type': '棺材',
-      'disabled': true
-    }, {
-      text: '增加火焰',
-      'id': 'necropolis.stat_4224308712',
-      'value': {
-        'min': 500
-      },
-      'type': '棺材',
-      'disabled': true
-    }, {
-      text: '增加冰冷',
-      'id': 'necropolis.stat_1119655256',
-      'value': {
-        'min': 500
-      },
-      'type': '棺材',
-      'disabled': true
-    }, {
-      text: '增加閃電',
-      'id': 'necropolis.stat_4129421370',
-      'value': {
-        'min': 500
-      },
-      'type': '棺材',
-      'disabled': true
-    }, {
-      text: '增加元素',
-      'id': 'necropolis.stat_3084343890',
-      'value': {
-        'min': 500
-      },
-      'type': '棺材',
-      'disabled': true
-    }, {
-      text: '增加生命',
-      'id': 'necropolis.stat_1991278263',
-      'value': {
-        'min': 500
-      },
-      'type': '棺材',
-      'disabled': true
-    }, {
-      text: '增加攻擊',
-      'id': 'necropolis.stat_584391877',
-      'value': {
-        'min': 500
-      },
-      'type': '棺材',
-      'disabled': true
-    }, {
-      text: '增加法術',
-      'id': 'necropolis.stat_3824746815',
-      'value': {
-        'min': 500
-      },
-      'type': '棺材',
-      'disabled': true
-    }, {
-      text: '增加防禦',
-      'id': 'necropolis.stat_1327587435',
-      'value': {
-        'min': 500
-      },
-      'type': '棺材',
-      'disabled': true
-    }, {
-      text: '增加抗性',
-      'id': 'necropolis.stat_1041629979',
-      'value': {
-        'min': 500
-      },
-      'type': '棺材',
-      'disabled': true
-    }, {
-      text: '增加能力',
-      'id': 'necropolis.stat_663914124',
-      'value': {
-        'min': 500
-      },
-      'type': '棺材',
-      'disabled': true
-    }, {
-      text: '增加寶石',
-      'id': 'necropolis.stat_1291773572',
-      'value': {
-        'min': 500
-      },
-      'type': '棺材',
-      'disabled': true
-    }, {
-      text: '增加召喚',
-      'id': 'necropolis.stat_2194568236',
-      'value': {
-        'min': 500
-      },
-      'type': '棺材',
-      'disabled': true
-    }, {
-      text: '增加前綴',
-      'id': 'necropolis.stat_2209675971',
-      'value': {
-        'min': 500
-      },
-      'type': '棺材',
-      'disabled': true
-    }, {
-      text: '增加後綴',
-      'id': 'necropolis.stat_3292535110',
-      'value': {
-        'min': 500
-      },
-      'type': '棺材',
-      'disabled': true
-    },)
-  }
+  itemParsed.stats.map(ele => ele.disabled = false)
 }
 
 function parseImmortalFire(item: string[][]) {

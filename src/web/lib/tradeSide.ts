@@ -302,23 +302,23 @@ const rateTimeLimitArr = {
     time: 2
   }],
   search: [{
-    limit: 25,
+    limit: 45,
     time: 120
   }, {
     limit: 12,
-    time: 20
+    time: 25
   }, {
-    limit: 3,
+    limit: 5,
     time: 3
   }],
   exchange: [{
-    limit: 40,
-    time: 200
+    limit: 35,
+    time: 120
   }, {
-    limit: 10,
+    limit: 12,
     time: 60
   }, {
-    limit: 3,
+    limit: 5,
     time: 8
   }]
 } as const
