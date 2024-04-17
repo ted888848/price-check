@@ -29,7 +29,7 @@
     "@types/vue-select": "^3.16.8",
     "@typescript-eslint/eslint-plugin": "^7.4.0",
     "@typescript-eslint/parser": "^7.4.0",
-    "@unocss/preset-icons": "^0.58.6",
+    "@unocss/preset-icons": "^0.59.3",
     "@unocss/preset-uno": "^0.58.6",
     "@vitejs/plugin-vue": "^5.0.4",
     "axios": "^1.6.8",
