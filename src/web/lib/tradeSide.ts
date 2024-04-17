@@ -1,8 +1,14 @@
-import { GGCapi } from '../../lib/api'
+import { apiBaseConfig } from '@/lib/config'
 import { APIStatic, currencyImageUrl } from './APIdata'
 import { ref } from 'vue'
 import { isUndefined, isNumber, countBy } from 'lodash-es'
 import type { AxiosResponseHeaders } from 'axios'
+import axios from 'axios'
+const tradeAPI = axios.create({
+  ...apiBaseConfig,
+  baseURL: 'http://localhost:6969/proxy',
+})
+
 export interface ISearchJson {
   query: {
     type?: {
@@ -352,7 +358,7 @@ function parseRateTimeLimit(header?: AxiosResponseHeaders) {
   if (!header) return
   const type = header['x-rate-limit-policy'].split('-')[1] as keyof typeof rateTimeLimitArr
   if (Object.keys(rateTimeLimitArr).includes(type)) {
-    const timesArr = header['x-rate-limit-ip-state'].split(',').map((ele: string) => parseInt(ele.substring(0, ele.indexOf(':')))).reverse()
+    const timesArr = header['x-rate-limit-ip-state'].split(',').map((ele: string) => parseInt(ele.split(':')?.[0])).reverse()
     for (let i = 0; i < timesArr.length; ++i) {
       if (timesArr[i] >= rateTimeLimitArr[type][i].limit) {
         startCountdown(rateTimeLimitArr[type][i].time)
@@ -397,7 +403,11 @@ export async function searchItem(searchJson: ISearchJson, league: string) {
   }
   searchJson = cleanupJSON(searchJson)
   if (process.env.NODE_ENV === 'development') console.log(searchJson)
-  await GGCapi.post(encodeURI(`trade/search/${league}`), JSON.stringify(searchJson))
+  await tradeAPI.post('', {
+    tradeURL: encodeURI(`trade/search/${league}`),
+    method: 'POST',
+    data: JSON.stringify(searchJson)
+  })
     .then((response) => {
       parseRateTimeLimit(response.headers as AxiosResponseHeaders)
       return response.data
@@ -442,7 +452,13 @@ export async function fetchItem(fetchList: string[], searchID: string, oldFetchR
   for (let i = 0; i < fetchList.length; i += 10) {
     itemJsonUrl.push('trade/fetch/' + fetchList.slice(i, i + 10).join(',') + `?query=${searchID}`)
   }
-  await Promise.all(itemJsonUrl.map((url) => GGCapi.get(encodeURI(url))))
+  await Promise.all(
+    itemJsonUrl.map((url) =>
+      tradeAPI.post('', {
+        tradeURL: encodeURI(url),
+        method: 'GET',
+      }))
+  )
     .then((responses) => {
       responses.forEach(res => {
         const tempResult = res.data.result.map((ele: any) => `${ele.listing.price.amount}|${ele.listing.price.currency}`) as string[]
@@ -504,7 +520,11 @@ export async function getDivineToChaos(league: string) {
     'engine': 'new'
   }
   let chaos = 0
-  await GGCapi.post(encodeURI(`trade/exchange/${league}`), JSON.stringify(exchangeJSON))
+  await tradeAPI.post('', {
+    tradeURL: encodeURI(`trade/exchange/${league}`),
+    method: 'POST',
+    data: JSON.stringify(exchangeJSON)
+  })
     .then((response) => {
       parseRateTimeLimit(response.headers as AxiosResponseHeaders)
       return response.data
@@ -558,7 +578,11 @@ export async function searchExchange(item: ParsedItem, league: string): Promise<
     },
     'engine': 'new'
   }
-  await GGCapi.post(encodeURI(`trade/exchange/${league}`), JSON.stringify(exchangeJSON))
+  await tradeAPI.post('', {
+    tradeURL: encodeURI(`trade/exchange/${league}`),
+    method: 'POST',
+    data: JSON.stringify(exchangeJSON)
+  })
     .then((response) => {
       parseRateTimeLimit(response.headers as AxiosResponseHeaders)
       return response.data

@@ -6,6 +6,7 @@ const channels = {
   GET_CONFIG: 'getConfig',
   SET_CONFIG: 'setConfig',
   RELOAD_APIDATA: 'reloadAPIData',
+
 } as const
 export type Channel = typeof channels[keyof typeof channels];
 

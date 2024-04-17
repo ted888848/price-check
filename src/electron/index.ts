@@ -8,6 +8,7 @@ import { setupConfig } from './config'
 import IPC from '@/ipc'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import './proxyServer'
 const isDevelopment = process.env.NODE_ENV !== 'production'
 const _dirname = typeof __dirname !== 'undefined' ? __dirname : dirname(fileURLToPath(import.meta.url))
 process.env.DIST = _dirname

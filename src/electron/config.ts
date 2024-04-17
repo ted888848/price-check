@@ -99,7 +99,8 @@ function setCookie() {
       path: '/',
       httpOnly: true,
       secure: true,
-      sameSite: 'lax'
+      sameSite: 'lax',
+      domain: 'pathofexile.tw'
     })
   }
 }
