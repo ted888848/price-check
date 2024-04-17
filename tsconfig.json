@@ -28,7 +28,8 @@
     "types.d.ts"
   ],
   "exclude": [
-    "src/electron"
+    "src/electron",
+    "src/lib"
   ],
   "references": [
     {

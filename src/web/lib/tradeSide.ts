@@ -1,12 +1,16 @@
-import { apiBaseConfig } from '@/lib/config'
 import { APIStatic, currencyImageUrl } from './APIdata'
 import { ref } from 'vue'
 import { isUndefined, isNumber, countBy } from 'lodash-es'
 import type { AxiosResponseHeaders } from 'axios'
 import axios from 'axios'
 const tradeAPI = axios.create({
-  ...apiBaseConfig,
   baseURL: 'http://localhost:6969/proxy',
+  timeout: 4000,
+  withCredentials: true,
+  headers: {
+    'accept': 'application/json',
+    'Content-Type': 'application/json',
+  },
 })
 
 export interface ISearchJson {
