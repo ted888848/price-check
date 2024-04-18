@@ -1,23 +1,20 @@
 import express from 'express'
 import { GGCapi } from '@/lib/api'
-import type { AxiosResponse } from 'axios'
 function ProxyServer() {
   const server = express()
   server.use(express.json())
   server.listen('6969')
 
   server.post('/proxy', async (req, res) => {
-    const { tradeURL, method } = req.body as ProxyData
-    let response: AxiosResponse
-    if (method === 'GET') {
-      response = await GGCapi.get(tradeURL)
-    }
-    else if (method === 'POST') {
-      const { data } = req.body as ProxyDataPost
-      response = await GGCapi.post(tradeURL, data)
-    }
-    if (!response) res.status(500).send('No response')
-    res.status(response.status).set(response.headers).send(response.data)
+    const data = req.body
+    const { url } = req.query as { url: string }
+    const response = await GGCapi.post(url, data, { headers: req.headers }).catch(err => err)
+    res.status(response.status).set(response.headers).json(response.data)
+  })
+  server.get('/proxy', async (req, res) => {
+    const { url } = req.query as { url: string }
+    const response = await GGCapi.get(url, { headers: req.headers }).catch(err => err)
+    res.status(response.status).set(response.headers).json(response.data)
   })
 }
 

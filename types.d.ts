@@ -263,11 +263,3 @@ interface APILeagues {
     text: string;
   }[];
 }
-type ProxyDataPost<T = any> = {
-  method: 'POST';
-  data?: T;
-}
-type ProxyDataGet = {
-  method: 'GET';
-}
-type ProxyData<T = any> = { tradeURL: string } & (ProxyDataPost<T> | ProxyDataGet)
