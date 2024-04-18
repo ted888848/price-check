@@ -3,7 +3,7 @@ import { ref } from 'vue'
 import { isUndefined, isNumber, countBy } from 'lodash-es'
 import type { AxiosResponseHeaders } from 'axios'
 import axios from 'axios'
-const tradeAPI = axios.create({
+const tradeAxios = axios.create({
   baseURL: 'http://localhost:6969/proxy',
   timeout: 4000,
   withCredentials: true,
@@ -13,6 +13,9 @@ const tradeAPI = axios.create({
   },
 })
 
+function tradeAPI<D = any, T = ProxyData<D>>(url: string, data: T) {
+  return tradeAxios.post(url, data)
+}
 export interface ISearchJson {
   query: {
     type?: {
@@ -407,7 +410,7 @@ export async function searchItem(searchJson: ISearchJson, league: string) {
   }
   searchJson = cleanupJSON(searchJson)
   if (process.env.NODE_ENV === 'development') console.log(searchJson)
-  await tradeAPI.post('', {
+  await tradeAPI('', {
     tradeURL: encodeURI(`trade/search/${league}`),
     method: 'POST',
     data: JSON.stringify(searchJson)
@@ -457,11 +460,9 @@ export async function fetchItem(fetchList: string[], searchID: string, oldFetchR
     itemJsonUrl.push('trade/fetch/' + fetchList.slice(i, i + 10).join(',') + `?query=${searchID}`)
   }
   await Promise.all(
-    itemJsonUrl.map((url) =>
-      tradeAPI.post('', {
-        tradeURL: encodeURI(url),
-        method: 'GET',
-      }))
+    itemJsonUrl.map((url) => tradeAPI('', {
+      tradeURL: encodeURI(url), method: 'GET',
+    }))
   )
     .then((responses) => {
       responses.forEach(res => {
@@ -524,7 +525,7 @@ export async function getDivineToChaos(league: string) {
     'engine': 'new'
   }
   let chaos = 0
-  await tradeAPI.post('', {
+  await tradeAPI('', {
     tradeURL: encodeURI(`trade/exchange/${league}`),
     method: 'POST',
     data: JSON.stringify(exchangeJSON)
@@ -582,7 +583,7 @@ export async function searchExchange(item: ParsedItem, league: string): Promise<
     },
     'engine': 'new'
   }
-  await tradeAPI.post('', {
+  await tradeAPI('', {
     tradeURL: encodeURI(`trade/exchange/${league}`),
     method: 'POST',
     data: JSON.stringify(exchangeJSON)
