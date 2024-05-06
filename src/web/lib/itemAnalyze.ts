@@ -414,43 +414,45 @@ function parseMod(section: string[], type: keyof ParsedAPIMods) {
   const regSection = getStrReg(section, type)
   const tempArr = parseMultilineMod(regSection, section, type)
   regSection.forEach((line, index) => {
-    let matchMod = APImods[type].entries.filter(s => line.test(s.text))
-    if (matchMod.length > 1) {
-      if (itemParsed.isWeaponOrArmor && matchMod.find(ele => ele.text.endsWith(' (部分)')))
-        matchMod = matchMod.filter(mod => mod.text.endsWith(' (部分)'))
+    let matchMods = APImods[type].entries.filter(s => line.test(s.text))
+    if (matchMods.length > 1) {
+      if (itemParsed.isWeaponOrArmor && matchMods.find(ele => ele.text.endsWith(' (部分)')))
+        matchMods = matchMods.filter(mod => mod.text.endsWith(' (部分)'))
       else {
-        matchMod = matchMod.filter(mod => !mod.text.endsWith(' (部分)'))
+        matchMods = matchMods.filter(mod => !mod.text.endsWith(' (部分)'))
         const regTemp = section[index].match(/增加|減少/)?.[0]
         if (regTemp)
-          matchMod = matchMod.filter(mod => mod.text.includes(regTemp))
+          matchMods = matchMods.filter(mod => mod.text.includes(regTemp))
       }
     }
-    if (!matchMod.length) return false
-    const matchReg = new RegExp(matchMod[0].text.replace(/[+-]?#/g, String.raw`([+-]?\d+(?:\.\d+)?)`)
-      .replace(' (部分)', '').replace(/減少|增加/, String.raw`(?:減少|增加)`))
-    const regGroup = section[index].match(matchReg)
-    regGroup?.shift()
-    if (regGroup?.length) {
-      let minValue = regGroup.reduce((pre, ele) => pre + Number(ele), 0) / regGroup.length
-      const diffSign = matchMod[0].text.match(/減少|增加/)?.[0] !== section[index].match(/減少|增加/)?.[0]
-      if (diffSign) { //數字前增加與減少不相等，把數字變負數
-        minValue = -minValue
+    if (!matchMods.length) return false
+    matchMods.forEach((matchMod) => {
+      const matchReg = new RegExp(matchMod.text.replace(/[+-]?#/g, String.raw`([+-]?\d+(?:\.\d+)?)`)
+        .replace(' (部分)', '').replace(/減少|增加/, String.raw`(?:減少|增加)`))
+      const regGroup = section[index].match(matchReg)
+      regGroup?.shift()
+      if (regGroup?.length) {
+        let minValue = regGroup.reduce((pre, ele) => pre + Number(ele), 0) / regGroup.length
+        const diffSign = matchMod.text.match(/減少|增加/)?.[0] !== section[index].match(/減少|增加/)?.[0]
+        if (diffSign) { //數字前增加與減少不相等，把數字變負數
+          minValue = -minValue
+        }
+        tempArr.push({
+          ...matchMod,
+          value: {
+            max: diffSign ? minValue : undefined,
+            min: diffSign ? undefined : minValue
+          },
+          disabled: true,
+          type: APImods[type].type
+        })
       }
-      tempArr.push({
-        ...matchMod[0],
-        value: {
-          max: diffSign ? minValue : undefined,
-          min: diffSign ? undefined : minValue
-        },
-        disabled: true,
-        type: APImods[type].type
-      })
-    }
-    else {
-      tempArr.push({
-        ...matchMod[0], disabled: true, type: APImods[type].type
-      })
-    }
+      else {
+        tempArr.push({
+          ...matchMod, disabled: true, type: APImods[type].type
+        })
+      }
+    })
   })
   if (tempArr.length) {
     itemParsed.stats.push(...tempArr)
