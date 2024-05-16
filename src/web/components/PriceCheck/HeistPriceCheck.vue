@@ -75,7 +75,8 @@
     <div class="i-svg-spinners:tadpole" />
   </div>
   <span v-if="rateTimeLimit.flag" class="text-white bg-red-600 text-xl text-center my-2 hover:cursor-default">API次數限制
-    {{ rateTimeLimit.second }} 秒後再回來 </span>
+    {{ rateTimeLimit.second }} 秒後再回來
+  </span>
 </template>
 
 <script setup lang="ts">

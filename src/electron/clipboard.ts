@@ -48,4 +48,4 @@ export async function getClipboard() {
     foo()
   })
   return clipboardPromise
-}   
+}

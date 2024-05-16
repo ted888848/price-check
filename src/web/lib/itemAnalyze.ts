@@ -352,9 +352,9 @@ function parseItemLevel(section: string[]) {
 function getStrReg(section: string[], type: string) {
   const retArr: RegExp[] = []
   section.forEach(line => {
-    let _line = line.substring(0, line.indexOf(` (${type})`))
-    _line = _line ? _line : line
-    retArr.push(new RegExp(String.raw`^${_line.replace(/[+-]?\d+(\.\d+)?/g, String.raw`[+-]?(\d+|#)`)
+    const indexOfType = line.indexOf(` (${type})`)
+    line = indexOfType > -1 ? line.substring(0, indexOfType) : line
+    retArr.push(new RegExp(String.raw`^${line.replace(/[+-]?\d+(\.\d+)?/g, String.raw`[+-]?(\d+|#)`)
       .replace(/減少|增加/, String.raw`(?:減少|增加)`)}( \(部分\))?$`))
   })
   return retArr
@@ -377,9 +377,7 @@ function parseMultilineMod(regSection: RegExp[], section: string[], type: keyof 
       if (flag) {
         const matchReg = matchMod.text.map(mod => new RegExp(mod.replace(/[+-]?#/g, String.raw`[+-]?(\d+(?:\.\d+)?)`)
           .replace(' (部分)', '').replace(/減少|增加/, String.raw`(?:減少|增加)`)))
-        const tempGroup = {
-          ...matchMod
-        }
+        const tempGroup = structuredClone(matchMod)
         let tempValue = 0
         let valueCount = 0
         for (const ind in matchReg) {
@@ -432,16 +430,13 @@ function parseMod(section: string[], type: keyof ParsedAPIMods) {
       const regGroup = section[index].match(matchReg)
       regGroup?.shift()
       if (regGroup?.length) {
-        let minValue = regGroup.reduce((pre, ele) => pre + Number(ele), 0) / regGroup.length
         const diffSign = matchMod.text.match(/減少|增加/)?.[0] !== section[index].match(/減少|增加/)?.[0]
-        if (diffSign) { //數字前增加與減少不相等，把數字變負數
-          minValue = -minValue
-        }
+        //數字前增加與減少不相等，把數字變負數
+        const minValue = (diffSign ? -1 : 1) * (regGroup.reduce((pre, ele) => pre + Number(ele), 0) / regGroup.length)
         tempArr.push({
           ...matchMod,
           value: {
-            max: diffSign ? minValue : undefined,
-            min: diffSign ? undefined : minValue
+            [diffSign ? 'max' : 'min']: minValue,
           },
           disabled: true,
           type: APImods[type].type
@@ -525,7 +520,6 @@ function parseInfluence(section: string[]) {
   for (const line of section) {
     if (line === '破裂之物') {
       itemParsed.isFractured = true
-      break
     }
     else if (line === '追憶之物') {
       itemParsed.isSynthesized = true
@@ -618,10 +612,12 @@ function parseWeapon(item: string[][]) {
       lineMatch.shift()
       itemParsed.eleDamage = {
         min: lineMatch.reduce((pre, curr, index) => {
+          if (index === 0) return pre
           if (curr && index % 2 == 0) return pre += parseInt(curr)
           return pre
         }, 0),
         max: lineMatch.reduce((pre, curr, index) => {
+          if (index === 0) return pre
           if (curr && index % 2 == 1) return pre += parseInt(curr)
           return pre
         }, 0)
@@ -638,8 +634,8 @@ function parseWeapon(item: string[][]) {
     }
   })
   item.shift()
-  if (itemParsed.phyDamage && itemParsed.attackSpeed) itemParsed.pDPS = parseFloat(((itemParsed.phyDamage.min + itemParsed.phyDamage.max) / 2 * itemParsed.attackSpeed).toFixed(2))
-  if (itemParsed.eleDamage && itemParsed.attackSpeed) itemParsed.eDPS = parseFloat(((itemParsed.eleDamage.min + itemParsed.eleDamage.max) / 2 * itemParsed.attackSpeed).toFixed(2))
+  if (itemParsed.phyDamage && itemParsed.attackSpeed) itemParsed.pDPS = parseFloat((((itemParsed.phyDamage.min + itemParsed.phyDamage.max) / 2) * itemParsed.attackSpeed).toFixed(2))
+  if (itemParsed.eleDamage && itemParsed.attackSpeed) itemParsed.eDPS = parseFloat((((itemParsed.eleDamage.min + itemParsed.eleDamage.max) / 2) * itemParsed.attackSpeed).toFixed(2))
   parseAllfuns(item, parseFuns)
 }
 function parseArmor(item: string[][]) {
@@ -796,18 +792,10 @@ function parseMap(item: string[][]) {
     text: '地圖被 # 佔據',
     type: 'implicit',
     options: [
-      {
-        value: 1, text: '異界．奴役'
-      },
-      {
-        value: 2, text: '異界．根除'
-      },
-      {
-        value: 3, text: '異界．干擾'
-      },
-      {
-        value: 4, text: '異界．淨化'
-      }
+      { value: 1, text: '異界．奴役' },
+      { value: 2, text: '異界．根除' },
+      { value: 3, text: '異界．干擾' },
+      { value: 4, text: '異界．淨化' }
     ]
   } as const
   const conquerorMap = {
@@ -815,18 +803,10 @@ function parseMap(item: string[][]) {
     text: '地圖含有 # 的壁壘',
     type: 'implicit',
     options: [
-      {
-        value: 1, text: '巴倫'
-      },
-      {
-        value: 2, text: '維羅提尼亞'
-      },
-      {
-        value: 3, text: '奧赫茲明'
-      },
-      {
-        value: 4, text: '圖拉克斯'
-      }
+      { value: 1, text: '巴倫' },
+      { value: 2, text: '維羅提尼亞' },
+      { value: 3, text: '奧赫茲明' },
+      { value: 4, text: '圖拉克斯' }
     ]
   } as const
   item[0].forEach(line => {

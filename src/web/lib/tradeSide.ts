@@ -60,109 +60,54 @@ export interface ISearchJson {
       };
       socket_filters?: {
         disabled: boolean;
-        filters: {
-          links: { min?: number; max?: number };
-        };
+        filters: { links: { min?: number; max?: number } };
       };
     };
     stats: [{ type: 'and'; filters: ItemStat[] }];
-    status: {
-      option: 'any' | 'online' | 'onlineleague';
-    };
+    status: { option: 'any' | 'online' | 'onlineleague' };
   };
-  sort: {
-    price: 'asc';
-  };
+  sort: { price: 'asc' };
 }
 
 export const selectOptions = {
-  generalOption: [{
-    label: '任何',
-    value: undefined
-  }, {
-    label: '是',
-    value: true
-  }, {
-    label: '否',
-    value: false
-  }],
-  gemAltQOptions: [{
-    label: '普通',
-    value: 0
-  }, {
-    label: '異常的',
-    value: 1
-  }, {
-    label: '相異的',
-    value: 2
-  }, {
-    label: '幻影的',
-    value: 3
-  }],
-  influencesOptions: [{
-    id: 'pseudo.pseudo_has_shaper_influence',
-    label: '塑者'
-  }, {
-    id: 'pseudo.pseudo_has_elder_influence',
-    label: '尊師'
-  }, {
-    id: 'pseudo.pseudo_has_crusader_influence',
-    label: '聖戰'
-  }, {
-    id: 'pseudo.pseudo_has_redeemer_influence',
-    label: '救贖'
-  }, {
-    id: 'pseudo.pseudo_has_hunter_influence',
-    label: '狩獵'
-  }, {
-    id: 'pseudo.pseudo_has_warlord_influence',
-    label: '督軍'
-  }],
-  elderMapOptions: [{
-    value: 1,
-    label: '奴役(右上)'
-  }, {
-    value: 2,
-    label: '根除(右下)'
-  }, {
-    value: 3,
-    label: '干擾(左下)'
-  }, {
-    value: 4,
-    label: '淨化(左上)'
-  }],
-  conquerorMapOptions: [{
-    value: 1,
-    label: '巴倫'
-  }, {
-    value: 2,
-    label: '維羅提尼亞'
-  }, {
-    value: 3,
-    label: '奧赫茲明'
-  }, {
-    value: 4,
-    label: '圖拉克斯'
-  }],
-  rarityOptions: [{
-    value: undefined,
-    label: '任何'
-  }, {
-    value: 'normal',
-    label: '普通'
-  }, {
-    value: 'magic',
-    label: '魔法'
-  }, {
-    value: 'rare',
-    label: '稀有'
-  }, {
-    value: 'unique',
-    label: '傳奇'
-  }, {
-    value: 'nonunique',
-    label: '非傳奇'
-  }],
+  generalOption: [
+    { label: '任何', value: undefined },
+    { label: '是', value: true },
+    { label: '否', value: false }
+  ],
+  gemAltQOptions: [
+    { label: '普通', value: 0 },
+    { label: '異常的', value: 1 },
+    { label: '相異的', value: 2 },
+    { label: '幻影的', value: 3 }
+  ],
+  influencesOptions: [
+    { id: 'pseudo.pseudo_has_shaper_influence', label: '塑者' },
+    { id: 'pseudo.pseudo_has_elder_influence', label: '尊師' },
+    { id: 'pseudo.pseudo_has_crusader_influence', label: '聖戰' },
+    { id: 'pseudo.pseudo_has_redeemer_influence', label: '救贖' },
+    { id: 'pseudo.pseudo_has_hunter_influence', label: '狩獵' },
+    { id: 'pseudo.pseudo_has_warlord_influence', label: '督軍' }],
+  elderMapOptions: [
+    { value: 1, label: '奴役(右上)' },
+    { value: 2, label: '根除(右下)' },
+    { value: 3, label: '干擾(左下)' },
+    { value: 4, label: '淨化(左上)' }
+  ],
+  conquerorMapOptions: [
+    { value: 1, label: '巴倫' },
+    { value: 2, label: '維羅提尼亞' },
+    { value: 3, label: '奧赫茲明' },
+    { value: 4, label: '圖拉克斯' }
+  ],
+  rarityOptions: [
+    { value: undefined, label: '任何' },
+    { value: 'normal', label: '普通' },
+    { value: 'magic', label: '魔法' },
+    { value: 'rare', label: '稀有' },
+    { value: 'unique', label: '傳奇' },
+    { value: 'nonunique', label: '非傳奇' }
+  ],
 }
 const defaultSearchJson: ISearchJson = {
   query: {
@@ -303,33 +248,20 @@ export function getSearchJSON(item: ParsedItem) {
   return searchJSON
 }
 const rateTimeLimitArr = {
-  fetch: [{
-    limit: 14,
-    time: 6
-  }, {
-    limit: 10,
-    time: 2
-  }],
-  search: [{
-    limit: 45,
-    time: 120
-  }, {
-    limit: 12,
-    time: 25
-  }, {
-    limit: 5,
-    time: 3
-  }],
-  exchange: [{
-    limit: 35,
-    time: 120
-  }, {
-    limit: 12,
-    time: 60
-  }, {
-    limit: 5,
-    time: 8
-  }]
+  fetch: [
+    { limit: 14, time: 6 },
+    { limit: 10, time: 2 }
+  ],
+  search: [
+    { limit: 45, time: 120 },
+    { limit: 12, time: 25 },
+    { limit: 5, time: 3 }
+  ],
+  exchange: [
+    { limit: 35, time: 120 },
+    { limit: 12, time: 60 },
+    { limit: 5, time: 8 }
+  ]
 } as const
 const rateTimeLimit = ref({
   flag: false, second: 0
@@ -396,9 +328,7 @@ export interface ISearchResult {
 }
 export async function searchItem(searchJson: ISearchJson, league: string) {
   const searchResult: ISearchResult = {
-    searchID: {
-      type: 'search'
-    },
+    searchID: { type: 'search' },
     result: [],
     totalCount: 0,
     nowFetched: 0,
@@ -407,9 +337,7 @@ export async function searchItem(searchJson: ISearchJson, league: string) {
   searchJson = cleanupJSON(searchJson)
   if (process.env.NODE_ENV === 'development') console.log(searchJson)
   await tradeApi.post('', searchJson, {
-    params: {
-      url: encodeURI(`trade/search/${league}`)
-    }
+    params: { url: encodeURI(`trade/search/${league}`) }
   })
     .then((response) => {
       parseRateTimeLimit(response.headers as AxiosResponseHeaders)
@@ -455,14 +383,7 @@ export async function fetchItem(fetchList: string[], searchID: string, oldFetchR
   for (let i = 0; i < fetchList.length; i += 10) {
     itemJsonUrl.push('trade/fetch/' + fetchList.slice(i, i + 10).join(',') + `?query=${searchID}`)
   }
-  await Promise.all(
-    itemJsonUrl.map((url) =>
-      tradeApi.get('', {
-        params: {
-          url: encodeURI(url),
-        }
-      })
-    ))
+  await Promise.all(itemJsonUrl.map((url) => tradeApi.get('', { params: { url: encodeURI(url), } })))
     .then((responses) => {
       responses.forEach(res => {
         const tempResult = res.data.result.map((ele: any) => `${ele.listing.price.amount}|${ele.listing.price.currency}`) as string[]
@@ -498,37 +419,25 @@ export async function fetchItem(fetchList: string[], searchID: string, oldFetchR
 }
 export interface IExchangeJson {
   query: {
-    status: {
-      option: 'online';
-    };
+    status: { option: 'online' };
     have: string[];
     want: string[];
   };
-  sort: {
-    have: 'asc';
-  };
+  sort: { have: 'asc' };
   engine: 'new';
 }
 export async function getDivineToChaos(league: string) {
   const exchangeJSON: IExchangeJson = {
     'query': {
-      'status': {
-        'option': 'online'
-      },
+      'status': { 'option': 'online' },
       'have': ['divine'],
       'want': ['chaos']
     },
-    'sort': {
-      'have': 'asc'
-    },
+    'sort': { 'have': 'asc' },
     'engine': 'new'
   }
   let chaos = 0
-  await tradeApi.post('', exchangeJSON, {
-    params: {
-      url: encodeURI(`trade/exchange/${league}`)
-    }
-  })
+  await tradeApi.post('', exchangeJSON, { params: { url: encodeURI(`trade/exchange/${league}`) } })
     .then((response) => {
       parseRateTimeLimit(response.headers as AxiosResponseHeaders)
       return response.data
@@ -560,9 +469,7 @@ export interface IExchangeResult {
 }
 export async function searchExchange(item: ParsedItem, league: string): Promise<IExchangeResult> {
   const exchangeResult: IExchangeResult = {
-    searchID: {
-      type: 'exchange'
-    },
+    searchID: { type: 'exchange' },
     result: [],
     totalCount: 0,
     nowFetched: 0,
@@ -571,22 +478,14 @@ export async function searchExchange(item: ParsedItem, league: string): Promise<
   const tempResult: string[] = []
   const exchangeJSON: IExchangeJson = {
     'query': {
-      'status': {
-        'option': 'online'
-      },
+      'status': { 'option': 'online' },
       'have': [item.searchExchange.have],
       'want': [APIStatic.find(e => e.text === item.baseType)?.id ?? '']
     },
-    'sort': {
-      'have': 'asc'
-    },
+    'sort': { 'have': 'asc' },
     'engine': 'new'
   }
-  await tradeApi.post('', exchangeJSON, {
-    params: {
-      url: encodeURI(`trade/exchange/${league}`)
-    }
-  })
+  await tradeApi.post('', exchangeJSON, { params: { url: encodeURI(`trade/exchange/${league}`) } })
     .then((response) => {
       parseRateTimeLimit(response.headers as AxiosResponseHeaders)
       return response.data

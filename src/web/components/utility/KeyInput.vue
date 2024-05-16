@@ -31,4 +31,4 @@ function handelKeydown(event: KeyboardEvent) {
   }
   hotkey.value = keyToElectron(keyCode, altKey, ctrlKey, shiftKey)
 }
-</script>@/web/lib/keyToElectron
+</script>
