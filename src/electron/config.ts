@@ -4,7 +4,7 @@ import IPC from '@/ipc'
 import { registerShortcut, unRegisterShortcut } from './shortcuts'
 const defaultStore: Config = {
   characterName: '',
-  searchExchangeDivine: false,
+  searchExchangePrefer: 'divine&chaos',
   POESESSID: '',
   searchTwoWeekOffline: false,
   priceCheckHotkey: 'Ctrl+D',
@@ -37,8 +37,9 @@ const storeSchema: Schema<Config> = {
   characterName: {
     type: 'string'
   },
-  searchExchangeDivine: {
-    type: 'boolean'
+  searchExchangePrefer: {
+    type: 'string',
+
   },
   POESESSID: {
     type: 'string'
@@ -87,6 +88,14 @@ export function setupConfig() {
   })
   ipcMain.on(IPC.GET_CONFIG, (e) => {
     e.returnValue = config
+  })
+  ipcMain.on(IPC.UPDATE_CONFIG, (_e, newConfigStr: string) => {
+    const newConfig = JSON.parse(newConfigStr) as Partial<Config>
+    store.store = { ...store.store, ...newConfig }
+    config = store.store
+    unRegisterShortcut()
+    registerShortcut()
+    setCookie()
   })
   setCookie()
 }

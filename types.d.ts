@@ -173,7 +173,8 @@ interface ParsedItem {
   searchTwoWeekOffline: boolean;
   searchExchange: {
     option: boolean;
-    have: 'chaos' | 'divine';
+    have: string[];
+    want?: string[];
   };
   search6L?: boolean;
   isRGB?: boolean;
@@ -193,7 +194,7 @@ type hotkeyType = 'type-in-chat'
 
 interface Config {
   characterName: string;
-  searchExchangeDivine: boolean;
+  searchExchangePrefer: 'divine&chaos' | 'chaos' | 'divine';
   POESESSID: string;
   searchTwoWeekOffline: boolean;
   priceCheckHotkey: string;

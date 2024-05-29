@@ -10,10 +10,11 @@
       <input id="POESESSID" v-model="config.POESESSID"
         class="shadow appearance-none w-310px border rounded py-1 px-2 text-gray-700 leading-tight" type="text">
     </div>
-    <div class="flex mt-5 hover:cursor-pointer items-center"
-      @click="() => config.searchExchangeDivine = !config.searchExchangeDivine">
-      <span class="text-xl text-white mr-2">可堆疊通貨優先使用神聖:</span>
-      <CircleCheck :checked="config.searchExchangeDivine" />
+    <div class="flex mt-5 hover:cursor-pointer items-center gap-8px">
+      <span class="text-xl text-white">以物易物優先使用:</span>
+      <VSelect v-model="config.searchExchangePrefer" class="text-sm style-chooser min-w-150px" :options="exchangeHave"
+        label="label" :reduce="(ele: ArrayValueType<typeof exchangeHave>) => ele.value" :clearable="false"
+        :searchable="false" />
     </div>
     <div class="flex mt-5 hover:cursor-pointer items-center"
       @click="() => config.searchTwoWeekOffline = !config.searchTwoWeekOffline">
@@ -24,6 +25,8 @@
 </template>
 <script setup lang="ts">
 import CircleCheck from '../utility/CircleCheck.vue'
+import { selectOptions } from '@/web/lib/tradeSide'
+const { exchangeHave } = selectOptions
 const config = defineModel<Config>('config', {
   required: true
 })

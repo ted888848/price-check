@@ -4,7 +4,7 @@ import { isUndefined, isNumber, countBy } from 'lodash-es'
 import type { AxiosResponseHeaders } from 'axios'
 import axios from 'axios'
 const tradeApi = axios.create({
-  baseURL: 'http://localhost:6969/proxy',
+  baseURL: `http://localhost:${window.proxyServer.getPort()}/proxy`,
   timeout: 4000,
   withCredentials: true,
   headers: {
@@ -87,7 +87,8 @@ export const selectOptions = {
     { id: 'pseudo.pseudo_has_crusader_influence', label: '聖戰' },
     { id: 'pseudo.pseudo_has_redeemer_influence', label: '救贖' },
     { id: 'pseudo.pseudo_has_hunter_influence', label: '狩獵' },
-    { id: 'pseudo.pseudo_has_warlord_influence', label: '督軍' }],
+    { id: 'pseudo.pseudo_has_warlord_influence', label: '督軍' }
+  ],
   elderMapOptions: [
     { value: 1, label: '奴役(右上)' },
     { value: 2, label: '根除(右下)' },
@@ -108,44 +109,35 @@ export const selectOptions = {
     { value: 'unique', label: '傳奇' },
     { value: 'nonunique', label: '非傳奇' }
   ],
+  exchangeHave: [
+    { label: 'D&C', value: 'divine&chaos' },
+    { label: '混沌', value: 'chaos' },
+    { label: '神聖', value: 'divine' }
+  ]
 }
 const defaultSearchJson: ISearchJson = {
   query: {
     filters: {
       trade_filters: {
         filters: {
-          price: {
-            min: 2,
-            option: 'chaos_divine'
-          },
-          collapse: {
-            option: true
-          }
+          price: { min: 2, option: 'chaos_divine' },
+          collapse: { option: true }
         }
       },
       misc_filters: {
-        filters: {
-        }
+        filters: {}
       },
       type_filters: {
-        filters: {
-        }
+        filters: {}
       },
       map_filters: {
-        filters: {
-        }
+        filters: {}
       }
     },
-    stats: [{
-      type: 'and', filters: []
-    }],
-    status: {
-      option: 'online'
-    },
+    stats: [{ type: 'and', filters: [] }],
+    status: { option: 'online' },
   },
-  sort: {
-    price: 'asc'
-  }
+  sort: { price: 'asc' }
 }
 export function getSearchJSON(item: ParsedItem) {
   const searchJSON: ISearchJson = structuredClone(defaultSearchJson)
@@ -248,20 +240,35 @@ export function getSearchJSON(item: ParsedItem) {
   return searchJSON
 }
 const rateTimeLimitArr = {
-  fetch: [
-    { limit: 14, time: 6 },
-    { limit: 10, time: 2 }
-  ],
-  search: [
-    { limit: 45, time: 120 },
-    { limit: 12, time: 25 },
-    { limit: 5, time: 3 }
-  ],
-  exchange: [
-    { limit: 35, time: 120 },
-    { limit: 12, time: 60 },
-    { limit: 5, time: 8 }
-  ]
+  search: {
+    ip: [
+      { limit: 45, time: 60 },
+      { limit: 13, time: 20 },
+      { limit: 6, time: 3 }
+    ],
+    account: [
+      { limit: 3, time: 2 }
+    ]
+  },
+  fetch: {
+    ip: [
+      { limit: 14, time: 4 },
+      { limit: 10, time: 1 }
+    ],
+    account: [
+      { limit: 4, time: 2 }
+    ]
+  },
+  exchange: {
+    ip: [
+      { limit: 40, time: 60 },
+      { limit: 13, time: 30 },
+      { limit: 5, time: 3 }
+    ],
+    account: [
+      { limit: 3, time: 2 }
+    ]
+  }
 } as const
 const rateTimeLimit = ref({
   flag: false, second: 0
@@ -291,13 +298,16 @@ function startCountdown(time: number) {
 
 function parseRateTimeLimit(header?: AxiosResponseHeaders) {
   if (!header) return
+  const rules = header['x-rate-limit-rules'].split(',').map((ele: string) => ele.toLowerCase())
   const type = header['x-rate-limit-policy'].split('-')[1] as keyof typeof rateTimeLimitArr
   if (Object.keys(rateTimeLimitArr).includes(type)) {
-    const timesArr = header['x-rate-limit-ip-state'].split(',').map((ele: string) => parseInt(ele.split(':')?.[0])).reverse()
-    for (let i = 0; i < timesArr.length; ++i) {
-      if (timesArr[i] >= rateTimeLimitArr[type][i].limit) {
-        startCountdown(rateTimeLimitArr[type][i].time)
-        break
+    for (const rule of rules) {
+      const timesArr = header[`x-rate-limit-${rule}-state`].split(',').map((ele: string) => parseInt(ele.split(':')?.[0])).reverse()
+      for (let i = 0; i < timesArr.length; ++i) {
+        if (timesArr[i] >= rateTimeLimitArr[type][rule][i].limit) {
+          startCountdown(rateTimeLimitArr[type][rule][i].time)
+          break
+        }
       }
     }
   }
@@ -336,9 +346,7 @@ export async function searchItem(searchJson: ISearchJson, league: string) {
   }
   searchJson = cleanupJSON(searchJson)
   if (process.env.NODE_ENV === 'development') console.log(searchJson)
-  await tradeApi.post('', searchJson, {
-    params: { url: encodeURI(`trade/search/${league}`) }
-  })
+  await tradeApi.post('', searchJson, { params: { url: `trade/search/${league}` } })
     .then((response) => {
       parseRateTimeLimit(response.headers as AxiosResponseHeaders)
       return response.data
@@ -383,7 +391,8 @@ export async function fetchItem(fetchList: string[], searchID: string, oldFetchR
   for (let i = 0; i < fetchList.length; i += 10) {
     itemJsonUrl.push('trade/fetch/' + fetchList.slice(i, i + 10).join(',') + `?query=${searchID}`)
   }
-  await Promise.all(itemJsonUrl.map((url) => tradeApi.get('', { params: { url: encodeURI(url), } })))
+  await Promise.all(
+    itemJsonUrl.map((url) => tradeApi.get('', { params: { url: url, } })))
     .then((responses) => {
       responses.forEach(res => {
         const tempResult = res.data.result.map((ele: any) => `${ele.listing.price.amount}|${ele.listing.price.currency}`) as string[]
@@ -437,7 +446,7 @@ export async function getDivineToChaos(league: string) {
     'engine': 'new'
   }
   let chaos = 0
-  await tradeApi.post('', exchangeJSON, { params: { url: encodeURI(`trade/exchange/${league}`) } })
+  await tradeApi.post('', exchangeJSON, { params: { url: `trade/exchange/${league}` } })
     .then((response) => {
       parseRateTimeLimit(response.headers as AxiosResponseHeaders)
       return response.data
@@ -478,14 +487,16 @@ export async function searchExchange(item: ParsedItem, league: string): Promise<
   const tempResult: string[] = []
   const exchangeJSON: IExchangeJson = {
     'query': {
-      'status': { 'option': 'online' },
-      'have': [item.searchExchange.have],
-      'want': [APIStatic.find(e => e.text === item.baseType)?.id ?? '']
+      'status': {
+        'option': 'online'
+      },
+      'have': item.searchExchange.have,
+      'want': (item.searchExchange.want?.length ?? 0) > 0 ? item.searchExchange.want! : [APIStatic.find(e => e.text === item.baseType)?.id ?? '']
     },
     'sort': { 'have': 'asc' },
     'engine': 'new'
   }
-  await tradeApi.post('', exchangeJSON, { params: { url: encodeURI(`trade/exchange/${league}`) } })
+  await tradeApi.post('', exchangeJSON, { params: { url: `trade/exchange/${league}` } })
     .then((response) => {
       parseRateTimeLimit(response.headers as AxiosResponseHeaders)
       return response.data
@@ -493,7 +504,9 @@ export async function searchExchange(item: ParsedItem, league: string): Promise<
       exchangeResult.searchID.ID = data.id
       exchangeResult.currency2 = exchangeJSON.query.want[0]
       for (const key in data.result) {
-        tempResult.push(data.result[key].listing.offers[0].exchange.amount + '：' + data.result[key].listing.offers[0].item.amount + '|' + item.searchExchange.have)
+        for (const offer of data.result[key].listing.offers) {
+          tempResult.push(offer.exchange.amount + '：' + offer.item.amount + '|' + offer.exchange.currency)
+        }
       }
       exchangeResult.nowFetched = exchangeResult.totalCount = tempResult.length
     })

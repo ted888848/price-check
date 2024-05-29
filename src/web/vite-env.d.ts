@@ -19,5 +19,6 @@ declare global {
   interface Window {
     ipc: typeof import('@/preload').ipc;
     store: typeof import('@/preload').store;
+    proxyServer: typeof import('@/preload').proxyServer;
   }
 }

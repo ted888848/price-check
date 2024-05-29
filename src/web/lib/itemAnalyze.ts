@@ -44,9 +44,14 @@ const defaultItemParsed: ParsedItem = Object.freeze({
   autoSearch: false,
   searchTwoWeekOffline: false,
   searchExchange: {
-    option: false, have: 'chaos' as const
+    option: false, have: ['divine', 'chaos']
   }
 })
+function getDefaultItemParsed(config: Config) {
+  const itemParsed = structuredClone(defaultItemParsed)
+  itemParsed.searchExchange.have = config.searchExchangePrefer.split('&')
+  return itemParsed
+}
 let itemParsed: ParsedItem
 function findUnique(type: Exclude<keyof ParsedAPIitems, 'gems'>, isFonded: { flag: boolean }): void {
   if (isFonded.flag) return
@@ -62,7 +67,8 @@ function findUnique(type: Exclude<keyof ParsedAPIitems, 'gems'>, isFonded: { fla
   isFonded.flag = true
 }
 export function itemAnalyze(item: string) {
-  itemParsed = structuredClone(defaultItemParsed)
+  const config = window.ipc.sendSync(IPC.GET_CONFIG)
+  itemParsed = getDefaultItemParsed(config)
   const itemArr = item.split(/\r?\n/)
   itemArr.pop()
   const itemSection: string[][] = [[]]
@@ -82,7 +88,6 @@ export function itemAnalyze(item: string) {
   const isFindUnique = {
     flag: false
   }
-  const config = window.ipc.sendSync(IPC.GET_CONFIG)
   switch (itemParsed.type.text) {
     case '爪':
     case '匕首':
@@ -150,8 +155,8 @@ export function itemAnalyze(item: string) {
       }
       if (APIStatic.some((ele: Static) => ele.text === itemParsed.baseType)) {
         itemParsed.searchExchange.option = true
-        const searchExchangeDivine = config.searchExchangeDivine
-        itemParsed.searchExchange.have = searchExchangeDivine ? 'divine' : 'chaos'
+        // const searchExchangeDivine = config.searchExchangeDivine
+        // itemParsed.searchExchange.have = ['divine', 'chaos']
       }
       break
     }
@@ -578,7 +583,7 @@ function parsePseudoEleResistance() {
     })
   }
 }
-function parseAllfuns(item: string[][], functions: typeof parseFuns) {
+function parseAllfuns(item: string[][], functions: typeof parseFuns = parseFuns) {
   endFor:
   for (const fun of functions) {
     for (const section of item) {
@@ -762,21 +767,79 @@ function parseImpossibleEscape(item: string[][]) {
     }
   }
 }
+function parseThreadOfHope(item: string[][]) {
+  function parseRangeMod(section: string[]) {
+    const mod = {
+      'id': 'explicit.stat_3642528642',
+      'text': '只會影響#範圍內的天賦',
+      'type': 'explicit',
+      'option': {
+        'options': [
+          {
+            'id': 1,
+            'text': '小'
+          },
+          {
+            'id': 2,
+            'text': '中'
+          },
+          {
+            'id': 3,
+            'text': '大'
+          },
+          {
+            'id': 4,
+            'text': '非常大'
+          },
+          {
+            'id': 5,
+            'text': '極大'
+          }
+        ]
+      }
+    }
+    const reg = new RegExp(`^${mod.text.replace('#', `(${mod.option.options.map(ele => ele.text).join('|')})`)}$`)
+    if (parseExplicitMod(section) === ParseResult.PARSE_SECTION_SKIP) return ParseResult.PARSE_SECTION_SKIP
+    for (const line of section) {
+      const match = line.match(reg)
+      if (match) {
+        const matchOption = mod.option?.options.find(ele => ele.text === match[1])
+        itemParsed.stats.push({
+          id: mod.id,
+          text: match[0],
+          value: {
+            option: matchOption?.id
+          },
+          type: '隨機',
+          disabled: false
+        })
+        return ParseResult.PARSE_SECTION_SUCC
+      }
+    }
+    return ParseResult.PARSE_SECTION_SKIP
+  }
+  const parseFuns = [parseItemLevel, parseCorrupt, parseIdentify, parseImplicitMod, parseRangeMod]
+  parseAllfuns(item, parseFuns)
+}
 function parseOtherNeedMods(item: string[][]) {
   if (itemParsed.baseType.endsWith('星團珠寶')) {
     parseClusterJewel(item)
     return
   }
-  else if (itemParsed.baseType.endsWith('虛空石')) {
+  if (itemParsed.baseType.endsWith('虛空石')) {
     parseSextant(item)
     return
   }
-  else if (/^禁忌(血肉|烈焰)$/.test(itemParsed.name!)) {
+  if (/^禁忌(血肉|烈焰)$/.test(itemParsed.name!)) {
     parseForbiddenJewel(item)
     return
   }
-  else if (itemParsed.name === '逃脫不能') {
+  if (itemParsed.name === '逃脫不能') {
     parseImpossibleEscape(item)
+    return
+  }
+  if (itemParsed.name === '希望之絃') {
+    parseThreadOfHope(item)
     return
   }
   parseAllfuns(item, parseFuns)
@@ -792,10 +855,10 @@ function parseMap(item: string[][]) {
     text: '地圖被 # 佔據',
     type: 'implicit',
     options: [
-      { value: 1, text: '異界．奴役' },
-      { value: 2, text: '異界．根除' },
-      { value: 3, text: '異界．干擾' },
-      { value: 4, text: '異界．淨化' }
+      { value: 1, text: '異界．奴役', exchange: 'enslaver-map' },
+      { value: 2, text: '異界．根除', exchange: 'eradicator-map' },
+      { value: 3, text: '異界．干擾', exchange: 'constrictor-map' },
+      { value: 4, text: '異界．淨化', exchange: 'purifier-map' }
     ]
   } as const
   const conquerorMap = {
@@ -803,20 +866,20 @@ function parseMap(item: string[][]) {
     text: '地圖含有 # 的壁壘',
     type: 'implicit',
     options: [
-      { value: 1, text: '巴倫' },
-      { value: 2, text: '維羅提尼亞' },
-      { value: 3, text: '奧赫茲明' },
-      { value: 4, text: '圖拉克斯' }
+      { value: 1, text: '巴倫', exchange: 'barans-map' },
+      { value: 2, text: '維羅提尼亞', exchange: 'veritanias-map' },
+      { value: 3, text: '奧赫茲明', exchange: 'al-hezmins-map' },
+      { value: 4, text: '圖拉克斯', exchange: 'droxs-map' }
     ]
   } as const
-  item[0].forEach(line => {
-    const lineMatch = line.match(/地圖階級: (\d+)/)
-    if (lineMatch) {
-      itemParsed.mapTier = {
-        min: parseInt(lineMatch[1]), max: undefined, search: true
-      }
-    }
-  })
+  // item[0].forEach(line => {
+  //   const lineMatch = line.match(/地圖階級: (\d+)/)
+  //   if (lineMatch) {
+  //     itemParsed.mapTier = {
+  //       min: parseInt(lineMatch[1]), max: undefined, search: true
+  //     }
+  //   }
+  // })
   item.shift()
   switch (true) {
     case itemParsed.baseType.startsWith('凋落的'):
@@ -836,7 +899,7 @@ function parseMap(item: string[][]) {
     if (section[0].includes('區域被異界尊師控制') && section.length > 1) {
       const match = elderMap.options.filter(ele => section[1].includes(`地圖被${ele.text}佔據`))[0]
       if (match) {
-        itemParsed.type.searchByType = true
+        // itemParsed.type.searchByType = true
         itemParsed.autoSearch = true
         itemParsed.elderMap = {
           id: 'implicit.stat_3624393862',
@@ -846,13 +909,15 @@ function parseMap(item: string[][]) {
           },
           disabled: false
         }
+        itemParsed.searchExchange.want = [match.exchange]
+        itemParsed.searchExchange.option = true
         if (itemParsed.mapTier?.search) itemParsed.mapTier.search = false
       }
     }
     else if (section[0].startsWith('地圖含有') && section.length > 1) {
       const match = conquerorMap.options.filter(ele => section[0].includes(`地圖含有${ele.text}的壁壘`))[0]
       if (match) {
-        itemParsed.type.searchByType = true
+        // itemParsed.type.searchByType = true
         itemParsed.autoSearch = true
         itemParsed.conquerorMap = {
           id: 'implicit.stat_2563183002',
@@ -862,6 +927,8 @@ function parseMap(item: string[][]) {
           },
           disabled: false
         }
+        itemParsed.searchExchange.want = [match.exchange]
+        itemParsed.searchExchange.option = true
         if (itemParsed.mapTier?.search) itemParsed.mapTier.search = false
       }
     }
@@ -994,7 +1061,6 @@ function parseCoffin(item: string[][]) {
     if (parseBodyLevel(section) === ParseResult.PARSE_SECTION_SUCC) continue
     if (parseMod(section.map(line => line.replace(' (implicit)', '')), 'necropolis') === ParseResult.PARSE_SECTION_SUCC) break
   }
-
   itemParsed.stats.map(ele => ele.disabled = false)
 }
 

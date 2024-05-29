@@ -1,12 +1,13 @@
-const channels = {
+export const channels = {
   PRICE_CHECK_SHOW: 'priceCheck',
   OVERLAY_SHOW: 'overlay',
   FORCE_POE: 'forcePOE',
   POE_ACTIVE: 'poeActive',
   GET_CONFIG: 'getConfig',
   SET_CONFIG: 'setConfig',
+  UPDATE_CONFIG: 'updateConfig',
   RELOAD_APIDATA: 'reloadAPIData',
-
+  GET_PROXY_PORT: 'getProxyPort',
 } as const
 export type Channel = typeof channels[keyof typeof channels];
 
@@ -34,6 +35,10 @@ type IpcSetConfig = {
   name: 'setConfig';
   handler: (config: string) => void;
 }
+type IpcUpdateConfig = {
+  name: 'updateConfig';
+  handler: (config: string) => void;
+}
 type IpcReloadAPIData = {
   name: 'reloadAPIData';
   handler: () => ({
@@ -42,7 +47,12 @@ type IpcReloadAPIData = {
     status: false; error: unknown;
   });
 }
-export type IpcEvent = IpcPriceCheck | IpcOverlay | IpcForcePOE | IpcPOEActive | IpcGetConfig | IpcSetConfig | IpcReloadAPIData;
+
+type IpcGetProxyPort = {
+  name: 'getProxyPort';
+  handler: () => number;
+}
+export type IpcEvent = IpcPriceCheck | IpcOverlay | IpcForcePOE | IpcPOEActive | IpcGetConfig | IpcSetConfig | IpcReloadAPIData | IpcGetProxyPort | IpcUpdateConfig;
 export type IpcReturn<C extends Channel> = ReturnType<Extract<IpcEvent, { name: C }>['handler']>;
 export type IpcArgs<C extends Channel> = Parameters<Extract<IpcEvent, { name: C }>['handler']>;
 

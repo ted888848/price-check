@@ -4,7 +4,13 @@
     <span v-if="item.name">{{ item.name }}</span>
     <div class="center gap-12px">
       <img v-if="itemProp.baseType === '滿靈柩'" class="h-28px" src="/coffin-dance.gif">
-      <span :class="{ 'text-red-500': item.type.searchByType }">{{ item.baseType }}</span>
+      <span :class="{ 'text-red-500': item.type.searchByType }">
+        {{ item.elderMap ?
+          `尊師守衛 ${elderMapOptions.find(e => e.value === item.elderMap!.value?.option)?.label}` :
+          item.conquerorMap ?
+            `征服者 ${conquerorMapOptions.find(e => e.value === item.conquerorMap!.value?.option)?.label}` : item.baseType
+        }}
+      </span>
       <img v-if="itemProp.baseType === '滿靈柩'" class="h-28px" src="/coffin-dance.gif">
     </div>
   </div>
@@ -18,51 +24,38 @@
   <VSelect v-if="undefinedUnique && item.uniques.length > 0" v-model="item.name" class="text-sm style-chooser"
     :options="item.uniques" label="name" :reduce="(ele: ArrayValueType<typeof item['uniques']>) => ele.name" />
   <div class="mx-0  bg-blue-900 grid grid-cols-3 select-none">
-    <div class="flex p-2 items-center justify-center">
+    <div v-if="!item.searchExchange.option" class="flex p-2 items-center justify-center">
       <span class="mx-1 text-white hover:cursor-default">汙染:</span>
       <VSelect v-model="item.isCorrupt" class="text-sm style-chooser flex-grow" :options="generalOption" label="label"
         :reduce="(ele: ArrayValueType<typeof generalOption>) => ele.value" :clearable="false" :searchable="false" />
     </div>
-    <div v-if="!item.type.text.endsWith('技能寶石')" class="flex p-2 items-center justify-center select-none">
+    <div v-if="!item.searchExchange.option && !item.type.text.endsWith('技能寶石')"
+      class="flex p-2 items-center justify-center select-none">
       <span class="mx-1 text-white hover:cursor-default">已鑑定:</span>
       <VSelect v-model="item.isIdentify" class="text-sm style-chooser flex-grow" :options="generalOption" label="label"
         :reduce="(ele: ArrayValueType<typeof generalOption>) => ele.value" :clearable="false" :searchable="false" />
     </div>
-    <div class="flex items-center justify-center">
+    <div v-if="item.searchExchange.option" class="center p-2 select-none col-start-2">
+      <span class="mx-1 text-white hover:cursor-default">使用:</span>
+      <VSelect v-model="searchExchangeState" class="text-sm style-chooser flex-grow" :options="exchangeHave"
+        label="label" :reduce="(ele: ArrayValueType<typeof exchangeHave>) => ele.value" :clearable="false"
+        :searchable="false" />
+    </div>
+    <div v-if="!item.searchExchange.option" class="flex items-center justify-center">
       <ValueMinMax v-if="item.gemLevel" v-model="item.gemLevel" class="flex p-2 items-center justify-center">
         寶石等級:
       </ValueMinMax>
       <ValueMinMax v-else-if="item.mapTier" v-model="item.mapTier" class="flex p-2 items-center justify-center">
         地圖階級:
       </ValueMinMax>
-      <div v-else-if="item.searchExchange.option"
-        class="flex p-2 items-center justify-center hover:cursor-pointer flex-grow" @click="() => {
-      item.searchExchange.have = ('divine' === item.searchExchange.have) ? 'chaos' : 'divine';
-      searchBtn()
-    }">
-        <span class="mx-1 text-white">神聖價</span>
-        <CircleCheck :checked="item.searchExchange.have === 'divine'" />
-      </div>
       <ValueMinMax v-else-if="item.itemLevel" v-model="item.itemLevel" class="flex p-2 items-center justify-center">
         物品等級:
       </ValueMinMax>
     </div>
-    <ValueMinMax v-model="item.quality" class="flex p-2 items-center justify-center">
+    <ValueMinMax v-if="!item.searchExchange.option" v-model="item.quality" class="flex p-2 items-center justify-center">
       品質:
     </ValueMinMax>
-    <div v-if="item.elderMap" class="flex col-span-2 items-center justify-center select-none">
-      <span class="mx-1 text-white hover:cursor-default">尊師守衛:</span>
-      <VSelect v-model="item.elderMap.value!.option" class="text-sm style-chooser style-chooser-inf "
-        :options="elderMapOptions" :reduce="(ele: ArrayValueType<typeof elderMapOptions>) => ele.value" label="label"
-        :searchable="false" :clearable="false" />
-    </div>
-    <div v-else-if="item.conquerorMap" class="flex col-span-2 items-center justify-center select-none">
-      <span class="mx-1 text-white hover:cursor-default">征服者:</span>
-      <VSelect v-model="item.conquerorMap.value!.option" class="text-sm style-chooser style-chooser-inf "
-        :options="conquerorMapOptions" :reduce="(ele: ArrayValueType<typeof conquerorMapOptions>) => ele.value"
-        label="label" :searchable="false" :clearable="false" />
-    </div>
-    <div v-else-if="item.blightedMap" class="flex items-center justify-center">
+    <div v-if="item.blightedMap" class="flex items-center justify-center">
       <span class="mx-1 text-white hover:cursor-default">凋落圖</span>
     </div>
     <div v-else-if="item.UberBlightedMap" class="flex items-center justify-center">
@@ -86,12 +79,12 @@
       <span class="mx-1 text-white">RGB?</span>
       <CircleCheck :checked="item.isRGB" />
     </div>
-    <div class="flex items-center justify-center py-1 select-none">
+    <div v-if="!item.searchExchange.option" class="flex items-center justify-center py-1 select-none">
       <span class="mx-1 text-white hover:cursor-default">稀有度:</span>
       <VSelect v-model="item.raritySearch" class="text-sm style-chooser w-24" :options="rarityOptions" label="label"
         :searchable="false" :clearable="false" />
     </div>
-    <div class="flex items-center justify-center py-1 hover:cursor-pointer"
+    <div v-if="!item.searchExchange.option" class="flex items-center justify-center py-1 hover:cursor-pointer"
       @click="() => item.searchTwoWeekOffline = !item.searchTwoWeekOffline">
       <span class="mx-1 text-white">2周離線</span>
       <CircleCheck :checked="item.searchTwoWeekOffline" />
@@ -214,10 +207,11 @@
 
 <script setup lang="ts">
 import { maxBy } from 'lodash-es'
-import { computed, ref, nextTick } from 'vue'
+import { computed, ref, nextTick, watch } from 'vue'
 import {
   getSearchJSON, searchItem, fetchItem, getIsCounting, searchExchange, selectOptions
 } from '@/web/lib/tradeSide'
+import IPC from '@/ipc'
 import { APIStatic } from '@/web/lib/APIdata'
 import CircleCheck from '../utility/CircleCheck.vue'
 import ValueMinMax from '../utility/ValueMinMax.vue'
@@ -235,7 +229,7 @@ const undefinedUnique = item.value.isIdentify === false && item.value.raritySear
 
 const {
   generalOption, influencesOptions, elderMapOptions,
-  conquerorMapOptions, rarityOptions
+  conquerorMapOptions, rarityOptions, exchangeHave
 } = selectOptions
 function modTextColor(type?: string) {
   switch (type) {
@@ -303,8 +297,8 @@ async function searchBtn() {
   if (item.value.searchExchange.option) {
     searchResult.value = (await searchExchange(item.value, props.leagueSelect))
     if (!searchResult.value.err) {
-      currency2Img.value =
-        `${import.meta.env.VITE_URL_BASE}${APIStatic.find(ele => ele.id === (searchResult.value as IExchangeResult).currency2)!.image}`
+      const image = APIStatic.find(ele => ele.id === (searchResult.value as IExchangeResult).currency2)!.image
+      currency2Img.value = image ? `${import.meta.env.VITE_URL_BASE}${image}` : ''
       fetchResult.value = searchResult.value.result
     }
   }
@@ -323,7 +317,18 @@ async function searchBtn() {
 }
 
 const fetchResultSorted = computed(() => {
-  if (props.divineToChaos && !item.value.searchExchange.option)
+  if (props.divineToChaos) {
+    if (item.value.searchExchange.option) {
+      return fetchResult.value.slice().sort((a, b) => {
+        const [aCurrencyCount, aItemCount] = (a.price as string).split('：').map(Number)
+        const aPrice = aCurrencyCount / aItemCount
+        const [bCurrencyCount, bItemCount] = (b.price as string).split('：').map(Number)
+        const bPrice = bCurrencyCount / bItemCount
+        const ca = a.currency === 'divine' ? aPrice * props.divineToChaos : aPrice as number
+        const cb = b.currency === 'divine' ? bPrice * props.divineToChaos : bPrice as number
+        return ca - cb
+      })
+    }
     return fetchResult.value.slice().sort((a, b) => {
       if (!['divine', 'chaos'].includes(a.currency)) return 1
       if (!['divine', 'chaos'].includes(b.currency)) return -1
@@ -331,12 +336,26 @@ const fetchResultSorted = computed(() => {
       const cb = b.currency === 'divine' ? (b.price as number) * props.divineToChaos : b.price as number
       return ca - cb
     })
+  }
   else
     return fetchResult.value
 })
 const maxAmount = computed(() => maxBy(fetchResult.value, ele => ele.amount))
-if (item.value.autoSearch)
-  searchBtn()
+const searchExchangeState = computed<Config['searchExchangePrefer']>({
+  get() {
+    if (item.value.searchExchange.have.length === 2 && item.value.searchExchange.have.includes('chaos') && item.value.searchExchange.have.includes('divine'))
+      return 'divine&chaos' as Config['searchExchangePrefer']
+    return item.value.searchExchange.have[0] as Config['searchExchangePrefer']
+  },
+  set(value,) {
+    item.value.searchExchange.have = value.split('&')
+    searchBtn()
+  }
+})
+watch(searchExchangeState, (value) => {
+  window.ipc.send(IPC.UPDATE_CONFIG, JSON.stringify({ searchExchangePrefer: value } satisfies Partial<Config>))
+})
+
 
 const emit = defineEmits<{
   'open-web-view': [extendUrl: string];
@@ -347,6 +366,9 @@ function openWebView() {
 function openBrowser() {
   window.open(encodeURI(`${import.meta.env.VITE_URL_BASE}/trade/${searchResult.value.searchID.type}/${props.leagueSelect}/${searchResult.value.searchID.ID}`))
 }
+if (item.value.autoSearch)
+  searchBtn()
+
 </script>
 
 <style></style>@/web/lib/APIdata@/web/lib/tradeSide@/web/lib/tradeSide

@@ -17,6 +17,7 @@ process.env.PUBLIC = process.env.VITE_DEV_SERVER_URL
   : process.env.DIST
 
 if (process.platform === 'win32') app.setAppUserModelId(app.getName())
+
 app.disableHardwareAcceleration()
 if (!app.requestSingleInstanceLock()) {
   app.quit()

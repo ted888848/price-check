@@ -19,7 +19,7 @@ export const GGCapi = axios.create(apiBaseConfig)
 GGCapi.interceptors.request.use((request) => {
   const POESESSID = config.POESESSID
   if (POESESSID) {
-    request.headers['Cookie'] = `POESESSID=${POESESSID};` + request.headers['Cookie']
+    request.headers['Cookie'] = `POESESSID=${POESESSID};${(request.headers['Cookie'] ?? '')}`
   }
   return request
 })
