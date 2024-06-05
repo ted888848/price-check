@@ -1,7 +1,10 @@
 import { OverlayController } from 'electron-overlay-window'
 import { EventEmitter } from 'events'
 import type { BrowserWindow } from 'electron'
-class POEWindowClass extends EventEmitter {
+interface TEventMap {
+  poeActiveChange: [boolean];
+}
+class POEWindowClass extends EventEmitter<TEventMap> {
   private _isActive: boolean
   constructor() {
     super()

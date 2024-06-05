@@ -102,7 +102,7 @@ function setupAPIItems(itemsJson: APIItems) {
         APIitems[groupID] = {
           ...itemGroup, entries: parseGams(itemGroup.entries), id: 'gems'
         }
-        if (itemGroup.id === 'gems') heistReward.push(...parseGams(itemGroup.entries))
+        heistReward.push(...parseGams(itemGroup.entries))
         break
       default:
         APIitems[groupID] = {

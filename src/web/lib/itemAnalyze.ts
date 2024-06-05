@@ -58,8 +58,7 @@ function findUnique(type: Exclude<keyof ParsedAPIitems, 'gems'>, isFonded: { fla
   let temp: ItemUniques[] = []
   for (const ele of APIitems[type].entries) {
     if (type !== 'gems' && ele.type === itemParsed.baseType) {
-      //@ts-expect-error 他有unique
-      temp = structuredClone(ele.unique)
+      temp = structuredClone(ele.unique ?? [])
       break
     }
   }
