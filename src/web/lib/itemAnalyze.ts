@@ -55,6 +55,7 @@ function getDefaultItemParsed(config: Config) {
 let itemParsed: ParsedItem
 function findUnique(type: Exclude<keyof ParsedAPIitems, 'gems'>, isFonded: { flag: boolean }): void {
   if (isFonded.flag) return
+  console.log(type)
   let temp: ItemUniques[] = []
   for (const ele of APIitems[type].entries) {
     if (type !== 'gems' && ele.type === itemParsed.baseType) {
@@ -125,7 +126,7 @@ export function itemAnalyze(item: string) {
     case '項鍊':
     case '戒指':
     case '腰帶':
-      findUnique('accessories', isFindUnique)
+      findUnique('accessory', isFindUnique)
     case '永恆珠寶':
     case '珠寶':
     case '深淵珠寶':
