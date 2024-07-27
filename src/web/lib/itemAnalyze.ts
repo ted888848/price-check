@@ -55,7 +55,6 @@ function getDefaultItemParsed(config: Config) {
 let itemParsed: ParsedItem
 function findUnique(type: Exclude<keyof ParsedAPIitems, 'gems'>, isFonded: { flag: boolean }): void {
   if (isFonded.flag) return
-  console.log(type)
   let temp: ItemUniques[] = []
   for (const ele of APIitems[type].entries) {
     if (type !== 'gems' && ele.type === itemParsed.baseType) {
@@ -105,7 +104,7 @@ export function itemAnalyze(item: string) {
     case '雙手錘':
     case '魚竿':
     case '征戰長杖':
-      findUnique('weapons', isFindUnique)
+      findUnique('weapon', isFindUnique)
       parseWeapon(itemSection)
       break
     case '手套':
@@ -120,7 +119,7 @@ export function itemAnalyze(item: string) {
     case '魔力藥劑':
     case '複合藥劑':
     case '功能藥劑':
-      findUnique('flasks', isFindUnique)
+      findUnique('flask', isFindUnique)
       parseFlask(itemSection)
       break
     case '項鍊':
@@ -130,7 +129,7 @@ export function itemAnalyze(item: string) {
     case '永恆珠寶':
     case '珠寶':
     case '深淵珠寶':
-      findUnique('jewels', isFindUnique)
+      findUnique('jewel', isFindUnique)
     case '輿圖升級道具':
     case '箭袋':
     case '飾品':
@@ -140,7 +139,7 @@ export function itemAnalyze(item: string) {
       parseOtherNeedMods(itemSection)
       break
     case '異界地圖':
-      findUnique('maps', isFindUnique)
+      findUnique('map', isFindUnique)
       parseMap(itemSection)
       break
     case '契約書':
@@ -288,8 +287,7 @@ function parseItemName(section: string[], itemSection: string[][]) {
     if (section[2].startsWith('追憶之')) section[2] = section[2].substring(4)
     if (itemParsed.rarity === '魔法') {
       const tempName = section[2]
-      const _itemType = itemParsed.type.option?.substring(0, itemParsed.type.option.indexOf('.'))
-      const itemType = (_itemType === 'weapon' ? 'weapons' : _itemType) as keyof typeof APIitems
+      const itemType = itemParsed.type.option?.substring(0, itemParsed.type.option.indexOf('.')) as keyof typeof APIitems
       let tempBaseType = APIitems[itemType]?.entries.find((entry) => tempName.endsWith(entry.type))?.type
       if (tempBaseType === undefined) {
         tempBaseType = tempName.indexOf('之') > -1 ? tempName.substring(tempName.indexOf('之') + 1) :
