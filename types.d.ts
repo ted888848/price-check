@@ -32,15 +32,15 @@ interface ItemGem {
 
 
 interface ParsedAPIitems {
-  accessories: Item;
+  accessory: Item;
   armour: Item;
-  cards: Item;
+  card: Item;
   currency: Item;
-  flasks: Item;
-  gems: ItemGem;
-  jewels: Item;
-  maps: Item;
-  weapons: Item;
+  flask: Item;
+  gem: ItemGem;
+  jewel: Item;
+  map: Item;
+  weapon: Item;
   watchstones: Item;
   heistequipment: Item;
   heistmission: Item;

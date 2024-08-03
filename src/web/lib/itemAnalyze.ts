@@ -299,7 +299,7 @@ function parseItemName(section: string[], itemSection: string[][]) {
     else if (itemType === '技能寶石') {
       itemParsed.baseType = section[2]
 
-      const transGemInfo = APIitems.gems.entries.find(ele => ele.trans?.some(({ text }) => text === itemParsed.baseType))
+      const transGemInfo = APIitems.gem.entries.find(ele => ele.trans?.some(({ text }) => text === itemParsed.baseType))
       if (transGemInfo) {
         itemParsed.transGem = {
           option: transGemInfo.type,

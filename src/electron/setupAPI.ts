@@ -72,11 +72,11 @@ function setupAPIItems(itemsJson: APIItems) {
   itemsJson.result.forEach((itemGroup) => {
     const groupID = itemGroup.id as keyof ParsedAPIitems
     switch (groupID) {
-      case 'accessories':
+      case 'accessory':
       case 'armour':
-      case 'flasks':
-      case 'jewels':
-      case 'weapons':
+      case 'flask':
+      case 'jewel':
+      case 'weapon':
       case 'watchstones':
       case 'heistequipment':
       case 'heistmission':
@@ -87,18 +87,18 @@ function setupAPIItems(itemsJson: APIItems) {
           entries: setupItemEntries(itemGroup.entries, heistReward)
         }
         break
-      case 'maps':
+      case 'map':
         APIitems[groupID] = {
           id: itemGroup.id,
           label: itemGroup.label,
           entries: setupItemEntries(itemGroup.entries.filter((ele) => ele.disc === 'warfortheatlas'), heistReward)
         }
         break
-      case 'cards':
+      case 'card':
       case 'currency':
         APIitems[groupID] = itemGroup
         break
-      case 'gems':
+      case 'gem':
         APIitems[groupID] = {
           ...itemGroup, entries: parseGams(itemGroup.entries), id: 'gems'
         }
