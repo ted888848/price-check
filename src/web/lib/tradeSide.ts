@@ -490,7 +490,7 @@ export async function searchExchange(item: ParsedItem, league: string): Promise<
       'status': {
         'option': 'online'
       },
-      'have': item.searchExchange.have,
+      'have': item.onlyChaos ? ['chaos'] : item.searchExchange.have,
       'want': (item.searchExchange.want?.length ?? 0) > 0 ? item.searchExchange.want! : [APIStatic.find(e => e.text === item.baseType)?.id ?? '']
     },
     'sort': { 'have': 'asc' },

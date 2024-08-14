@@ -53,11 +53,11 @@ function getDefaultItemParsed(config: Config) {
   return itemParsed
 }
 let itemParsed: ParsedItem
-function findUnique(type: Exclude<keyof ParsedAPIitems, 'gems'>, isFonded: { flag: boolean }): void {
+function findUnique(type: Exclude<keyof ParsedAPIitems, 'gem'>, isFonded: { flag: boolean }): void {
   if (isFonded.flag) return
   let temp: ItemUniques[] = []
   for (const ele of APIitems[type].entries) {
-    if (type !== 'gems' && ele.type === itemParsed.baseType) {
+    if (type !== 'gem' && ele.type === itemParsed.baseType) {
       temp = structuredClone(ele.unique ?? [])
       break
     }
@@ -130,7 +130,6 @@ export function itemAnalyze(item: string) {
     case '珠寶':
     case '深淵珠寶':
       findUnique('jewel', isFindUnique)
-    case '輿圖升級道具':
     case '箭袋':
     case '飾品':
     case '劫盜裝備':
@@ -182,6 +181,7 @@ export function itemAnalyze(item: string) {
       parseImmortalFire(itemSection)
       break
     case '其它':
+    case '輿圖升級道具':
       break
     default:
       break
@@ -615,12 +615,10 @@ function parseWeapon(item: string[][]) {
       lineMatch.shift()
       itemParsed.eleDamage = {
         min: lineMatch.reduce((pre, curr, index) => {
-          if (index === 0) return pre
           if (curr && index % 2 == 0) return pre += parseInt(curr)
           return pre
         }, 0),
         max: lineMatch.reduce((pre, curr, index) => {
-          if (index === 0) return pre
           if (curr && index % 2 == 1) return pre += parseInt(curr)
           return pre
         }, 0)
@@ -708,6 +706,7 @@ function parseClusterJewel(item: string[][]) {
     parseExplicitMod,
   ]
   parseAllfuns(item, _parseFuns)
+  itemParsed.autoSearch = true
 }
 function parseForbiddenJewel(item: string[][]) {
   itemParsed.autoSearch = true
@@ -824,10 +823,10 @@ function parseOtherNeedMods(item: string[][]) {
     parseClusterJewel(item)
     return
   }
-  if (itemParsed.baseType.endsWith('虛空石')) {
-    parseSextant(item)
-    return
-  }
+  // if (itemParsed.baseType.endsWith('虛空石')) {
+  //   parseSextant(item)
+  //   return
+  // }
   if (/^禁忌(血肉|烈焰)$/.test(itemParsed.name!)) {
     parseForbiddenJewel(item)
     return
@@ -1055,7 +1054,6 @@ function parseCoffin(item: string[][]) {
     return ParseResult.PARSE_SECTION_SUCC
   }
   for (const section of item) {
-    console.log(section)
     if (parseBodyLevel(section) === ParseResult.PARSE_SECTION_SUCC) continue
     if (parseMod(section.map(line => line.replace(' (implicit)', '')), 'necropolis') === ParseResult.PARSE_SECTION_SUCC) break
   }
