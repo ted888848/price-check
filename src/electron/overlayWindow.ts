@@ -3,6 +3,7 @@ import { OverlayController, OVERLAY_WINDOW_OPTS } from 'electron-overlay-window'
 import { PoeWindow } from './POEWindow'
 import IPC from '@/ipc'
 import { join } from 'path'
+import { config } from './config'
 export let win: BrowserWindow
 let isOverlayOpen: boolean
 export async function createWindow() {
@@ -31,7 +32,8 @@ export async function createWindow() {
   ipcMain.on(IPC.FORCE_POE, () => {
     forcePOE()
   })
-  PoeWindow.attach(win, 'Path of Exile 2')
+  const poeWindowName = 'Path of Exile' + (config.poeVersion === '2' ? ' 2' : '')
+  PoeWindow.attach(win, poeWindowName)
   PoeWindow.on('poeActiveChange', handlePoeActive)
   win.webContents.on('before-input-event', handleBIEvent)
   win.webContents.on('did-attach-webview', (_, webviewWebContent) => {
