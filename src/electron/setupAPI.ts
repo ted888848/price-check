@@ -3,8 +3,13 @@ import Store from 'electron-store'
 import { app, session, dialog } from 'electron' //, shell
 import { autoUpdater } from 'electron-updater'
 import { buildTray } from './tray'
-const store = new Store({
+import { config } from './config'
+const store1 = new Store({
   name: 'APIData'
+})
+
+const store2 = new Store({
+  name: 'API2Data'
 })
 
 function setupItemEntries(itemArray: APIItem['entries'], heistReward: HeistReward[]) {
@@ -195,7 +200,7 @@ function setupAPIMods(statsJson: APIStats) {
           label: statsGroup.label,
           entries:
             statsGroup.entries.splice(statsGroup.entries
-              .findIndex((ele) => ele.text === '附加的小型天賦給予：#'), 1)[0].option.options
+              .findIndex((ele) => ele.text === '附加的小型天賦給予：#'), 1)[0].option?.options
               .map(option => ({
                 id: option.id.toString(), text: option.text
               })),
@@ -253,32 +258,36 @@ function setupAPIStatic(data: APIStaticItem[]) {
   })
   return APIStatic
 }
-async function getLeagues() {
-  const response = await GGCapi.get('trade/data/leagues')
+async function getLeagues(poeVersion: POEVersion = '1') {
+  const response = await GGCapi.get(`trade${poeVersion === '2' ? '2' : ''}/data/leagues`)
   const data = response.data as APILeagues
   const leagues = data.result.map((l) => l.text)
+  const store = poeVersion === '2' ? store2 : store1
   store.set('Leagues', leagues)
 }
-async function getItems() {
-  const response = await GGCapi.get('trade/data/items')
+async function getItems(poeVersion: POEVersion = '1') {
+  const response = await GGCapi.get(`trade${poeVersion === '2' ? '2' : ''}/data/items`)
   const data = response.data as APIItems
   const { APIitems, heistReward } = setupAPIItems(data)
+  const store = poeVersion === '2' ? store2 : store1
   store.set('APIitems', APIitems)
   store.set('heistReward', heistReward)
 }
-async function getStats() {
-  const response = await GGCapi.get('trade/data/stats')
+async function getStats(poeVersion: POEVersion = '1') {
+  const response = await GGCapi.get(`trade${poeVersion === '2' ? '2' : ''}/data/stats`)
   const data = response.data as APIStats
+  const store = poeVersion === '2' ? store2 : store1
   store.set('APImods', setupAPIMods(data))
 }
-async function getStatic() {
-  const response = await GGCapi.get('trade/data/static')
+async function getStatic(poeVersion: POEVersion = '1') {
+  const response = await GGCapi.get(`trade${poeVersion === '2' ? '2' : ''}/data/static`)
   const data = response.data as APIStatic
   const _currencyImageUrl = data.result[0].entries
+  const store = poeVersion === '2' ? store2 : store1
   store.set('currencyImageUrl', _currencyImageUrl)
   store.set('APIStatic', setupAPIStatic(data.result))
 }
-export async function getAPIdata() {
+export async function get1APIdata() {
   const result = await Promise.allSettled([getLeagues(), getItems(), getStatic(), getStats()])
   let error: any
   result.forEach((e) => {
@@ -286,9 +295,24 @@ export async function getAPIdata() {
       error = e.reason
     }
   })
-  store.set('APIVersion', app.getVersion())
+  store1.set('APIVersion', app.getVersion())
   if (error?.length) throw error
 }
+
+export async function get2APIdata() {
+  const result = await Promise.allSettled([getLeagues('2'), getItems('2'), getStatic('2'), getStats('2')])
+  let error: any
+  result.forEach((e) => {
+    if (e.status === 'rejected') {
+      error = e.reason
+      console.log(error)
+    }
+
+  })
+  store1.set('APIVersion', app.getVersion())
+  if (error?.length) throw error
+}
+
 
 export const updateState = {
   label: '', canClick: true
@@ -346,12 +370,24 @@ export async function checkForUpdate() {
     updateState.canClick = true
     buildTray()
   }
-  if (store.get('APIVersion', '') !== app.getVersion()) {
-    try {
-      await getAPIdata()
+  if (config.poeVersion === '1') {
+    if (store1.get('APIVersion', '') !== app.getVersion()) {
+      try {
+        await get1APIdata()
+      }
+      catch (err: any) {
+        throw new Error(err)
+      }
     }
-    catch (err: any) {
-      throw new Error(err)
+  }
+  else {
+    if (store2.get('APIVersion', '') !== app.getVersion()) {
+      try {
+        await get2APIdata()
+      }
+      catch (err: any) {
+        throw new Error(err)
+      }
     }
   }
 }

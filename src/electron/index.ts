@@ -3,7 +3,7 @@ import { app, dialog, ipcMain } from 'electron'
 import { setupShortcut } from './shortcuts'
 import { createWindow } from './overlayWindow'
 import { setupTray } from './tray'
-import { getAPIdata, checkForUpdate } from './setupAPI'
+import { get1APIdata, checkForUpdate } from './setupAPI'
 import { setupConfig } from './config'
 import IPC from '@/ipc'
 import { dirname, join } from 'node:path'
@@ -50,7 +50,7 @@ app.on('ready', async () => {
 
   ipcMain.handle(IPC.RELOAD_APIDATA, async () => {
     try {
-      await getAPIdata()
+      await get1APIdata()
       return {
         status: true
       }

@@ -1,5 +1,5 @@
 import Store, { Schema } from 'electron-store'
-import { ipcMain, session } from 'electron'
+import { app, ipcMain, session } from 'electron'
 import IPC from '@/ipc'
 import { registerShortcut, unRegisterShortcut } from './shortcuts'
 const defaultStore: Config = {
@@ -32,6 +32,7 @@ const defaultStore: Config = {
     }
   ],
   league: '',
+  poeVersion: '1'
 }
 const storeSchema: Schema<Config> = {
   characterName: {
@@ -69,6 +70,10 @@ const storeSchema: Schema<Config> = {
   },
   league: {
     type: 'string'
+  },
+  poeVersion: {
+    type: 'string',
+    default: '1'
   }
 }
 export const store = new Store({
@@ -80,22 +85,32 @@ export let config: Config
 export function setupConfig() {
   config = store.store
   ipcMain.on(IPC.SET_CONFIG, (_e, configData: string) => {
+    const prevSetVersion = store.store.poeVersion
     store.store = JSON.parse(configData) as Config
     config = store.store
     unRegisterShortcut()
     registerShortcut()
     setCookie()
+    if (prevSetVersion !== config.poeVersion) {
+      app.relaunch()
+      app.quit()
+    }
   })
   ipcMain.on(IPC.GET_CONFIG, (e) => {
     e.returnValue = config
   })
   ipcMain.on(IPC.UPDATE_CONFIG, (_e, newConfigStr: string) => {
+    const prevSetVersion = store.store.poeVersion
     const newConfig = JSON.parse(newConfigStr) as Partial<Config>
     store.store = { ...store.store, ...newConfig }
     config = store.store
     unRegisterShortcut()
     registerShortcut()
     setCookie()
+    if (prevSetVersion !== config.poeVersion) {
+      app.relaunch()
+      app.quit()
+    }
   })
   setCookie()
 }

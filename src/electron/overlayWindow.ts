@@ -31,7 +31,7 @@ export async function createWindow() {
   ipcMain.on(IPC.FORCE_POE, () => {
     forcePOE()
   })
-  PoeWindow.attach(win, 'Path of Exile')
+  PoeWindow.attach(win, 'Path of Exile 2')
   PoeWindow.on('poeActiveChange', handlePoeActive)
   win.webContents.on('before-input-event', handleBIEvent)
   win.webContents.on('did-attach-webview', (_, webviewWebContent) => {

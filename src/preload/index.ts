@@ -18,16 +18,22 @@ export const ipc = {
 }
 contextBridge.exposeInMainWorld('ipc', ipc)
 
-const apiDataStore = new Store({
+const api1DataStore = new Store({
   name: 'APIData'
 })
 
+
+const api2DataStore = new Store({
+  name: 'API2Data'
+})
 export const store = {
-  get(key: string): any {
-    return apiDataStore.get(key)
+  get(key: string, poeVersion: POEVersion = '1'): any {
+    if (poeVersion === '2') return api2DataStore.get(key)
+    return api1DataStore.get(key)
   },
-  set(key: string, value: any): void {
-    apiDataStore.set(key, value)
+  set(key: string, value: any, poeVersion: POEVersion = '1'): void {
+    if (poeVersion === '2') return api2DataStore.set(key, value)
+    api1DataStore.set(key, value)
   }
 }
 contextBridge.exposeInMainWorld('store', store)

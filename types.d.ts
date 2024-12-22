@@ -191,7 +191,7 @@ interface ItemUniques {
   name: string;
 }
 type hotkeyType = 'type-in-chat'
-
+type POEVersion = '1' | '2'
 interface Config {
   characterName: string;
   searchExchangePrefer: 'divine&chaos' | 'chaos' | 'divine';
@@ -205,6 +205,7 @@ interface Config {
     outputText: string;
   }[];
   league: string;
+  poeVersion: POEVersion;
 }
 
 interface APIStaticItem {

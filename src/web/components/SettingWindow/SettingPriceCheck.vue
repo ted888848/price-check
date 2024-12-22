@@ -21,6 +21,19 @@
       <span class="text-xl text-white mr-2">搜尋兩周內上架包含離線:</span>
       <CircleCheck :checked="config.searchTwoWeekOffline" />
     </div>
+    <div class="flex mt-5 gap-8px">
+      <span class="text-xl text-white mr-2">
+        POE 版本 (確定後需要重開)
+      </span>
+      <div class="flex items-center gap-4px" @click="() => config.poeVersion = '1'">
+        <span class="text-lg text-white">POE1</span>
+        <CircleCheck :checked="config.poeVersion === '1'" />
+      </div>
+      <div class="flex items-center gap-4px" @click="() => config.poeVersion = '2'">
+        <span class="text-lg text-white">POE2</span>
+        <CircleCheck :checked="config.poeVersion === '2'" />
+      </div>
+    </div>
   </div>
 </template>
 <script setup lang="ts">

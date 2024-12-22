@@ -14,7 +14,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import IPC from '@/ipc'
-import { loadAPIdata } from '@/web/lib/APIdata'
+import { loadAPIData } from '@/web/lib/APIdata'
 import SettingWindow from '@/web/components/SettingWindow/SettingWindow.vue'
 const overlayWindowShow = ref(false)
 function closeOverlay() {
@@ -36,7 +36,7 @@ function reloadAPIdata() {
     .then(({ status, error }) => {
       if (status) {
         emit('reloadLeagues')
-        loadAPIdata()
+        loadAPIData()
         console.log('API reloaded')
       }
       else {
