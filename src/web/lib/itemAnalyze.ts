@@ -112,6 +112,7 @@ export function itemAnalyze(item: string) {
     case '胸甲':
     case '頭部':
     case '盾':
+    case '法器':
       findUnique('armour', isFindUnique)
       parseArmor(itemSection)
       break
@@ -222,6 +223,7 @@ function parseItemName(section: string[], itemSection: string[][]) {
     頭部: 'armour.helmet',
     箭袋: 'armour.quiver',
     盾: 'armour.shield',
+    法器: 'armour.focus',
     項鍊: 'accessory.amulet',
     戒指: 'accessory.ring',
     腰帶: 'accessory.belt',
