@@ -82,11 +82,11 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { maxBy } from 'lodash-es'
-import { searchItem, fetchItem, getIsCounting } from '@/web/lib/tradeSide'
+import { searchItem, fetchItem, getIsCounting, poeVersion } from '@/web/lib/tradeSide'
 import { heistReward as gemReplicaOptions } from '@/web/lib/APIdata'
 import CircleCheck from '../utility/CircleCheck.vue'
 import type { ISearchResult, ISearchJson, IFetchResult } from '@/web/lib/tradeSide'
-const props = defineProps(['itemProp', 'leagueSelect', 'divineToChaos', 'isOverflow'])
+const props = defineProps(['itemProp', 'leagueSelect', 'divineToChaosOrExalted', 'isOverflow'])
 const { rateTimeLimit } = getIsCounting()
 
 const gemReplicaSelect = ref<HeistReward>()
@@ -201,14 +201,16 @@ async function searchBtn() {
 }
 
 const fetchResultSorted = computed(() => {
-  if (props.divineToChaos)
+  if (props.divineToChaosOrExalted) {
+    const subCurrency = poeVersion === '2' ? 'exalted' : 'chaos'
     return fetchResult.value.slice().sort((a, b) => {
-      if (!['divine', 'chaos'].includes(a.currency)) return 1
-      if (!['divine', 'chaos'].includes(b.currency)) return -1
-      let ca = a.currency === 'divine' ? (a.price as number) * props.divineToChaos : a.price as number
-      let cb = b.currency === 'divine' ? (b.price as number) * props.divineToChaos : b.price as number
+      if (!['divine', subCurrency].includes(a.currency)) return 1
+      if (!['divine', subCurrency].includes(b.currency)) return -1
+      const ca = a.currency === 'divine' ? (a.price as number) * props.divineToChaosOrExalted : a.price as number
+      const cb = b.currency === 'divine' ? (b.price as number) * props.divineToChaosOrExalted : b.price as number
       return ca - cb
     })
+  }
   else
     return fetchResult.value
 })

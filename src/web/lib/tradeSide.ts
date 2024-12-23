@@ -14,7 +14,7 @@ const tradeApi = axios.create({
     'Content-Type': 'application/json',
   },
 })
-const poeVersion = window.ipc.sendSync(IPC.GET_CONFIG).poeVersion
+export const poeVersion = window.ipc.sendSync(IPC.GET_CONFIG).poeVersion
 const poeApiTradeVersion = poeVersion === '2' ? 'trade2' : 'trade'
 export interface ISearchJson {
   query: {
@@ -116,6 +116,7 @@ export const selectOptions = {
   exchangeHave: [
     { label: 'D&C', value: 'divine&chaos' },
     { label: '混沌', value: 'chaos' },
+    { label: '崇高', value: 'exalted' },
     { label: '神聖', value: 'divine' }
   ]
 }
@@ -219,8 +220,8 @@ export function getSearchJSON(item: ParsedItem) {
     }
     searchJSON.query.status.option = 'any'
   }
-  if (item.onlyChaos) {
-    searchJSON.query.filters.trade_filters.filters.price.option = 'chaos'
+  if (item.onlyChaosOrExalted) {
+    searchJSON.query.filters.trade_filters.filters.price.option = poeVersion === '2' ? 'exalted' : 'chaos'
   }
   searchJSON.query.stats[0].filters.push(...(item.stats))
   searchJSON.query.stats[0].filters.push(...(item.influences))
@@ -439,26 +440,26 @@ export interface IExchangeJson {
   sort: { have: 'asc' };
   engine: 'new';
 }
-export async function getDivineToChaos(league: string) {
+export async function getDivineToChaosOrExalted(league: string) {
   const exchangeJSON: IExchangeJson = {
     'query': {
       'status': { 'option': 'online' },
       'have': ['divine'],
-      'want': ['chaos']
+      'want': [(poeVersion === '2' ? 'exalted' : 'chaos')]
     },
     'sort': { 'have': 'asc' },
     'engine': 'new'
   }
-  let chaos = 0
+  let chaosOrExalted = 0
   await tradeApi.post('', exchangeJSON, { params: { url: `${poeApiTradeVersion}/exchange/${league}` } })
     .then((response) => {
       parseRateTimeLimit(response.headers as AxiosResponseHeaders)
       return response.data
     }).then((data) => {
       const temp = Object.keys(data.result).slice(0, 5)
-      chaos = temp.reduce((pre, curr) =>
-        pre + (data.result[curr].listing.offers[0].item.amount / data.result[curr].listing.offers[0].exchange.amount), chaos)
-      chaos /= temp.length
+      chaosOrExalted = temp.reduce((pre, curr) =>
+        pre + (data.result[curr].listing.offers[0].item.amount / data.result[curr].listing.offers[0].exchange.amount), chaosOrExalted)
+      chaosOrExalted /= temp.length
     })
     .catch((err) => {
       console.error(err)
@@ -466,7 +467,7 @@ export async function getDivineToChaos(league: string) {
         startCountdown(parseInt(err.response.headers['retry-after']))
       }
     })
-  return Math.round(chaos / 5) * 5
+  return Math.round(chaosOrExalted / 5) * 5
 }
 export interface IExchangeResult {
   searchID: {
@@ -494,7 +495,7 @@ export async function searchExchange(item: ParsedItem, league: string): Promise<
       'status': {
         'option': 'online'
       },
-      'have': item.onlyChaos ? ['chaos'] : item.searchExchange.have,
+      'have': item.onlyChaosOrExalted ? [(poeVersion === '2' ? 'exalted' : 'chaos')] : item.searchExchange.have,
       'want': (item.searchExchange.want?.length ?? 0) > 0 ? item.searchExchange.want! : [APIStatic.find(e => e.text === item.baseType)?.id ?? '']
     },
     'sort': { 'have': 'asc' },

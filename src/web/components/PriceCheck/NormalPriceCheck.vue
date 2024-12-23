@@ -146,8 +146,8 @@
     </button>
     <button
       class="mx-2 bg-gray-500 text-white rounded px-1 hover:bg-gray-400 disabled:cursor-default disabled:opacity-60 disabled:bg-gray-500"
-      :disabled="rateTimeLimit.flag" @click="searchOnlyChaos">
-      SearchC
+      :disabled="rateTimeLimit.flag" @click="searchOnlyChaosOrExalted">
+      Search2
     </button>
     <div v-if="searchResult.err || searchResult.searchID.ID">
       <button
@@ -209,7 +209,8 @@
 import { maxBy } from 'lodash-es'
 import { computed, ref, nextTick, watch } from 'vue'
 import {
-  getSearchJSON, searchItem, fetchItem, getIsCounting, searchExchange, selectOptions
+  getSearchJSON, searchItem, fetchItem, getIsCounting, searchExchange, selectOptions,
+  poeVersion
 } from '@/web/lib/tradeSide'
 import IPC from '@/ipc'
 import { APIStatic } from '@/web/lib/APIdata'
@@ -219,7 +220,7 @@ import type { ISearchResult, IExchangeResult, IFetchResult } from '@/web/lib/tra
 const props = defineProps<{
   itemProp: ParsedItem;
   leagueSelect: string;
-  divineToChaos: number;
+  divineToChaosOrExalted: number;
   isOverflow: () => boolean;
 }>()
 const { rateTimeLimit } = getIsCounting()
@@ -261,9 +262,9 @@ const fetchResult = ref<IFetchResult[]>([])
 const isSearching = ref(false)
 const modTbodyToggle = ref(true)
 const currency2Img = ref('')
-function searchOnlyChaos() {
-  item.value.onlyChaos = true
-  searchBtn().then(() => { item.value.onlyChaos = false })
+function searchOnlyChaosOrExalted() {
+  item.value.onlyChaosOrExalted = true
+  searchBtn().then(() => { item.value.onlyChaosOrExalted = false })
 }
 function resetSearchData() {
   searchResult.value = {
@@ -317,23 +318,24 @@ async function searchBtn() {
 }
 
 const fetchResultSorted = computed(() => {
-  if (props.divineToChaos) {
+  if (props.divineToChaosOrExalted) {
     if (item.value.searchExchange.option) {
       return fetchResult.value.slice().sort((a, b) => {
         const [aCurrencyCount, aItemCount] = (a.price as string).split('：').map(Number)
         const aPrice = aCurrencyCount / aItemCount
         const [bCurrencyCount, bItemCount] = (b.price as string).split('：').map(Number)
         const bPrice = bCurrencyCount / bItemCount
-        const ca = a.currency === 'divine' ? aPrice * props.divineToChaos : aPrice as number
-        const cb = b.currency === 'divine' ? bPrice * props.divineToChaos : bPrice as number
+        const ca = a.currency === 'divine' ? aPrice * props.divineToChaosOrExalted : aPrice as number
+        const cb = b.currency === 'divine' ? bPrice * props.divineToChaosOrExalted : bPrice as number
         return ca - cb
       })
     }
+    const subCurrency = poeVersion === '2' ? 'exalted' : 'chaos'
     return fetchResult.value.slice().sort((a, b) => {
-      if (!['divine', 'chaos'].includes(a.currency)) return 1
-      if (!['divine', 'chaos'].includes(b.currency)) return -1
-      const ca = a.currency === 'divine' ? (a.price as number) * props.divineToChaos : a.price as number
-      const cb = b.currency === 'divine' ? (b.price as number) * props.divineToChaos : b.price as number
+      if (!['divine', subCurrency].includes(a.currency)) return 1
+      if (!['divine', subCurrency].includes(b.currency)) return -1
+      const ca = a.currency === 'divine' ? (a.price as number) * props.divineToChaosOrExalted : a.price as number
+      const cb = b.currency === 'divine' ? (b.price as number) * props.divineToChaosOrExalted : b.price as number
       return ca - cb
     })
   }
@@ -343,12 +345,21 @@ const fetchResultSorted = computed(() => {
 const maxAmount = computed(() => maxBy(fetchResult.value, ele => ele.amount))
 const searchExchangeState = computed<Config['searchExchangePrefer']>({
   get() {
-    if (item.value.searchExchange.have.length === 2 && item.value.searchExchange.have.includes('chaos') && item.value.searchExchange.have.includes('divine'))
-      return 'divine&chaos' as Config['searchExchangePrefer']
+    if (item.value.searchExchange.have.length === 2 &&
+      (item.value.searchExchange.have.includes('chaos') || item.value.searchExchange.have.includes('exalted')) &&
+      item.value.searchExchange.have.includes('divine')
+    )
+      return 'divine&(C or Ex)' as Config['searchExchangePrefer']
     return item.value.searchExchange.have[0] as Config['searchExchangePrefer']
   },
   set(value,) {
-    item.value.searchExchange.have = value.split('&')
+    if (value === 'divine&(C or Ex)') {
+      const subCurrency = poeVersion === '2' ? 'exalted' : 'chaos'
+      item.value.searchExchange.have = [subCurrency, 'divine']
+    }
+    else {
+      item.value.searchExchange.have = [value]
+    }
     searchBtn()
   }
 })
@@ -371,4 +382,4 @@ if (item.value.autoSearch)
 
 </script>
 
-<style></style>@/web/lib/APIdata@/web/lib/tradeSide@/web/lib/tradeSide
+<style></style>

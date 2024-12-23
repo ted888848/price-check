@@ -4,7 +4,7 @@ import IPC from '@/ipc'
 import { registerShortcut, unRegisterShortcut } from './shortcuts'
 const defaultStore: Config = {
   characterName: '',
-  searchExchangePrefer: 'divine&chaos',
+  searchExchangePrefer: 'divine&(C or Ex)',
   POESESSID: '',
   searchTwoWeekOffline: false,
   priceCheckHotkey: 'Ctrl+D',
@@ -40,7 +40,6 @@ const storeSchema: Schema<Config> = {
   },
   searchExchangePrefer: {
     type: 'string',
-
   },
   POESESSID: {
     type: 'string'

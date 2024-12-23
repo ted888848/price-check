@@ -14,15 +14,15 @@
         <div class="flex justify-center flex-1">
           <div class="relative exaltedImg ">
             <img :src="divineImage" class=" w-8 h-8 ">
-            <ul v-if="divineToChaos"
+            <ul v-if="divineToChaosOrEx"
               class="exaltedImgTooltip invisible bg-gray-700 z-10 text-center absolute text-white rounded">
               <li v-for="line in divineToChaosDec" :key="line.e" class="flex px-2 min-w-max text-xl">
                 {{ line.e }} : {{ line.c }}
               </li>
             </ul>
           </div>
-          <span class=" text-white text-2xl">:{{ divineToChaos }}</span>
-          <img :src="chaosImage" class=" w-8 h-8 hover:cursor-pointer" @dblclick="refreshDivineToChaos">
+          <span class=" text-white text-2xl">:{{ divineToChaosOrEx }}</span>
+          <img :src="chaosOrExImage" class=" w-8 h-8 hover:cursor-pointer" @dblclick="refreshDivineToChaosOrExalted">
         </div>
         <div class="flex justify-end mr-1 ml-auto flex-1">
           <button class=" text-white hover:text-red-500" @click="closePriceCheck">
@@ -36,10 +36,10 @@
       </div>
       <KeepAlive>
         <NormalPriceCheck v-if="currentPriceCheck === 'NormalPriceCheck'" :item-prop="item!"
-          :league-select="leagueSelect" :divine-to-chaos="divineToChaos" :is-overflow="isOverflow"
+          :league-select="leagueSelect" :divine-to-chaos-or-exalted="divineToChaosOrEx" :is-overflow="isOverflow"
           @open-web-view="openWebView" />
         <HeistPriceCheck v-else-if="currentPriceCheck === 'HeistPriceCheck'" :item-prop="item!"
-          :divine-to-chaos="divineToChaos" :league-select="leagueSelect" :is-overflow="isOverflow"
+          :divine-to-chaos-or-exalted="divineToChaosOrEx" :league-select="leagueSelect" :is-overflow="isOverflow"
           @open-web-view="openWebView" />
       </KeepAlive>
     </div>
@@ -51,7 +51,7 @@ import { ref, computed, nextTick, onMounted, onUnmounted } from 'vue'
 import { range } from 'lodash-es'
 import IPC from '@/ipc'
 import { itemAnalyze } from '@/web/lib/itemAnalyze'
-import { getDivineToChaos } from '@/web/lib/tradeSide'
+import { getDivineToChaosOrExalted, poeVersion } from '@/web/lib/tradeSide'
 import { leagues, currencyImageUrl } from '@/web/lib/APIdata'
 import NormalPriceCheck from './NormalPriceCheck.vue'
 import HeistPriceCheck from './HeistPriceCheck.vue'
@@ -90,7 +90,7 @@ const leagueSelect = computed({
     window.ipc.send(IPC.SET_CONFIG, JSON.stringify({
       ...config, league: val
     }))
-    refreshDivineToChaos()
+    refreshDivineToChaosOrExalted()
   }
 })
 function loadLeagues() {
@@ -115,18 +115,18 @@ const priceCheckOptions: PriceCheckOption[] = [{
 const currentPriceCheck = ref<PriceCheckTabs>('NormalPriceCheck')
 const item = ref<ParsedItem | null>(null)
 
-const divineToChaos = ref(0)
-let divineImage = import.meta.env.VITE_URL_BASE + currencyImageUrl.find(ele => ele.id === 'divine')?.image
-let chaosImage = import.meta.env.VITE_URL_BASE + currencyImageUrl.find(ele => ele.id === 'chaos')?.image
-async function refreshDivineToChaos() {
-  divineToChaos.value = await getDivineToChaos(leagueSelect.value)
+const divineToChaosOrEx = ref(0)
+const divineImage = import.meta.env.VITE_URL_BASE + currencyImageUrl.find(ele => ele.id === 'divine')?.image
+const chaosOrExImage = import.meta.env.VITE_URL_BASE + currencyImageUrl.find(ele => ele.id === (poeVersion === '2' ? 'exalted' : 'chaos'))?.image
+async function refreshDivineToChaosOrExalted() {
+  divineToChaosOrEx.value = await getDivineToChaosOrExalted(leagueSelect.value)
 }
 const divToCInterval = setInterval(() => {
-  refreshDivineToChaos()
+  refreshDivineToChaosOrExalted()
 }, 10 * 60 * 1000)
 const divineToChaosDec = computed(() => {
   return range(0.1, 1, 0.1).map(ele => ({
-    e: ele.toFixed(1), c: (ele * divineToChaos.value).toFixed(0)
+    e: ele.toFixed(1), c: (ele * divineToChaosOrEx.value).toFixed(0)
   }))
 })
 

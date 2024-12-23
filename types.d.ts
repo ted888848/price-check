@@ -178,7 +178,7 @@ interface ParsedItem {
   };
   search6L?: boolean;
   isRGB?: boolean;
-  onlyChaos?: boolean;
+  onlyChaosOrExalted?: boolean;
   transGem?: {
     discriminator: string;
     option: string;
@@ -194,7 +194,7 @@ type hotkeyType = 'type-in-chat'
 type POEVersion = '1' | '2'
 interface Config {
   characterName: string;
-  searchExchangePrefer: 'divine&chaos' | 'chaos' | 'divine';
+  searchExchangePrefer: 'divine&(C or Ex)' | 'chaos' | 'divine' | 'exalted';
   POESESSID: string;
   searchTwoWeekOffline: boolean;
   priceCheckHotkey: string;
