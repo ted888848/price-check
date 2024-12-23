@@ -1,8 +1,8 @@
 {
   "name": "price-check",
-  "version": "3.25.3",
+  "version": "3.25.4",
   "main": "dist/main.mjs",
-  "description": "就只是一個POE查價",
+  "description": "一個POE查價器",
   "author": "ted <ted888848@gmail.com>",
   "license": "MIT",
   "private": true,

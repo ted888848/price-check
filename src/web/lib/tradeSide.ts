@@ -114,7 +114,7 @@ export const selectOptions = {
     { value: 'nonunique', label: '非傳奇' }
   ],
   exchangeHave: [
-    { label: 'D&C', value: 'divine&chaos' },
+    { label: 'D&(C|Ex)', value: 'divine&(C or Ex)' },
     { label: '混沌', value: 'chaos' },
     { label: '崇高', value: 'exalted' },
     { label: '神聖', value: 'divine' }
@@ -125,7 +125,7 @@ const defaultSearchJson: ISearchJson = {
     filters: {
       trade_filters: {
         filters: {
-          price: { min: 2, option: poeVersion === '2' ? undefined : 'chaos_divine' },
+          price: { min: 2 },
           collapse: { option: true }
         }
       },
