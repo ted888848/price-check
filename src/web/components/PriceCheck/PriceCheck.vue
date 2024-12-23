@@ -64,7 +64,7 @@ function openWebView(extendUrl: string) {
   priceCheckPos.value.right = '0px'
   isWebViewOpen.value = true
   nextTick(() => {
-    webView.value!.src = encodeURI(`${import.meta.env.VITE_URL_BASE}/trade/${extendUrl}`)
+    webView.value!.src = encodeURI(`${import.meta.env.VITE_URL_BASE}/trade${poeVersion === '2' ? '2' : ''}/${extendUrl}`)
   })
 }
 function closeWebView() {

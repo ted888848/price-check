@@ -86,7 +86,12 @@ import { searchItem, fetchItem, getIsCounting, poeVersion } from '@/web/lib/trad
 import { heistReward as gemReplicaOptions } from '@/web/lib/APIdata'
 import CircleCheck from '../utility/CircleCheck.vue'
 import type { ISearchResult, ISearchJson, IFetchResult } from '@/web/lib/tradeSide'
-const props = defineProps(['itemProp', 'leagueSelect', 'divineToChaosOrExalted', 'isOverflow'])
+const props = defineProps<{
+  itemProp: ParsedItem;
+  leagueSelect: string;
+  divineToChaosOrExalted: number;
+  isOverflow: () => boolean;
+}>()
 const { rateTimeLimit } = getIsCounting()
 
 const gemReplicaSelect = ref<HeistReward>()
@@ -226,8 +231,8 @@ function openWebView() {
   emit('open-web-view', `search/${props.leagueSelect}/${searchResult.value.searchID.ID}`)
 }
 function openBrowser() {
-  window.open(encodeURI(`${import.meta.env.VITE_URL_BASE}/trade/${searchResult.value.searchID.type}/${props.leagueSelect}/${searchResult.value.searchID.ID}`))
+  window.open(encodeURI(`${import.meta.env.VITE_URL_BASE}/trade${poeVersion === '2' ? '2' : ''}/${searchResult.value.searchID.type}/${props.leagueSelect}/${searchResult.value.searchID.ID}`))
 }
 </script>
 
-<style></style>@/web/lib/APIdata@/web/lib/tradeSide@/web/lib/tradeSide
+<style></style>
