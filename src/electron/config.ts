@@ -71,8 +71,7 @@ const storeSchema: Schema<Config> = {
     type: 'string'
   },
   poeVersion: {
-    type: 'string',
-    default: '1'
+    type: 'string'
   }
 }
 export const store = new Store({
@@ -83,6 +82,12 @@ export const store = new Store({
 export let config: Config
 export function setupConfig() {
   config = store.store
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  //@ts-ignore
+  if (config.searchExchangePrefer === 'divine&chaos') {
+    config.searchExchangePrefer = 'divine&(C or Ex)'
+    store.store = config
+  }
   ipcMain.on(IPC.SET_CONFIG, (_e, configData: string) => {
     // const prevSetVersion = store.store.poeVersion
     store.store = JSON.parse(configData) as Config

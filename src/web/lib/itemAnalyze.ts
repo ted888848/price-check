@@ -1,5 +1,6 @@
 import IPC from '@/ipc'
 import { APIitems, APImods, APIStatic } from './APIdata'
+import { poeVersion } from './tradeSide'
 enum ParseResult {
   PARSE_SECTION_FAIL,
   PARSE_SECTION_SUCC,
@@ -44,12 +45,18 @@ const defaultItemParsed: ParsedItem = Object.freeze({
   autoSearch: false,
   searchTwoWeekOffline: false,
   searchExchange: {
-    option: false, have: ['divine', 'chaos']
+    option: false, have: []
   }
 })
 function getDefaultItemParsed(config: Config) {
   const itemParsed = structuredClone(defaultItemParsed)
-  itemParsed.searchExchange.have = config.searchExchangePrefer.split('&')
+  if (config.searchExchangePrefer === 'divine&(C or Ex)') {
+    const subCurrency = poeVersion === '2' ? 'exalted' : 'chaos'
+    itemParsed.searchExchange.have = ['divine', subCurrency]
+  }
+  else {
+    itemParsed.searchExchange.have = [config.searchExchangePrefer]
+  }
   return itemParsed
 }
 let itemParsed: ParsedItem
