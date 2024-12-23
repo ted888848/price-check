@@ -11,11 +11,11 @@ export function loadAPIData(poeVersion?: POEVersion) {
     const config = window.ipc.sendSync(IPC.GET_CONFIG)
     poeVersion = config.poeVersion
   }
-  if (poeVersion === '1') loadAPI1data()
-  else loadAPI2data()
+  if (poeVersion === '1') loadAPIPoe1Data()
+  else loadAPIPoe2Data()
 }
 
-function loadAPI1data() {
+function loadAPIPoe1Data() {
   leagues = window.store.get('Leagues') as string[] ?? []
   APIitems = window.store.get('APIitems') as ParsedAPIitems ?? []
   heistReward = window.store.get('heistReward') as HeistReward[] ?? []
@@ -25,7 +25,7 @@ function loadAPI1data() {
 }
 
 
-function loadAPI2data() {
+function loadAPIPoe2Data() {
   leagues = window.store.get('Leagues', '2') as string[] ?? []
   APIitems = window.store.get('APIitems', '2') as ParsedAPIitems ?? []
   heistReward = window.store.get('heistReward', '2') as HeistReward[] ?? []
