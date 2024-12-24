@@ -85,6 +85,7 @@
     "array-bracket-spacing": "warn",
     "key-spacing": "warn",
     "@typescript-eslint/no-non-null-assertion": "off",
+    "@typescript-eslint/no-unused-vars":"warn",
     "@typescript-eslint/no-explicit-any": "off",
     "@typescript-eslint/member-delimiter-style": "warn",
     "@typescript-eslint/type-annotation-spacing": "warn",

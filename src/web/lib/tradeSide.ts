@@ -3,7 +3,7 @@ import { ref } from 'vue'
 import { isUndefined, isNumber, countBy } from 'lodash-es'
 import type { AxiosResponseHeaders } from 'axios'
 import axios from 'axios'
-import IPC from '@/ipc'
+import { poeVersion, tradeBase } from './index'
 
 const tradeApi = axios.create({
   baseURL: `http://localhost:${window.proxyServer.getPort()}/proxy`,
@@ -14,8 +14,6 @@ const tradeApi = axios.create({
     'Content-Type': 'application/json',
   },
 })
-export const poeVersion = window.ipc.sendSync(IPC.GET_CONFIG).poeVersion
-const poeApiTradeVersion = poeVersion === '2' ? 'trade2' : 'trade'
 export interface ISearchJson {
   query: {
     type?: {
@@ -351,7 +349,7 @@ export async function searchItem(searchJson: ISearchJson, league: string) {
   }
   searchJson = cleanupJSON(searchJson)
   if (process.env.NODE_ENV === 'development') console.log(searchJson)
-  await tradeApi.post('', searchJson, { params: { url: `${poeApiTradeVersion}/search/${league}` } })
+  await tradeApi.post('', searchJson, { params: { url: `${tradeBase}/search/${league}` } })
     .then((response) => {
       parseRateTimeLimit(response.headers as AxiosResponseHeaders)
       return response.data
@@ -394,7 +392,7 @@ export async function fetchItem(fetchList: string[], searchID: string, oldFetchR
   let fetchPriceResult: string[] = []
   const itemJsonUrl: string[] = []
   for (let i = 0; i < fetchList.length; i += 10) {
-    itemJsonUrl.push(`${poeApiTradeVersion}/fetch/` + fetchList.slice(i, i + 10).join(',') + `?query=${searchID}`)
+    itemJsonUrl.push(`${tradeBase}/fetch/` + fetchList.slice(i, i + 10).join(',') + `?query=${searchID}`)
   }
   await Promise.all(
     itemJsonUrl.map((url) => tradeApi.get('', { params: { url: url, } })))
@@ -451,7 +449,7 @@ export async function getDivineToChaosOrExalted(league: string) {
     'engine': 'new'
   }
   let chaosOrExalted = 0
-  await tradeApi.post('', exchangeJSON, { params: { url: `${poeApiTradeVersion}/exchange/${league}` } })
+  await tradeApi.post('', exchangeJSON, { params: { url: `${tradeBase}/exchange/${league}` } })
     .then((response) => {
       parseRateTimeLimit(response.headers as AxiosResponseHeaders)
       return response.data
@@ -501,7 +499,7 @@ export async function searchExchange(item: ParsedItem, league: string): Promise<
     'sort': { 'have': 'asc' },
     'engine': 'new'
   }
-  await tradeApi.post('', exchangeJSON, { params: { url: `${poeApiTradeVersion}/exchange/${league}` } })
+  await tradeApi.post('', exchangeJSON, { params: { url: `${tradeBase}/exchange/${league}` } })
     .then((response) => {
       parseRateTimeLimit(response.headers as AxiosResponseHeaders)
       return response.data

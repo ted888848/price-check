@@ -51,10 +51,11 @@ import { ref, computed, nextTick, onMounted, onUnmounted } from 'vue'
 import { range } from 'lodash-es'
 import IPC from '@/ipc'
 import { itemAnalyze } from '@/web/lib/itemAnalyze'
-import { getDivineToChaosOrExalted, poeVersion } from '@/web/lib/tradeSide'
+import { getDivineToChaosOrExalted } from '@/web/lib/tradeSide'
 import { leagues, currencyImageUrl } from '@/web/lib/APIdata'
 import NormalPriceCheck from './NormalPriceCheck.vue'
 import HeistPriceCheck from './HeistPriceCheck.vue'
+import { secondCurrency, tradeBase } from '@/web/lib'
 const isWebViewOpen = ref(false)
 const webView = ref<HTMLIFrameElement>()
 const priceCheckPos = ref({
@@ -64,7 +65,7 @@ function openWebView(extendUrl: string) {
   priceCheckPos.value.right = '0px'
   isWebViewOpen.value = true
   nextTick(() => {
-    webView.value!.src = encodeURI(`${import.meta.env.VITE_URL_BASE}/trade${poeVersion === '2' ? '2' : ''}/${extendUrl}`)
+    webView.value!.src = encodeURI(`${import.meta.env.VITE_URL_BASE}/${tradeBase}/${extendUrl}`)
   })
 }
 function closeWebView() {
@@ -117,7 +118,7 @@ const item = ref<ParsedItem | null>(null)
 
 const divineToChaosOrEx = ref(0)
 const divineImage = import.meta.env.VITE_URL_BASE + currencyImageUrl.find(ele => ele.id === 'divine')?.image
-const chaosOrExImage = import.meta.env.VITE_URL_BASE + currencyImageUrl.find(ele => ele.id === (poeVersion === '2' ? 'exalted' : 'chaos'))?.image
+const chaosOrExImage = import.meta.env.VITE_URL_BASE + currencyImageUrl.find(ele => ele.id === (secondCurrency))?.image
 async function refreshDivineToChaosOrExalted() {
   divineToChaosOrEx.value = await getDivineToChaosOrExalted(leagueSelect.value)
 }

@@ -6,15 +6,15 @@
     "target": "ESNext",
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
+    "baseUrl": ".",
     "paths": {
       "@/*": [
-        "./src/*"
+        "src/*"
       ]
     }
   },
   "include": [
     "src/electron",
-    "src/ipc",
     "src/lib",
     "vite.config.ts",
     "package.json",

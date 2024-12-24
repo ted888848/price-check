@@ -24,12 +24,13 @@
     "noImplicitAny": false
   },
   "include": [
-    "src/**/*",
+    "src",
     "types.d.ts"
   ],
   "exclude": [
     "src/electron",
-    "src/lib"
+    "src/lib",
+    "src/ipc"
   ],
   "references": [
     {

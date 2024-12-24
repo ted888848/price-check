@@ -210,13 +210,13 @@ import { maxBy } from 'lodash-es'
 import { computed, ref, nextTick, watch } from 'vue'
 import {
   getSearchJSON, searchItem, fetchItem, getIsCounting, searchExchange, selectOptions,
-  poeVersion
 } from '@/web/lib/tradeSide'
 import IPC from '@/ipc'
 import { APIStatic } from '@/web/lib/APIdata'
 import CircleCheck from '../utility/CircleCheck.vue'
 import ValueMinMax from '../utility/ValueMinMax.vue'
 import type { ISearchResult, IExchangeResult, IFetchResult } from '@/web/lib/tradeSide'
+import { secondCurrency, tradeBase } from '@/web/lib'
 const props = defineProps<{
   itemProp: ParsedItem;
   leagueSelect: string;
@@ -330,10 +330,9 @@ const fetchResultSorted = computed(() => {
         return ca - cb
       })
     }
-    const subCurrency = poeVersion === '2' ? 'exalted' : 'chaos'
     return fetchResult.value.slice().sort((a, b) => {
-      if (!['divine', subCurrency].includes(a.currency)) return 1
-      if (!['divine', subCurrency].includes(b.currency)) return -1
+      if (!['divine', secondCurrency].includes(a.currency)) return 1
+      if (!['divine', secondCurrency].includes(b.currency)) return -1
       const ca = a.currency === 'divine' ? (a.price as number) * props.divineToChaosOrExalted : a.price as number
       const cb = b.currency === 'divine' ? (b.price as number) * props.divineToChaosOrExalted : b.price as number
       return ca - cb
@@ -354,8 +353,7 @@ const searchExchangeState = computed<Config['searchExchangePrefer']>({
   },
   set(value,) {
     if (value === 'divine&(C or Ex)') {
-      const subCurrency = poeVersion === '2' ? 'exalted' : 'chaos'
-      item.value.searchExchange.have = [subCurrency, 'divine']
+      item.value.searchExchange.have = [secondCurrency, 'divine']
     }
     else {
       item.value.searchExchange.have = [value]
@@ -375,7 +373,7 @@ function openWebView() {
   emit('open-web-view', `${searchResult.value.searchID.type}/${props.leagueSelect}/${searchResult.value.searchID.ID}`)
 }
 function openBrowser() {
-  window.open(encodeURI(`${import.meta.env.VITE_URL_BASE}/trade${poeVersion === '2' ? '2' : ''}/${searchResult.value.searchID.type}/${props.leagueSelect}/${searchResult.value.searchID.ID}`))
+  window.open(encodeURI(`${import.meta.env.VITE_URL_BASE}/${tradeBase}/${searchResult.value.searchID.type}/${props.leagueSelect}/${searchResult.value.searchID.ID}`))
 }
 if (item.value.autoSearch)
   searchBtn()

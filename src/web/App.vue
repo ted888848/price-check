@@ -6,11 +6,11 @@
 <script setup lang="ts">
 import OverlayWindow from '@/web/components/OverlayWindow/OverlayWindow.vue'
 import PriceCheck from '@/web/components/PriceCheck/PriceCheck.vue'
-import { ref } from 'vue'
+import { useTemplateRef } from 'vue'
 import { loadAPIData } from './lib/APIdata'
-const priceCheck = ref<InstanceType<typeof PriceCheck>>()
+const priceCheckRef = useTemplateRef('priceCheck')
 const reloadLeagues = () => {
-  priceCheck.value?.loadLeagues()
+  priceCheckRef.value?.loadLeagues()
 }
 loadAPIData()
 </script>

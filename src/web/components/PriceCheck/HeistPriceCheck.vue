@@ -82,10 +82,11 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { maxBy } from 'lodash-es'
-import { searchItem, fetchItem, getIsCounting, poeVersion } from '@/web/lib/tradeSide'
+import { searchItem, fetchItem, getIsCounting } from '@/web/lib/tradeSide'
 import { heistReward as gemReplicaOptions } from '@/web/lib/APIdata'
 import CircleCheck from '../utility/CircleCheck.vue'
 import type { ISearchResult, ISearchJson, IFetchResult } from '@/web/lib/tradeSide'
+import { secondCurrency, tradeBase } from '@/web/lib'
 const props = defineProps<{
   itemProp: ParsedItem;
   leagueSelect: string;
@@ -207,10 +208,9 @@ async function searchBtn() {
 
 const fetchResultSorted = computed(() => {
   if (props.divineToChaosOrExalted) {
-    const subCurrency = poeVersion === '2' ? 'exalted' : 'chaos'
     return fetchResult.value.slice().sort((a, b) => {
-      if (!['divine', subCurrency].includes(a.currency)) return 1
-      if (!['divine', subCurrency].includes(b.currency)) return -1
+      if (!['divine', secondCurrency].includes(a.currency)) return 1
+      if (!['divine', secondCurrency].includes(b.currency)) return -1
       const ca = a.currency === 'divine' ? (a.price as number) * props.divineToChaosOrExalted : a.price as number
       const cb = b.currency === 'divine' ? (b.price as number) * props.divineToChaosOrExalted : b.price as number
       return ca - cb
@@ -231,7 +231,7 @@ function openWebView() {
   emit('open-web-view', `search/${props.leagueSelect}/${searchResult.value.searchID.ID}`)
 }
 function openBrowser() {
-  window.open(encodeURI(`${import.meta.env.VITE_URL_BASE}/trade${poeVersion === '2' ? '2' : ''}/${searchResult.value.searchID.type}/${props.leagueSelect}/${searchResult.value.searchID.ID}`))
+  window.open(encodeURI(`${import.meta.env.VITE_URL_BASE}/${tradeBase}/${searchResult.value.searchID.type}/${props.leagueSelect}/${searchResult.value.searchID.ID}`))
 }
 </script>
 
