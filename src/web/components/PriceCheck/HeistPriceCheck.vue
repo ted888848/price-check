@@ -86,7 +86,7 @@ import { searchItem, fetchItem, getIsCounting } from '@/web/lib/tradeSide'
 import { heistReward as gemReplicaOptions } from '@/web/lib/APIdata'
 import CircleCheck from '../utility/CircleCheck.vue'
 import type { ISearchResult, ISearchJson, IFetchResult } from '@/web/lib/tradeSide'
-import { secondCurrency, tradeBase } from '@/web/lib'
+import { secondCurrency, tradeUrl } from '@/web/lib'
 const props = defineProps<{
   itemProp: ParsedItem;
   leagueSelect: string;
@@ -231,7 +231,7 @@ function openWebView() {
   emit('open-web-view', `search/${props.leagueSelect}/${searchResult.value.searchID.ID}`)
 }
 function openBrowser() {
-  window.open(encodeURI(`${import.meta.env.VITE_URL_BASE}/${tradeBase}/${searchResult.value.searchID.type}/${props.leagueSelect}/${searchResult.value.searchID.ID}`))
+  window.open(encodeURI(`${import.meta.env.VITE_URL_BASE}/${tradeUrl}/${searchResult.value.searchID.type}/${props.leagueSelect}/${searchResult.value.searchID.ID}`))
 }
 </script>
 

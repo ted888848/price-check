@@ -385,36 +385,34 @@ function parseMultilineMod(regSection: RegExp[], section: string[], type: keyof 
           break
         }
       }
-      if (flag) {
-        const matchReg = matchMod.text.map(mod => new RegExp(mod.replace(/[+-]?#/g, String.raw`[+-]?(\d+(?:\.\d+)?)`)
-          .replace(' (部分)', '').replace(/減少|增加/, String.raw`(?:減少|增加)`)))
-        const tempGroup = structuredClone(matchMod)
-        let tempValue = 0
-        let valueCount = 0
-        for (const ind in matchReg) {
-          const regGroup = section[i + (+ind)].match(matchReg[ind])
-          if (!regGroup) continue outer
-          regGroup.shift()
-          if (regGroup.length) tempValue = regGroup.reduce((pre, ele) => { valueCount++; return pre + Number(ele) }, tempValue)
-        }
-        section.splice(i, tempGroup.text.length)
-        regSection.splice(i, tempGroup.text.length)
-        i -= tempGroup.text.length
-        i = i < 0 ? -1 : i
-        if (tempValue)
-          tempArr.push({
-            ...tempGroup,
-            value: {
-              min: tempValue / valueCount
-            },
-            disabled: true,
-            type: APImods[type].type
-          })
-        else
-          tempArr.push({
-            ...tempGroup, disabled: true, type: APImods[type].type
-          })
+      if (!flag) continue
+      const matchReg = matchMod.text.map(mod => new RegExp(mod.replace(/[+-]?#/g, String.raw`[+-]?(\d+(?:\.\d+)?)`)
+        .replace(' (部分)', '').replace(/減少|增加/, String.raw`(?:減少|增加)`)))
+      let tempValue = 0
+      let valueCount = 0
+      for (const ind in matchReg) {
+        const regGroup = section[i + (+ind)].match(matchReg[ind])
+        if (!regGroup) continue outer
+        regGroup.shift()
+        if (regGroup.length) tempValue = regGroup.reduce((pre, ele) => { valueCount++; return pre + Number(ele) }, tempValue)
       }
+      section.splice(i, matchMod.text.length)
+      regSection.splice(i, matchMod.text.length)
+      i -= matchMod.text.length
+      i = i < 0 ? -1 : i
+      if (tempValue)
+        tempArr.push({
+          ...matchMod,
+          value: {
+            min: tempValue / valueCount
+          },
+          disabled: true,
+          type: APImods[type].type
+        })
+      else
+        tempArr.push({
+          ...matchMod, disabled: true, type: APImods[type].type
+        })
     }
   }
   return tempArr

@@ -19,19 +19,16 @@
     "paths": {
       "@/*": [
         "src/*"
-      ],
+      ]
     },
-    "noImplicitAny": false
+    "noImplicitAny": true
   },
   "include": [
-    "src",
+    "src/web",
+    "src/preload",
     "types.d.ts"
   ],
-  "exclude": [
-    "src/electron",
-    "src/lib",
-    "src/ipc"
-  ],
+  "exclude": [],
   "references": [
     {
       "path": "./tsconfig.node.json"

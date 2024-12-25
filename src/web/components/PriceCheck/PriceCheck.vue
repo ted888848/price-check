@@ -55,7 +55,7 @@ import { getDivineToChaosOrExalted } from '@/web/lib/tradeSide'
 import { leagues, currencyImageUrl } from '@/web/lib/APIdata'
 import NormalPriceCheck from './NormalPriceCheck.vue'
 import HeistPriceCheck from './HeistPriceCheck.vue'
-import { secondCurrency, tradeBase } from '@/web/lib'
+import { secondCurrency, tradeUrl } from '@/web/lib'
 const isWebViewOpen = ref(false)
 const webView = ref<HTMLIFrameElement>()
 const priceCheckPos = ref({
@@ -65,7 +65,7 @@ function openWebView(extendUrl: string) {
   priceCheckPos.value.right = '0px'
   isWebViewOpen.value = true
   nextTick(() => {
-    webView.value!.src = encodeURI(`${import.meta.env.VITE_URL_BASE}/${tradeBase}/${extendUrl}`)
+    webView.value!.src = encodeURI(`${import.meta.env.VITE_URL_BASE}/${tradeUrl}/${extendUrl}`)
   })
 }
 function closeWebView() {

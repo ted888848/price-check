@@ -216,7 +216,7 @@ import { APIStatic } from '@/web/lib/APIdata'
 import CircleCheck from '../utility/CircleCheck.vue'
 import ValueMinMax from '../utility/ValueMinMax.vue'
 import type { ISearchResult, IExchangeResult, IFetchResult } from '@/web/lib/tradeSide'
-import { secondCurrency, tradeBase } from '@/web/lib'
+import { secondCurrency, tradeUrl } from '@/web/lib'
 const props = defineProps<{
   itemProp: ParsedItem;
   leagueSelect: string;
@@ -373,7 +373,7 @@ function openWebView() {
   emit('open-web-view', `${searchResult.value.searchID.type}/${props.leagueSelect}/${searchResult.value.searchID.ID}`)
 }
 function openBrowser() {
-  window.open(encodeURI(`${import.meta.env.VITE_URL_BASE}/${tradeBase}/${searchResult.value.searchID.type}/${props.leagueSelect}/${searchResult.value.searchID.ID}`))
+  window.open(encodeURI(`${import.meta.env.VITE_URL_BASE}/${tradeUrl}/${searchResult.value.searchID.type}/${props.leagueSelect}/${searchResult.value.searchID.ID}`))
 }
 if (item.value.autoSearch)
   searchBtn()

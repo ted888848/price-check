@@ -17,7 +17,8 @@
     "build": "vue-tsc --noEmit && vite build && electron-builder",
     "preview": "vite preview",
     "buildP": "powershell ./setGithubToken.ps1; npm run build -- -p always",
-    "vuetsc": "vue-tsc --noEmit"
+    "vuetsc": "vue-tsc --noEmit",
+    "ipc-type": "tsc ./src/ipc/index.ts --emitDeclarationOnly --declaration --outDir src/ipc"
   },
   "devDependencies": {
     "@headlessui/vue": "^1.7.23",
