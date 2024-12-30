@@ -6,6 +6,7 @@
   "license": "MIT",
   "private": true,
   "main": ".vite/build/main.js",
+  "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc --noEmit && vite build && electron-builder",
