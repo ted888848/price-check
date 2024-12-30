@@ -11,24 +11,32 @@ export async function createWindow() {
     width: 800,
     height: 600,
     ...OVERLAY_WINDOW_OPTS,
-    icon: join(process.env.PUBLIC, 'SextantOrb128.ico'),
+    icon: join(__dirname, 'SextantOrb128.ico'),
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: true,
       webSecurity: false,
       webviewTag: true,
-      preload: join(process.env.DIST, 'preload.mjs'),
+      preload: join(__dirname, 'preload.js'),
     },
   })
-  if (process.env.VITE_DEV_SERVER_URL) {
-    await win.loadURL(process.env.VITE_DEV_SERVER_URL)
+  if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
+    win.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL)
     win.webContents.openDevTools({
       mode: 'detach', activate: false
     })
+  } else {
+    win.loadFile(join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`))
   }
-  else {
-    await win.loadFile(join(process.env.DIST, 'index.html'))
-  }
+  // if (process.env.VITE_DEV_SERVER_URL) {
+  //   await win.loadURL(process.env.VITE_DEV_SERVER_URL)
+  //   win.webContents.openDevTools({
+  //     mode: 'detach', activate: false
+  //   })
+  // }
+  // else {
+  //   await win.loadFile(join(process.env.DIST, 'index.html'))
+  // }
   ipcMain.on(IPC.FORCE_POE, () => {
     forcePOE()
   })

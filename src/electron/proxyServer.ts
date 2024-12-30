@@ -1,5 +1,5 @@
 import express from 'express'
-import { GGCapi } from '@/lib/api'
+import { GGCapi } from './lib/api'
 import { AxiosResponse } from 'axios'
 import { Server } from 'node:http'
 import { ipcMain } from 'electron'

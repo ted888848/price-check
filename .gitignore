@@ -28,3 +28,5 @@ release
 pnpm-lock.yaml
 yarn.lock
 setGithubToken.ps1
+out/
+.vite

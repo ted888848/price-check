@@ -1,3 +1,4 @@
+/// <reference types="vite/client" />
 declare type ArrayValueType<T> = T extends (infer E)[] ? E : never
 interface HeistReward {
   name?: string;

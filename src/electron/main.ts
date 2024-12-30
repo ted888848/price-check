@@ -6,15 +6,19 @@ import { setupTray } from './tray'
 import { get1APIdata, checkForUpdate } from './setupAPI'
 import { setupConfig } from './config'
 import IPC from '@/ipc'
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
 import './proxyServer'
+import started from 'electron-squirrel-startup'
+
+// Handle creating/removing shortcuts on Windows when installing/uninstalling.
+if (started) {
+  app.quit()
+}
 const isDevelopment = process.env.NODE_ENV !== 'production'
-const _dirname = typeof __dirname !== 'undefined' ? __dirname : dirname(fileURLToPath(import.meta.url))
-process.env.DIST = _dirname
-process.env.PUBLIC = process.env.VITE_DEV_SERVER_URL
-  ? join(process.env.DIST, '../public')
-  : process.env.DIST
+// const _dirname = typeof __dirname !== 'undefined' ? __dirname : dirname(fileURLToPath(import.meta.url))
+// process.env.DIST = _dirname
+// process.env.PUBLIC = process.env.VITE_DEV_SERVER_URL
+//   ? join(process.env.DIST, '../public')
+//   : process.env.DIST
 
 if (process.platform === 'win32') app.setAppUserModelId(app.getName())
 

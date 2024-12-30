@@ -1,29 +1,36 @@
 {
   "name": "price-check",
   "version": "3.25.4",
-  "main": "dist/main.mjs",
   "description": "一個POE查價器",
   "author": "ted <ted888848@gmail.com>",
   "license": "MIT",
   "private": true,
-  "type": "module",
-  "debug": {
-    "env": {
-      "VITE_DEV_SERVER_URL": "http://127.0.0.1:3344/"
-    }
-  },
+  "main": ".vite/build/main.js",
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc --noEmit && vite build && electron-builder",
     "preview": "vite preview",
     "buildP": "powershell ./setGithubToken.ps1; npm run build -- -p always",
     "vuetsc": "vue-tsc --noEmit",
-    "ipc-type": "tsc ./src/ipc/index.ts --emitDeclarationOnly --declaration --outDir src/ipc"
+    "ipc-type": "tsc ./src/ipc/index.ts --emitDeclarationOnly --declaration --outDir src/ipc",
+    "start": "electron-forge start",
+    "package": "electron-forge package",
+    "make": "electron-forge make"
   },
   "devDependencies": {
+    "@electron-forge/cli": "^7.6.0",
+    "@electron-forge/maker-deb": "^7.6.0",
+    "@electron-forge/maker-rpm": "^7.6.0",
+    "@electron-forge/maker-squirrel": "^7.6.0",
+    "@electron-forge/maker-zip": "^7.6.0",
+    "@electron-forge/plugin-auto-unpack-natives": "^7.6.0",
+    "@electron-forge/plugin-fuses": "^7.6.0",
+    "@electron-forge/plugin-vite": "^7.6.0",
+    "@electron/fuses": "^1.8.0",
     "@headlessui/vue": "^1.7.23",
     "@iconify-json/material-symbols": "^1.2.8",
     "@iconify-json/svg-spinners": "^1.2.1",
+    "@types/electron-squirrel-startup": "^1.0.2",
     "@types/express": "^4.17.21",
     "@types/lodash-es": "^4.17.12",
     "@types/node": "^20.17.8",
@@ -34,26 +41,25 @@
     "@unocss/preset-uno": "^0.58.9",
     "@vitejs/plugin-vue": "^5.2.0",
     "axios": "^1.7.8",
-    "electron": "^29.4.6",
-    "electron-builder": "^24.13.3",
+    "electron": "33.2.1",
     "electron-store": "^8.2.0",
-    "electron-updater": "^6.3.9",
+    "ts-node": "^10.9.2",
     "eslint": "^8.57.1",
     "eslint-plugin-vue": "^9.31.0",
     "lodash-es": "^4.17.21",
     "typescript": "^5.7.2",
     "unocss": "^0.58.9",
     "vite": "^5.4.11",
-    "vite-plugin-electron": "^0.28.8",
-    "vite-plugin-electron-renderer": "^0.14.6",
     "vue": "^3.5.13",
     "vue-select": "^4.0.0-beta.6",
     "vue-tsc": "^2.2.0"
   },
   "dependencies": {
     "electron-overlay-window": "^3.3.0",
+    "electron-squirrel-startup": "^1.0.1",
     "express": "^4.21.1",
-    "uiohook-napi": "^1.5.4"
+    "uiohook-napi": "^1.5.4",
+    "vite-tsconfig-paths": "^5.1.4"
   },
   "repository": {
     "type": "git",

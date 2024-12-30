@@ -17,7 +17,6 @@ export const ipc = {
   }
 }
 contextBridge.exposeInMainWorld('ipc', ipc)
-
 const api1DataStore = new Store({
   name: 'APIData'
 })

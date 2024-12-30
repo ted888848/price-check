@@ -17,19 +17,19 @@ export function loadAPIData(poeVersion?: POEVersion) {
 
 function loadAPIPoe1Data() {
   leagues = window.store.get('Leagues') as string[] ?? []
-  APIitems = window.store.get('APIitems') as ParsedAPIitems ?? []
+  APIitems = (window.store.get('APIitems') ?? {}) as ParsedAPIitems
   heistReward = window.store.get('heistReward') as HeistReward[] ?? []
   APIStatic = window.store.get('APIStatic') as Static[] ?? []
-  APImods = window.store.get('APImods') as ParsedAPIMods ?? []
+  APImods = (window.store.get('APImods') ?? {}) as ParsedAPIMods
   currencyImageUrl = window.store.get('currencyImageUrl') as Static[] ?? []
 }
 
 
 function loadAPIPoe2Data() {
   leagues = window.store.get('Leagues', '2') as string[] ?? []
-  APIitems = window.store.get('APIitems', '2') as ParsedAPIitems ?? []
+  APIitems = (window.store.get('APIitems', '2') ?? {}) as ParsedAPIitems
   heistReward = window.store.get('heistReward', '2') as HeistReward[] ?? []
   APIStatic = window.store.get('APIStatic', '2') as Static[] ?? []
-  APImods = window.store.get('APImods', '2') as ParsedAPIMods ?? []
+  APImods = (window.store.get('APImods', '2') ?? {}) as ParsedAPIMods
   currencyImageUrl = window.store.get('currencyImageUrl', '2') as Static[] ?? []
 }

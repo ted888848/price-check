@@ -1,26 +1,24 @@
 {
   "compilerOptions": {
     "target": "ESNext",
-    "module": "ESNext",
     "composite": true,
+    "module": "ESNext",
     "allowJs": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
     "noImplicitAny": false,
     "sourceMap": true,
     "baseUrl": ".",
-    "outDir": "out",
+    "outDir": "dist",
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "paths": {
       "@/*": ["src/*"]
-    }
+    },
   },
   "include": [
-    "src/electron",
-    "src/preload",
-    "src/ipc",
-    "src/types.d.ts",
-    "forge.env.d.ts",
+    "src/web",
+    "src/types.d.ts"
+
   ]
 }

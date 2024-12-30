@@ -68,6 +68,6 @@ export function buildTray() {
 }
 
 export function setupTray() {
-  tray = new Tray(join(process.env.PUBLIC, 'SextantOrb128.ico'))
+  tray = new Tray(join(__dirname, 'SextantOrb128.ico'))
   buildTray()
 }
