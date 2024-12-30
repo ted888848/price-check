@@ -1,7 +1,7 @@
 import { Tray, Menu, app } from 'electron'
 import { win } from './overlayWindow'
 import { checkForUpdate } from './setupAPI'
-import { join } from 'path'
+import { join } from 'node:path'
 import { updateState } from './setupAPI'
 import { config, updateConfig } from './config'
 let tray: Tray
@@ -12,8 +12,9 @@ export function buildTray() {
       type: 'normal',
       click() {
         win.webContents.openDevTools({
-          mode: 'detach', activate: false
+          mode: 'undocked', activate: false
         })
+
       }
     },
     {

@@ -13,12 +13,13 @@
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": [
+        "src/*"
+      ]
     },
   },
   "include": [
     "src/web",
     "src/types.d.ts"
-
   ]
 }

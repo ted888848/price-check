@@ -2,7 +2,7 @@ import { BrowserWindow, ipcMain, shell } from 'electron'
 import { OverlayController, OVERLAY_WINDOW_OPTS } from 'electron-overlay-window'
 import { PoeWindow } from './POEWindow'
 import IPC from '@/ipc'
-import { join } from 'path'
+import { join } from 'node:path'
 import { config } from './config'
 export let win: BrowserWindow
 let isOverlayOpen: boolean
@@ -20,10 +20,11 @@ export async function createWindow() {
       preload: join(__dirname, 'preload.js'),
     },
   })
+  console.log(MAIN_WINDOW_VITE_DEV_SERVER_URL)
   if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
     win.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL)
     win.webContents.openDevTools({
-      mode: 'detach', activate: false
+      mode: 'undocked', activate: false
     })
   } else {
     win.loadFile(join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`))
