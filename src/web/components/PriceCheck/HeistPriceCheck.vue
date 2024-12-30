@@ -24,7 +24,7 @@
     <button
       class="mx-2 bg-gray-500 text-white rounded px-1 hover:bg-gray-400 disabled:cursor-default disabled:opacity-60 disabled:bg-gray-500"
       :disabled="rateTimeLimit.flag" @click="searchOnlyChaos">
-      SearchC
+      Search2
     </button>
     <div v-if="searchResult.err || searchResult.searchID.ID">
       <button
@@ -34,13 +34,13 @@
       </button>
       <button
         class="mx-2 bg-blue-800 text-white rounded px-4 hover:bg-blue-700 disabled:cursor-default disabled:opacity-60 disabled:bg-blue-800"
-        :disabled="rateTimeLimit.flag" @click="openBrowser">
+        @click="openBrowser">
         B
       </button>
     </div>
     <button
       class="mx-2 bg-blue-800 text-white rounded px-4 hover:bg-blue-700 disabled:cursor-default disabled:opacity-60 disabled:bg-blue-800"
-      :disabled="rateTimeLimit.flag" @click="openWebView">
+      @click="openWebView">
       BV
     </button>
   </div>

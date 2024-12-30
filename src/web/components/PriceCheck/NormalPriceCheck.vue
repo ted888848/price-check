@@ -157,13 +157,13 @@
       </button>
       <button
         class="mx-2 bg-blue-800 text-white rounded px-4 hover:bg-blue-700 disabled:cursor-default disabled:opacity-60 disabled:bg-blue-800"
-        :disabled="rateTimeLimit.flag" @click="openBrowser">
+        @click="openBrowser">
         B
       </button>
     </div>
     <button
       class="mx-2 bg-blue-800 text-white rounded px-4 hover:bg-blue-700 disabled:cursor-default disabled:opacity-60 disabled:bg-blue-800"
-      :disabled="rateTimeLimit.flag" @click="openWebView">
+      @click="openWebView">
       BV
     </button>
   </div>
