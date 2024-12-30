@@ -26,6 +26,7 @@
     "@electron-forge/plugin-auto-unpack-natives": "^7.6.0",
     "@electron-forge/plugin-fuses": "^7.6.0",
     "@electron-forge/plugin-vite": "^7.6.0",
+    "@electron-forge/publisher-github": "^7.6.0",
     "@electron/fuses": "^1.8.0",
     "@headlessui/vue": "^1.7.23",
     "@iconify-json/material-symbols": "^1.2.8",
@@ -43,10 +44,10 @@
     "axios": "^1.7.8",
     "electron": "33.2.1",
     "electron-store": "^8.2.0",
-    "ts-node": "^10.9.2",
     "eslint": "^8.57.1",
     "eslint-plugin-vue": "^9.31.0",
     "lodash-es": "^4.17.21",
+    "ts-node": "^10.9.2",
     "typescript": "^5.7.2",
     "unocss": "^0.58.9",
     "vite": "^5.4.11",
@@ -59,10 +60,12 @@
     "electron-squirrel-startup": "^1.0.1",
     "express": "^4.21.1",
     "uiohook-napi": "^1.5.4",
+    "update-electron-app": "^3.1.0",
     "vite-tsconfig-paths": "^5.1.4"
   },
   "repository": {
     "type": "git",
+    "owner": "ted888848",
     "url": "https://github.com/ted888848/price-check.git"
   }
 }

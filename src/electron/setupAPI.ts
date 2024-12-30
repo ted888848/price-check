@@ -1,6 +1,7 @@
 import { GGCapi } from './lib/api'
 import Store from 'electron-store'
-import { app, session, dialog } from 'electron' //, shell
+import { app, session, dialog, autoUpdater } from 'electron' //, shell
+import { updateElectronApp, makeUserNotifier } from 'update-electron-app'
 // import { autoUpdater } from 'electron-updater'
 import { buildTray } from './tray'
 import { config } from './config'
@@ -318,17 +319,16 @@ export const updateState = {
   label: '', canClick: true
 }
 
-// autoUpdater.on('update-available', ({ version, releaseNotes }) => {
-//   updateState.label = `下載新版本 v${version}中`
-//   updateState.canClick = false
-//   buildTray()
-//   dialog.showMessageBox({
-//     title: '有新版本',
-//     type: 'info',
-//     message: `有新版本 v${version}，並已經開始在背景下載\n
-//     ${releaseNotes!.toString().replaceAll(/<[/]?(ul|li)>/g, '')}`,
-//   })
-// })
+autoUpdater.on('update-available', () => {
+  updateState.label = '背景下載新版本中'
+  updateState.canClick = false
+  buildTray()
+  dialog.showMessageBox({
+    title: '有新版本',
+    type: 'info',
+    message: '有新版本正在背景下載',
+  })
+})
 // autoUpdater.on('update-downloaded', () => {
 //   updateState.label = '下載完成，關閉後將自動安裝'
 //   updateState.canClick = false
@@ -346,11 +346,11 @@ export const updateState = {
 //       }
 //     })
 // })
-// autoUpdater.on('update-not-available', () => {
-//   updateState.label = '目前沒有新版本'
-//   updateState.canClick = true
-//   buildTray()
-// })
+autoUpdater.on('update-not-available', () => {
+  updateState.label = '目前沒有新版本'
+  updateState.canClick = true
+  buildTray()
+})
 export async function checkForUpdate() {
   if ((await session.defaultSession?.getCacheSize() >>> 20) >= 30) { //大於30MB
     session.defaultSession.clearCache()
@@ -364,6 +364,19 @@ export async function checkForUpdate() {
   buildTray()
   try {
     // await autoUpdater.checkForUpdates()
+    updateElectronApp({
+      notifyUser: true,
+      onNotifyUser(info) {
+        makeUserNotifier({
+          title: '新版本下載完成',
+          detail: `新版本 ${info.releaseName}，已經下載完成\n
+          ${info.releaseNotes!.toString().replaceAll(/<[/]?(ul|li)>/g, '')}`,
+          laterButtonText: '稍後再安裝',
+          restartButtonText: '重新開啟並安裝更新',
+        })
+      },
+      updateInterval: '20 minutes',
+    })
   }
   catch {
     updateState.label = '檢查更新錯誤'
