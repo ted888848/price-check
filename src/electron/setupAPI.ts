@@ -288,7 +288,12 @@ async function getStatic(poeVersion: POEVersion = '1') {
   store.set('currencyImageUrl', _currencyImageUrl)
   store.set('APIStatic', setupAPIStatic(data.result))
 }
-export async function get1APIdata() {
+export async function getAPIData() {
+  const poeVersion = config.poeVersion
+  return poeVersion === '1' ? get1APIdata() : get2APIdata()
+}
+
+async function get1APIdata() {
   const result = await Promise.allSettled([getLeagues(), getItems(), getStatic(), getStats()])
   let error: any
   result.forEach((e) => {
@@ -300,7 +305,7 @@ export async function get1APIdata() {
   if (error?.length) throw error
 }
 
-export async function get2APIdata() {
+async function get2APIdata() {
   const result = await Promise.allSettled([getLeagues('2'), getItems('2'), getStatic('2'), getStats('2')])
   let error: any
   result.forEach((e) => {
