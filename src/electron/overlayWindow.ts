@@ -20,7 +20,7 @@ export async function createWindow() {
       preload: join(__dirname, 'preload.js'),
     },
   })
-  console.log(MAIN_WINDOW_VITE_DEV_SERVER_URL)
+
   if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
     win.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL)
     win.webContents.openDevTools({
@@ -29,15 +29,7 @@ export async function createWindow() {
   } else {
     win.loadFile(join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`))
   }
-  // if (process.env.VITE_DEV_SERVER_URL) {
-  //   await win.loadURL(process.env.VITE_DEV_SERVER_URL)
-  //   win.webContents.openDevTools({
-  //     mode: 'detach', activate: false
-  //   })
-  // }
-  // else {
-  //   await win.loadFile(join(process.env.DIST, 'index.html'))
-  // }
+
   ipcMain.on(IPC.FORCE_POE, () => {
     forcePOE()
   })
