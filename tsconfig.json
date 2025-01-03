@@ -4,6 +4,8 @@
     "module": "ESNext",
     "moduleResolution": "bundler",
     "baseUrl": ".",
+    "isolatedModules": true,
+    "noEmit": true,
     "paths": {
       "@/*": [
         "src/*"
