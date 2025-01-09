@@ -5,6 +5,7 @@ import electron from 'vite-plugin-electron/simple'
 import renderer from 'vite-plugin-electron-renderer'
 import pkg from './package.json'
 import UnoCSS from 'unocss/vite'
+import tsconfigPaths from 'vite-tsconfig-paths'
 // https://vitejs.dev/config/
 export default defineConfig(({ command }) => {
   // rmSync('dist-electron', {
@@ -25,6 +26,7 @@ export default defineConfig(({ command }) => {
         }
       }),
       UnoCSS(),
+      tsconfigPaths(),
       electron({
         main: {
           entry: 'src/electron/index.ts',
@@ -73,11 +75,6 @@ export default defineConfig(({ command }) => {
         port: +url.port,
       }
     })(),
-    clearScreen: false,
-    resolve: {
-      alias: {
-        '@': `${__dirname}/src`,
-      }
-    }
+    clearScreen: false
   }
 })

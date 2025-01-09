@@ -48,11 +48,14 @@
     "vite-plugin-electron-renderer": "^0.14.6",
     "vue": "^3.5.13",
     "vue-select": "^4.0.0-beta.6",
+    "vite-tsconfig-paths": "^5.1.4",
+    "hono": "^4.6.15",
+    "update-electron-app": "^3.1.0",
+    "@hono/node-server": "^1.13.7",
     "vue-tsc": "^2.2.0"
   },
   "dependencies": {
     "electron-overlay-window": "^3.3.0",
-    "express": "^4.21.1",
     "uiohook-napi": "^1.5.4"
   },
   "repository": {
