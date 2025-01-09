@@ -1,6 +1,6 @@
 {
   "name": "price-check",
-  "version": "3.25.4",
+  "version": "3.25.5",
   "description": "一個POE查價器",
   "author": "ted <ted888848@gmail.com>",
   "license": "MIT",
@@ -48,16 +48,16 @@
     "vite": "^5.4.11",
     "vue": "^3.5.13",
     "vue-select": "^4.0.0-beta.6",
+    "@hono/node-server": "^1.13.7",
+    "electron-squirrel-startup": "^1.0.1",
+    "hono": "^4.6.15",
+    "update-electron-app": "^3.1.0",
+    "vite-tsconfig-paths": "^5.1.4",
     "vue-tsc": "^2.2.0"
   },
   "dependencies": {
-    "@hono/node-server": "^1.13.7",
     "electron-overlay-window": "^3.3.0",
-    "electron-squirrel-startup": "^1.0.1",
-    "hono": "^4.6.15",
-    "uiohook-napi": "^1.5.4",
-    "update-electron-app": "^3.1.0",
-    "vite-tsconfig-paths": "^5.1.4"
+    "uiohook-napi": "^1.5.4"
   },
   "repository": {
     "type": "git",

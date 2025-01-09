@@ -1,17 +1,26 @@
 {
   "compilerOptions": {
     "target": "ESNext",
-    "module": "ESNext",
-    "moduleResolution": "bundler",
+    "module": "commonjs",
+    "allowJs": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "noImplicitAny": true,
+    "sourceMap": true,
     "baseUrl": ".",
-    "isolatedModules": true,
-    "noEmit": true,
+    "outDir": "dist",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
     "paths": {
       "@/*": [
         "src/*"
       ]
     }
   },
+  "include": [
+    "forge.config.ts",
+    "forge.env.ts",
+  ],
   "references": [
     {
       "path": "./tsconfig.node.json"
