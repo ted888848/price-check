@@ -84,12 +84,12 @@ export const selectOptions = Object.freeze({
     { label: '幻影的', value: 3 }
   ],
   influencesOptions: [
-    { id: 'pseudo.pseudo_has_shaper_influence', label: '塑者' },
-    { id: 'pseudo.pseudo_has_elder_influence', label: '尊師' },
-    { id: 'pseudo.pseudo_has_crusader_influence', label: '聖戰' },
-    { id: 'pseudo.pseudo_has_redeemer_influence', label: '救贖' },
-    { id: 'pseudo.pseudo_has_hunter_influence', label: '狩獵' },
-    { id: 'pseudo.pseudo_has_warlord_influence', label: '督軍' }
+    { id: 'pseudo.pseudo_has_shaper_influence', text: '塑者' as string | string[] },
+    { id: 'pseudo.pseudo_has_elder_influence', text: '尊師' as string | string[] },
+    { id: 'pseudo.pseudo_has_crusader_influence', text: '聖戰' as string | string[] },
+    { id: 'pseudo.pseudo_has_redeemer_influence', text: '救贖' as string | string[] },
+    { id: 'pseudo.pseudo_has_hunter_influence', text: '狩獵' as string | string[] },
+    { id: 'pseudo.pseudo_has_warlord_influence', text: '督軍' as string | string[] }
   ],
   elderMapOptions: [
     { value: 1, label: '奴役(右上)' },

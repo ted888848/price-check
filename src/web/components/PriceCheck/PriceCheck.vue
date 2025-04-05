@@ -7,9 +7,7 @@
       :class="{ 'absolute': !isWebViewOpen }">
       <div class="bg-gray-800 flex justify-between max-h-9 items-center">
         <div class="flex justify-start mr-auto ml-1 flex-1">
-          <VSelect v-model="currentPriceCheck" class="text-sm style-chooser style-chooser-inf text-center"
-            :options="priceCheckOptions" label="label" :searchable="false" :clearable="false"
-            :reduce="(option: ArrayValueType<typeof priceCheckOptions>) => option.value" />
+          <MySelect v-model="currentPriceCheck" :options="priceCheckOptions" label-key="label" value-key="value" />
         </div>
         <div class="flex justify-center flex-1">
           <div class="relative exaltedImg ">
@@ -31,8 +29,8 @@
         </div>
       </div>
       <div class="p-1">
-        <VSelect v-model="leagueSelect" class=" text-base style-chooser text-center" :options="leagues"
-          :clearable="false" :searchable="false" />
+        <MySelect v-model="leagueSelect" :options="leagues.map(v => ({ label: v, value: v }))" label-key="label"
+          value-key="value" />
       </div>
       <KeepAlive>
         <NormalPriceCheck v-if="currentPriceCheck === 'NormalPriceCheck'" :item-prop="item!"
@@ -56,6 +54,7 @@ import { leagues, currencyImageUrl } from '@/web/lib/APIdata'
 import NormalPriceCheck from './NormalPriceCheck.vue'
 import HeistPriceCheck from './HeistPriceCheck.vue'
 import { secondCurrency, tradeUrl } from '@/web/lib'
+import MySelect from '../utility/MySelect.vue'
 const isWebViewOpen = ref(false)
 const webView = ref<HTMLIFrameElement>()
 const priceCheckPos = ref({

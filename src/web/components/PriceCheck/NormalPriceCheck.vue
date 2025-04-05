@@ -21,25 +21,21 @@
     </span>
     <span :style="{ visibility: item.eDPS ? 'visible' : 'hidden' }" class=" w-40">EDps: {{ item.eDPS }}</span>
   </div>
-  <VSelect v-if="undefinedUnique && item.uniques.length > 0" v-model="item.name" class="text-sm style-chooser"
-    :options="item.uniques" label="name" :reduce="(ele: ArrayValueType<typeof item['uniques']>) => ele.name" />
+  <MySelect v-if="undefinedUnique && item.uniques.length > 0" v-model="item.name" :options="item.uniques"
+    label-key="name" value-key="name" />
   <div class="mx-0  bg-blue-900 grid grid-cols-3 select-none">
     <div v-if="!item.searchExchange.option" class="flex p-2 items-center justify-center">
       <span class="mx-1 text-white hover:cursor-default">汙染:</span>
-      <VSelect v-model="item.isCorrupt" class="text-sm style-chooser flex-grow" :options="generalOption" label="label"
-        :reduce="(ele: ArrayValueType<typeof generalOption>) => ele.value" :clearable="false" :searchable="false" />
+      <MySelect v-model="item.isCorrupt" :options="generalOption" label-key="label" value-key="value" />
     </div>
     <div v-if="!item.searchExchange.option && !item.type.text.endsWith('技能寶石')"
       class="flex p-2 items-center justify-center select-none">
       <span class="mx-1 text-white hover:cursor-default">已鑑定:</span>
-      <VSelect v-model="item.isIdentify" class="text-sm style-chooser flex-grow" :options="generalOption" label="label"
-        :reduce="(ele: ArrayValueType<typeof generalOption>) => ele.value" :clearable="false" :searchable="false" />
+      <MySelect v-model="item.isIdentify" :options="generalOption" label-key="label" value-key="value" />
     </div>
     <div v-if="item.searchExchange.option" class="center p-2 select-none col-start-2">
       <span class="mx-1 text-white hover:cursor-default">使用:</span>
-      <VSelect v-model="searchExchangeState" class="text-sm style-chooser flex-grow" :options="exchangeHave"
-        label="label" :reduce="(ele: ArrayValueType<typeof exchangeHave>) => ele.value" :clearable="false"
-        :searchable="false" />
+      <MySelect v-model="searchExchangeState" :options="exchangeHave" label-key="label" value-key="value" />
     </div>
     <div v-if="!item.searchExchange.option" class="flex items-center justify-center">
       <ValueMinMax v-if="item.gemLevel" v-model="item.gemLevel" class="flex p-2 items-center justify-center">
@@ -65,8 +61,7 @@
       class="flex col-span-2 items-center justify-center select-none">
       <span class="mx-1 text-white hover:cursor-default">勢力:</span>
       <div class=" flex-grow mx-1">
-        <VSelect v-model="item.influences" class="text-sm style-chooser style-chooser-inf" :options="influencesOptions"
-          label="label" :searchable="false" multiple />
+        <MySelect v-model="item.influences" :options="influencesOptions" label-key="text" multiple />
       </div>
     </div>
     <div v-if="item.search6L !== undefined" class="flex items-center justify-center py-1 hover:cursor-pointer"
@@ -81,8 +76,7 @@
     </div>
     <div v-if="!item.searchExchange.option" class="flex items-center justify-center py-1 select-none">
       <span class="mx-1 text-white hover:cursor-default">稀有度:</span>
-      <VSelect v-model="item.raritySearch" class="text-sm style-chooser w-24" :options="rarityOptions" label="label"
-        :searchable="false" :clearable="false" />
+      <MySelect v-model="item.raritySearch" :options="rarityOptions" label-key="label" />
     </div>
     <div v-if="!item.searchExchange.option" class="flex items-center justify-center py-1 hover:cursor-pointer"
       @click="() => item.searchTwoWeekOffline = !item.searchTwoWeekOffline">
@@ -217,6 +211,7 @@ import CircleCheck from '../utility/CircleCheck.vue'
 import ValueMinMax from '../utility/ValueMinMax.vue'
 import type { ISearchResult, IExchangeResult, IFetchResult } from '@/web/lib/tradeSide'
 import { secondCurrency, tradeUrl } from '@/web/lib'
+import MySelect from '../utility/MySelect.vue'
 const props = defineProps<{
   itemProp: ParsedItem;
   leagueSelect: string;

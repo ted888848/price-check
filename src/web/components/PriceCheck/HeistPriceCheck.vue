@@ -1,14 +1,14 @@
 <template>
   <div class="flex p-2 items-center justify-center">
     <span class="mx-1 text-white hover:cursor-default">物品:</span>
-    <VSelect v-model="gemReplicaSelect" class="text-sm style-chooser flex-grow" :options="gemReplicaOptions"
-      label="text" />
+    <MySelect v-model="gemReplicaSelect" :options="gemReplicaOptions" label="text" :clearable="true"
+      :filterable="true" />
   </div>
   <div v-show="!((gemReplicaSelect?.text.startsWith('贗品') && gemReplicaSelect?.trans) ?? true)"
     class="flex p-2 items-center justify-center">
     <span class="mx-1 text-white hover:cursor-default">寶石版本:</span>
-    <VSelect v-model="gemTransSelect" class="text-sm style-chooser flex-grow" :options="gemReplicaSelect?.trans"
-      label="text" :clearable="true" :searchable="false" />
+    <MySelect v-model="gemTransSelect" class="text-sm style-chooser flex-grow" :options="gemReplicaSelect?.trans ?? []"
+      label="text" :filterable="false" :clearable="true" />
   </div>
   <div class="flex items-center justify-center py-1 hover:cursor-pointer"
     @click="_event => twoWeekOffline = !twoWeekOffline">
@@ -87,6 +87,7 @@ import { heistReward as gemReplicaOptions } from '@/web/lib/APIdata'
 import CircleCheck from '../utility/CircleCheck.vue'
 import type { ISearchResult, ISearchJson, IFetchResult } from '@/web/lib/tradeSide'
 import { secondCurrency, tradeUrl } from '@/web/lib'
+import MySelect from '../utility/MySelect.vue'
 const props = defineProps<{
   itemProp: ParsedItem;
   leagueSelect: string;

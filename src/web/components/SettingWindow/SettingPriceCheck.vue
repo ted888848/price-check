@@ -12,9 +12,8 @@
     </div>
     <div class="flex mt-5 hover:cursor-pointer items-center gap-8px">
       <span class="text-xl text-white">以物易物優先使用:</span>
-      <VSelect v-model="config.searchExchangePrefer" class="text-sm style-chooser min-w-150px" :options="exchangeHave"
-        label="label" :reduce="(ele: ArrayValueType<typeof exchangeHave>) => ele.value" :clearable="false"
-        :searchable="false" />
+      <MySelect v-model="config.searchExchangePrefer" class="min-w-150px w-fit" :options="exchangeHave"
+        label-key="label" value-key="value" />
     </div>
     <div class="flex mt-5 hover:cursor-pointer items-center"
       @click="() => config.searchTwoWeekOffline = !config.searchTwoWeekOffline">
@@ -26,6 +25,7 @@
 <script setup lang="ts">
 import CircleCheck from '../utility/CircleCheck.vue'
 import { selectOptions } from '@/web/lib/tradeSide'
+import MySelect from '../utility/MySelect.vue'
 const { exchangeHave } = selectOptions
 const config = defineModel<Config>('config', {
   required: true
