@@ -1,5 +1,5 @@
-import { IpcArgs, IpcReturn } from '@/ipc'
-import { Channel } from '@/ipc'
+import type { IpcArgs, IpcReturn } from '@/ipc'
+import type { Channel } from '@/ipc'
 import { contextBridge, ipcRenderer } from 'electron'
 import Store from 'electron-store'
 export const ipc = {

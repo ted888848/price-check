@@ -12,8 +12,8 @@
     </div>
     <div class="flex mt-5 hover:cursor-pointer items-center gap-8px">
       <span class="text-xl text-white">以物易物優先使用:</span>
-      <MySelect v-model="config.searchExchangePrefer" class="min-w-150px w-fit" :options="exchangeHave"
-        label-key="label" value-key="value" />
+      <MySelect v-model="config.searchExchangePrefer" class="min-w-150px" :options="exchangeHave" label-key="label"
+        :reducer="i => i.value" />
     </div>
     <div class="flex mt-5 hover:cursor-pointer items-center"
       @click="() => config.searchTwoWeekOffline = !config.searchTwoWeekOffline">

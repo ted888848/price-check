@@ -7,7 +7,8 @@
       :class="{ 'absolute': !isWebViewOpen }">
       <div class="bg-gray-800 flex justify-between max-h-9 items-center">
         <div class="flex justify-start mr-auto ml-1 flex-1">
-          <MySelect v-model="currentPriceCheck" :options="priceCheckOptions" label-key="label" value-key="value" />
+          <MySelect v-model="currentPriceCheck" :options="priceCheckOptions" label-key="label" :reducer="i => i.value"
+            class="w-100px" />
         </div>
         <div class="flex justify-center flex-1">
           <div class="relative exaltedImg ">
@@ -30,7 +31,7 @@
       </div>
       <div class="p-1">
         <MySelect v-model="leagueSelect" :options="leagues.map(v => ({ label: v, value: v }))" label-key="label"
-          value-key="value" />
+          :reducer="i => i.value" class="flex-1" />
       </div>
       <KeepAlive>
         <NormalPriceCheck v-if="currentPriceCheck === 'NormalPriceCheck'" :item-prop="item!"
@@ -81,7 +82,7 @@ function closePriceCheck() {
   isWebViewOpen.value = false
 }
 
-const leagueSelectRef = ref()
+const leagueSelectRef = ref<string>('')
 const leagueSelect = computed({
   get: () => leagueSelectRef.value,
   set: (val: string) => {

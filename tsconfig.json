@@ -1,37 +1,19 @@
 {
   "compilerOptions": {
-    "target": "ESNext",
-    "useDefineForClassFields": true,
-    "module": "ESNext",
-    "moduleResolution": "Bundler",
-    "strict": true,
-    "jsx": "preserve",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "esModuleInterop": true,
-    "lib": [
-      "ESNext",
-      "DOM"
-    ],
-    "skipLibCheck": true,
-    "noEmit": true,
     "baseUrl": ".",
     "paths": {
       "@/*": [
         "src/*"
       ]
-    },
-    "noImplicitAny": true
+    }
   },
-  "include": [
-    "src/web",
-    "src/preload",
-    "types.d.ts"
-  ],
-  "exclude": [],
+  "files": [],
   "references": [
     {
       "path": "./tsconfig.node.json"
+    },
+    {
+      "path": "./tsconfig.app.json"
     }
   ]
 }

@@ -1,11 +1,13 @@
 <template>
+  <MySelect v-if="undefinedUnique && item.uniques.length > 0" v-model="item.name" :options="item.uniques"
+    label-key="name" :reducer="i => i.name" class="mx-4px" />
   <div class="text-xl text-white my-1 text-center center gap-8px"
     @click="() => item.type.searchByType = Boolean(!item.type.searchByType && item.type.option)">
     <span v-if="item.name">{{ item.name }}</span>
     <div class="center gap-12px">
       <img v-if="itemProp.baseType === '滿靈柩'" class="h-28px" src="/coffin-dance.gif">
       <span :class="{ 'text-red-500': item.type.searchByType }">
-        {{ item.elderMap ?
+        {{item.elderMap ?
           `尊師守衛 ${elderMapOptions.find(e => e.value === item.elderMap!.value?.option)?.label}` :
           item.conquerorMap ?
             `征服者 ${conquerorMapOptions.find(e => e.value === item.conquerorMap!.value?.option)?.label}` : item.baseType
@@ -14,6 +16,7 @@
       <img v-if="itemProp.baseType === '滿靈柩'" class="h-28px" src="/coffin-dance.gif">
     </div>
   </div>
+
   <div class="text-white text-center flex justify-between px-2">
     <span :style="{ visibility: item.pDPS ? 'visible' : 'hidden' }" class=" w-40">PDps: {{ item.pDPS }}</span>
     <span v-if="item.type.text" class="flex-1" :class="{ 'text-3xl': item.type.searchByType }">
@@ -21,21 +24,22 @@
     </span>
     <span :style="{ visibility: item.eDPS ? 'visible' : 'hidden' }" class=" w-40">EDps: {{ item.eDPS }}</span>
   </div>
-  <MySelect v-if="undefinedUnique && item.uniques.length > 0" v-model="item.name" :options="item.uniques"
-    label-key="name" value-key="name" />
   <div class="mx-0  bg-blue-900 grid grid-cols-3 select-none">
     <div v-if="!item.searchExchange.option" class="flex p-2 items-center justify-center">
       <span class="mx-1 text-white hover:cursor-default">汙染:</span>
-      <MySelect v-model="item.isCorrupt" :options="generalOption" label-key="label" value-key="value" />
+      <MySelect v-model="item.isCorrupt" :options="generalOption" label-key="label" :reducer="i => i.value"
+        class="flex-1" />
     </div>
     <div v-if="!item.searchExchange.option && !item.type.text.endsWith('技能寶石')"
       class="flex p-2 items-center justify-center select-none">
       <span class="mx-1 text-white hover:cursor-default">已鑑定:</span>
-      <MySelect v-model="item.isIdentify" :options="generalOption" label-key="label" value-key="value" />
+      <MySelect v-model="item.isIdentify" :options="generalOption" label-key="label" :reducer="i => i.value"
+        class="flex-1" />
     </div>
     <div v-if="item.searchExchange.option" class="center p-2 select-none col-start-2">
       <span class="mx-1 text-white hover:cursor-default">使用:</span>
-      <MySelect v-model="searchExchangeState" :options="exchangeHave" label-key="label" value-key="value" />
+      <MySelect v-model="searchExchangeState" :options="exchangeHave" label-key="label" :reducer="i => i.value"
+        class="flex-1" />
     </div>
     <div v-if="!item.searchExchange.option" class="flex items-center justify-center">
       <ValueMinMax v-if="item.gemLevel" v-model="item.gemLevel" class="flex p-2 items-center justify-center">
@@ -61,7 +65,8 @@
       class="flex col-span-2 items-center justify-center select-none">
       <span class="mx-1 text-white hover:cursor-default">勢力:</span>
       <div class=" flex-grow mx-1">
-        <MySelect v-model="item.influences" :options="influencesOptions" label-key="text" multiple />
+        <MySelect v-model="item.influences" :options="influencesOptions" label-key="text" value-key="id" multiple
+          :center-label="false" class="flex-1" />
       </div>
     </div>
     <div v-if="item.search6L !== undefined" class="flex items-center justify-center py-1 hover:cursor-pointer"
@@ -76,7 +81,8 @@
     </div>
     <div v-if="!item.searchExchange.option" class="flex items-center justify-center py-1 select-none">
       <span class="mx-1 text-white hover:cursor-default">稀有度:</span>
-      <MySelect v-model="item.raritySearch" :options="rarityOptions" label-key="label" />
+      <MySelect v-model="item.raritySearch" :options="rarityOptions" label-key="label" value-key="value"
+        class="flex-1" />
     </div>
     <div v-if="!item.searchExchange.option" class="flex items-center justify-center py-1 hover:cursor-pointer"
       @click="() => item.searchTwoWeekOffline = !item.searchTwoWeekOffline">

@@ -1,17 +1,16 @@
 <template>
   <div class="flex p-2 items-center justify-center">
     <span class="mx-1 text-white hover:cursor-default">物品:</span>
-    <MySelect v-model="gemReplicaSelect" :options="gemReplicaOptions" label="text" :clearable="true"
-      :filterable="true" />
+    <MySelect v-model="gemReplicaSelect" :options="gemReplicaOptions" label-key="text" value-key="text"
+      :clearable="true" :filterable="true" class="flex-1" />
   </div>
   <div v-show="!((gemReplicaSelect?.text.startsWith('贗品') && gemReplicaSelect?.trans) ?? true)"
     class="flex p-2 items-center justify-center">
     <span class="mx-1 text-white hover:cursor-default">寶石版本:</span>
-    <MySelect v-model="gemTransSelect" class="text-sm style-chooser flex-grow" :options="gemReplicaSelect?.trans ?? []"
-      label="text" :filterable="false" :clearable="true" />
+    <MySelect v-model="gemTransSelect" :options="gemReplicaSelect?.trans ?? []" label-key="text" value-key="disc"
+      :filterable="false" :clearable="true" class="flex-1" />
   </div>
-  <div class="flex items-center justify-center py-1 hover:cursor-pointer"
-    @click="_event => twoWeekOffline = !twoWeekOffline">
+  <div class="flex items-center justify-center py-1 hover:cursor-pointer" @click="twoWeekOffline = !twoWeekOffline">
     <span class="mx-1 text-white">2周離線</span>
     <CircleCheck :checked="twoWeekOffline" />
   </div>

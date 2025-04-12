@@ -611,13 +611,13 @@ function parseWeapon(item: string[][]) {
         min: parseInt(lineMatch[1]), max: undefined, search: false
       }
     }
-    else if ((lineMatch = line.match(/物理傷害: (\d+)-(\d+)/))) {
+    else if ((lineMatch = line.match(/物理傷害: (\d+)(?:-|\s到\s)(\d+)/))) {
       itemParsed.phyDamage = {
         min: parseInt(lineMatch[1]),
         max: parseInt(lineMatch[2])
       }
     }
-    else if ((lineMatch = line.match(/元素傷害:(?: (\d+)-(\d+) \(augmented\),?)(?: (\d+)-(\d+) \(augmented\),?)?(?: (\d+)-(\d+) \(augmented\))?/))) {
+    else if ((lineMatch = line.match(/(?:元素|火焰|冰冷|閃電)傷害:(?: (\d+)(?:-|\s到\s)(\d+) \((?:augmented|fire|lightning|cold)\),?)(?: (\d+)(?:-|\s到\s)(\d+) \((?:augmented|fire|lightning|cold)\),?)?(?: (\d+)(?:-|\s到\s)(\d+) \((?:augmented|fire|lightning|cold)\))?/))) {
       lineMatch.shift()
       itemParsed.eleDamage = {
         min: lineMatch.reduce((pre, curr, index) => {

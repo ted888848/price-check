@@ -17,6 +17,11 @@ export default defineConfig(({ command }) => {
   const sourcemap = isServe || !!process.env.VSCODE_DEBUG
 
   return {
+    resolve: {
+      alias: {
+        '@': `${__dirname}/src`,
+      }
+    },
     plugins: [
       vue({
         template: {
@@ -61,6 +66,11 @@ export default defineConfig(({ command }) => {
                   entryFileNames: 'preload.mjs'
                 },
               },
+            },
+            resolve: {
+              alias: {
+                '@': `${__dirname}/src`,
+              }
             }
           }
         }
