@@ -3,7 +3,7 @@ import { ref } from 'vue'
 import { isUndefined, isNumber, countBy } from 'lodash-es'
 import type { AxiosResponseHeaders } from 'axios'
 import axios from 'axios'
-import { poeVersion, secondCurrency, tradeUrl } from './index'
+import { secondCurrency, tradeUrl } from './index'
 
 const tradeApi = axios.create({
   baseURL: `http://localhost:${window.proxyServer.getPort()}/proxy`,

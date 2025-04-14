@@ -137,7 +137,7 @@ function isOverflow() {
   return priceCheckDiv.value.scrollHeight > priceCheckDiv.value.offsetHeight
 }
 
-window.ipc.on(IPC.PRICE_CHECK_SHOW, (e, clip: string, pos: string) => {
+window.ipc.on(IPC.PRICE_CHECK_SHOW, (_e, clip: string, pos: string) => {
   closeWebView()
   windowShowHide.value = true
   currentPriceCheck.value = 'NormalPriceCheck'
@@ -167,36 +167,6 @@ div.priceCheckRoot {
 
 div.priceCheck {
   width: 500px;
-}
-
-.style-chooser .vs__search::placeholder,
-.style-chooser .vs__dropdown-toggle,
-.style-chooser .vs__dropdown-menu {
-  text-align: center;
-  min-width: 0px;
-  background: #dfe5fb;
-  border: none;
-  color: #394066;
-}
-
-.style-chooser .vs__search {
-  padding: 0;
-  width: 0;
-  flex-grow: 0;
-}
-
-.style-chooser .vs__selected {
-  flex-grow: 0;
-}
-
-.style-chooser .vs__selected-options {
-  display: flex;
-  justify-content: center;
-}
-
-.style-chooser-inf .vs__selected-options {
-  min-width: 100px;
-  justify-content: start;
 }
 
 input::-webkit-outer-spin-button,

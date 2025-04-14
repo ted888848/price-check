@@ -1,7 +1,17 @@
 <template>
   <div>
     <ElSelect v-model="<any>selectedValue" :multiple="multiple" :disabled="disabled" :filterable="filterable"
-      :clearable="clearable" placeholder="" :value-key="valueKey" @change="handleSelectChange">
+      :clearable="clearable" placeholder="" :value-key="valueKey" @change="handleSelectChange" :show-arrow="false"
+      :popper-options="{
+        modifiers: [
+          {
+            name: 'offset',
+            options: {
+              offset: [0, 4],
+            },
+          },
+        ],
+      }">
       <template v-if="centerLabel" #label="{ label }">
         <div class="text-center">
           {{ label }}
@@ -18,7 +28,7 @@
 <script setup lang="ts"
   generic="T extends Record<string, any>, ReducerReturn ,ValueKey extends (keyof T | undefined) = undefined, Multiple extends boolean = false">
   import { ElSelect, ElOption } from 'element-plus'
-  import { ref, watch } from 'vue'
+  import { ref } from 'vue'
   type TModelValue = ValueKey extends string ? T : ReducerReturn;
   type TModelValue2 = Multiple extends true ? TModelValue[] : TModelValue;
   type PropsBase = {
