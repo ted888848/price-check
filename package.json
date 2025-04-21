@@ -21,7 +21,6 @@
     "ipc-type": "tsc ./src/ipc/index.ts --emitDeclarationOnly --declaration --outDir src/ipc"
   },
   "devDependencies": {
-    "@headlessui/vue": "^1.7.23",
     "@hono/node-server": "^1.14.1",
     "@iconify-json/material-symbols": "^1.2.19",
     "@iconify-json/svg-spinners": "^1.2.2",
@@ -30,16 +29,18 @@
     "@unocss/preset-icons": "^66.1.0-beta.11",
     "@unocss/preset-uno": "^66.1.0-beta.11",
     "@vitejs/plugin-vue": "^5.2.3",
+    "@vue/tsconfig": "^0.7.0",
     "axios": "^1.8.4",
     "electron": "^29.4.6",
     "electron-builder": "^24.13.3",
     "electron-store": "^8.2.0",
     "electron-updater": "^6.6.3",
+    "element-plus": "^2.9.7",
     "hono": "^4.7.6",
     "lodash-es": "^4.17.21",
     "typescript": "^5.8.3",
     "unocss": "^66.1.0-beta.11",
-    "update-electron-app": "^3.1.1",
+    "unplugin-element-plus": "^0.9.1",
     "vite": "^6.2.6",
     "vite-plugin-electron": "^0.29.0",
     "vite-plugin-electron-renderer": "^0.14.6",
@@ -48,11 +49,8 @@
     "vue-tsc": "^2.2.8"
   },
   "dependencies": {
-    "@vue/tsconfig": "^0.7.0",
     "electron-overlay-window": "^3.3.0",
-    "element-plus": "^2.9.7",
-    "uiohook-napi": "^1.5.4",
-    "unplugin-element-plus": "^0.9.1"
+    "uiohook-napi": "^1.5.4"
   },
   "repository": {
     "type": "git",

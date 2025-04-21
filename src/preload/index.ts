@@ -1,4 +1,4 @@
-import type { IpcArgs, IpcReturn } from '@/ipc'
+import type { IpcArgs, IPCListener, IpcReturn } from '@/ipc'
 import type { Channel } from '@/ipc'
 import { contextBridge, ipcRenderer } from 'electron'
 import Store from 'electron-store'
@@ -12,8 +12,8 @@ export const ipc = {
   invoke<C extends Channel>(channel: C, ...args: IpcArgs<C>): Promise<IpcReturn<C>> {
     return ipcRenderer.invoke(channel, ...args)
   },
-  on<C extends Channel>(channel: C, listener: (event: Electron.IpcRendererEvent, ...args: IpcArgs<C>) => void) {
-    return ipcRenderer.on(channel, listener as any)
+  on<C extends Channel>(channel: C, listener: IPCListener<C>) {
+    return ipcRenderer.on(channel, listener)
   }
 }
 contextBridge.exposeInMainWorld('ipc', ipc)
