@@ -3,7 +3,7 @@ import { ref } from 'vue'
 import { isUndefined, isNumber, countBy } from 'lodash-es'
 import type { AxiosResponseHeaders } from 'axios'
 import axios from 'axios'
-import { secondCurrency, tradeUrl } from './index'
+import { poeVersion, secondCurrency, tradeUrl } from './index'
 
 const tradeApi = axios.create({
   baseURL: `http://localhost:${window.proxyServer.getPort()}/proxy`,
@@ -112,7 +112,7 @@ export const selectOptions = Object.freeze({
     { value: 'nonunique', label: '非傳奇' }
   ],
   exchangeHave: [
-    { label: 'D&(C|Ex)', value: 'divine&(C or Ex)' },
+    { label: `D&${poeVersion === '2' ? 'Ex' : 'C'}`, value: 'divine&(C or Ex)' },
     { label: '混沌', value: 'chaos' },
     { label: '崇高', value: 'exalted' },
     { label: '神聖', value: 'divine' }
