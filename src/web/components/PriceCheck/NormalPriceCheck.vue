@@ -61,12 +61,18 @@
     <div v-else-if="item.UberBlightedMap" class="flex items-center justify-center">
       <span class="mx-1 text-white hover:cursor-default">Uber凋落圖</span>
     </div>
+
+    <div v-if="item.type.option === 'map'" class="flex items-center justify-center"
+      @click="() => item.memoryMap = !item.memoryMap">
+      <span class="mx-1 text-white hover:cursor-default">記憶地圖</span>
+      <CircleCheck :have-undefined="true" :checked="item.memoryMap ?? false" />
+    </div>
     <div v-else-if="item.isWeaponOrArmor || ['項鍊', '戒指', '腰帶', '箭袋'].includes(item.type.text)"
       class="flex col-span-2 items-center justify-center select-none">
       <span class="mx-1 text-white hover:cursor-default">勢力:</span>
       <div class=" flex-grow mx-1">
-        <MySelect v-model="item.influences" :options="influencesOptions" label-key="text" value-key="id" multiple
-          :center-label="false" class="flex-1" />
+        <MySelect v-model="item.influences" :options="influencesOptions" label-key="label" value-key="id"
+          :multiple="true" :center-label="false" class="flex-1" log />
       </div>
     </div>
     <div v-if="item.search6L !== undefined" class="flex items-center justify-center py-1 hover:cursor-pointer"

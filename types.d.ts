@@ -166,9 +166,10 @@ interface ParsedItem {
   attackSpeed?: number;
   weaponArea?: number;
   stats: ItemStat[];
-  influences: ItemStat[];
+  influences: (ItemStat & { label: string })[];
   elderMap?: ItemStat;
   conquerorMap?: ItemStat;
+  memoryMap?: boolean;
   autoSearch: boolean;
   searchTwoWeekOffline: boolean;
   searchExchange: {

@@ -875,6 +875,7 @@ function parseMap(item: string[][]) {
       { value: 4, text: '圖拉克斯', exchange: 'droxs-map' }
     ]
   } as const
+
   // item[0].forEach(line => {
   //   const lineMatch = line.match(/地圖階級: (\d+)/)
   //   if (lineMatch) {
@@ -934,6 +935,10 @@ function parseMap(item: string[][]) {
         itemParsed.searchExchange.option = true
         if (itemParsed.mapTier?.search) itemParsed.mapTier.search = false
       }
+    }
+    else if (section[0].includes('區域受到開創者的記憶影響')) {
+      itemParsed.autoSearch = true
+      itemParsed.memoryMap = true
     }
   }
   for (const section of item) {
