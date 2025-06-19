@@ -900,45 +900,49 @@ function parseMap(item: string[][]) {
       break
   }
   for (const section of item) {
-    if (section[0].includes('區域被異界尊師控制') && section.length > 1) {
-      const match = elderMap.options.filter(ele => section[1].includes(`地圖被${ele.text}佔據`))[0]
-      if (match) {
-        // itemParsed.type.searchByType = true
-        itemParsed.autoSearch = true
-        itemParsed.elderMap = {
-          id: 'implicit.stat_3624393862',
-          text: match.text,
-          value: {
-            option: match.value
-          },
-          disabled: false
+    for (const line of section) {
+      if (!itemParsed.elderMap) {
+        const elderMatch = elderMap.options.filter(ele => line.includes(`地圖被${ele.text}佔據`))[0]
+        if (elderMatch) {
+          // itemParsed.type.searchByType = true
+          itemParsed.autoSearch = true
+          itemParsed.elderMap = {
+            id: 'implicit.stat_3624393862',
+            text: elderMatch.text,
+            value: {
+              option: elderMatch.value
+            },
+            disabled: false
+          }
+          itemParsed.searchExchange.want = [elderMatch.exchange]
+          itemParsed.searchExchange.option = true
+          if (itemParsed.mapTier?.search) itemParsed.mapTier.search = false
         }
-        itemParsed.searchExchange.want = [match.exchange]
-        itemParsed.searchExchange.option = true
-        if (itemParsed.mapTier?.search) itemParsed.mapTier.search = false
       }
-    }
-    else if (section[0].startsWith('地圖含有') && section.length > 1) {
-      const match = conquerorMap.options.filter(ele => section[0].includes(`地圖含有${ele.text}的壁壘`))[0]
-      if (match) {
-        // itemParsed.type.searchByType = true
-        itemParsed.autoSearch = true
-        itemParsed.conquerorMap = {
-          id: 'implicit.stat_2563183002',
-          text: match.text,
-          value: {
-            option: match.value
-          },
-          disabled: false
+
+      if (!itemParsed.conquerorMap) {
+        const conquerorMatch = conquerorMap.options.filter(ele => line.includes(`地圖含有${ele.text}的壁壘`))[0]
+        if (conquerorMatch) {
+          // itemParsed.type.searchByType = true
+          itemParsed.autoSearch = true
+          itemParsed.conquerorMap = {
+            id: 'implicit.stat_2563183002',
+            text: conquerorMatch.text,
+            value: {
+              option: conquerorMatch.value
+            },
+            disabled: false
+          }
+          itemParsed.searchExchange.want = [conquerorMatch.exchange]
+          itemParsed.searchExchange.option = true
+          if (itemParsed.mapTier?.search) itemParsed.mapTier.search = false
         }
-        itemParsed.searchExchange.want = [match.exchange]
-        itemParsed.searchExchange.option = true
-        if (itemParsed.mapTier?.search) itemParsed.mapTier.search = false
       }
-    }
-    else if (section[0].includes('區域受到開創者的記憶影響')) {
-      itemParsed.autoSearch = true
-      itemParsed.memoryMap = true
+
+      if (line.includes('區域受到開創者的記憶影響')) {
+        itemParsed.autoSearch = true
+        itemParsed.memoryMap = true
+      }
     }
   }
   for (const section of item) {

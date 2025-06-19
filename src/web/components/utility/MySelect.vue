@@ -1,8 +1,8 @@
 <template>
   <div>
     <ElSelect v-model="<any>selectedValue" :multiple="multiple" :disabled="disabled" :filterable="filterable"
-      :clearable="clearable" placeholder="" :value-key="valueKey" @change="handleSelectChange" :show-arrow="false"
-      :popper-options="{
+      :clearable="clearable" placeholder="" :value-key="valueKey ?? (labelKey as string)" @change="handleSelectChange"
+      :show-arrow="false" :popper-options="{
         modifiers: [
           {
             name: 'offset',
