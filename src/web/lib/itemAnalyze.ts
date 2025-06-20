@@ -194,6 +194,9 @@ export function itemAnalyze(item: string) {
       break
   }
   parsePseudoEleResistance()
+  if (itemParsed.rarity === '傳奇' && itemParsed.isIdentify === false && itemParsed.uniques.length === 1) {
+    itemParsed.name = itemParsed.uniques[0].name
+  }
   if (itemParsed.raritySearch.label === '傳奇' && itemParsed.name) itemParsed.autoSearch = true
   if (itemParsed.baseType === '阿茲瓦特史記') parseTemple(itemSection)
   else if (itemParsed.baseType === '充能的羅盤') parseSextant(itemSection)
