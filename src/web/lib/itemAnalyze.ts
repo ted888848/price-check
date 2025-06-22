@@ -377,45 +377,50 @@ function parseMultilineMod(regSection: RegExp[], section: string[], type: keyof 
   if (!APImods[type].mutiLines) return []
   const tempArr: ItemStat[] = []
   for (let i = 0; i < regSection.length; ++i) {
-    const matchModList = APImods[type].mutiLines?.filter(s => regSection[i].test(s.text[0]))
-    if (!matchModList) continue
-    outer:
-    for (const matchMod of matchModList) {
-      let flag = true
-      for (const index in matchMod.text) {
-        if ((i + (+index)) >= regSection.length || !regSection[i + (+index)].test(matchMod.text[+index])) {
-          flag = false
-          break
+    try {
+      const matchModList = APImods[type].mutiLines?.filter(s => regSection[i].test(s.text[0]))
+      if (!matchModList) continue
+      outer:
+      for (const matchMod of matchModList) {
+        let flag = true
+        for (const index in matchMod.text) {
+          if ((i + (+index)) >= regSection.length || !regSection[i + (+index)].test(matchMod.text[+index])) {
+            flag = false
+            break
+          }
         }
+        if (!flag) continue
+        const matchReg = matchMod.text.map(mod => new RegExp(mod.replace(/[+-]?#/g, String.raw`[+-]?(\d+(?:\.\d+)?)`)
+          .replace(' (部分)', '').replace(/減少|增加/, String.raw`(?:減少|增加)`)))
+        let tempValue = 0
+        let valueCount = 0
+        for (const ind in matchReg) {
+          const regGroup = section[i + (+ind)].match(matchReg[ind])
+          if (!regGroup) continue outer
+          regGroup.shift()
+          if (regGroup.length) tempValue = regGroup.reduce((pre, ele) => { valueCount++; return pre + Number(ele) }, tempValue)
+        }
+        section.splice(i, matchMod.text.length)
+        regSection.splice(i, matchMod.text.length)
+        i -= matchMod.text.length
+        i = i < 0 ? -1 : i
+        if (tempValue)
+          tempArr.push({
+            ...matchMod,
+            value: {
+              min: tempValue / valueCount
+            },
+            disabled: true,
+            type: APImods[type].type
+          })
+        else
+          tempArr.push({
+            ...matchMod, disabled: true, type: APImods[type].type
+          })
       }
-      if (!flag) continue
-      const matchReg = matchMod.text.map(mod => new RegExp(mod.replace(/[+-]?#/g, String.raw`[+-]?(\d+(?:\.\d+)?)`)
-        .replace(' (部分)', '').replace(/減少|增加/, String.raw`(?:減少|增加)`)))
-      let tempValue = 0
-      let valueCount = 0
-      for (const ind in matchReg) {
-        const regGroup = section[i + (+ind)].match(matchReg[ind])
-        if (!regGroup) continue outer
-        regGroup.shift()
-        if (regGroup.length) tempValue = regGroup.reduce((pre, ele) => { valueCount++; return pre + Number(ele) }, tempValue)
-      }
-      section.splice(i, matchMod.text.length)
-      regSection.splice(i, matchMod.text.length)
-      i -= matchMod.text.length
-      i = i < 0 ? -1 : i
-      if (tempValue)
-        tempArr.push({
-          ...matchMod,
-          value: {
-            min: tempValue / valueCount
-          },
-          disabled: true,
-          type: APImods[type].type
-        })
-      else
-        tempArr.push({
-          ...matchMod, disabled: true, type: APImods[type].type
-        })
+    }
+    catch (e) {
+      console.error(e)
     }
   }
   return tempArr
@@ -424,42 +429,48 @@ function parseMod(section: string[], type: keyof ParsedAPIMods) {
   const regSection = getStrReg(section, type)
   const tempArr = parseMultilineMod(regSection, section, type)
   regSection.forEach((line, index) => {
-    let matchMods = APImods[type].entries.filter(s => line.test(s.text))
-    if (matchMods.length > 1) {
-      if (itemParsed.isWeaponOrArmor && matchMods.find(ele => ele.text.endsWith(' (部分)')))
-        matchMods = matchMods.filter(mod => mod.text.endsWith(' (部分)'))
-      else {
-        matchMods = matchMods.filter(mod => !mod.text.endsWith(' (部分)'))
-        const regTemp = section[index].match(/增加|減少/)?.[0]
-        if (regTemp)
-          matchMods = matchMods.filter(mod => mod.text.includes(regTemp))
+    try {
+      let matchMods = APImods[type].entries.filter(s => line.test(s.text))
+      if (matchMods.length > 1) {
+        if (itemParsed.isWeaponOrArmor && matchMods.find(ele => ele.text.endsWith(' (部分)')))
+          matchMods = matchMods.filter(mod => mod.text.endsWith(' (部分)'))
+        else {
+          matchMods = matchMods.filter(mod => !mod.text.endsWith(' (部分)'))
+          const regTemp = section[index].match(/增加|減少/)?.[0]
+          if (regTemp)
+            matchMods = matchMods.filter(mod => mod.text.includes(regTemp))
+        }
       }
+      if (!matchMods.length) return false
+      matchMods.forEach((matchMod) => {
+        console.log(matchMod.text)
+        const matchReg = new RegExp(matchMod.text.replace(/[+-]?#/g, String.raw`([+-]?\d+(?:\.\d+)?)`)
+          .replace(' (部分)', '').replace(/減少|增加/, String.raw`(?:減少|增加)`))
+        const regGroup = section[index].match(matchReg)
+        regGroup?.shift()
+        if (regGroup?.length) {
+          const diffSign = matchMod.text.match(/減少|增加/)?.[0] !== section[index].match(/減少|增加/)?.[0]
+          //數字前增加與減少不相等，把數字變負數
+          const minValue = (diffSign ? -1 : 1) * (regGroup.reduce((pre, ele) => pre + Number(ele), 0) / regGroup.length)
+          tempArr.push({
+            ...matchMod,
+            value: {
+              [diffSign ? 'max' : 'min']: minValue,
+            },
+            disabled: true,
+            type: APImods[type].type
+          })
+        }
+        else {
+          tempArr.push({
+            ...matchMod, disabled: true, type: APImods[type].type
+          })
+        }
+      })
     }
-    if (!matchMods.length) return false
-    matchMods.forEach((matchMod) => {
-      const matchReg = new RegExp(matchMod.text.replace(/[+-]?#/g, String.raw`([+-]?\d+(?:\.\d+)?)`)
-        .replace(' (部分)', '').replace(/減少|增加/, String.raw`(?:減少|增加)`))
-      const regGroup = section[index].match(matchReg)
-      regGroup?.shift()
-      if (regGroup?.length) {
-        const diffSign = matchMod.text.match(/減少|增加/)?.[0] !== section[index].match(/減少|增加/)?.[0]
-        //數字前增加與減少不相等，把數字變負數
-        const minValue = (diffSign ? -1 : 1) * (regGroup.reduce((pre, ele) => pre + Number(ele), 0) / regGroup.length)
-        tempArr.push({
-          ...matchMod,
-          value: {
-            [diffSign ? 'max' : 'min']: minValue,
-          },
-          disabled: true,
-          type: APImods[type].type
-        })
-      }
-      else {
-        tempArr.push({
-          ...matchMod, disabled: true, type: APImods[type].type
-        })
-      }
-    })
+    catch (e) {
+      console.error(e)
+    }
   })
   if (tempArr.length) {
     itemParsed.stats.push(...tempArr)
@@ -879,14 +890,14 @@ function parseMap(item: string[][]) {
     ]
   } as const
 
-  // item[0].forEach(line => {
-  //   const lineMatch = line.match(/地圖階級: (\d+)/)
-  //   if (lineMatch) {
-  //     itemParsed.mapTier = {
-  //       min: parseInt(lineMatch[1]), max: undefined, search: true
-  //     }
-  //   }
-  // })
+  item[0].forEach(line => {
+    const lineMatch = line.match(/地圖階級: (\d+)/)
+    if (lineMatch) {
+      itemParsed.mapTier = {
+        min: parseInt(lineMatch[1]), max: undefined, search: true
+      }
+    }
+  })
   item.shift()
   switch (true) {
     case itemParsed.baseType.startsWith('凋落的'):

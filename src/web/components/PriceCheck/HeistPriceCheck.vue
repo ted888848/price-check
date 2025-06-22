@@ -43,6 +43,9 @@
       BV
     </button>
   </div>
+  <span v-if="parseError" class="text-red-600 text-4xl text-center hover:cursor-default">
+    {{ parseError }}
+  </span>
   <table v-if="fetchResultSorted.length" class="bg-blue-500 text-center text-white text-sm my-1 mx-5 w-1/2 self-center">
     <thead class="">
       <tr class=" border-b-2 border-red-500 text-base">
@@ -91,6 +94,7 @@ const props = defineProps<{
   itemProp: ParsedItem;
   leagueSelect: string;
   divineToChaosOrExalted: number;
+  parseError?: string | null;
   isOverflow: () => boolean;
 }>()
 const { rateTimeLimit } = getIsCounting()

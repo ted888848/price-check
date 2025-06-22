@@ -36,10 +36,10 @@
       <KeepAlive>
         <NormalPriceCheck v-if="currentPriceCheck === 'NormalPriceCheck'" :item-prop="item!"
           :league-select="leagueSelect" :divine-to-chaos-or-exalted="divineToChaosOrEx" :is-overflow="isOverflow"
-          @open-web-view="openWebView" />
+          @open-web-view="openWebView" :parse-error="parseError" />
         <HeistPriceCheck v-else-if="currentPriceCheck === 'HeistPriceCheck'" :item-prop="item!"
           :divine-to-chaos-or-exalted="divineToChaosOrEx" :league-select="leagueSelect" :is-overflow="isOverflow"
-          @open-web-view="openWebView" />
+          @open-web-view="openWebView" :parse-error="parseError" />
       </KeepAlive>
     </div>
   </div>
@@ -115,6 +115,7 @@ const priceCheckOptions: PriceCheckOption[] = [{
 }]
 const currentPriceCheck = ref<PriceCheckTabs>('NormalPriceCheck')
 const item = ref<ParsedItem | null>(null)
+const parseError = ref<string | null>(null)
 
 const divineToChaosOrEx = ref(0)
 const divineImage = import.meta.env.VITE_URL_BASE + currencyImageUrl.find(ele => ele.id === 'divine')?.image
@@ -143,9 +144,12 @@ window.ipc.on(IPC.PRICE_CHECK_SHOW, (_e, clip: string, pos: string) => {
   currentPriceCheck.value = 'NormalPriceCheck'
   priceCheckPos.value.right = pos
   try {
+    parseError.value = null
     item.value = itemAnalyze(clip)
   }
   catch (e) {
+    item.value = {} as ParsedItem
+    parseError.value = (e as Error).message
     console.log(e)
   }
 })

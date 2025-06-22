@@ -254,7 +254,7 @@ const rateTimeLimitArr = {
       { limit: 6, time: 3 }
     ],
     account: [
-      { limit: 3, time: 2 }
+      { limit: 2, time: 1 }
     ]
   },
   fetch: {
@@ -263,7 +263,7 @@ const rateTimeLimitArr = {
       { limit: 10, time: 1 }
     ],
     account: [
-      { limit: 4, time: 2 }
+      { limit: 4, time: 1 }
     ]
   },
   exchange: {
@@ -273,7 +273,7 @@ const rateTimeLimitArr = {
       { limit: 5, time: 3 }
     ],
     account: [
-      { limit: 3, time: 2 }
+      { limit: 2, time: 2 }
     ]
   }
 } as const
