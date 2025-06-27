@@ -443,7 +443,6 @@ function parseMod(section: string[], type: keyof ParsedAPIMods) {
       }
       if (!matchMods.length) return false
       matchMods.forEach((matchMod) => {
-        console.log(matchMod.text)
         const matchReg = new RegExp(matchMod.text.replace(/[+-]?#/g, String.raw`([+-]?\d+(?:\.\d+)?)`)
           .replace(' (部分)', '').replace(/減少|增加/, String.raw`(?:減少|增加)`))
         const regGroup = section[index].match(matchReg)
@@ -859,7 +858,24 @@ function parseOtherNeedMods(item: string[][]) {
     parseThreadOfHope(item)
     return
   }
+  if (itemParsed.name === '贗品．龍牙翱翔') {
+    outer: for (const section of item) {
+      for (let index = 0; index < section.length; index++) {
+        const match = section[index].match(/全部 ([^\s]+) 寶石等級 \+3/)
+        if (match) {
+          section[index] = String.raw`全部 # 寶石等級 \+${match[1]}`
+        }
+      }
+    }
+  }
   parseAllfuns(item, parseFuns)
+  if (itemParsed.name === '贗品．龍牙翱翔') {
+    itemParsed.stats.forEach(ele => {
+      if (typeof ele.text === 'string' && ele.text.startsWith('全部 # 寶石等級')) {
+        ele.disabled = false
+      }
+    })
+  }
   if (itemParsed.type.option === 'memoryline') {
     itemParsed.stats.forEach(ele => ele.disabled = false)
     itemParsed.itemLevel && (itemParsed.itemLevel.search = false)
@@ -1095,3 +1111,4 @@ function parseImmortalFire(item: string[][]) {
     if (parseItemLevel(section) === ParseResult.PARSE_SECTION_SUCC) break
   }
 }
+
