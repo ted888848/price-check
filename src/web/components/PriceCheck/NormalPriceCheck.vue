@@ -193,8 +193,8 @@
       <tbody class="">
         <tr v-for="ele in fetchResultSorted" :key="`${ele.price}|${ele.currency}`" class=" border-b-2 border-gray-600"
           :class="{
-            'text-yellow-400 text-xl bg-indigo-700 font-bold': ele.amount === maxAmount!.amount,
-            'text-yellow-300 bg-indigo-500': secondMaxAmount?.amount !== maxAmount?.amount && ele.amount === secondMaxAmount!.amount
+            'text-yellow-400 text-xl bg-indigo-700 font-bold': ele.amount === maxAmount?.amount,
+            'text-yellow-300 bg-indigo-500': secondMaxAmount?.amount !== maxAmount?.amount && ele.amount === secondMaxAmount?.amount
           }">
           <td v-if="item.searchExchange.option" class="flex justify-center items-center">
             <img :src="ele.image" class=" w-7 h-7">{{ ele.price }}<img :src="currency2Img" class=" w-7 h-7">
