@@ -368,8 +368,10 @@ function getStrReg(section: string[], type: string) {
   section.forEach(line => {
     const indexOfType = line.indexOf(` (${type})`)
     line = indexOfType > -1 ? line.substring(0, indexOfType) : line
-    retArr.push(new RegExp(String.raw`^${line.replace(/[+-]?\d+(\.\d+)?/g, String.raw`[+-]?(\d+|#)`)
-      .replace(/減少|增加/, String.raw`(?:減少|增加)`)}( \(部分\))?$`))
+    line = line.replace(/[+-]?\d+(?:\.\d+)?/g, '__NUMBER__')
+    line = line.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    retArr.push(new RegExp(`^${line.replace(/__NUMBER__/g, '[+-]?(\\d+|#)')
+      .replace(/減少|增加/, "(?:減少|增加)")}( \\(部分\\))?$`))
   })
   return retArr
 }
@@ -863,7 +865,7 @@ function parseOtherNeedMods(item: string[][]) {
       for (let index = 0; index < section.length; index++) {
         const match = section[index].match(/全部 ([^\s]+) 寶石等級 \+3/)
         if (match) {
-          section[index] = String.raw`全部 # 寶石等級 \+${match[1]}`
+          section[index] = `全部 # 寶石等級 +${match[1]}`
         }
       }
     }
