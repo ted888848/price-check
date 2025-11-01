@@ -6,7 +6,6 @@
       @click="() => item.type.searchByType = Boolean(!item.type.searchByType && item.type.option)">
       <span v-if="item.name">{{ item.name }}</span>
       <div class="center gap-12px">
-        <img v-if="itemProp.baseType === '滿靈柩'" class="h-28px" src="/coffin-dance.gif">
         <span :class="{ 'text-red-500': item.type.searchByType }">
           {{item.elderMap ?
             `尊師守衛 ${elderMapOptions.find(e => e.value === item.elderMap!.value?.option)?.label}` :
@@ -14,7 +13,6 @@
               `征服者 ${conquerorMapOptions.find(e => e.value === item.conquerorMap!.value?.option)?.label}` : item.baseType
           }}
         </span>
-        <img v-if="itemProp.baseType === '滿靈柩'" class="h-28px" src="/coffin-dance.gif">
       </div>
     </div>
 
@@ -92,10 +90,10 @@
         <MySelect v-model="item.raritySearch" :options="rarityOptions" label-key="label" value-key="value"
           class="flex-1" />
       </div>
-      <div v-if="!item.searchExchange.option" class="flex items-center justify-center py-1 hover:cursor-pointer"
-        @click="() => item.searchTwoWeekOffline = !item.searchTwoWeekOffline">
-        <span class="mx-1 text-white">2周離線</span>
-        <CircleCheck :checked="item.searchTwoWeekOffline" />
+      <div v-if="!item.searchExchange.option" class="flex items-center justify-center py-1 select-none">
+        <span class="mx-1 text-white">搜尋類型:</span>
+        <MySelect v-model="item.searchOnlineType" :options="searchOnlineTypeOptions" label-key="label"
+          :reducer="i => i.value" class="flex-1" />
       </div>
     </div>
 
@@ -124,8 +122,8 @@
           <td class="text-base" @click="() => mod.disabled = !mod.disabled">
             <CircleCheck :checked="!mod.disabled" />
           </td>
-          <td class=" text-lg font-semibold hover:cursor-default" :style="{ color: modTextColor(mod.type) }"
-            @click="() => mod.disabled = !mod.disabled">
+          <td class="whitespace-nowrap text-lg font-semibold hover:cursor-default"
+            :style="{ color: modTextColor(mod.type) }" @click="() => mod.disabled = !mod.disabled">
             {{ mod.type }}
           </td>
           <td @click="() => mod.disabled = !mod.disabled">
@@ -216,7 +214,7 @@
       <div class="i-svg-spinners:tadpole" />
     </div>
     <span v-if="rateTimeLimit.flag" class="text-white bg-red-600 text-xl text-center my-2 hover:cursor-default">
-      API次數限制 {{ rateTimeLimit.second }} 秒後再回來
+      API次數限制 {{ rateTimeLimit.second.toFixed(1) }} 秒後再回來
     </span>
   </template>
   <span v-if="parseError" class="text-red-600 text-4xl text-center hover:cursor-default">
@@ -226,9 +224,9 @@
 
 <script setup lang="ts">
 import { maxBy } from 'lodash-es'
-import { computed, ref, nextTick, watch } from 'vue'
+import { computed, ref, nextTick, watch, onUnmounted } from 'vue'
 import {
-  getSearchJSON, searchItem, fetchItem, getIsCounting, searchExchange, selectOptions,
+  getSearchJSON, searchItem, fetchItem, searchExchange, selectOptions,
 } from '@/web/lib/tradeSide'
 import IPC from '@/ipc'
 import { APIStatic } from '@/web/lib/APIdata'
@@ -237,6 +235,7 @@ import ValueMinMax from '../utility/ValueMinMax.vue'
 import type { ISearchResult, IExchangeResult, IFetchResult } from '@/web/lib/tradeSide'
 import { secondCurrency, tradeUrl } from '@/web/lib'
 import MySelect from '../utility/MySelect.vue'
+import { getIsCounting } from '@/web/lib/ratetimelimit'
 const props = defineProps<{
   itemProp: ParsedItem;
   leagueSelect: string;
@@ -251,7 +250,8 @@ const undefinedUnique = item.value.isIdentify === false && item.value.raritySear
 
 const {
   generalOption, influencesOptions, elderMapOptions,
-  conquerorMapOptions, rarityOptions, exchangeHave
+  conquerorMapOptions, rarityOptions, exchangeHave,
+  searchOnlineTypeOptions: searchOnlineTypeOptions,
 } = selectOptions
 function modTextColor(type?: string) {
   switch (type) {
@@ -305,34 +305,44 @@ function resetSearchData() {
 async function fetchMore() {
   isSearching.value = true
   const fetchStartPos = searchResult.value.nowFetched
-  const fetchEndPos = Math.min(searchResult.value.nowFetched + 20, searchResult.value.totalCount)
+  const fetchEndPos = Math.min(searchResult.value.nowFetched + item.value.fetchCount, searchResult.value.totalCount)
   searchResult.value.nowFetched = fetchEndPos
   const fetchList = searchResult.value.result.slice(fetchStartPos, fetchEndPos) as string[]
-  fetchResult.value = await fetchItem(fetchList, searchResult.value.searchID.ID!, fetchResult.value)
-  isSearching.value = false
-  nextTick(() => { modTbodyToggle.value = !props.isOverflow() })
+  try {
+    fetchResult.value = await fetchItem(fetchList, searchResult.value.searchID.ID!, fetchResult.value)
+  } catch (error) {
+    console.error('Error fetching more items:', error)
+  } finally {
+    isSearching.value = false
+    nextTick(() => { modTbodyToggle.value = !props.isOverflow() })
+  }
 }
 async function searchBtn() {
   if (rateTimeLimit.value.flag) return
   resetSearchData()
   isSearching.value = true
-  if (item.value.searchExchange.option) {
-    searchResult.value = (await searchExchange(item.value, props.leagueSelect))
-    if (!searchResult.value.err) {
-      const image = APIStatic.find(ele => ele.id === (searchResult.value as IExchangeResult).currency2)!.image
-      currency2Img.value = image ? `${import.meta.env.VITE_URL_BASE}${image}` : ''
-      fetchResult.value = searchResult.value.result
+  try {
+    if (item.value.searchExchange.option) {
+      searchResult.value = (await searchExchange(item.value, props.leagueSelect))
+      if (!searchResult.value.err) {
+        const image = APIStatic.find(ele => ele.id === (searchResult.value as IExchangeResult).currency2)!.image
+        currency2Img.value = image ? `${import.meta.env.VITE_URL_BASE}${image}` : ''
+        fetchResult.value = searchResult.value.result
+      }
+    }
+    else {
+      searchResult.value = await searchItem(getSearchJSON(item.value), props.leagueSelect)
+      if (!searchResult.value.err) {
+        const fetchStartPos = searchResult.value.nowFetched
+        const fetchEndPos = Math.min(searchResult.value.nowFetched + item.value.fetchCount, searchResult.value.totalCount)
+        searchResult.value.nowFetched = fetchEndPos
+        const fetchList = searchResult.value.result.slice(fetchStartPos, fetchEndPos)
+        fetchResult.value = await fetchItem(fetchList, searchResult.value.searchID.ID!)
+      }
     }
   }
-  else {
-    searchResult.value = await searchItem(getSearchJSON(item.value), props.leagueSelect)
-    if (!searchResult.value.err) {
-      const fetchStartPos = searchResult.value.nowFetched
-      const fetchEndPos = Math.min(searchResult.value.nowFetched + 20, searchResult.value.totalCount)
-      searchResult.value.nowFetched = fetchEndPos
-      const fetchList = searchResult.value.result.slice(fetchStartPos, fetchEndPos)
-      fetchResult.value = await fetchItem(fetchList, searchResult.value.searchID.ID!)
-    }
+  catch (error) {
+    console.error('Error during search:', error)
   }
   isSearching.value = false
   nextTick(() => { modTbodyToggle.value = !props.isOverflow() })
@@ -392,6 +402,15 @@ watch(searchExchangeState, (value) => {
   window.ipc.send(IPC.UPDATE_CONFIG, JSON.stringify({ searchExchangePrefer: value } satisfies Partial<Config>))
 })
 
+watch(() => item.value.searchOnlineType, (value) => {
+  if (value === 'securable') {
+    item.value.fetchCount = 10
+  }
+  else {
+    item.value.fetchCount = 20
+  }
+})
+
 
 const emit = defineEmits<{
   'open-web-view': [extendUrl: string];
@@ -405,6 +424,21 @@ function openBrowser() {
 if (item.value.autoSearch && !props.parseError)
   searchBtn()
 
+function handleKeydown(e: KeyboardEvent) {
+  if (e.key === 'Enter' && !isSearching.value && !props.parseError) {
+    e.preventDefault()
+    if (e.altKey) {
+      searchOnlyChaosOrExalted()
+    }
+    else {
+      searchBtn()
+    }
+  }
+}
+window.addEventListener('keydown', handleKeydown)
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleKeydown)
+})
 </script>
 
 <style></style>

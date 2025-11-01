@@ -32,7 +32,8 @@ const defaultStore: Config = {
     }
   ],
   league: '',
-  poeVersion: '1'
+  poeVersion: '1',
+  searchOnlineType: 'online',
 }
 const storeSchema: Schema<Config> = {
   characterName: {
@@ -72,6 +73,9 @@ const storeSchema: Schema<Config> = {
   },
   poeVersion: {
     type: 'string'
+  },
+  searchOnlineType: {
+    type: 'string',
   }
 }
 export const store = new Store({
@@ -87,6 +91,9 @@ export function setupConfig() {
   if (config.searchExchangePrefer === 'divine&chaos') {
     config.searchExchangePrefer = 'divine&(C or Ex)'
     store.store = config
+  }
+  if (config.searchTwoWeekOffline === true) {
+    config.searchOnlineType = '1week'
   }
   ipcMain.on(IPC.SET_CONFIG, (_e, configData: string) => {
     // const prevSetVersion = store.store.poeVersion

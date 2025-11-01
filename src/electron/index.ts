@@ -16,7 +16,7 @@ process.env.PUBLIC = process.env.VITE_DEV_SERVER_URL
   ? join(process.env.DIST, '../public')
   : process.env.DIST
 
-if (process.platform === 'win32') app.setAppUserModelId(app.getName())
+if (process.platform === 'win32') app.setAppUserModelId('com.electron.price-check')
 
 app.disableHardwareAcceleration()
 if (!app.requestSingleInstanceLock()) {

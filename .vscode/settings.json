@@ -44,6 +44,7 @@
     "onesword",
     "onlineleague",
     "POESESSID",
+    "ratetimelimiters",
     "runedagger",
     "SUCC",
     "Tipc",
@@ -64,5 +65,6 @@
   "launch": {
     "configurations": [],
     "compounds": []
-  }
+  },
+  "postman.settings.dotenv-detection-notification-visibility": false
 }

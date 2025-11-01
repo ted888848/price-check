@@ -15,18 +15,17 @@
       <MySelect v-model="config.searchExchangePrefer" class="min-w-150px" :options="exchangeHave" label-key="label"
         :reducer="i => i.value" />
     </div>
-    <div class="flex mt-5 hover:cursor-pointer items-center"
-      @click="() => config.searchTwoWeekOffline = !config.searchTwoWeekOffline">
-      <span class="text-xl text-white mr-2">搜尋兩周內上架包含離線:</span>
-      <CircleCheck :checked="config.searchTwoWeekOffline" />
+    <div class="flex items-center py-1 select-none">
+      <span class="mx-1 text-white">搜尋類型:</span>
+      <MySelect v-model="config.searchOnlineType" :options="searchOnlineTypeOptions" label-key="label"
+        :reducer="i => i.value" class="min-w-100px" />
     </div>
   </div>
 </template>
 <script setup lang="ts">
-import CircleCheck from '../utility/CircleCheck.vue'
 import { selectOptions } from '@/web/lib/tradeSide'
 import MySelect from '../utility/MySelect.vue'
-const { exchangeHave } = selectOptions
+const { exchangeHave, searchOnlineTypeOptions } = selectOptions
 const config = defineModel<Config>('config', {
   required: true
 })

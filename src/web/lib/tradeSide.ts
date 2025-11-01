@@ -1,9 +1,9 @@
 import { APIStatic, currencyImageUrl } from './APIdata'
-import { ref } from 'vue'
 import { isUndefined, isNumber, countBy } from 'lodash-es'
 import type { AxiosResponseHeaders } from 'axios'
 import axios from 'axios'
 import { poeVersion, secondCurrency, tradeUrl } from './index'
+import { parseRateTimeLimit, startCountdown } from './ratetimelimit'
 
 const tradeApi = axios.create({
   baseURL: `http://localhost:${window.proxyServer.getPort()}/proxy`,
@@ -66,7 +66,7 @@ export interface ISearchJson {
       };
     };
     stats: [{ type: 'and'; filters: ItemStat[] }];
-    status: { option: 'any' | 'online' | 'onlineleague' };
+    status: { option: 'any' | 'online' | 'onlineleague' | 'securable' };
   };
   sort: { price: 'asc' };
 }
@@ -116,7 +116,13 @@ export const selectOptions = Object.freeze({
     { label: '混沌', value: 'chaos' },
     { label: '崇高', value: 'exalted' },
     { label: '神聖', value: 'divine' }
-  ]
+  ],
+  searchOnlineTypeOptions: [
+    { label: '全部', value: 'all' },
+    { label: '線上', value: 'online' },
+    { label: '攤位', value: 'securable' },
+    { label: '1周', value: '1week' },
+  ].filter(Boolean) as { label: string; value: 'all' | 'online' | 'securable' | '1week' }[]
 })
 const defaultSearchJson: ISearchJson = {
   query: {
@@ -212,15 +218,30 @@ export function getSearchJSON(item: ParsedItem) {
       option: item.raritySearch.value
     }
   }
-  if (item.searchTwoWeekOffline) {
+
+
+  if (item.searchOnlineType === 'securable') {
+    searchJSON.query.status.option = 'securable'
+    //@ts-expect-error 
+    delete searchJSON.query.filters.trade_filters.filters.price.min
+  }
+  else if (item.searchOnlineType === 'online') {
+    searchJSON.query.status.option = 'online'
+  }
+  else if (item.searchOnlineType === '1week') {
     searchJSON.query.filters.trade_filters.filters.indexed = {
-      option: '2weeks'
+      option: '1week'
     }
     searchJSON.query.status.option = 'any'
   }
+  else {
+    searchJSON.query.status.option = 'any'
+  }
+
   if (item.onlyChaosOrExalted) {
     searchJSON.query.filters.trade_filters.filters.price.option = secondCurrency
   }
+
   searchJSON.query.stats[0].filters.push(...(item.stats))
   searchJSON.query.stats[0].filters.push(...(item.influences))
 
@@ -245,79 +266,6 @@ export function getSearchJSON(item: ParsedItem) {
   }
 
   return searchJSON
-}
-const rateTimeLimitArr = {
-  search: {
-    ip: [
-      { limit: 45, time: 60 },
-      { limit: 13, time: 20 },
-      { limit: 6, time: 3 }
-    ],
-    account: [
-      { limit: 2, time: 1 }
-    ]
-  },
-  fetch: {
-    ip: [
-      { limit: 14, time: 4 },
-      { limit: 10, time: 1 }
-    ],
-    account: [
-      { limit: 4, time: 1 }
-    ]
-  },
-  exchange: {
-    ip: [
-      { limit: 40, time: 60 },
-      { limit: 13, time: 30 },
-      { limit: 5, time: 3 }
-    ],
-    account: [
-      { limit: 2, time: 2 }
-    ]
-  }
-} as const
-const rateTimeLimit = ref({
-  flag: false, second: 0
-})
-export function getIsCounting() {
-  return {
-    rateTimeLimit
-  }
-}
-let interval: NodeJS.Timeout | undefined
-function startCountdown(time: number) {
-  if (time < rateTimeLimit.value.second) return
-  if (interval) {
-    clearInterval(interval)
-    interval = undefined
-  }
-  rateTimeLimit.value.flag = true
-  rateTimeLimit.value.second = time
-  interval = setInterval(() => {
-    if ((--rateTimeLimit.value.second) < 0) {
-      rateTimeLimit.value.flag = false
-      clearInterval(interval)
-      interval = undefined
-    }
-  }, 1000)
-}
-
-function parseRateTimeLimit(header?: AxiosResponseHeaders) {
-  if (!header) return
-  const rules = header['x-rate-limit-rules'].split(',').map((ele: string) => ele.toLowerCase()) as ('ip' | 'account')[]
-  const type = header['x-rate-limit-policy'].split('-')[1] as keyof typeof rateTimeLimitArr
-  if (Object.keys(rateTimeLimitArr).includes(type)) {
-    for (const rule of rules) {
-      const timesArr = header[`x-rate-limit-${rule}-state`].split(',').map((ele: string) => parseInt(ele.split(':')?.[0])).reverse()
-      for (let i = 0; i < timesArr.length; ++i) {
-        if (timesArr[i] >= rateTimeLimitArr[type][rule][i].limit) {
-          startCountdown(rateTimeLimitArr[type][rule][i].time)
-          break
-        }
-      }
-    }
-  }
 }
 
 function cleanupJSON(searchJson: ISearchJson) {

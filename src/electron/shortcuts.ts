@@ -1,9 +1,9 @@
 import { clipboard, globalShortcut } from 'electron'
 import { toggleOverlay, togglePriceCheck } from './overlayWindow'
-import { PoeWindow } from './POEWindow'
+import { PoeWindow, POEWindowClass } from './POEWindow'
 import { MyClipBoard, getClipboard } from './clipboard'
 import { config } from './config'
-import { uIOhook, UiohookKey } from 'uiohook-napi'
+import { uIOhook, UiohookKey, UiohookWheelEvent } from 'uiohook-napi'
 export function setupShortcut() {
   if (PoeWindow.isActive) {
     registerShortcut()
@@ -17,6 +17,7 @@ export function setupShortcut() {
     })
   })
 }
+
 
 export function registerShortcut() {
   globalShortcut.register(config.priceCheckHotkey, () => {
@@ -50,6 +51,7 @@ export function registerShortcut() {
     }
     globalShortcut.register(shortcut.hotkey, () => pasteTextToChat(typeText, lastMsg, moveToFront))
   })
+
 }
 export function unRegisterShortcut() {
   globalShortcut.unregisterAll()

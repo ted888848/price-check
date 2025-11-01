@@ -10,9 +10,10 @@
     <MySelect v-model="gemTransSelect" :options="gemReplicaSelect?.trans ?? []" label-key="text" value-key="disc"
       :filterable="false" :clearable="true" class="flex-1" />
   </div>
-  <div class="flex items-center justify-center py-1 hover:cursor-pointer" @click="twoWeekOffline = !twoWeekOffline">
-    <span class="mx-1 text-white">2周離線</span>
-    <CircleCheck :checked="twoWeekOffline" />
+  <div class="flex items-center justify-center py-1 select-none">
+    <span class="mx-1 text-white">搜尋類型:</span>
+    <MySelect v-model="searchOnlineType" :options="searchOnlineTypeOptions" label-key="label" :reducer="i => i.value"
+      class="w-100px" />
   </div>
   <div v-if="!isSearching" class="my-2 justify-center flex text-xl">
     <button
@@ -77,19 +78,20 @@
     <div class="i-svg-spinners:tadpole" />
   </div>
   <span v-if="rateTimeLimit.flag" class="text-white bg-red-600 text-xl text-center my-2 hover:cursor-default">API次數限制
-    {{ rateTimeLimit.second }} 秒後再回來
+    {{ rateTimeLimit.second.toFixed(1) }} 秒後再回來
   </span>
 </template>
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { maxBy } from 'lodash-es'
-import { searchItem, fetchItem, getIsCounting } from '@/web/lib/tradeSide'
+import { searchItem, fetchItem, selectOptions } from '@/web/lib/tradeSide'
 import { heistReward as gemReplicaOptions } from '@/web/lib/APIdata'
 import CircleCheck from '../utility/CircleCheck.vue'
 import type { ISearchResult, ISearchJson, IFetchResult } from '@/web/lib/tradeSide'
-import { secondCurrency, tradeUrl } from '@/web/lib'
+import { poeVersion, secondCurrency, tradeUrl } from '@/web/lib'
 import MySelect from '../utility/MySelect.vue'
+import { getIsCounting } from '@/web/lib/ratetimelimit'
 const props = defineProps<{
   itemProp: ParsedItem;
   leagueSelect: string;
@@ -98,7 +100,7 @@ const props = defineProps<{
   isOverflow: () => boolean;
 }>()
 const { rateTimeLimit } = getIsCounting()
-
+const { searchOnlineTypeOptions: searchOnlineTypeOptions } = selectOptions
 const gemReplicaSelect = ref<HeistReward>()
 const gemTransSelect = ref<ArrayValueType<HeistReward['trans']>>()
 const searchJSON: ISearchJson = {
@@ -149,17 +151,24 @@ const searchResult = ref<ISearchResult>({
 })
 const fetchResult = ref<IFetchResult[]>([])
 const isSearching = ref(false)
-const twoWeekOffline = ref(false)
-watch(twoWeekOffline, (newValue) => {
-  if (newValue) {
+const searchOnlineType = ref<typeof searchOnlineTypeOptions[number]['value']>('online')
+watch(searchOnlineType, (newValue) => {
+  if (newValue === 'securable') {
+    searchJSON.query.status.option = 'securable'
+    //@ts-expect-error 
+    delete searchJSON.query.filters.trade_filters.filters.price.min
+  }
+  else if (newValue === 'online') {
+    searchJSON.query.status.option = 'online'
+  }
+  else if (newValue === '1week') {
     searchJSON.query.filters.trade_filters.filters.indexed = {
-      option: '2weeks'
+      option: '1week'
     }
     searchJSON.query.status.option = 'any'
   }
   else {
-    delete searchJSON.query.filters.trade_filters.filters.indexed
-    searchJSON.query.status.option = 'online'
+    searchJSON.query.status.option = 'any'
   }
 })
 function resetSearchData() {
@@ -185,6 +194,7 @@ async function fetchMore() {
   isSearching.value = false
 }
 function searchOnlyChaos() {
+
   searchJSON.query.filters.trade_filters.filters.price.option = 'chaos'
   searchBtn().then(() => { delete searchJSON.query.filters.trade_filters.filters.price.option })
 }

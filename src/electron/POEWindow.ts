@@ -4,7 +4,7 @@ import type { BrowserWindow } from 'electron'
 interface TEventMap {
   poeActiveChange: [boolean];
 }
-class POEWindowClass extends EventEmitter<TEventMap> {
+export class POEWindowClass extends EventEmitter<TEventMap> {
   private _isActive: boolean
   constructor() {
     super()

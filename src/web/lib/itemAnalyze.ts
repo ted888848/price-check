@@ -43,10 +43,11 @@ const defaultItemParsed: ParsedItem = Object.freeze({
     search: false
   },
   autoSearch: false,
-  searchTwoWeekOffline: false,
   searchExchange: {
     option: false, have: []
-  }
+  },
+  searchOnlineType: 'online',
+  fetchCount: 20,
 })
 function getDefaultItemParsed(config: Config) {
   const itemParsed = structuredClone(defaultItemParsed)
@@ -151,6 +152,7 @@ export function itemAnalyze(item: string) {
     case '契約書':
       findUnique('heistmission', isFindUnique)
     case '可堆疊通貨':
+    case '預兆':
     case '地圖碎片':
     case '掘獄可堆疊有插槽通貨': {
       itemParsed.autoSearch = true
@@ -200,7 +202,7 @@ export function itemAnalyze(item: string) {
   if (itemParsed.raritySearch.label === '傳奇' && itemParsed.name) itemParsed.autoSearch = true
   if (itemParsed.baseType === '阿茲瓦特史記') parseTemple(itemSection)
   else if (itemParsed.baseType === '充能的羅盤') parseSextant(itemSection)
-  itemParsed.searchTwoWeekOffline = config.searchTwoWeekOffline ?? false
+  itemParsed.searchOnlineType = config.searchOnlineType ?? itemParsed.searchOnlineType
   return itemParsed
 }
 function parseItemName(section: string[], itemSection: string[][]) {
@@ -226,12 +228,16 @@ function parseItemName(section: string[], itemSection: string[][]) {
     雙手錘: 'weapon.twomace',
     魚竿: 'weapon.rod',
     征戰長杖: 'weapon.warstaff',
+    長鋒: 'weapon.spear',
+    細杖: 'weapon.warstaff',
+    十字弓: 'weapon.crossbow',
     手套: 'armour.gloves',
     鞋子: 'armour.boots',
     胸甲: 'armour.chest',
     頭部: 'armour.helmet',
     箭袋: 'armour.quiver',
     盾: 'armour.shield',
+    輕盾: 'armour.buckler',
     法器: 'armour.focus',
     項鍊: 'accessory.amulet',
     戒指: 'accessory.ring',
@@ -270,13 +276,17 @@ function parseItemName(section: string[], itemSection: string[][]) {
     value: 'nonunique',
     label: '非傳奇'
   }] as const
+  // 物品種類
   const itemType = section[0].match(/物品種類: ([^\n]+)/)![1] as keyof typeof typeTrans
   itemParsed.type = {
     text: itemType, option: typeTrans[itemType], searchByType: false
   }
-  itemParsed.rarity = section[1].match(/稀有度: ([^\n]+)/)?.[1] ?? ''
+  section.shift()
+
+  // 稀有度
+  itemParsed.rarity = section[0].match(/稀有度: ([^\n]+)/)?.[1] ?? ''
   if (itemType === '不滅之火餘燼') {
-    itemParsed.baseType = section[1]
+    itemParsed.baseType = section[0]
     return ParseResult.PARSE_SECTION_SUCC
   }
   if (['普通', '魔法', '稀有'].includes(itemParsed.rarity)) {
@@ -288,40 +298,55 @@ function parseItemName(section: string[], itemSection: string[][]) {
   else {
     itemParsed.raritySearch = rarityOptions[0]
   }
-  if (section.length >= 4) {
-    itemParsed.name = section[2]
-    if (section[3].startsWith('追憶之')) section[3] = section[3].substring(4)
-    itemParsed.baseType = section[3]
+  section.shift()
+
+  // 物品名稱與基底
+  const itemTypeApi = itemParsed.type.option?.substring(0, itemParsed.type.option.indexOf('.')) as keyof typeof APIitems
+  const apiBaseTypes = (APIitems[itemTypeApi]?.entries ?? Object.values(APIitems).flatMap(item => item.entries))
+    .filter((entry) => {
+      let sectionLine = section.at(-1)
+      if (!sectionLine) return false
+      if (sectionLine.startsWith('精良的')) sectionLine = sectionLine.substring(4)
+      if (sectionLine.startsWith('追憶之')) sectionLine = sectionLine.substring(4)
+
+      return entry.type === sectionLine || sectionLine?.endsWith(entry.type)
+    })
+  let maxMatchLength = 0
+
+  let apiBaseType: string | undefined = undefined
+  apiBaseTypes?.forEach((entry) => {
+    const entryTypeLength = entry.type.length
+    if (entryTypeLength > maxMatchLength) {
+      maxMatchLength = entryTypeLength
+      apiBaseType = entry.type
+    }
+  })
+
+  if (itemType === '技能寶石') {
+    itemParsed.baseType = section[2]
+    const transGemInfo = APIitems.gem.entries.find(ele => ele.trans?.some(({ text }) => text === itemParsed.baseType))
+    if (transGemInfo) {
+      itemParsed.transGem = {
+        option: transGemInfo.type,
+        discriminator: transGemInfo.trans!.find(g => g.text === itemParsed.baseType)!.disc
+      }
+    }
+  }
+  else if (apiBaseType) {
+    itemParsed.baseType = apiBaseType
+    const lastLine = section.at(-1)
+    if (itemParsed.baseType !== lastLine) {
+      itemParsed.name = lastLine?.replace(itemParsed.baseType, '')
+    }
   }
   else {
-    if (section[2].startsWith('精良的')) section[2] = section[2].substring(4)
-    if (section[2].startsWith('追憶之')) section[2] = section[2].substring(4)
-    if (itemParsed.rarity === '魔法') {
-      const tempName = section[2]
-      const itemType = itemParsed.type.option?.substring(0, itemParsed.type.option.indexOf('.')) as keyof typeof APIitems
-      let tempBaseType = APIitems[itemType]?.entries.find((entry) => tempName.endsWith(entry.type))?.type
-      if (tempBaseType === undefined) {
-        tempBaseType = tempName.indexOf('之') > -1 ? tempName.substring(tempName.indexOf('之') + 1) :
-          tempName.indexOf('的') > -1 ? tempName.substring(tempName.indexOf('的') + 1) : tempName
-      }
-      itemParsed.baseType = tempBaseType
-      itemParsed.name = tempName.substring(0, tempName.indexOf(itemParsed.baseType))
-    }
-    else if (itemType === '技能寶石') {
-      itemParsed.baseType = section[2]
-
-      const transGemInfo = APIitems.gem.entries.find(ele => ele.trans?.some(({ text }) => text === itemParsed.baseType))
-      if (transGemInfo) {
-        itemParsed.transGem = {
-          option: transGemInfo.type,
-          discriminator: transGemInfo.trans!.find(g => g.text === itemParsed.baseType)!.disc
-        }
-      }
-    }
-    else {
-      itemParsed.baseType = section[2]
-    }
+    itemParsed.baseType = section.at(-1)!
   }
+  section.pop()
+  if (section.length > 0) {
+    itemParsed.name = section.pop()
+  }
+
   return ParseResult.PARSE_SECTION_SUCC
 }
 function parseRequirement(section: string[]) {
@@ -358,8 +383,9 @@ function parseItemLevel(section: string[]) {
   const sectionMatch = section[0].match(/^物品等級: (\d+)/)
   if (!sectionMatch) return ParseResult.PARSE_SECTION_SKIP
   const il = parseInt(sectionMatch[1])
+  const maxModLevel = window.ipc.sendSync(IPC.GET_CONFIG).poeVersion === '1' ? 86 : 82
   itemParsed.itemLevel = {
-    min: il > 86 ? 86 : il, max: undefined, search: itemParsed.rarity !== '傳奇'
+    min: il > maxModLevel ? maxModLevel : il, max: undefined, search: itemParsed.rarity !== '傳奇'
   }
   return ParseResult.PARSE_SECTION_SUCC
 }

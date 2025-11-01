@@ -56,6 +56,8 @@ import NormalPriceCheck from './NormalPriceCheck.vue'
 import HeistPriceCheck from './HeistPriceCheck.vue'
 import { secondCurrency, tradeUrl } from '@/web/lib'
 import MySelect from '../utility/MySelect.vue'
+import { getRateTimeLimitState } from '@/web/lib/ratetimelimit'
+const { rateTimeLimitState } = getRateTimeLimitState()
 const isWebViewOpen = ref(false)
 const webView = ref<HTMLIFrameElement>()
 const priceCheckPos = ref({
@@ -140,6 +142,7 @@ function isOverflow() {
 
 window.ipc.on(IPC.PRICE_CHECK_SHOW, (_e, clip: string, pos: string) => {
   closeWebView()
+  rateTimeLimitState.value = {}
   windowShowHide.value = true
   currentPriceCheck.value = 'NormalPriceCheck'
   priceCheckPos.value.right = pos

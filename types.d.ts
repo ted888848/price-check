@@ -171,7 +171,6 @@ interface ParsedItem {
   conquerorMap?: ItemStat;
   memoryMap?: boolean;
   autoSearch: boolean;
-  searchTwoWeekOffline: boolean;
   searchExchange: {
     option: boolean;
     have: string[];
@@ -184,6 +183,8 @@ interface ParsedItem {
     discriminator: string;
     option: string;
   };
+  searchOnlineType: Config['searchOnlineType'];
+  fetchCount: number;
   // [key: string]: any;
 }
 
@@ -207,6 +208,7 @@ interface Config {
   }[];
   league: string;
   poeVersion: POEVersion;
+  searchOnlineType: 'online' | '1week' | 'securable' | 'all';
 }
 
 interface APIStaticItem {
