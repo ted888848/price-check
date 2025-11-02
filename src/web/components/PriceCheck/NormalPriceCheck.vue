@@ -95,6 +95,13 @@
         <MySelect v-model="item.searchOnlineType" :options="searchOnlineTypeOptions" label-key="label"
           :reducer="i => i.value" class="flex-1" />
       </div>
+
+      <!-- 3.27 新增穢生選項 -->
+      <div v-if="item.foulborn!==undefined" class="flex items-center justify-center"
+        @click="() => item.foulborn = !item.foulborn">
+        <span class="mx-1 text-white hover:cursor-default">穢生:</span>
+        <CircleCheck :have-undefined="true" :checked="item.foulborn ?? false" />
+      </div>
     </div>
 
     <table v-if="item.stats.length" class="bg-gray-700 text-center mt-1 text-white text-sm">
@@ -265,6 +272,8 @@ function modTextColor(type?: string) {
       return 'red'
     case '偽屬性':
       return '#9936eb'
+    case '穢生':
+      return '#8B4513'
     default:
       return 'white'
   }

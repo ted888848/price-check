@@ -45,6 +45,8 @@ export interface ISearchJson {
           gem_level?: { min?: number; max?: number };
           quality?: { min?: number; max?: number };
           alternate_art?: { option: boolean };
+          //3.27
+          foulborn_item?: { option: boolean };
         };
       };
       type_filters: {
@@ -262,6 +264,13 @@ export function getSearchJSON(item: ParsedItem) {
   if (!isUndefined(item.isRGB)) {
     searchJSON.query.filters.misc_filters.filters.alternate_art = {
       option: item.isRGB
+    }
+  }
+
+  //3.27
+  if (item.foulborn) {
+    searchJSON.query.filters.misc_filters.filters.foulborn_item = {
+      option: true
     }
   }
 

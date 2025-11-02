@@ -45,9 +45,6 @@ const storeSchema: Schema<Config> = {
   POESESSID: {
     type: 'string'
   },
-  searchTwoWeekOffline: {
-    type: 'boolean'
-  },
   priceCheckHotkey: {
     type: 'string'
   },
@@ -92,8 +89,10 @@ export function setupConfig() {
     config.searchExchangePrefer = 'divine&(C or Ex)'
     store.store = config
   }
-  if (config.searchTwoWeekOffline === true) {
+  if (config.searchTwoWeekOffline === true && !config.searchOnlineType) {
     config.searchOnlineType = '1week'
+    delete (config as any).searchTwoWeekOffline
+    store.store = config
   }
   ipcMain.on(IPC.SET_CONFIG, (_e, configData: string) => {
     // const prevSetVersion = store.store.poeVersion

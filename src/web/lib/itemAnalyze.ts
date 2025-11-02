@@ -347,6 +347,11 @@ function parseItemName(section: string[], itemSection: string[][]) {
     itemParsed.name = section.pop()
   }
 
+  if (itemParsed.name?.startsWith('穢生 ')) {
+    itemParsed.name = itemParsed.name.replace('穢生 ', '')
+    itemParsed.foulborn = true
+  }
+
   return ParseResult.PARSE_SECTION_SUCC
 }
 function parseRequirement(section: string[]) {
@@ -401,7 +406,9 @@ function getStrReg(section: string[], type: string) {
   })
   return retArr
 }
-function parseMultilineMod(regSection: RegExp[], section: string[], type: keyof ParsedAPIMods) {
+function parseMultilineMod(regSection: RegExp[], section: string[], type: keyof ParsedAPIMods | 'mutated') {
+  const isMutated = type === 'mutated'
+  type = isMutated ? 'explicit' : type as keyof ParsedAPIMods
   if (!APImods[type].mutiLines) return []
   const tempArr: ItemStat[] = []
   for (let i = 0; i < regSection.length; ++i) {
@@ -438,12 +445,12 @@ function parseMultilineMod(regSection: RegExp[], section: string[], type: keyof 
             value: {
               min: tempValue / valueCount
             },
-            disabled: true,
-            type: APImods[type].type
+            disabled: isMutated ? false : true,
+            type: isMutated ? '穢生' : APImods[type].type
           })
         else
           tempArr.push({
-            ...matchMod, disabled: true, type: APImods[type].type
+            ...matchMod, disabled: isMutated ? false : true, type: isMutated ? '穢生' : APImods[type].type
           })
       }
     }
@@ -453,8 +460,10 @@ function parseMultilineMod(regSection: RegExp[], section: string[], type: keyof 
   }
   return tempArr
 }
-function parseMod(section: string[], type: keyof ParsedAPIMods) {
+function parseMod(section: string[], type: keyof ParsedAPIMods | 'mutated') {
+  const isMutated = type === 'mutated'
   const regSection = getStrReg(section, type)
+  type = isMutated ? 'explicit' : type as keyof ParsedAPIMods
   const tempArr = parseMultilineMod(regSection, section, type)
   regSection.forEach((line, index) => {
     try {
@@ -484,13 +493,13 @@ function parseMod(section: string[], type: keyof ParsedAPIMods) {
             value: {
               [diffSign ? 'max' : 'min']: minValue,
             },
-            disabled: true,
-            type: APImods[type].type
+            disabled: isMutated ? false : true,
+            type: isMutated ? '穢生' : APImods[type].type
           })
         }
         else {
           tempArr.push({
-            ...matchMod, disabled: true, type: APImods[type].type
+            ...matchMod, disabled: isMutated ? false : true, type: isMutated ? '穢生' : APImods[type].type
           })
         }
       })
@@ -519,16 +528,20 @@ function parseExplicitMod(section: string[]) {
   if (!['魔法', '稀有', '傳奇'].includes(itemParsed.rarity)) return ParseResult.PARSE_SECTION_SKIP
   const explicitSection: string[] = [],
     fracturedSection: string[] = [],
-    craftedSection: string[] = []
+    craftedSection: string[] = [],
+    mutatedSection: string[] = []
   let parsed = false
   section.forEach(line => {
-    const type = line.match(/fractured|crafted/)
+    const type = line.match(/fractured|crafted|mutated/)
     switch (type?.[0]) {
       case 'crafted':
         craftedSection.push(line)
         break
       case 'fractured':
         fracturedSection.push(line)
+        break
+      case 'mutated':
+        mutatedSection.push(line)
         break
       default:
         line !== '隱匿前綴' && line !== '隱匿後綴' && explicitSection.push(line)
@@ -538,6 +551,8 @@ function parseExplicitMod(section: string[]) {
   if (craftedSection.length) parsed = parseMod(craftedSection, 'crafted') === ParseResult.PARSE_SECTION_SUCC || parsed
   if (fracturedSection.length) parsed = parseMod(fracturedSection, 'fractured') === ParseResult.PARSE_SECTION_SUCC || parsed
   if (explicitSection.length) parsed = parseMod(explicitSection, 'explicit') === ParseResult.PARSE_SECTION_SUCC || parsed
+  if (mutatedSection.length) parsed = parseMod(mutatedSection, 'mutated') === ParseResult.PARSE_SECTION_SUCC || parsed
+
   if (parsed) return ParseResult.PARSE_SECTION_SUCC
   return ParseResult.PARSE_SECTION_SKIP
 }

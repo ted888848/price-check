@@ -186,6 +186,9 @@ interface ParsedItem {
   searchOnlineType: Config['searchOnlineType'];
   fetchCount: number;
   // [key: string]: any;
+
+  //3.27 
+  foulborn?: boolean;
 }
 
 interface ItemUniques {
@@ -198,7 +201,7 @@ interface Config {
   characterName: string;
   searchExchangePrefer: 'divine&(C or Ex)' | 'chaos' | 'divine' | 'exalted';
   POESESSID: string;
-  searchTwoWeekOffline: boolean;
+  searchTwoWeekOffline?: boolean;
   priceCheckHotkey: string;
   settingHotkey: string;
   shortcuts: {
