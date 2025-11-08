@@ -4,14 +4,18 @@
       label-key="name" :reducer="i => i.name" class="mx-4px" />
     <div class="text-xl text-white my-1 text-center center gap-8px"
       @click="() => item.type.searchByType = Boolean(!item.type.searchByType && item.type.option)">
-      <span v-if="item.name">{{ item.name }}</span>
-      <div class="center gap-12px">
-        <span :class="{ 'text-red-500': item.type.searchByType }">
+      <span v-if="item.name && !item.elderMap && !item.conquerorMap">{{ item.name }}</span>
+      <div class="center gap-4px">
+        <span>
           {{item.elderMap ?
             `尊師守衛 ${elderMapOptions.find(e => e.value === item.elderMap!.value?.option)?.label}` :
             item.conquerorMap ?
-              `征服者 ${conquerorMapOptions.find(e => e.value === item.conquerorMap!.value?.option)?.label}` : item.baseType
+              `征服者 ${conquerorMapOptions.find(e => e.value === item.conquerorMap!.value?.option)?.label}` : null
           }}
+          &nbsp;
+        </span>
+        <span :class="{ 'text-red-500': item.type.searchByType }">
+          {{ item.baseType }}
         </span>
       </div>
     </div>
@@ -96,8 +100,14 @@
           :reducer="i => i.value" class="flex-1" />
       </div>
 
+      <div v-if="item.type.option === 'gem.activegem'" class="flex items-center justify-center"
+        @click="() => item.vaalVer = !item.vaalVer">
+        <span class="mx-1 text-white hover:cursor-default">瓦爾版</span>
+        <CircleCheck :have-undefined="true" :checked="item.vaalVer ?? false" />
+      </div>
+
       <!-- 3.27 新增穢生選項 -->
-      <div v-if="item.foulborn!==undefined" class="flex items-center justify-center"
+      <div v-if="item.foulborn !== undefined" class="flex items-center justify-center"
         @click="() => item.foulborn = !item.foulborn">
         <span class="mx-1 text-white hover:cursor-default">穢生:</span>
         <CircleCheck :have-undefined="true" :checked="item.foulborn ?? false" />

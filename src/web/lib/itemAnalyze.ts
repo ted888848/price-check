@@ -90,6 +90,7 @@ export function itemAnalyze(item: string) {
     }
   }, itemSection[0])
   if (parseItemName(itemSection[0], itemSection) === ParseResult.PARSE_SECTION_FAIL) return null
+  itemParsed.searchOnlineType = config.searchOnlineType ?? itemParsed.searchOnlineType
   itemSection.shift()
   const isFindUnique = {
     flag: false
@@ -175,6 +176,7 @@ export function itemAnalyze(item: string) {
       parseLogbook(itemSection)
       break
     case '命運卡':
+      itemParsed.searchOnlineType = 'online'
     case '遺鑰':
     case '屍體':
       itemParsed.autoSearch = true
@@ -202,7 +204,6 @@ export function itemAnalyze(item: string) {
   if (itemParsed.raritySearch.label === '傳奇' && itemParsed.name) itemParsed.autoSearch = true
   if (itemParsed.baseType === '阿茲瓦特史記') parseTemple(itemSection)
   else if (itemParsed.baseType === '充能的羅盤') parseSextant(itemSection)
-  itemParsed.searchOnlineType = config.searchOnlineType ?? itemParsed.searchOnlineType
   return itemParsed
 }
 function parseItemName(section: string[], itemSection: string[][]) {
@@ -323,7 +324,7 @@ function parseItemName(section: string[], itemSection: string[][]) {
   })
 
   if (itemType === '技能寶石') {
-    itemParsed.baseType = section[2]
+    itemParsed.baseType = section[0]
     const transGemInfo = APIitems.gem.entries.find(ele => ele.trans?.some(({ text }) => text === itemParsed.baseType))
     if (transGemInfo) {
       itemParsed.transGem = {
@@ -926,6 +927,7 @@ function parseOtherNeedMods(item: string[][]) {
   }
 }
 function parseMap(item: string[][]) {
+  itemParsed.autoSearch = true
   const elderMap = {
     id: 'implicit.stat_3624393862',
     text: '地圖被 # 佔據',
@@ -977,9 +979,7 @@ function parseMap(item: string[][]) {
       if (!itemParsed.elderMap) {
         const elderMatch = elderMap.options.filter(ele => line.includes(`地圖被${ele.text}佔據`))[0]
         if (elderMatch) {
-          // itemParsed.type.searchByType = true
-          itemParsed.autoSearch = true
-          itemParsed.elderMap = {
+          const elderStat = {
             id: 'implicit.stat_3624393862',
             text: elderMatch.text,
             value: {
@@ -987,18 +987,19 @@ function parseMap(item: string[][]) {
             },
             disabled: false
           }
-          itemParsed.searchExchange.want = [elderMatch.exchange]
-          itemParsed.searchExchange.option = true
+          // itemParsed.searchExchange.want = [elderMatch.exchange]
+          // itemParsed.searchExchange.option = true
+          itemParsed.elderMap = elderStat
+          itemParsed.stats.push(elderStat)
           if (itemParsed.mapTier?.search) itemParsed.mapTier.search = false
+          // itemParsed.type.searchByType = true
         }
       }
 
       if (!itemParsed.conquerorMap) {
         const conquerorMatch = conquerorMap.options.filter(ele => line.includes(`地圖含有${ele.text}的壁壘`))[0]
         if (conquerorMatch) {
-          // itemParsed.type.searchByType = true
-          itemParsed.autoSearch = true
-          itemParsed.conquerorMap = {
+          const conquerorStat = {
             id: 'implicit.stat_2563183002',
             text: conquerorMatch.text,
             value: {
@@ -1006,9 +1007,12 @@ function parseMap(item: string[][]) {
             },
             disabled: false
           }
-          itemParsed.searchExchange.want = [conquerorMatch.exchange]
-          itemParsed.searchExchange.option = true
+          // itemParsed.searchExchange.want = [conquerorMatch.exchange]
+          // itemParsed.searchExchange.option = true
+          itemParsed.conquerorMap = conquerorStat
+          itemParsed.stats.push(conquerorStat)
           if (itemParsed.mapTier?.search) itemParsed.mapTier.search = false
+          itemParsed.type.searchByType = true
         }
       }
 
@@ -1044,15 +1048,13 @@ function parseGem(item: string[][]) {
   // let vaalLine: string
   // endFor:
   for (const section of item.reverse()) {
+    if (section[0].includes('瓦爾．')) {
+      itemParsed.vaalVer = true
+      itemParsed.vaalBaseType = section[0]
+      continue;
+    }
     if (parseCorrupt(section) === ParseResult.PARSE_SECTION_SUCC) {
-      break
-      // for (section of item) {
-      //   if (section[0].includes('瓦爾．')) {
-      //     itemParsed.vaalVer = true
-      //     // vaalLine = section[0]
-      //     break endFor
-      //   }
-      // }
+
     }
   }
   itemParsed.quality.search = !!(itemParsed.isCorrupt && itemParsed.quality.search)
@@ -1061,7 +1063,10 @@ function parseTemple(item: string[][]) {
   item.shift()
   item[0] = item[0].map(line => line.replace(/ \(階級 [123]\)/, ''))
   parseMod(item[0], 'temple')
-  itemParsed.stats = itemParsed.stats.filter(ele => ['多里亞尼之院', '腐敗之地', '祭祀之巔'].includes(ele.text as string))
+  itemParsed.stats = itemParsed.stats
+    .filter(ele => ['多里亞尼之院', '腐敗之地', '祭祀之巔'].includes(ele.text as string))
+    .map(ele => ({ ...ele, disabled: ele.text === '祭祀之巔' ? true : false }))
+  itemParsed.autoSearch = true
 }
 function parseFlask(item: string[][]) {
   item[0].forEach(line => {

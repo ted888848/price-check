@@ -133,6 +133,7 @@ interface ParsedItem {
   };
   altQType?: number;
   vaalVer?: boolean;
+  vaalBaseType?: string;
   requireLevel?: number;
   requireInt?: number;
   requireStr?: number;

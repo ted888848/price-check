@@ -68,7 +68,7 @@ export interface ISearchJson {
       };
     };
     stats: [{ type: 'and'; filters: ItemStat[] }];
-    status: { option: 'any' | 'online' | 'onlineleague' | 'securable' };
+    status: { option: 'any' | 'online' | 'onlineleague' | 'securable' | 'available' };
   };
   sort: { price: 'asc' };
 }
@@ -146,7 +146,7 @@ const defaultSearchJson: ISearchJson = {
       }
     },
     stats: [{ type: 'and', filters: [] }],
-    status: { option: 'online' },
+    status: { option: 'available' },
   },
   sort: { price: 'asc' }
 }
@@ -228,7 +228,7 @@ export function getSearchJSON(item: ParsedItem) {
     delete searchJSON.query.filters.trade_filters.filters.price.min
   }
   else if (item.searchOnlineType === 'online') {
-    searchJSON.query.status.option = 'online'
+    searchJSON.query.status.option = 'available'
   }
   else if (item.searchOnlineType === '1week') {
     searchJSON.query.filters.trade_filters.filters.indexed = {
@@ -267,10 +267,14 @@ export function getSearchJSON(item: ParsedItem) {
     }
   }
 
+  if (item.vaalVer) {
+    searchJSON.query.type = item.vaalBaseType
+  }
+
   //3.27
   if (item.foulborn) {
     searchJSON.query.filters.misc_filters.filters.foulborn_item = {
-      option: true
+      option: (true ? 'yes' : 'no') as unknown as boolean
     }
   }
 
