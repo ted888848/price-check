@@ -12,7 +12,6 @@
             item.conquerorMap ?
               `征服者 ${conquerorMapOptions.find(e => e.value === item.conquerorMap!.value?.option)?.label}` : null
           }}
-          &nbsp;
         </span>
         <span :class="{ 'text-red-500': item.type.searchByType }">
           {{ item.baseType }}

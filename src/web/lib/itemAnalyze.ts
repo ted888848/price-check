@@ -194,7 +194,11 @@ export function itemAnalyze(item: string) {
     case '其它':
     case '輿圖升級道具':
       break
+    case '接肢':
+      parseGraft(itemSection)
+      break;
     default:
+      parseAllfuns(itemSection)
       break
   }
   parsePseudoEleResistance()
@@ -256,7 +260,8 @@ function parseItemName(section: string[], itemSection: string[][]) {
     記憶: 'memoryline',
     技能寶石: 'gem.activegem',
     咒語: 'azmeri.charm',
-    不滅之火餘燼: undefined
+    不滅之火餘燼: undefined,
+    接肢: 'graft'
   } as const
   const rarityOptions = [{
     value: undefined,
@@ -1158,5 +1163,9 @@ function parseImmortalFire(item: string[][]) {
   for (const section of item) {
     if (parseItemLevel(section) === ParseResult.PARSE_SECTION_SUCC) break
   }
+}
+
+function parseGraft(itemSection: string[][]) {
+  parseAllfuns(itemSection)
 }
 
