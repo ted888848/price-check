@@ -268,7 +268,7 @@ export function getSearchJSON(item: ParsedItem) {
   }
 
   if (item.vaalVer) {
-    searchJSON.query.type = item.vaalBaseType
+    searchJSON.query.type = item.vaalBaseType ?? ('瓦爾．' + item.baseType)
   }
 
   //3.27

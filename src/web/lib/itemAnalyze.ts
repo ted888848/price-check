@@ -308,23 +308,32 @@ function parseItemName(section: string[], itemSection: string[][]) {
 
   // 物品名稱與基底
   const itemTypeApi = itemParsed.type.option?.substring(0, itemParsed.type.option.indexOf('.')) as keyof typeof APIitems
+  const itemNameLine = section.at(-1) ?? ''
   const apiBaseTypes = (APIitems[itemTypeApi]?.entries ?? Object.values(APIitems).flatMap(item => item.entries))
     .filter((entry) => {
-      let sectionLine = section.at(-1)
+      let sectionLine = itemNameLine
       if (!sectionLine) return false
       if (sectionLine.startsWith('精良的')) sectionLine = sectionLine.substring(4)
       if (sectionLine.startsWith('追憶之')) sectionLine = sectionLine.substring(4)
 
       return entry.type === sectionLine || sectionLine?.endsWith(entry.type)
-    })
+    }).map((entry) => (entry.type))
+
+  APIStatic.forEach((entry) => {
+    let sectionLine = itemNameLine
+    if (!sectionLine) return
+    if (entry.text === sectionLine) {
+      apiBaseTypes.push(entry.text)
+    }
+  })
   let maxMatchLength = 0
 
   let apiBaseType: string | undefined = undefined
   apiBaseTypes?.forEach((entry) => {
-    const entryTypeLength = entry.type.length
-    if (entryTypeLength > maxMatchLength) {
-      maxMatchLength = entryTypeLength
-      apiBaseType = entry.type
+    const matchLength = entry.length - itemNameLine!.replace(entry, '').length
+    if (matchLength > maxMatchLength) {
+      maxMatchLength = matchLength
+      apiBaseType = entry
     }
   })
 
