@@ -126,7 +126,7 @@ function checkNewline(statsGroup: APIStatsItem) {
     if (stat.text.includes('\n')) {
       const lines = stat.text.split('\n')
       mutiLines.push({
-        id: stat.id, text: lines
+        ...stat, id: stat.id, text: lines
       })
     }
   })

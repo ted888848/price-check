@@ -26,6 +26,11 @@
       </span>
       <span :style="{ visibility: item.eDPS ? 'visible' : 'hidden' }" class=" w-40">EDps: {{ item.eDPS }}</span>
     </div>
+    <div v-if="item.map_completion_reward"  class="text-white text-center flex justify-center px-2">
+      <span class="flex-1">
+        {{ item.map_completion_reward }}
+      </span>
+    </div>
     <div class="mx-0  bg-blue-900 grid grid-cols-3 select-none">
       <div v-if="!item.searchExchange.option" class="flex p-2 items-center justify-center">
         <span class="mx-1 text-white hover:cursor-default">汙染:</span>

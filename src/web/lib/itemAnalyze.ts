@@ -7,7 +7,7 @@ enum ParseResult {
   PARSE_SECTION_SKIP,
   PARSE_ITEM_SKIP
 }
-const parseFuns: ((section: string[]) => ParseResult)[] = [
+const parseFuns: (((section: string[]) => ParseResult) | undefined)[] = [
   parseRGB,
   parseRequirement,
   parseSocket,
@@ -95,6 +95,7 @@ export function itemAnalyze(item: string) {
   const isFindUnique = {
     flag: false
   }
+  let skip = false
   switch (itemParsed.type.text) {
     case '爪':
     case '匕首':
@@ -138,7 +139,9 @@ export function itemAnalyze(item: string) {
     case '永恆珠寶':
     case '珠寶':
     case '深淵珠寶':
+      parseJewel(itemSection)
       findUnique('jewel', isFindUnique)
+      break
     case '箭袋':
     case '飾品':
     case '劫盜裝備':
@@ -153,14 +156,12 @@ export function itemAnalyze(item: string) {
     case '契約書':
       findUnique('heistmission', isFindUnique)
     case '可堆疊通貨':
+      skip = parseBeastItem(itemSection)
     case '預兆':
     case '地圖碎片':
     case '掘獄可堆疊有插槽通貨': {
+      if (skip) break;
       itemParsed.autoSearch = true
-      if (itemParsed.baseType === '滿靈柩') {
-        parseCoffin(itemSection)
-        break
-      }
       if (APIStatic.some((ele: Static) => ele.text === itemParsed.baseType)) {
         itemParsed.searchExchange.option = true
         // const searchExchangeDivine = config.searchExchangeDivine
@@ -185,12 +186,6 @@ export function itemAnalyze(item: string) {
       parseRelic(itemSection)
       break
     case '咒語':
-    case '萃取物':
-      parseCharmAndTincture(itemSection)
-      break
-    case '不滅之火餘燼':
-      parseImmortalFire(itemSection)
-      break
     case '其它':
     case '輿圖升級道具':
       break
@@ -207,7 +202,6 @@ export function itemAnalyze(item: string) {
   }
   if (itemParsed.raritySearch.label === '傳奇' && itemParsed.name) itemParsed.autoSearch = true
   if (itemParsed.baseType === '阿茲瓦特史記') parseTemple(itemSection)
-  else if (itemParsed.baseType === '充能的羅盤') parseSextant(itemSection)
   return itemParsed
 }
 function parseItemName(section: string[], itemSection: string[][]) {
@@ -261,7 +255,8 @@ function parseItemName(section: string[], itemSection: string[][]) {
     技能寶石: 'gem.activegem',
     咒語: 'azmeri.charm',
     不滅之火餘燼: undefined,
-    接肢: 'graft'
+    接肢: 'graft',
+    萃取物: 'tincture'
   } as const
   const rarityOptions = [{
     value: undefined,
@@ -308,7 +303,7 @@ function parseItemName(section: string[], itemSection: string[][]) {
 
   // 物品名稱與基底
   const itemTypeApi = itemParsed.type.option?.substring(0, itemParsed.type.option.indexOf('.')) as keyof typeof APIitems
-  const itemNameLine = section.at(-1) ?? ''
+  const itemNameLine = section.at(-1)?.replace(/(精良的|追憶之)\s/, '') ?? ''
   const apiBaseTypes = (APIitems[itemTypeApi]?.entries ?? Object.values(APIitems).flatMap(item => item.entries))
     .filter((entry) => {
       let sectionLine = itemNameLine
@@ -662,6 +657,7 @@ function parseAllfuns(item: string[][], functions: typeof parseFuns = parseFuns)
   endFor:
   for (const fun of functions) {
     for (const section of item) {
+      if (!fun) continue
       const state = fun(section)
       if (state === ParseResult.PARSE_SECTION_SUCC) {
         item = item.filter(s => s !== section)
@@ -806,31 +802,19 @@ function parseForbiddenJewel(item: string[][]) {
     }
   }
 }
-function parseSextant(item: string[][]) {
-  itemParsed.autoSearch = true
-  for (const section of item) {
-    for (const index in section) {
-      if (section[index].startsWith('你地圖中')) {
-        section[index] = section[index].replace(/你地圖中[有的]?\s?/, '')
-      }
-    }
-    if (parseEnchantMod(section) === ParseResult.PARSE_SECTION_SUCC)
-      return
-  }
-}
 function parseImpossibleEscape(item: string[][]) {
   itemParsed.autoSearch = true
   itemParsed.isCorrupt = true
   outer:
   for (const section of item) {
     for (const line of section) {
-      const result = line.match(/範圍 (.+) 內的天賦可以在沒有連結你的天賦樹下被配置/)
+      const result = line.match(/天賦樹中在範圍(.+)內未連結的天賦仍然可以配置/)
       if (result) {
-        const statDetail = APImods.explicit.entries.find(ele => ele.id === 'explicit.stat_2422708892')!
+        const statDetail = APImods.explicit.mutiLines?.find(ele => ele.id === 'explicit.stat_2422708892')!
         const matchOption = statDetail.option?.options.find(ele => ele.text === result[1])
         itemParsed.stats.push({
           id: statDetail.id,
-          text: statDetail.text.replace('#', result[1]),
+          text: statDetail.text[0].replace('#', result[1]),
           value: {
             option: matchOption?.id
           },
@@ -896,26 +880,6 @@ function parseThreadOfHope(item: string[][]) {
   parseAllfuns(item, parseFuns)
 }
 function parseOtherNeedMods(item: string[][]) {
-  if (itemParsed.baseType.endsWith('星團珠寶')) {
-    parseClusterJewel(item)
-    return
-  }
-  // if (itemParsed.baseType.endsWith('虛空石')) {
-  //   parseSextant(item)
-  //   return
-  // }
-  if (/^禁忌(血肉|烈焰)$/.test(itemParsed.name!)) {
-    parseForbiddenJewel(item)
-    return
-  }
-  if (itemParsed.name === '逃脫不能') {
-    parseImpossibleEscape(item)
-    return
-  }
-  if (itemParsed.name === '希望之絃') {
-    parseThreadOfHope(item)
-    return
-  }
   if (itemParsed.name === '贗品．龍牙翱翔') {
     outer: for (const section of item) {
       for (let index = 0; index < section.length; index++) {
@@ -971,6 +935,10 @@ function parseMap(item: string[][]) {
       itemParsed.mapTier = {
         min: parseInt(lineMatch[1]), max: undefined, search: true
       }
+    }
+    const completionMatch = line.match(/獎勵: 貼模 \((.+)\)/)
+    if (completionMatch) {
+      itemParsed.map_completion_reward = completionMatch[1]
     }
   })
   item.shift()
@@ -1036,10 +1004,14 @@ function parseMap(item: string[][]) {
       }
     }
   }
-  for (const section of item) {
-    parseCorrupt(section)
-    if (parseIdentify(section) === ParseResult.PARSE_ITEM_SKIP) break
+  const parseFuns = [
+    parseCorrupt, parseIdentify,
+  ]
+  if (itemParsed.map_completion_reward) {
+    item = item.filter(section => !section[0].startsWith('怪物等級：'))
+    parseFuns.push(parseExplicitMod)
   }
+  parseAllfuns(item, parseFuns)
 }
 function parseGem(item: string[][]) {
   itemParsed.autoSearch = true
@@ -1139,42 +1111,171 @@ function parseRelic(item: string[][]) {
   parseMod(item[0], 'sanctum')
 }
 
-function parseCharmAndTincture(item: string[][]) {
-  parseItemLevel(item[0])
-  item.shift()
-  for (const lines of item) {
-    if (parseMod(lines, 'explicit') === ParseResult.PARSE_SECTION_SUCC) break
-  }
-  if (itemParsed.type.text === '咒語') {
-    itemParsed.type.searchByType = true
-  }
-}
 
-function parseCoffin(item: string[][]) {
-  function parseBodyLevel(section: string[]) {
-    const sectionMatch = section[1]?.match(/^屍體等級: (\d+)/)
-    if (!sectionMatch) return ParseResult.PARSE_SECTION_SKIP
-    const il = parseInt(sectionMatch[1])
-    itemParsed.itemLevel = {
-      min: il > 86 ? 86 : il, max: undefined, search: false
+function parseBeastItem(item: string[][]) {
+  let isBeastItem = false
+  APIitems['monster']?.entries.forEach(monster => {
+    if (monster.type === itemParsed.baseType) {
+      isBeastItem = true
     }
-    return ParseResult.PARSE_SECTION_SUCC
+  })
+  if (isBeastItem) {
+    itemParsed.autoSearch = true
+    itemParsed.searchExchange.option = false
+    return true
   }
-  for (const section of item) {
-    if (parseBodyLevel(section) === ParseResult.PARSE_SECTION_SUCC) continue
-    if (parseMod(section.map(line => line.replace(' (implicit)', '')), 'necropolis') === ParseResult.PARSE_SECTION_SUCC) break
-  }
-  itemParsed.stats.map(ele => ele.disabled = false)
-}
-
-function parseImmortalFire(item: string[][]) {
-  itemParsed.autoSearch = true
-  for (const section of item) {
-    if (parseItemLevel(section) === ParseResult.PARSE_SECTION_SUCC) break
-  }
+  return false
 }
 
 function parseGraft(itemSection: string[][]) {
   parseAllfuns(itemSection)
+}
+
+function parseTimelessJewel(item: string[][]) {
+
+  itemParsed.autoSearch = true
+  let statsList: { id: string, text: string, type: string }[] = []
+  if (itemParsed.name === '致命的驕傲') {
+    statsList = [
+      {
+        "id": "explicit.pseudo_timeless_jewel_rakiata",
+        "text": "拉其塔指揮領導超過 # 戰士",
+        "type": "隨機"
+      },
+      {
+        "id": "explicit.pseudo_timeless_jewel_kaom",
+        "text": "岡姆指揮領導超過 # 戰士",
+        "type": "隨機"
+      }, {
+        "id": "explicit.pseudo_timeless_jewel_akoya",
+        "text": "阿寇亞指揮領導超過 # 戰士",
+        "type": "隨機"
+      }, {
+        "id": "explicit.pseudo_timeless_jewel_kiloava",
+        "text": "基洛瓦指揮領導超過 # 戰士",
+        "type": "隨機"
+      },
+    ]
+  }
+  else if (itemParsed.name === '輝煌的虛榮') {
+    statsList = [
+      {
+        "id": "explicit.pseudo_timeless_jewel_xibaqua",
+        "text": "浸泡在以賽巴昆之名獻祭的 # 條生命中",
+        "type": "隨機"
+      }, {
+        "id": "explicit.pseudo_timeless_jewel_doryani",
+        "text": "浸泡在以多里亞尼之名獻祭的 # 條生命中",
+        "type": "隨機"
+      }, {
+        "id": "explicit.pseudo_timeless_jewel_ahuana",
+        "text": "浸泡在以阿呼阿娜之名獻祭的 # 條生命中",
+        "type": "隨機"
+      }, {
+        "id": "explicit.pseudo_timeless_jewel_zerphi",
+        "text": "浸泡在以澤佛伊之名獻祭的 # 條生命中",
+        "type": "隨機"
+      },
+    ]
+  }
+  else if (itemParsed.name === '殘酷的紀律') {
+    statsList = [{
+      "id": "explicit.pseudo_timeless_jewel_asenath",
+      "text": "# 位部屬宣誓服從於安賽娜絲的血脈",
+      "type": "explicit"
+    }, {
+      "id": "explicit.pseudo_timeless_jewel_balbala",
+      "text": "# 位部屬宣誓服從於巴爾巴拉的血脈",
+      "type": "explicit"
+    }, {
+      "id": "explicit.pseudo_timeless_jewel_nasima",
+      "text": "# 位部屬宣誓服從於納西瑪的血脈",
+      "type": "explicit"
+    }, {
+      "id": "explicit.pseudo_timeless_jewel_deshret",
+      "text": "# 位部屬宣誓服從於迪虛瑞特的血脈",
+      "type": "explicit"
+    },
+    ]
+  }
+  else if (itemParsed.name === '優雅的高傲') {
+    statsList = [
+      {
+        "id": "explicit.pseudo_timeless_jewel_cadiro",
+        "text": "授銜 # 個硬幣以紀念卡迪羅",
+        "type": "explicit"
+      }, {
+        "id": "explicit.pseudo_timeless_jewel_caspiro",
+        "text": "授銜 # 個硬幣以紀念卡斯皮羅",
+        "type": "explicit"
+      }, {
+        "id": "explicit.pseudo_timeless_jewel_victario",
+        "text": "授銜 # 個硬幣以紀念維多里奧",
+        "type": "explicit"
+      }, {
+        "id": "explicit.pseudo_timeless_jewel_chitus",
+        "text": "授銜 # 個硬幣以紀念切特斯",
+        "type": "explicit"
+      },
+    ]
+  }
+  else if (itemParsed.name === '激進的信仰') {
+    statsList = [
+      {
+        "id": "explicit.pseudo_timeless_jewel_dominus",
+        "text": "為了讚美 # 名受到神主轉化的人們所雕刻",
+        "type": "explicit"
+      }, {
+        "id": "explicit.pseudo_timeless_jewel_avarius",
+        "text": "為了讚美 # 名受到聖宗伊爾莉斯轉化的人們所雕刻",
+        "type": "explicit"
+      }, {
+        "id": "explicit.pseudo_timeless_jewel_maxarius",
+        "text": "為了禮讚 # 名受到聖宗瑪薩里歐斯感化的信眾所雕刻",
+        "type": "explicit"
+      }, {
+        "id": "explicit.pseudo_timeless_jewel_venarius",
+        "text": "為了讚美 # 名受到聖宗維那利斯轉化的人們所雕刻",
+        "type": "explicit"
+      },
+    ]
+  }
+
+  const statsListId = statsList.map(ele => ele.id)
+  const statAlreadyIn = itemParsed.stats.find(ele => statsListId.includes(ele.id))
+  if (!statAlreadyIn) return
+  statAlreadyIn.disabled = false;
+  if (statAlreadyIn.value)
+    statAlreadyIn.value.max = statAlreadyIn.value.min
+  itemParsed.stats.splice(1, 0, ...statsList.filter(ele => ele.id !== statAlreadyIn?.id).map((ele) => ({
+    ...ele,
+    disabled: true,
+    value: statAlreadyIn.value ?
+      { min: statAlreadyIn.value.min, max: statAlreadyIn.value.min } :
+      undefined
+  })))
+
+}
+function parseJewel(item: string[][]) {
+  if (itemParsed.baseType.endsWith('星團珠寶')) {
+    parseClusterJewel(item)
+    return
+  }
+  if (/^禁忌(血肉|烈焰)$/.test(itemParsed.name!)) {
+    parseForbiddenJewel(item)
+    return
+  }
+  if (itemParsed.name === '逃脫不能') {
+    parseImpossibleEscape(item)
+    return
+  }
+  if (itemParsed.name === '希望之絃') {
+    parseThreadOfHope(item)
+    return
+  }
+  parseAllfuns(item, parseFuns)
+  if (itemParsed.baseType === '永恆珠寶' && itemParsed.rarity === '傳奇') {
+    parseTimelessJewel(item)
+  }
 }
 

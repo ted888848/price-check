@@ -103,13 +103,13 @@ interface ItemStat {
   };
 }
 interface ParsedItem {
-  baseType: string;
-  type: {
+  baseType: string; //物品基底
+  type: { //物品類型
     text: string;
     option?: string;
     searchByType: boolean;
   };
-  name?: string;
+  name?: string; //物品名稱
   uniques: ItemUniques[];
   raritySearch: {
     value: string | undefined;
@@ -186,6 +186,7 @@ interface ParsedItem {
   };
   searchOnlineType: Config['searchOnlineType'];
   fetchCount: number;
+  map_completion_reward?: string
   // [key: string]: any;
 
   //3.27 

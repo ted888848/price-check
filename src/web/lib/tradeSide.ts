@@ -60,6 +60,7 @@ export interface ISearchJson {
           map_tier?: { min?: number; max?: number };
           map_blighted?: { option: boolean };
           map_uberblighted?: { option: boolean };
+          map_completion_reward?: { option: string };
         };
       };
       socket_filters?: {
@@ -155,7 +156,7 @@ export function getSearchJSON(item: ParsedItem) {
   if (!item.type.searchByType) {//如果沒有要依照類別搜尋
     searchJSON.query.type = item.baseType
   }
-  if (item.raritySearch.value === 'unique') {
+  if (item.raritySearch.value === 'unique' && !item.type.searchByType) {
     searchJSON.query.name = item.name || undefined
   }
   if (!isUndefined(item.isCorrupt)) {
@@ -188,7 +189,7 @@ export function getSearchJSON(item: ParsedItem) {
       min: item.mapTier.min, max: item.mapTier.max
     }
   }
-  if (!isUndefined(item.type.option)) {
+  if (!isUndefined(item.type.option) && item.type.searchByType) {
     searchJSON.query.filters.type_filters.filters.category = {
       option: item.type.option
     }
@@ -269,6 +270,12 @@ export function getSearchJSON(item: ParsedItem) {
 
   if (item.vaalVer) {
     searchJSON.query.type = item.vaalBaseType ?? ('瓦爾．' + item.baseType)
+  }
+
+  if (item.map_completion_reward) {
+    searchJSON.query.filters.map_filters.filters.map_completion_reward = {
+      option: item.map_completion_reward
+    }
   }
 
   //3.27
