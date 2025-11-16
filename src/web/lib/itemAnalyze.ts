@@ -321,11 +321,11 @@ function parseItemName(section: string[], itemSection: string[][]) {
       apiBaseTypes.push(entry.text)
     }
   })
-  let maxMatchLength = 0
 
+  let maxMatchLength = 0
   let apiBaseType: string | undefined = undefined
   apiBaseTypes?.forEach((entry) => {
-    const matchLength = entry.length - itemNameLine!.replace(entry, '').length
+    const matchLength = entry.length
     if (matchLength > maxMatchLength) {
       maxMatchLength = matchLength
       apiBaseType = entry
