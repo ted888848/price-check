@@ -1,0 +1,38 @@
+{
+  "characterName": "",
+  "searchExchangePrefer": "divine&(C or Ex)",
+  "POESESSID": "",
+  "searchTwoWeekOffline": false,
+  "priceCheckHotkey": "Ctrl+D",
+  "settingHotkey": "Ctrl+F2",
+  "shortcuts": [
+    {
+      "hotkey": "F2",
+      "type": "type-in-chat",
+      "outputText": "/invite @last"
+    },
+    {
+      "hotkey": "F3",
+      "type": "type-in-chat",
+      "outputText": "%TY"
+    },
+    {
+      "hotkey": "F4",
+      "type": "type-in-chat",
+      "outputText": "/leave"
+    },
+    {
+      "hotkey": "F5",
+      "type": "type-in-chat",
+      "outputText": "/hideout"
+    },
+    {
+      "hotkey": "Ctrl+`",
+      "type": "type-in-chat",
+      "outputText": "/oos"
+    }
+  ],
+  "league": "看守者",
+  "poeVersion": "1",
+  "searchOnlineType": "securable"
+}

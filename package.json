@@ -18,6 +18,7 @@
     "preview": "vite preview",
     "buildP": "powershell ./setGithubToken.ps1; npm run build -- -p always",
     "vuetsc": "vue-tsc --noEmit",
+    "test": " vitest",
     "ipc-type": "tsc ./src/ipc/index.ts --emitDeclarationOnly --declaration --outDir src/ipc"
   },
   "devDependencies": {
@@ -45,6 +46,7 @@
     "vite-plugin-electron": "^0.29.0",
     "vite-plugin-electron-renderer": "^0.14.6",
     "vite-tsconfig-paths": "^5.1.4",
+    "vitest": "^4.0.10",
     "vue": "^3.5.13",
     "vue-tsc": "^3.1.1"
   },
