@@ -245,7 +245,7 @@
 
 <script setup lang="ts">
 import { countBy, maxBy } from 'lodash-es'
-import { computed, ref, nextTick, watch, onUnmounted, onMounted, watchEffect } from 'vue'
+import { computed, ref, nextTick, watch, onUnmounted, } from 'vue'
 import {
   getSearchJSON, searchItem, fetchItem, searchExchange, selectOptions,
 } from '@/renderer/lib/tradeSide'
@@ -327,7 +327,7 @@ const { data: searchResult, isFetching: isFetchingSearchResult, refetch: refetch
 })
 
 const { data: searchItemFetchResult, hasNextPage, fetchNextPage, isFetchingNextPage } = useInfiniteQuery({
-  queryKey: ['fetchItem', searchResult],
+  queryKey: ['fetchItem'],
   queryFn: ({ pageParam }) => {
     const startIndex = pageParam * item.value.fetchCount
     const endIndex = Math.min(startIndex + item.value.fetchCount, searchResult.value.result.length)
@@ -335,7 +335,7 @@ const { data: searchItemFetchResult, hasNextPage, fetchNextPage, isFetchingNextP
     return fetchItem(searchResultList, searchResult.value.searchID.ID!)
   },
   initialPageParam: 0,
-  getNextPageParam: (lastPage, pages) => {
+  getNextPageParam: (_lastPage, pages) => {
     const fetchedCount = pages.length * item.value.fetchCount
     if (fetchedCount < (searchResult.value as unknown as ISearchResult).totalCount) {
       return pages.length

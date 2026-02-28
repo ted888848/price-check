@@ -16,7 +16,7 @@
   "include": [
     "types.d.ts",
     "src/test/*",
-    "src/web",
+    "src/renderer",
     "src/ipc"
   ],
 }

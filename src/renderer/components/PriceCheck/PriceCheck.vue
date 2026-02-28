@@ -47,7 +47,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, nextTick, onUnmounted, watchEffect, onBeforeMount } from 'vue'
+import { ref, computed, nextTick, onBeforeMount } from 'vue'
 import { range } from 'lodash-es'
 import IPC from '@/ipc'
 import { itemAnalyze } from '@/renderer/lib/itemAnalyze'
@@ -117,7 +117,7 @@ const item = ref<ParsedItem | null>(null)
 const parseError = ref<string | null>(null)
 
 const { data: divineToChaosOrEx, refetch: refreshDivineToChaosOrExalted } = useQuery({
-  queryKey: ['divineToChaosOrExalted', leagueSelect],
+  queryKey: ['divineToChaosOrExalted', () => leagueSelect.value],
   queryFn: () => getDivineToChaosOrExalted(leagueSelect.value),
   refetchInterval: 10 * 60 * 1000,
   staleTime: 5 * 60 * 1000,

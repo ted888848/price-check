@@ -83,13 +83,12 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, reactive, ref, watch, watchEffect } from 'vue'
+import { computed, reactive, ref, watch, watchEffect } from 'vue'
 import { countBy, maxBy } from 'lodash-es'
 import { searchItem, fetchItem, selectOptions } from '@/renderer/lib/tradeSide'
 import { currencyImageUrl, heistReward as gemReplicaOptions } from '@/renderer/lib/APIdata'
-import CircleCheck from '../utility/CircleCheck.vue'
 import type { ISearchResult, ISearchJson, IFetchResult } from '@/renderer/lib/tradeSide'
-import { poeVersion, secondCurrency, tradeUrl } from '@/renderer/lib'
+import { secondCurrency, tradeUrl } from '@/renderer/lib'
 import MySelect from '../utility/MySelect.vue'
 import { getIsCounting } from '@/renderer/lib/ratetimelimit'
 import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/vue-query'
@@ -132,7 +131,7 @@ const baseSearchJSON = Object.freeze({
       type: 'and', filters: []
     }],
     status: {
-      option: 'available'
+      option: 'securable'
     }
   },
   sort: {
@@ -202,7 +201,7 @@ watchEffect(() => {
 })
 
 
-const { data: searchResult, isFetching: isFetchingSearchResult, refetch: refetchSearchItem, isFetched: isFetchedSearchItem } = useQuery<ISearchResult>({
+const { data: searchResult, isFetching: isFetchingSearchResult, refetch: refetchSearchItem } = useQuery<ISearchResult>({
   queryKey: ['searchItemHeist'],
   queryFn: () => {
     return searchItem(searchJSON, props.leagueSelect)
@@ -221,7 +220,7 @@ const { data: searchResult, isFetching: isFetchingSearchResult, refetch: refetch
 })
 
 const { data: searchItemFetchResult, hasNextPage, fetchNextPage, isFetchingNextPage } = useInfiniteQuery({
-  queryKey: ['fetchItemHeist', searchResult.value.searchID.ID, searchResult.value.result],
+  queryKey: ['fetchItemHeist'],
   queryFn: ({ pageParam }) => {
     const startIndex = pageParam * 20
     const endIndex = Math.min(startIndex + 20, searchResult.value.result.length)
@@ -229,7 +228,7 @@ const { data: searchItemFetchResult, hasNextPage, fetchNextPage, isFetchingNextP
     return fetchItem(searchResultList, searchResult.value.searchID.ID!)
   },
   initialPageParam: 0,
-  getNextPageParam: (lastPage, pages) => {
+  getNextPageParam: (_lastPage, pages) => {
     const fetchedCount = pages.length * 20
     if (fetchedCount < (searchResult.value as unknown as ISearchResult).totalCount) {
       return pages.length
