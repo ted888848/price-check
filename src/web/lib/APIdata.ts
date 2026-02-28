@@ -1,4 +1,5 @@
 import IPC from '@/ipc'
+import { secondCurrency } from '.'
 
 export let leagues: string[] = []
 export let APIitems: ParsedAPIitems
@@ -6,6 +7,8 @@ export let heistReward: HeistReward[] = []
 export let APImods: ParsedAPIMods
 export let APIStatic: Static[]
 export let currencyImageUrl: Static[]
+export let divineImage = ''
+export let chaosOrExImage = ''
 export function loadAPIData(poeVersion?: POEVersion) {
   if (!poeVersion) {
     const config = window.ipc.sendSync(IPC.GET_CONFIG)
@@ -13,6 +16,8 @@ export function loadAPIData(poeVersion?: POEVersion) {
   }
   if (poeVersion === '1') loadAPIPoe1Data()
   else loadAPIPoe2Data()
+  divineImage = import.meta.env.VITE_URL_BASE + currencyImageUrl?.find(ele => ele.id === 'divine')?.image
+  chaosOrExImage = import.meta.env.VITE_URL_BASE + currencyImageUrl?.find(ele => ele.id === (secondCurrency))?.image
 }
 
 function loadAPIPoe1Data() {

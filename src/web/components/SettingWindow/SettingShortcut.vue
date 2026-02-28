@@ -14,6 +14,12 @@
       </span>
     </div>
     <div class="text-white flex items-center">
+      <span class="text-xl mr-2 ">
+        上次查價結果
+      </span>
+      <KeyInput v-model:hotkey="config.prevPriceCheckHotkey" />
+    </div>
+    <div class="text-white flex items-center">
       <span class="text-xl mr-2 w-80px">
         設定
       </span>

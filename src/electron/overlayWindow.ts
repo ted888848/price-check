@@ -75,8 +75,8 @@ export function toggleOverlay() {
   forceOverlay()
 }
 
-export function togglePriceCheck(clip: string | null = null) {
-  win.webContents.send(IPC.PRICE_CHECK_SHOW, clip, PoeWindow.priceCheckPos)
+export function togglePriceCheck(clip: string | null = null, prev: boolean = false) {
+  win.webContents.send(IPC.PRICE_CHECK_SHOW, clip, PoeWindow.priceCheckPos, prev)
   forceOverlay()
 }
 export function forceOverlay() {

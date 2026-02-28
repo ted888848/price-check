@@ -18,18 +18,18 @@
   <div v-if="!isSearching" class="my-2 justify-center flex text-xl">
     <button
       class="mx-2 bg-gray-500 text-white rounded px-1 hover:bg-gray-400 disabled:cursor-default disabled:opacity-60 disabled:bg-gray-500"
-      :disabled="rateTimeLimit.flag" @click="searchBtn">
+      :disabled="rateTimeLimit.flag" @click="() => searchBtn(false)">
       Search
     </button>
     <button
       class="mx-2 bg-gray-500 text-white rounded px-1 hover:bg-gray-400 disabled:cursor-default disabled:opacity-60 disabled:bg-gray-500"
-      :disabled="rateTimeLimit.flag" @click="searchOnlyChaos">
+      :disabled="rateTimeLimit.flag" @click="() => searchBtn(true)">
       Search2
     </button>
     <div v-if="searchResult.err || searchResult.searchID.ID">
       <button
         class="mx-2 bg-green-400 text-black rounded px-1 hover:bg-green-300 disabled:cursor-default disabled:opacity-60 disabled:bg-green-400"
-        :disabled="rateTimeLimit.flag || searchResult.nowFetched >= searchResult.totalCount" @click="fetchMore">
+        :disabled="rateTimeLimit.flag || !hasNextPage" @click="fetchMore">
         在20筆
       </button>
       <button
@@ -72,7 +72,7 @@
     {{ searchResult.errData || 'Fail' }}
   </span>
   <span v-if="searchResult.searchID?.ID" class="text-white text-2xl text-center hover:cursor-default">
-    共{{ searchResult.totalCount }}筆,顯示{{ searchResult.nowFetched }}筆
+    共{{ searchResult.totalCount }}筆,顯示{{ fetchedCount }}筆
   </span>
   <div v-if="isSearching" class=" text-8xl text-white my-5 text-center flex justify-center">
     <div class="i-svg-spinners:tadpole" />
@@ -83,15 +83,16 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
-import { maxBy } from 'lodash-es'
+import { computed, nextTick, reactive, ref, watch, watchEffect } from 'vue'
+import { countBy, maxBy } from 'lodash-es'
 import { searchItem, fetchItem, selectOptions } from '@/web/lib/tradeSide'
-import { heistReward as gemReplicaOptions } from '@/web/lib/APIdata'
+import { currencyImageUrl, heistReward as gemReplicaOptions } from '@/web/lib/APIdata'
 import CircleCheck from '../utility/CircleCheck.vue'
 import type { ISearchResult, ISearchJson, IFetchResult } from '@/web/lib/tradeSide'
 import { poeVersion, secondCurrency, tradeUrl } from '@/web/lib'
 import MySelect from '../utility/MySelect.vue'
 import { getIsCounting } from '@/web/lib/ratetimelimit'
+import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/vue-query'
 const props = defineProps<{
   itemProp: ParsedItem;
   leagueSelect: string;
@@ -101,9 +102,7 @@ const props = defineProps<{
 }>()
 const { rateTimeLimit } = getIsCounting()
 const { searchOnlineTypeOptions: searchOnlineTypeOptions } = selectOptions
-const gemReplicaSelect = ref<HeistReward>()
-const gemTransSelect = ref<ArrayValueType<HeistReward['trans']>>()
-const searchJSON: ISearchJson = {
+const baseSearchJSON = Object.freeze({
   query: {
     filters: {
       trade_filters: {
@@ -133,91 +132,160 @@ const searchJSON: ISearchJson = {
       type: 'and', filters: []
     }],
     status: {
-      option: 'online'
+      option: 'available'
     }
   },
   sort: {
     price: 'asc'
   }
-}
-const searchResult = ref<ISearchResult>({
-  result: [],
-  err: false,
-  totalCount: 0,
-  nowFetched: 0,
-  searchID: {
-    ID: '', type: 'search'
-  }
-})
-const fetchResult = ref<IFetchResult[]>([])
-const isSearching = ref(false)
+} satisfies ISearchJson)
+const searchJSON: ISearchJson = reactive(structuredClone(baseSearchJSON))
 const searchOnlineType = ref<typeof searchOnlineTypeOptions[number]['value']>('online')
 watch(searchOnlineType, (newValue) => {
   if (newValue === 'securable') {
     searchJSON.query.status.option = 'securable'
     //@ts-expect-error 
     delete searchJSON.query.filters.trade_filters.filters.price.min
+    return;
   }
-  else if (newValue === 'online') {
-    searchJSON.query.status.option = 'online'
+  searchJSON.query.filters.trade_filters.filters.price.min = 2
+  if (newValue === 'online') {
+    searchJSON.query.status.option = 'available'
+    return
   }
-  else if (newValue === '1week') {
+  if (newValue === '1week') {
     searchJSON.query.filters.trade_filters.filters.indexed = {
       option: '1week'
     }
     searchJSON.query.status.option = 'any'
+    return
+  }
+  searchJSON.query.status.option = 'any'
+})
+
+const gemTransSelect = ref<ArrayValueType<HeistReward['trans']>>()
+watch(gemTransSelect, (newValue) => {
+  if (!gemReplicaSelect.value?.name?.startsWith('贗品') && newValue) {
+    searchJSON.query.type = {
+      option: gemReplicaSelect.value?.type ?? '', discriminator: newValue?.disc ?? ''
+    }
   }
   else {
-    searchJSON.query.status.option = 'any'
+    delete searchJSON.query.type
   }
 })
-function resetSearchData() {
-  searchResult.value = {
-    result: [],
-    err: false,
-    totalCount: 0,
-    nowFetched: 0,
-    searchID: {
-      ID: '', type: 'search'
-    }
+const gemReplicaSelect = ref<HeistReward>()
+watch(gemReplicaSelect, (newValue) => {
+  if (newValue) {
+    searchJSON.query.name = newValue.name
+    searchJSON.query.type = newValue.type
   }
-  fetchResult.value = []
-  isSearching.value = false
-}
-async function fetchMore() {
-  isSearching.value = true
-  const fetchStartPos = searchResult.value.nowFetched
-  const fetchEndPos = Math.min(searchResult.value.nowFetched + 20, searchResult.value.totalCount)
-  searchResult.value.nowFetched = fetchEndPos
-  const fetchList = searchResult.value.result.slice(fetchStartPos, fetchEndPos)
-  fetchResult.value = await fetchItem(fetchList, searchResult.value.searchID.ID!, fetchResult.value)
-  isSearching.value = false
-}
-function searchOnlyChaos() {
+  else {
+    delete searchJSON.query.name
+  }
+})
 
-  searchJSON.query.filters.trade_filters.filters.price.option = 'chaos'
-  searchBtn().then(() => { delete searchJSON.query.filters.trade_filters.filters.price.option })
-}
-async function searchBtn() {
-  if (rateTimeLimit.value.flag) return
-  resetSearchData()
-  isSearching.value = true
-  searchJSON.query.name = gemReplicaSelect.value?.name
-  searchJSON.query.type = gemReplicaSelect.value?.type
+watchEffect(() => {
+  if (gemReplicaSelect.value) {
+    searchJSON.query.name = gemReplicaSelect.value.name
+    searchJSON.query.type = gemReplicaSelect.value.type
+  }
+  else {
+    delete searchJSON.query.name
+    delete searchJSON.query.type
+  }
   if (!gemReplicaSelect.value?.name?.startsWith('贗品') && gemTransSelect.value) {
     searchJSON.query.type = {
-      option: gemReplicaSelect.value?.type ?? '', discriminator: gemTransSelect.value?.disc
+      option: gemReplicaSelect.value?.type ?? '', discriminator: gemTransSelect.value.disc ?? ''
     }
   }
-  searchResult.value = await searchItem(searchJSON, props.leagueSelect)
-  if (!searchResult.value.err) {
-    const fetchStartPos = searchResult.value.nowFetched
-    const fetchEndPos = Math.min(searchResult.value.nowFetched + 20, searchResult.value.totalCount)
-    searchResult.value.nowFetched = fetchEndPos
-    const fetchList = searchResult.value.result.slice(fetchStartPos, fetchEndPos)
-    fetchResult.value = await fetchItem(fetchList, searchResult.value.searchID.ID!)
+})
+
+
+const { data: searchResult, isFetching: isFetchingSearchResult, refetch: refetchSearchItem, isFetched: isFetchedSearchItem } = useQuery<ISearchResult>({
+  queryKey: ['searchItemHeist'],
+  queryFn: () => {
+    return searchItem(searchJSON, props.leagueSelect)
+  },
+  enabled: false,
+  staleTime: 0,
+  gcTime: 0,
+  initialData: {
+    result: [],
+    totalCount: 0,
+    searchID: {
+      ID: '', type: 'search'
+    },
+    err: false
   }
-  isSearching.value = false
+})
+
+const { data: searchItemFetchResult, hasNextPage, fetchNextPage, isFetchingNextPage } = useInfiniteQuery({
+  queryKey: ['fetchItemHeist', searchResult.value.searchID.ID, searchResult.value.result],
+  queryFn: ({ pageParam }) => {
+    const startIndex = pageParam * 20
+    const endIndex = Math.min(startIndex + 20, searchResult.value.result.length)
+    const searchResultList = (searchResult.value as unknown as ISearchResult).result.slice(startIndex, endIndex)
+    return fetchItem(searchResultList, searchResult.value.searchID.ID!)
+  },
+  initialPageParam: 0,
+  getNextPageParam: (lastPage, pages) => {
+    const fetchedCount = pages.length * 20
+    if (fetchedCount < (searchResult.value as unknown as ISearchResult).totalCount) {
+      return pages.length
+    }
+    return undefined
+  },
+  staleTime: 0,
+  gcTime: 0,
+  enabled: false
+})
+
+function fetchMore() {
+  if (rateTimeLimit.value.flag) return
+  fetchNextPage()
+}
+
+const isSearching = computed(() => isFetchingSearchResult.value || isFetchingNextPage.value)
+
+const fetchedCount = computed(() => {
+  return searchItemFetchResult.value ? searchItemFetchResult.value.pages.flat().length : 0
+})
+const fetchResult = computed<IFetchResult[]>(() => {
+  if (searchItemFetchResult.value) {
+    const searchResultsFlat = searchItemFetchResult.value.pages.flat()
+    const countByFetchResult = countBy(searchResultsFlat)
+    const fetchResult: IFetchResult[] = []
+    for (const key in countByFetchResult) {
+      const [price, currency] = key.split('|')
+      const numPrice = Number(price)
+      const fetchResultFind = fetchResult.find((e) => (e.price === numPrice && e.currency === currency))
+      if (fetchResultFind) {
+        fetchResultFind.amount += countByFetchResult[key]
+      }
+      else {
+        fetchResult.push({
+          price: numPrice,
+          currency,
+          amount: countByFetchResult[key],
+          image: `${import.meta.env.VITE_URL_BASE}${currencyImageUrl.find(ele => ele.id === currency)?.image}`
+        })
+      }
+    }
+    return fetchResult
+  }
+  return []
+})
+
+const queryClient = useQueryClient()
+
+async function searchBtn(onlyChaosOrExalted = false) {
+  if (rateTimeLimit.value.flag) return
+  searchJSON.query.filters.trade_filters.filters.price.option = onlyChaosOrExalted ? 'chaos' : undefined
+  queryClient.removeQueries({ queryKey: ['fetchItemHeist'] })
+  queryClient.removeQueries({ queryKey: ['searchItemHeist'] })
+  await refetchSearchItem()
+  await fetchNextPage()
 }
 
 const fetchResultSorted = computed(() => {

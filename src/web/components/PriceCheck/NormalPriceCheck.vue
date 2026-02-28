@@ -26,7 +26,7 @@
       </span>
       <span :style="{ visibility: item.eDPS ? 'visible' : 'hidden' }" class=" w-40">EDps: {{ item.eDPS }}</span>
     </div>
-    <div v-if="item.map_completion_reward"  class="text-white text-center flex justify-center px-2">
+    <div v-if="item.map_completion_reward" class="text-white text-center flex justify-center px-2">
       <span class="flex-1">
         {{ item.map_completion_reward }}
       </span>
@@ -170,18 +170,18 @@
     <div v-if="!isSearching" class="my-2 justify-center flex text-xl">
       <button
         class="mx-2 bg-gray-500 text-white rounded px-1 hover:bg-gray-400 disabled:cursor-default disabled:opacity-60 disabled:bg-gray-500"
-        :disabled="rateTimeLimit.flag" @click="searchBtn">
+        :disabled="rateTimeLimit.flag" @click="() => searchBtn(false)">
         Search
       </button>
       <button
         class="mx-2 bg-gray-500 text-white rounded px-1 hover:bg-gray-400 disabled:cursor-default disabled:opacity-60 disabled:bg-gray-500"
-        :disabled="rateTimeLimit.flag" @click="searchOnlyChaosOrExalted">
+        :disabled="rateTimeLimit.flag" @click="() => searchBtn(true)">
         Search2
       </button>
       <div v-if="searchResult.err || searchResult.searchID.ID">
         <button
           class="mx-2 bg-green-400 text-black rounded px-1 hover:bg-green-300 disabled:cursor-default disabled:opacity-60 disabled:bg-green-400"
-          :disabled="rateTimeLimit.flag || searchResult.nowFetched >= searchResult.totalCount" @click="fetchMore">
+          :disabled="rateTimeLimit.flag || !hasNextPage" @click="fetchMore">
           在20筆
         </button>
         <button
@@ -229,7 +229,7 @@
       {{ searchResult.errData || 'Fail' }}
     </span>
     <span v-if="searchResult.searchID?.ID" class="text-white text-2xl text-center hover:cursor-default">
-      共{{ searchResult.totalCount }}筆,顯示{{ searchResult.nowFetched }}筆
+      共{{ searchResult.totalCount }}筆,顯示{{ fetchedCount }}筆
     </span>
     <div v-if="isSearching" class=" text-8xl text-white my-5 text-center flex justify-center">
       <div class="i-svg-spinners:tadpole" />
@@ -244,26 +244,35 @@
 </template>
 
 <script setup lang="ts">
-import { maxBy } from 'lodash-es'
-import { computed, ref, nextTick, watch, onUnmounted } from 'vue'
+import { countBy, maxBy } from 'lodash-es'
+import { computed, ref, nextTick, watch, onUnmounted, onMounted, watchEffect } from 'vue'
 import {
   getSearchJSON, searchItem, fetchItem, searchExchange, selectOptions,
 } from '@/web/lib/tradeSide'
 import IPC from '@/ipc'
-import { APIStatic } from '@/web/lib/APIdata'
+import { APIStatic, divineImage, chaosOrExImage, currencyImageUrl } from '@/web/lib/APIdata'
 import CircleCheck from '../utility/CircleCheck.vue'
 import ValueMinMax from '../utility/ValueMinMax.vue'
 import type { ISearchResult, IExchangeResult, IFetchResult } from '@/web/lib/tradeSide'
 import { secondCurrency, tradeUrl } from '@/web/lib'
 import MySelect from '../utility/MySelect.vue'
 import { getIsCounting } from '@/web/lib/ratetimelimit'
+import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/vue-query'
 const props = defineProps<{
   itemProp: ParsedItem;
   leagueSelect: string;
   divineToChaosOrExalted: number;
   parseError?: string | null;
   isOverflow: () => boolean;
+  prevSearch?: boolean;
 }>()
+
+const queryClient = useQueryClient()
+if (!props.prevSearch) {
+  queryClient.removeQueries({ queryKey: ['searchItem'] })
+  queryClient.removeQueries({ queryKey: ['fetchItem'] })
+}
+
 const { rateTimeLimit } = getIsCounting()
 const item = ref(props.itemProp)
 if (process.env.NODE_ENV === 'development') console.log(item.value)
@@ -292,82 +301,115 @@ function modTextColor(type?: string) {
       return 'white'
   }
 }
-
-const searchResult = ref<ISearchResult | IExchangeResult>({
-  result: [],
-  totalCount: 0,
-  nowFetched: 0,
-  searchID: {
-    ID: '', type: 'search'
-  },
-  err: false
-})
-const fetchResult = ref<IFetchResult[]>([])
-const isSearching = ref(false)
 const modTbodyToggle = ref(true)
 const currency2Img = ref('')
-function searchOnlyChaosOrExalted() {
-  item.value.onlyChaosOrExalted = true
-  searchBtn().then(() => { item.value.onlyChaosOrExalted = false })
-}
-function resetSearchData() {
-  searchResult.value = {
+
+const { data: searchResult, isFetching: isFetchingSearchResult, refetch: refetchSearchItem, isFetched: isFetchedSearchItem } = useQuery<ISearchResult | IExchangeResult>({
+  queryKey: ['searchItem'],
+  queryFn: () => {
+    if (item.value.searchExchange.option) {
+      return searchExchange(item.value, props.leagueSelect)
+    }
+    else
+      return searchItem(getSearchJSON(item.value), props.leagueSelect)
+  },
+  enabled: false,
+  staleTime: 5 * 60 * 1000,
+  gcTime: 5 * 60 * 1000,
+  initialData: {
     result: [],
     totalCount: 0,
-    nowFetched: 0,
     searchID: {
       ID: '', type: 'search'
     },
     err: false
   }
-  fetchResult.value = []
-  isSearching.value = false
+})
+
+const { data: searchItemFetchResult, hasNextPage, fetchNextPage, isFetchingNextPage } = useInfiniteQuery({
+  queryKey: ['fetchItem', searchResult],
+  queryFn: ({ pageParam }) => {
+    const startIndex = pageParam * item.value.fetchCount
+    const endIndex = Math.min(startIndex + item.value.fetchCount, searchResult.value.result.length)
+    const searchResultList = (searchResult.value as unknown as ISearchResult).result.slice(startIndex, endIndex)
+    return fetchItem(searchResultList, searchResult.value.searchID.ID!)
+  },
+  initialPageParam: 0,
+  getNextPageParam: (lastPage, pages) => {
+    const fetchedCount = pages.length * item.value.fetchCount
+    if (fetchedCount < (searchResult.value as unknown as ISearchResult).totalCount) {
+      return pages.length
+    }
+    return undefined
+  },
+  staleTime: 5 * 60 * 1000,
+  gcTime: 5 * 60 * 1000,
+  enabled: false
+})
+
+function fetchMore() {
+  if (rateTimeLimit.value.flag) return
+  fetchNextPage()
+}
+
+const isSearching = computed(() => isFetchingSearchResult.value || isFetchingNextPage.value)
+
+const fetchedCount = computed(() => {
+  if (item.value.searchExchange.option) {
+    return (searchResult.value as IExchangeResult).result.length
+  }
+  else {
+    return searchItemFetchResult.value ? searchItemFetchResult.value.pages.flat().length : 0
+  }
+})
+const fetchResult = computed<IFetchResult[]>(() => {
+  if (item.value.searchExchange.option) {
+    if (!searchResult.value.result || searchResult.value.result.length === 0) return []
+    if (!searchResult.value.err) {
+      const image = APIStatic.find(ele => ele.id === (searchResult.value as IExchangeResult).currency2)!.image
+      currency2Img.value = image ? `${import.meta.env.VITE_URL_BASE}${image}` : ''
+      return (searchResult.value as IExchangeResult).result
+    }
+  }
+  else {
+    if (searchItemFetchResult.value) {
+      const searchResultsFlat = searchItemFetchResult.value.pages.flat()
+      const countByFetchResult = countBy(searchResultsFlat)
+      const fetchResult: IFetchResult[] = []
+      for (const key in countByFetchResult) {
+        const [price, currency] = key.split('|')
+        const numPrice = Number(price)
+        const fetchResultFind = fetchResult.find((e) => (e.price === numPrice && e.currency === currency))
+        if (fetchResultFind) {
+          fetchResultFind.amount += countByFetchResult[key]
+        }
+        else {
+          fetchResult.push({
+            price: numPrice,
+            currency,
+            amount: countByFetchResult[key],
+            image: `${import.meta.env.VITE_URL_BASE}${currencyImageUrl.find(ele => ele.id === currency)?.image}`
+          })
+        }
+      }
+      return fetchResult
+    }
+  }
+  return []
+})
+
+
+async function searchBtn(onlyChaosOrExalted = false) {
+  if (rateTimeLimit.value.flag) return
   modTbodyToggle.value = true
   currency2Img.value = ''
-}
-async function fetchMore() {
-  isSearching.value = true
-  const fetchStartPos = searchResult.value.nowFetched
-  const fetchEndPos = Math.min(searchResult.value.nowFetched + item.value.fetchCount, searchResult.value.totalCount)
-  searchResult.value.nowFetched = fetchEndPos
-  const fetchList = searchResult.value.result.slice(fetchStartPos, fetchEndPos) as string[]
-  try {
-    fetchResult.value = await fetchItem(fetchList, searchResult.value.searchID.ID!, fetchResult.value)
-  } catch (error) {
-    console.error('Error fetching more items:', error)
-  } finally {
-    isSearching.value = false
-    nextTick(() => { modTbodyToggle.value = !props.isOverflow() })
+  item.value.onlyChaosOrExalted = onlyChaosOrExalted
+  queryClient.removeQueries({ queryKey: ['fetchItem'] })
+  queryClient.removeQueries({ queryKey: ['searchItem'] })
+  await refetchSearchItem()
+  if (!item.value.searchExchange.option) {
+    await fetchNextPage()
   }
-}
-async function searchBtn() {
-  if (rateTimeLimit.value.flag) return
-  resetSearchData()
-  isSearching.value = true
-  try {
-    if (item.value.searchExchange.option) {
-      searchResult.value = (await searchExchange(item.value, props.leagueSelect))
-      if (!searchResult.value.err) {
-        const image = APIStatic.find(ele => ele.id === (searchResult.value as IExchangeResult).currency2)!.image
-        currency2Img.value = image ? `${import.meta.env.VITE_URL_BASE}${image}` : ''
-        fetchResult.value = searchResult.value.result
-      }
-    }
-    else {
-      searchResult.value = await searchItem(getSearchJSON(item.value), props.leagueSelect)
-      if (!searchResult.value.err) {
-        const fetchStartPos = searchResult.value.nowFetched
-        const fetchEndPos = Math.min(searchResult.value.nowFetched + item.value.fetchCount, searchResult.value.totalCount)
-        searchResult.value.nowFetched = fetchEndPos
-        const fetchList = searchResult.value.result.slice(fetchStartPos, fetchEndPos)
-        fetchResult.value = await fetchItem(fetchList, searchResult.value.searchID.ID!)
-      }
-    }
-  }
-  catch (error) {
-    console.error('Error during search:', error)
-  }
-  isSearching.value = false
   nextTick(() => { modTbodyToggle.value = !props.isOverflow() })
 }
 
@@ -444,17 +486,24 @@ function openWebView() {
 function openBrowser() {
   window.open(encodeURI(`${import.meta.env.VITE_URL_BASE}/${tradeUrl}/${searchResult.value.searchID.type}/${props.leagueSelect}/${searchResult.value.searchID.ID}`))
 }
-if (item.value.autoSearch && !props.parseError)
+if (item.value.autoSearch && !props.parseError && !props.prevSearch) {
   searchBtn()
+}
+
 
 function handleKeydown(e: KeyboardEvent) {
   if (e.key === 'Enter' && !isSearching.value && !props.parseError) {
     e.preventDefault()
-    if (e.altKey) {
-      searchOnlyChaosOrExalted()
+    if (isFetchedSearchItem.value && !item.value.searchExchange.option) {
+      fetchMore()
     }
     else {
-      searchBtn()
+      if (e.altKey) {
+        searchBtn(true)
+      }
+      else {
+        searchBtn(false)
+      }
     }
   }
 }

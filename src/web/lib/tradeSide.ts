@@ -307,7 +307,6 @@ export interface ISearchResult {
   };
   result: string[];
   totalCount: number;
-  nowFetched: number;
   errData?: string;
   err: boolean;
 }
@@ -316,7 +315,6 @@ export async function searchItem(searchJson: ISearchJson, league: string) {
     searchID: { type: 'search' },
     result: [],
     totalCount: 0,
-    nowFetched: 0,
     err: false
   }
   searchJson = cleanupJSON(searchJson)
@@ -330,7 +328,6 @@ export async function searchItem(searchJson: ISearchJson, league: string) {
       searchResult.searchID.ID = data.id
       searchResult.result = data.result
       searchResult.totalCount = data.result.length
-      searchResult.nowFetched = 0
     })
     .catch((err) => {
       console.error(err)
@@ -345,9 +342,7 @@ export async function searchItem(searchJson: ISearchJson, league: string) {
       }
     })
   if (searchResult.errData)
-    return {
-      ...searchResult, err: true
-    }
+    throw searchResult.errData
   return {
     ...searchResult
   }
@@ -359,8 +354,8 @@ export interface IFetchResult {
   image: string;
 }
 
-export async function fetchItem(fetchList: string[], searchID: string, oldFetchResult?: IFetchResult[]) {
-  if (!fetchList.length) return oldFetchResult ?? []
+export async function fetchItem(fetchList: string[], searchID: string) {
+  if (!fetchList.length) return []
   let fetchPriceResult: string[] = []
   const itemJsonUrl: string[] = []
   for (let i = 0; i < fetchList.length; i += 10) {
@@ -381,25 +376,7 @@ export async function fetchItem(fetchList: string[], searchID: string, oldFetchR
         startCountdown(parseInt(err.response.headers['retry-after']))
       }
     })
-  const countByFetchResult = countBy(fetchPriceResult)
-  const fetchResult = oldFetchResult ?? []
-  for (const key in countByFetchResult) {
-    const [price, currency] = key.split('|')
-    const numPrice = Number(price)
-    const fetchResultFind = fetchResult.find((e) => (e.price === numPrice && e.currency === currency))
-    if (fetchResultFind) {
-      fetchResultFind.amount += countByFetchResult[key]
-    }
-    else {
-      fetchResult.push({
-        price: numPrice,
-        currency,
-        amount: countByFetchResult[key],
-        image: `${import.meta.env.VITE_URL_BASE}${currencyImageUrl.find(ele => ele.id === currency)?.image}`
-      })
-    }
-  }
-  return fetchResult
+  return fetchPriceResult
 }
 export interface IExchangeJson {
   query: {
@@ -446,7 +423,6 @@ export interface IExchangeResult {
   };
   result: IFetchResult[];
   totalCount: number;
-  nowFetched: number;
   err: boolean;
   errData?: string;
   currency2?: string;
@@ -456,7 +432,6 @@ export async function searchExchange(item: ParsedItem, league: string): Promise<
     searchID: { type: 'exchange' },
     result: [],
     totalCount: 0,
-    nowFetched: 0,
     err: false
   }
   const tempResult: string[] = []
@@ -483,7 +458,6 @@ export async function searchExchange(item: ParsedItem, league: string): Promise<
           tempResult.push(offer.exchange.amount + '：' + offer.item.amount + '|' + offer.exchange.currency)
         }
       }
-      exchangeResult.nowFetched = exchangeResult.totalCount = tempResult.length
     })
     .catch((err) => {
       console.error(err)

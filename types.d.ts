@@ -214,6 +214,7 @@ interface Config {
   league: string;
   poeVersion: POEVersion;
   searchOnlineType: 'online' | '1week' | 'securable' | 'all';
+  prevPriceCheckHotkey?: string;
 }
 
 interface APIStaticItem {

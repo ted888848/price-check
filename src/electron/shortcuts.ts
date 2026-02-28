@@ -29,6 +29,11 @@ export function registerShortcut() {
   globalShortcut.register(config.settingHotkey, () => {
     toggleOverlay()
   })
+  if (config.prevPriceCheckHotkey) {
+    globalShortcut.register(config.prevPriceCheckHotkey, () => {
+      togglePriceCheck(null, true)
+    })
+  }
   config.shortcuts.forEach((shortcut) => {
     if (!shortcut.hotkey.length) return
     let typeText = ''

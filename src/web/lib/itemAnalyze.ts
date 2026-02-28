@@ -202,6 +202,7 @@ export function itemAnalyze(item: string) {
   }
   if (itemParsed.raritySearch.label === '傳奇' && itemParsed.name) itemParsed.autoSearch = true
   if (itemParsed.baseType === '阿茲瓦特史記') parseTemple(itemSection)
+
   return itemParsed
 }
 function parseItemName(section: string[], itemSection: string[][]) {
@@ -364,6 +365,8 @@ function parseItemName(section: string[], itemSection: string[][]) {
 
   return ParseResult.PARSE_SECTION_SUCC
 }
+
+
 function parseRequirement(section: string[]) {
   if (!section[0].startsWith('需求:')) return ParseResult.PARSE_SECTION_SKIP
   section.forEach(line => {
