@@ -7,8 +7,8 @@
         {{ rule }}:
         <ul>
           <li v-for="(item, index) in state" :key="index" class="text-xs hover:cursor-default">
-            {{ item.times }} / {{ apiRateTimeLimitMax['search']![rule]![index].times }} ({{
-              apiRateTimeLimitMax['search']![rule]![index].timeout }}s)
+            {{ item.times }} / {{ apiRateTimeLimitMax['search']![rule]![index]?.times }} ({{
+              apiRateTimeLimitMax['search']![rule]![index]?.timeout }}s)
           </li>
         </ul>
       </li>
@@ -16,7 +16,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { getRateTimeLimitState, apiRateTimeLimitMax, getRateLimiters } from '@/web/lib/ratetimelimit';
+import { getRateTimeLimitState, apiRateTimeLimitMax, getRateLimiters } from '@/renderer/lib/ratetimelimit';
 const { rateTimeLimitState } = getRateTimeLimitState()
 const { ratetimelimiters } = getRateLimiters()
 console.log(ratetimelimiters.value)

@@ -23,7 +23,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { selectOptions } from '@/web/lib/tradeSide'
+import { selectOptions } from '@/renderer/lib/tradeSide'
 import MySelect from '../utility/MySelect.vue'
 const { exchangeHave, searchOnlineTypeOptions } = selectOptions
 const config = defineModel<Config>('config', {

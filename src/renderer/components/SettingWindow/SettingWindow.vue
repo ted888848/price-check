@@ -11,7 +11,9 @@
         快捷鍵設定
       </button>
     </div>
-    <component :is="settingPage[currentSettingPage]" v-model:config="config" class="bg-slate-600 flex-1" />
+    <div class="pb-50px overflow-auto bg-slate-600 flex-1">
+      <component :is="settingPage[currentSettingPage]" v-model:config="config" />
+    </div>
     <div class=" absolute bottom-4 mx-auto left-0 right-0 flex items-center justify-center ">
       <button class="px-3 py-1 rounded bg-green-500 mr-3 disabled:opacity-70"
         :disabled="!Boolean(config.priceCheckHotkey.length && config.settingHotkey.length)" @click="save">

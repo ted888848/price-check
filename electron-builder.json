@@ -1,7 +1,7 @@
 {
   "appId": "com.electron.price-check",
   "asar": true,
-  "icon": "public/SextantOrb256.ico",
+  "icon": "src/assets/SextantOrb256.ico",
   "directories": {
     "output": "release/${version}"
   },
@@ -30,8 +30,8 @@
     "perMachine": false,
     "allowToChangeInstallationDirectory": true,
     "createDesktopShortcut": true,
-    "installerIcon": "public/SextantOrb256.ico",
-    "uninstallerIcon": "public/SextantOrb256.ico",
+    "installerIcon": "src/assets/SextantOrb256.ico",
+    "uninstallerIcon": "src/assets/SextantOrb256.ico",
     "deleteAppDataOnUninstall": true
   },
   "electronLanguages": [

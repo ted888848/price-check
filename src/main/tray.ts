@@ -1,9 +1,11 @@
-import { Tray, Menu, app } from 'electron'
+import { Tray, Menu, app, nativeImage } from 'electron'
 import { win } from './overlayWindow'
 import { checkForUpdate } from './setupAPI'
 import { join } from 'path'
 import { updateState } from './setupAPI'
 import { config, updateConfig } from './config'
+import SextantOrb128 from '../assets/SextantOrb128.ico?asset'
+
 let tray: Tray
 export function buildTray() {
   const trayMenu = Menu.buildFromTemplate([
@@ -68,6 +70,6 @@ export function buildTray() {
 }
 
 export function setupTray() {
-  tray = new Tray(join(process.env.PUBLIC, 'SextantOrb128.ico'))
+  tray = new Tray(nativeImage.createFromPath(SextantOrb128))
   buildTray()
 }

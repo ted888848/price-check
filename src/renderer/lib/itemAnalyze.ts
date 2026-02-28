@@ -63,7 +63,7 @@ let itemParsed: ParsedItem
 function findUnique(type: Exclude<keyof ParsedAPIitems, 'gem'>, isFonded: { flag: boolean }): void {
   if (isFonded.flag) return
   let temp: ItemUniques[] = []
-  for (const ele of APIitems[type].entries) {
+  for (const ele of APIitems[type]!.entries) {
     if (type !== 'gem' && ele.type === itemParsed.baseType) {
       temp = structuredClone(ele.unique ?? [])
       break
@@ -80,7 +80,7 @@ export function itemAnalyze(item: string) {
   const itemSection: string[][] = [[]]
   itemArr.reduce((section, line) => {
     if (line !== '--------') {
-      section.push(line)
+      section?.push(line)
       return section
     }
     else {
@@ -89,7 +89,7 @@ export function itemAnalyze(item: string) {
       return section
     }
   }, itemSection[0])
-  if (parseItemName(itemSection[0], itemSection) === ParseResult.PARSE_SECTION_FAIL) return null
+  if (parseItemName(itemSection[0]!, itemSection) === ParseResult.PARSE_SECTION_FAIL) return null
   itemParsed.searchOnlineType = config.searchOnlineType ?? itemParsed.searchOnlineType
   itemSection.shift()
   const isFindUnique = {
@@ -198,7 +198,7 @@ export function itemAnalyze(item: string) {
   }
   parsePseudoEleResistance()
   if (itemParsed.rarity === '傳奇' && itemParsed.isIdentify === false && itemParsed.uniques.length === 1) {
-    itemParsed.name = itemParsed.uniques[0].name
+    itemParsed.name = itemParsed.uniques[0]!.name
   }
   if (itemParsed.raritySearch.label === '傳奇' && itemParsed.name) itemParsed.autoSearch = true
   if (itemParsed.baseType === '阿茲瓦特史記') parseTemple(itemSection)
@@ -206,10 +206,10 @@ export function itemAnalyze(item: string) {
   return itemParsed
 }
 function parseItemName(section: string[], itemSection: string[][]) {
-  if (!section[0].startsWith('物品種類:')) return ParseResult.PARSE_SECTION_FAIL
+  if (!section[0]!.startsWith('物品種類:')) return ParseResult.PARSE_SECTION_FAIL
   if (section[2] === '你無法使用這項裝備，它的數值將被忽略') {
     section.pop()
-    section.push(...(itemSection.splice(1, 1)[0]))
+    section.push(...(itemSection.splice(1, 1)[0]!))
   }
   const typeTrans = {
     爪: 'weapon.claw',
@@ -279,16 +279,16 @@ function parseItemName(section: string[], itemSection: string[][]) {
     label: '非傳奇'
   }] as const
   // 物品種類
-  const itemType = section[0].match(/物品種類: ([^\n]+)/)![1] as keyof typeof typeTrans
+  const itemType = section[0]!.match(/物品種類: ([^\n]+)/)![1] as keyof typeof typeTrans
   itemParsed.type = {
     text: itemType, option: typeTrans[itemType], searchByType: false
   }
   section.shift()
 
   // 稀有度
-  itemParsed.rarity = section[0].match(/稀有度: ([^\n]+)/)?.[1] ?? ''
+  itemParsed.rarity = section[0]!.match(/稀有度: ([^\n]+)/)?.[1] ?? ''
   if (itemType === '不滅之火餘燼') {
-    itemParsed.baseType = section[0]
+    itemParsed.baseType = section[0]!
     return ParseResult.PARSE_SECTION_SUCC
   }
   if (['普通', '魔法', '稀有'].includes(itemParsed.rarity)) {
@@ -334,7 +334,7 @@ function parseItemName(section: string[], itemSection: string[][]) {
   })
 
   if (itemType === '技能寶石') {
-    itemParsed.baseType = section[0]
+    itemParsed.baseType = section[0]!
     const transGemInfo = APIitems.gem.entries.find(ele => ele.trans?.some(({ text }) => text === itemParsed.baseType))
     if (transGemInfo) {
       itemParsed.transGem = {
@@ -368,27 +368,27 @@ function parseItemName(section: string[], itemSection: string[][]) {
 
 
 function parseRequirement(section: string[]) {
-  if (!section[0].startsWith('需求:')) return ParseResult.PARSE_SECTION_SKIP
+  if (!section[0]?.startsWith('需求:')) return ParseResult.PARSE_SECTION_SKIP
   section.forEach(line => {
     let lineMatch: RegExpMatchArray | null
     if ((lineMatch = line.match(/^等級: (\d+)/))) {
-      itemParsed.requireLevel = parseInt(lineMatch[1])
+      itemParsed.requireLevel = parseInt(lineMatch[1]!)
     }
     else if ((lineMatch = line.match(/^智慧: (\d+)/))) {
-      itemParsed.requireInt = parseInt(lineMatch[1])
+      itemParsed.requireInt = parseInt(lineMatch[1]!)
     }
     else if ((lineMatch = line.match(/^力量: (\d+)/))) {
-      itemParsed.requireStr = parseInt(lineMatch[1])
+      itemParsed.requireStr = parseInt(lineMatch[1]!)
     }
     else if ((lineMatch = line.match(/^敏捷: (\d+)/))) {
-      itemParsed.requireDex = parseInt(lineMatch[1])
+      itemParsed.requireDex = parseInt(lineMatch[1]!)
     }
   })
   return ParseResult.PARSE_SECTION_SUCC
 }
 function parseSocket(section: string[]) {
-  if (!section[0].startsWith('插槽')) return ParseResult.PARSE_SECTION_SKIP
-  const sockets = section[0].replace(/R|G|B|W/g, '#')
+  if (!section[0]?.startsWith('插槽')) return ParseResult.PARSE_SECTION_SKIP
+  const sockets = section[0]!.replace(/R|G|B|W/g, '#')
   if (sockets.indexOf('#-#-#-#-#-#') > -1) {
     itemParsed.search6L = true
   }
@@ -398,9 +398,9 @@ function parseSocket(section: string[]) {
   return ParseResult.PARSE_SECTION_SUCC
 }
 function parseItemLevel(section: string[]) {
-  const sectionMatch = section[0].match(/^物品等級: (\d+)/)
+  const sectionMatch = section[0]?.match(/^物品等級: (\d+)/)
   if (!sectionMatch) return ParseResult.PARSE_SECTION_SKIP
-  const il = parseInt(sectionMatch[1])
+  const il = parseInt(sectionMatch[1]!)
   const maxModLevel = window.ipc.sendSync(IPC.GET_CONFIG).poeVersion === '1' ? 86 : 82
   itemParsed.itemLevel = {
     min: il > maxModLevel ? maxModLevel : il, max: undefined, search: itemParsed.rarity !== '傳奇'
@@ -426,13 +426,13 @@ function parseMultilineMod(regSection: RegExp[], section: string[], type: keyof 
   const tempArr: ItemStat[] = []
   for (let i = 0; i < regSection.length; ++i) {
     try {
-      const matchModList = APImods[type].mutiLines?.filter(s => regSection[i].test(s.text[0]))
+      const matchModList = APImods[type].mutiLines?.filter(s => regSection[i]!.test(s.text[0]!))
       if (!matchModList) continue
       outer:
       for (const matchMod of matchModList) {
         let flag = true
         for (const index in matchMod.text) {
-          if ((i + (+index)) >= regSection.length || !regSection[i + (+index)].test(matchMod.text[+index])) {
+          if ((i + (+index)) >= regSection.length || !regSection[i + (+index)]!.test(matchMod.text[+index]!)) {
             flag = false
             break
           }
@@ -443,7 +443,7 @@ function parseMultilineMod(regSection: RegExp[], section: string[], type: keyof 
         let tempValue = 0
         let valueCount = 0
         for (const ind in matchReg) {
-          const regGroup = section[i + (+ind)].match(matchReg[ind])
+          const regGroup = section[i + (+ind)]!.match(matchReg[ind]!)
           if (!regGroup) continue outer
           regGroup.shift()
           if (regGroup.length) tempValue = regGroup.reduce((pre, ele) => { valueCount++; return pre + Number(ele) }, tempValue)
@@ -486,7 +486,7 @@ function parseMod(section: string[], type: keyof ParsedAPIMods | 'mutated') {
           matchMods = matchMods.filter(mod => mod.text.endsWith(' (部分)'))
         else {
           matchMods = matchMods.filter(mod => !mod.text.endsWith(' (部分)'))
-          const regTemp = section[index].match(/增加|減少/)?.[0]
+          const regTemp = section[index]?.match(/增加|減少/)?.[0]
           if (regTemp)
             matchMods = matchMods.filter(mod => mod.text.includes(regTemp))
         }
@@ -495,10 +495,10 @@ function parseMod(section: string[], type: keyof ParsedAPIMods | 'mutated') {
       matchMods.forEach((matchMod) => {
         const matchReg = new RegExp(matchMod.text.replace(/[+-]?#/g, String.raw`([+-]?\d+(?:\.\d+)?)`)
           .replace(' (部分)', '').replace(/減少|增加/, String.raw`(?:減少|增加)`))
-        const regGroup = section[index].match(matchReg)
+        const regGroup = section[index]?.match(matchReg)
         regGroup?.shift()
         if (regGroup?.length) {
-          const diffSign = matchMod.text.match(/減少|增加/)?.[0] !== section[index].match(/減少|增加/)?.[0]
+          const diffSign = matchMod.text.match(/減少|增加/)?.[0] !== section[index]?.match(/減少|增加/)?.[0]
           //數字前增加與減少不相等，把數字變負數
           const minValue = (diffSign ? -1 : 1) * (regGroup.reduce((pre, ele) => pre + Number(ele), 0) / regGroup.length)
           tempArr.push({
@@ -612,14 +612,14 @@ function parseInfluence(section: string[]) {
   return ParseResult.PARSE_SECTION_SKIP
 }
 function parseCorrupt(section: string[]) {
-  if (section[0].match(/^已汙染$/)) {
+  if (section[0]?.match(/^已汙染$/)) {
     itemParsed.isCorrupt = true
     return ParseResult.PARSE_SECTION_SUCC
   }
   return ParseResult.PARSE_SECTION_SKIP
 }
 function parseIdentify(section: string[]) {
-  if (section[0].match(/^未鑑定$/)) {
+  if (section[0]?.match(/^未鑑定$/)) {
     itemParsed.isIdentify = false
     return ParseResult.PARSE_ITEM_SKIP
   }
@@ -674,17 +674,17 @@ function parseAllfuns(item: string[][], functions: typeof parseFuns = parseFuns)
 }
 function parseWeapon(item: string[][]) {
   itemParsed.isWeaponOrArmor = true
-  item[0].forEach(line => {
+  item[0]?.forEach(line => {
     let lineMatch: RegExpMatchArray | null
     if ((lineMatch = line.match(/品質: \+(\d+)%/))) {
       itemParsed.quality = {
-        min: parseInt(lineMatch[1]), max: undefined, search: false
+        min: parseInt(lineMatch[1]!), max: undefined, search: false
       }
     }
     else if ((lineMatch = line.match(/物理傷害: (\d+)(?:-|\s到\s)(\d+)/))) {
       itemParsed.phyDamage = {
-        min: parseInt(lineMatch[1]),
-        max: parseInt(lineMatch[2])
+        min: parseInt(lineMatch[1]!),
+        max: parseInt(lineMatch[2]!)
       }
     }
     else if ((lineMatch = line.match(/(?:元素|火焰|冰冷|閃電)傷害:(?: (\d+)(?:-|\s到\s)(\d+) \((?:augmented|fire|lightning|cold)\),?)(?: (\d+)(?:-|\s到\s)(\d+) \((?:augmented|fire|lightning|cold)\),?)?(?: (\d+)(?:-|\s到\s)(\d+) \((?:augmented|fire|lightning|cold)\))?/))) {
@@ -701,13 +701,13 @@ function parseWeapon(item: string[][]) {
       }
     }
     else if ((lineMatch = line.match(/暴擊率: (\d+\.?\d\d)%/))) {
-      itemParsed.critChance = parseFloat(lineMatch[1])
+      itemParsed.critChance = parseFloat(lineMatch[1]!)
     }
     else if ((lineMatch = line.match(/每秒攻擊次數: (\d+\.?\d\d)/))) {
-      itemParsed.attackSpeed = parseFloat(lineMatch[1])
+      itemParsed.attackSpeed = parseFloat(lineMatch[1]!)
     }
     else if ((lineMatch = line.match(/武器範圍: (\d+)/))) {
-      itemParsed.weaponArea = parseInt(lineMatch[1])
+      itemParsed.weaponArea = parseInt(lineMatch[1]!)
     }
   })
   item.shift()
@@ -717,27 +717,27 @@ function parseWeapon(item: string[][]) {
 }
 function parseArmor(item: string[][]) {
   itemParsed.isWeaponOrArmor = true
-  item[0].forEach(line => {
+  item[0]?.forEach(line => {
     let lineMatch: RegExpMatchArray | null
     if ((lineMatch = line.match(/品質: \+(\d+)%/))) {
-      itemParsed.quality.min = parseInt(lineMatch[1])
+      itemParsed.quality.min = parseInt(lineMatch[1]!)
     }
     else if ((lineMatch = line.match(/閃避值: (\d+)/))) {
-      itemParsed.evasion = parseInt(lineMatch[1])
+      itemParsed.evasion = parseInt(lineMatch[1]!)
     }
     else if ((lineMatch = line.match(/護甲: (\d+)/))) {
-      itemParsed.armour = parseInt(lineMatch[1])
+      itemParsed.armour = parseInt(lineMatch[1]!)
     }
     else if ((lineMatch = line.match(/能量護盾: (\d+)/))) {
-      itemParsed.energyShield = parseInt(lineMatch[1])
+      itemParsed.energyShield = parseInt(lineMatch[1]!)
     }
   })
   item.shift()
   parseAllfuns(item, parseFuns)
 }
 function parseClusterJewel(item: string[][]) {
-  if (parseRequirement(item[0]) === ParseResult.PARSE_SECTION_SUCC) item.shift()
-  const tempIlvl = parseInt(item[0][0].match(/物品等級: (\d+)/)![1])
+  if (parseRequirement(item[0]!) === ParseResult.PARSE_SECTION_SUCC) item.shift()
+  const tempIlvl = parseInt(item[0]![0]!.match(/物品等級: (\d+)/)![1]!)
   itemParsed.itemLevel = {
     min: tempIlvl >= 84 ? 84 : tempIlvl >= 75 ? 75 : tempIlvl >= 68 ? 68 : tempIlvl >= 50 ? 50 : 1,
     max: tempIlvl >= 84 ? 100 : tempIlvl >= 75 ? 83 : tempIlvl >= 68 ? 74 : tempIlvl >= 50 ? 67 : 49,
@@ -745,18 +745,18 @@ function parseClusterJewel(item: string[][]) {
   }
   item.shift()
   if (itemParsed.rarity !== '傳奇') {
-    parseEnchantMod(item[0].slice(0, 2))
+    parseEnchantMod(item[0]!.slice(0, 2))
     switch (itemParsed.baseType) {
       case '巨型星團珠寶':
       case '小型星團珠寶':
-        itemParsed.stats[0].value!.max = itemParsed.stats[0].value!.min
+        itemParsed.stats[0]!.value!.max = itemParsed.stats[0]!.value!.min
         break
       case '中型星團珠寶':
-        itemParsed.stats[0].value!.min = itemParsed.stats[0].value!.min === 6 ? 6 : 4
-        itemParsed.stats[0].value!.max = itemParsed.stats[0].value!.min === 6 ? 6 : 5
+        itemParsed.stats[0]!.value!.min = itemParsed.stats[0]!.value!.min === 6 ? 6 : 4
+        itemParsed.stats[0]!.value!.max = itemParsed.stats[0]!.value!.min === 6 ? 6 : 5
         break
     }
-    let clusterType: string = item[0].find(ele => ele.startsWith('附加的小型天賦給予：'))!
+    let clusterType: string = item[0]!.find(ele => ele.startsWith('附加的小型天賦給予：'))!
     clusterType = clusterType.substring(10, clusterType.indexOf(' (enchant)'))
     let tempMod = APImods.clusterJewel.entries.find(mod => mod.text.includes(clusterType))
     if (tempMod!.text.endsWith('(古典)') && itemParsed.baseType === '小型星團珠寶') {
@@ -788,11 +788,11 @@ function parseForbiddenJewel(item: string[][]) {
   itemParsed.autoSearch = true
   for (const section of item) {
     if (parseCorrupt(section) === ParseResult.PARSE_SECTION_SUCC) continue
-    const sectionMatch = section[0].match(/若禁忌(烈焰|血肉)上有符合的詞綴，配置 (.*)/)
+    const sectionMatch = section[0]!.match(/若禁忌(烈焰|血肉)上有符合的詞綴，配置 (.*)/)
     if (sectionMatch) {
       const type = sectionMatch[1]
-      const passive = sectionMatch[2]
-      const matchStat = APImods.forbiddenJewel.entries.find(e => e.text.indexOf(type) > -1)
+      const passive = sectionMatch[2]!
+      const matchStat = APImods.forbiddenJewel.entries.find(e => e.text.indexOf(type!) > -1)
       const matchPassive = matchStat?.option?.options.find(e => e.text === passive)
       itemParsed.stats.push({
         id: matchStat!.id,
@@ -817,7 +817,7 @@ function parseImpossibleEscape(item: string[][]) {
         const matchOption = statDetail.option?.options.find(ele => ele.text === result[1])
         itemParsed.stats.push({
           id: statDetail.id,
-          text: statDetail.text[0].replace('#', result[1]),
+          text: statDetail.text[0]!.replace('#', result[1]!),
           value: {
             option: matchOption?.id
           },
@@ -886,7 +886,7 @@ function parseOtherNeedMods(item: string[][]) {
   if (itemParsed.name === '贗品．龍牙翱翔') {
     outer: for (const section of item) {
       for (let index = 0; index < section.length; index++) {
-        const match = section[index].match(/全部 ([^\s]+) 寶石等級 \+3/)
+        const match = section[index]!.match(/全部 ([^\s]+) 寶石等級 \+3/)
         if (match) {
           section[index] = `全部 # 寶石等級 +${match[1]}`
         }
@@ -932,11 +932,11 @@ function parseMap(item: string[][]) {
     ]
   } as const
 
-  item[0].forEach(line => {
+  item[0]!.forEach(line => {
     const lineMatch = line.match(/地圖階級: (\d+)/)
     if (lineMatch) {
       itemParsed.mapTier = {
-        min: parseInt(lineMatch[1]), max: undefined, search: true
+        min: parseInt(lineMatch[1]!), max: undefined, search: true
       }
     }
     const completionMatch = line.match(/獎勵: 貼模 \((.+)\)/)
@@ -1011,7 +1011,7 @@ function parseMap(item: string[][]) {
     parseCorrupt, parseIdentify,
   ]
   if (itemParsed.map_completion_reward) {
-    item = item.filter(section => !section[0].startsWith('怪物等級：'))
+    item = item.filter(section => !section[0]!.startsWith('怪物等級：'))
     parseFuns.push(parseExplicitMod)
   }
   parseAllfuns(item, parseFuns)
@@ -1019,16 +1019,16 @@ function parseMap(item: string[][]) {
 function parseGem(item: string[][]) {
   itemParsed.autoSearch = true
 
-  item[0].forEach(line => {
+  item[0]!.forEach(line => {
     let lineMatch: RegExpMatchArray | null
     if ((lineMatch = line.match(/等級: (\d+)/))) {
       itemParsed.gemLevel = {
-        min: parseInt(lineMatch[1]), max: undefined, search: true
+        min: parseInt(lineMatch[1]!), max: undefined, search: true
       }
     }
     else if ((lineMatch = line.match(/品質: \+(\d+)%/))) {
       itemParsed.quality = {
-        min: parseInt(lineMatch[1]), max: undefined, search: false
+        min: parseInt(lineMatch[1]!), max: undefined, search: false
       }
     }
   })
@@ -1037,7 +1037,7 @@ function parseGem(item: string[][]) {
   // let vaalLine: string
   // endFor:
   for (const section of item.reverse()) {
-    if (section[0].includes('瓦爾．')) {
+    if (section[0]?.includes('瓦爾．')) {
       itemParsed.vaalVer = true
       itemParsed.vaalBaseType = section[0]
       continue;
@@ -1050,7 +1050,7 @@ function parseGem(item: string[][]) {
 }
 function parseTemple(item: string[][]) {
   item.shift()
-  item[0] = item[0].map(line => line.replace(/ \(階級 [123]\)/, ''))
+  item[0] = item[0]!.map(line => line.replace(/ \(階級 [123]\)/, ''))
   parseMod(item[0], 'temple')
   itemParsed.stats = itemParsed.stats
     .filter(ele => ['多里亞尼之院', '腐敗之地', '祭祀之巔'].includes(ele.text as string))
@@ -1058,11 +1058,11 @@ function parseTemple(item: string[][]) {
   itemParsed.autoSearch = true
 }
 function parseFlask(item: string[][]) {
-  item[0].forEach(line => {
+  item[0]?.forEach(line => {
     const lineMatch = line.match(/品質: \+(\d+)%/)
     if (lineMatch) {
       itemParsed.quality = {
-        min: parseInt(lineMatch[1]), max: undefined, search: true
+        min: parseInt(lineMatch[1]!), max: undefined, search: true
       }
     }
   })
@@ -1072,7 +1072,7 @@ function parseFlask(item: string[][]) {
 
 function parseLogbook(item: string[][]) {
   item.shift()
-  parseItemLevel(item[0])
+  parseItemLevel(item[0]!)
   item.shift()
   itemParsed.itemLevel!.min = itemParsed.itemLevel!.min! > 83 ? 83 : itemParsed.itemLevel!.min
   const logbookTypes = {
@@ -1083,10 +1083,10 @@ function parseLogbook(item: string[][]) {
   } as const
   for (const section of item) {
     if (section.length >= 2) {
-      if (Object.keys(logbookTypes).includes(section[1])) {
+      if (Object.keys(logbookTypes).includes(section[1]!)) {
         if (!itemParsed.stats.find(e => section[1] === e.text)) {
           itemParsed.stats.push({
-            id: logbookTypes[section[1] as keyof typeof logbookTypes], text: section[1], disabled: true
+            id: logbookTypes[section[1] as keyof typeof logbookTypes], text: section[1]!, disabled: true
           })
         }
         item = item.filter(s => s !== section)
@@ -1111,7 +1111,7 @@ function parseRelic(item: string[][]) {
     parseItemLevel(line)
   }
   item.shift()
-  parseMod(item[0], 'sanctum')
+  parseMod(item[0]!, 'sanctum')
 }
 
 

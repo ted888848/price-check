@@ -36,10 +36,10 @@
       </div>
       <KeepAlive v-if="currentPriceCheck">
         <NormalPriceCheck v-if="currentPriceCheck === 'NormalPriceCheck'" :item-prop="item!"
-          :league-select="leagueSelect" :divine-to-chaos-or-exalted="divineToChaosOrEx" :is-overflow="isOverflow"
+          :league-select="leagueSelect" :divine-to-chaos-or-exalted="divineToChaosOrEx ?? 0" :is-overflow="isOverflow"
           @open-web-view="openWebView" :parse-error="parseError" :prev-search="prevSearch" />
         <HeistPriceCheck v-else-if="currentPriceCheck === 'HeistPriceCheck'" :item-prop="item!"
-          :divine-to-chaos-or-exalted="divineToChaosOrEx" :league-select="leagueSelect" :is-overflow="isOverflow"
+          :divine-to-chaos-or-exalted="divineToChaosOrEx ?? 0" :league-select="leagueSelect" :is-overflow="isOverflow"
           @open-web-view="openWebView" :parse-error="parseError" />
       </KeepAlive>
     </div>
@@ -50,12 +50,12 @@
 import { ref, computed, nextTick, onUnmounted, watchEffect, onBeforeMount } from 'vue'
 import { range } from 'lodash-es'
 import IPC from '@/ipc'
-import { itemAnalyze } from '@/web/lib/itemAnalyze'
-import { getDivineToChaosOrExalted } from '@/web/lib/tradeSide'
-import { leagues, divineImage, chaosOrExImage } from '@/web/lib/APIdata'
+import { itemAnalyze } from '@/renderer/lib/itemAnalyze'
+import { getDivineToChaosOrExalted } from '@/renderer/lib/tradeSide'
+import { leagues, divineImage, chaosOrExImage } from '@/renderer/lib/APIdata'
 import NormalPriceCheck from './NormalPriceCheck.vue'
 import HeistPriceCheck from './HeistPriceCheck.vue'
-import { leagueSelectRef, tradeUrl } from '@/web/lib'
+import { leagueSelectRef, tradeUrl } from '@/renderer/lib'
 import MySelect from '../utility/MySelect.vue'
 import { useQuery } from '@tanstack/vue-query'
 const isWebViewOpen = ref(false)
@@ -90,12 +90,11 @@ const leagueSelect = computed({
     window.ipc.send(IPC.SET_CONFIG, JSON.stringify({
       ...config, league: val
     }))
-    refreshDivineToChaosOrExalted()
   }
 })
 function loadLeagues() {
   const configLeagues = window.ipc.sendSync(IPC.GET_CONFIG).league
-  leagueSelect.value = leagues.includes(configLeagues) ? configLeagues : (leagues.find(ele => !ele.match('^(標準|殘暴|專家)')) ?? leagues[0])
+  leagueSelect.value = leagues.includes(configLeagues) ? configLeagues : (leagues.find(ele => !ele.match('^(標準|殘暴|專家)')) ?? leagues[0]) as string
 }
 defineExpose({
   loadLeagues
@@ -121,13 +120,13 @@ const { data: divineToChaosOrEx, refetch: refreshDivineToChaosOrExalted } = useQ
   queryKey: ['divineToChaosOrExalted', leagueSelect],
   queryFn: () => getDivineToChaosOrExalted(leagueSelect.value),
   refetchInterval: 10 * 60 * 1000,
-  staleTime: 10 * 60 * 1000,
-  initialData: 0,
+  staleTime: 5 * 60 * 1000,
+  enabled: computed(() => !!leagueSelect.value)
 })
 
 const divineToChaosDec = computed(() => {
   return range(0.1, 1, 0.1).map(ele => ({
-    e: ele.toFixed(1), c: (ele * divineToChaosOrEx.value).toFixed(0)
+    e: ele.toFixed(1), c: (ele * (divineToChaosOrEx.value ?? 0)).toFixed(0)
   }))
 })
 

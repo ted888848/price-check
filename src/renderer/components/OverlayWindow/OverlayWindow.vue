@@ -14,8 +14,8 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import IPC from '@/ipc'
-import { loadAPIData } from '@/web/lib/APIdata'
-import SettingWindow from '@/web/components/SettingWindow/SettingWindow.vue'
+import { loadAPIData } from '@/renderer/lib/APIdata'
+import SettingWindow from '@/renderer/components/SettingWindow/SettingWindow.vue'
 const overlayWindowShow = ref(false)
 function closeOverlay() {
   overlayWindowShow.value = false

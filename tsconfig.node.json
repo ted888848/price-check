@@ -11,13 +11,16 @@
       "@/*": [
         "src/*"
       ]
-    }
+    },
+    "types": [
+      "electron-vite/node"
+    ]
   },
   "include": [
-    "src/electron",
+    "src/main",
     "src/lib",
     "src/ipc",
-    "vite.config.ts",
+    "electron.vite.config.ts",
     "package.json",
     "types.d.ts",
   ]

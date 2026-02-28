@@ -248,15 +248,15 @@ import { countBy, maxBy } from 'lodash-es'
 import { computed, ref, nextTick, watch, onUnmounted, onMounted, watchEffect } from 'vue'
 import {
   getSearchJSON, searchItem, fetchItem, searchExchange, selectOptions,
-} from '@/web/lib/tradeSide'
+} from '@/renderer/lib/tradeSide'
 import IPC from '@/ipc'
-import { APIStatic, divineImage, chaosOrExImage, currencyImageUrl } from '@/web/lib/APIdata'
+import { APIStatic, divineImage, chaosOrExImage, currencyImageUrl } from '@/renderer/lib/APIdata'
 import CircleCheck from '../utility/CircleCheck.vue'
 import ValueMinMax from '../utility/ValueMinMax.vue'
-import type { ISearchResult, IExchangeResult, IFetchResult } from '@/web/lib/tradeSide'
-import { secondCurrency, tradeUrl } from '@/web/lib'
+import type { ISearchResult, IExchangeResult, IFetchResult } from '@/renderer/lib/tradeSide'
+import { secondCurrency, tradeUrl } from '@/renderer/lib'
 import MySelect from '../utility/MySelect.vue'
-import { getIsCounting } from '@/web/lib/ratetimelimit'
+import { getIsCounting } from '@/renderer/lib/ratetimelimit'
 import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/vue-query'
 const props = defineProps<{
   itemProp: ParsedItem;
@@ -377,17 +377,17 @@ const fetchResult = computed<IFetchResult[]>(() => {
       const countByFetchResult = countBy(searchResultsFlat)
       const fetchResult: IFetchResult[] = []
       for (const key in countByFetchResult) {
-        const [price, currency] = key.split('|')
+        const [price, currency] = key.split('|') as [string, string]
         const numPrice = Number(price)
         const fetchResultFind = fetchResult.find((e) => (e.price === numPrice && e.currency === currency))
         if (fetchResultFind) {
-          fetchResultFind.amount += countByFetchResult[key]
+          fetchResultFind.amount += countByFetchResult[key]!
         }
         else {
           fetchResult.push({
             price: numPrice,
             currency,
-            amount: countByFetchResult[key],
+            amount: countByFetchResult[key]!,
             image: `${import.meta.env.VITE_URL_BASE}${currencyImageUrl.find(ele => ele.id === currency)?.image}`
           })
         }
@@ -417,9 +417,9 @@ const fetchResultSorted = computed(() => {
   if (props.divineToChaosOrExalted) {
     if (item.value.searchExchange.option) {
       return fetchResult.value.slice().sort((a, b) => {
-        const [aCurrencyCount, aItemCount] = (a.price as string).split('：').map(Number)
+        const [aCurrencyCount, aItemCount] = (a.price as string).split('：').map(Number) as [number, number]
         const aPrice = aCurrencyCount / aItemCount
-        const [bCurrencyCount, bItemCount] = (b.price as string).split('：').map(Number)
+        const [bCurrencyCount, bItemCount] = (b.price as string).split('：').map(Number) as [number, number]
         const bPrice = bCurrencyCount / bItemCount
         const ca = a.currency === 'divine' ? aPrice * props.divineToChaosOrExalted : aPrice as number
         const cb = b.currency === 'divine' ? bPrice * props.divineToChaosOrExalted : bPrice as number

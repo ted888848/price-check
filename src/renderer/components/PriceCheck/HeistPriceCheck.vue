@@ -85,13 +85,13 @@
 <script setup lang="ts">
 import { computed, nextTick, reactive, ref, watch, watchEffect } from 'vue'
 import { countBy, maxBy } from 'lodash-es'
-import { searchItem, fetchItem, selectOptions } from '@/web/lib/tradeSide'
-import { currencyImageUrl, heistReward as gemReplicaOptions } from '@/web/lib/APIdata'
+import { searchItem, fetchItem, selectOptions } from '@/renderer/lib/tradeSide'
+import { currencyImageUrl, heistReward as gemReplicaOptions } from '@/renderer/lib/APIdata'
 import CircleCheck from '../utility/CircleCheck.vue'
-import type { ISearchResult, ISearchJson, IFetchResult } from '@/web/lib/tradeSide'
-import { poeVersion, secondCurrency, tradeUrl } from '@/web/lib'
+import type { ISearchResult, ISearchJson, IFetchResult } from '@/renderer/lib/tradeSide'
+import { poeVersion, secondCurrency, tradeUrl } from '@/renderer/lib'
 import MySelect from '../utility/MySelect.vue'
-import { getIsCounting } from '@/web/lib/ratetimelimit'
+import { getIsCounting } from '@/renderer/lib/ratetimelimit'
 import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/vue-query'
 const props = defineProps<{
   itemProp: ParsedItem;
@@ -257,17 +257,17 @@ const fetchResult = computed<IFetchResult[]>(() => {
     const countByFetchResult = countBy(searchResultsFlat)
     const fetchResult: IFetchResult[] = []
     for (const key in countByFetchResult) {
-      const [price, currency] = key.split('|')
+      const [price, currency] = key.split('|') as [string, string]
       const numPrice = Number(price)
       const fetchResultFind = fetchResult.find((e) => (e.price === numPrice && e.currency === currency))
       if (fetchResultFind) {
-        fetchResultFind.amount += countByFetchResult[key]
+        fetchResultFind.amount += countByFetchResult[key]!
       }
       else {
         fetchResult.push({
           price: numPrice,
           currency,
-          amount: countByFetchResult[key],
+          amount: countByFetchResult[key]!,
           image: `${import.meta.env.VITE_URL_BASE}${currencyImageUrl.find(ele => ele.id === currency)?.image}`
         })
       }

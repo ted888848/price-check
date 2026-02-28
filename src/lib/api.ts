@@ -1,4 +1,4 @@
-import { config } from '@/electron/config'
+import { config } from '@/main/config'
 import axios from 'axios'
 
 import { CreateAxiosDefaults } from 'axios'

@@ -4,11 +4,10 @@
 </template>
 
 <script setup lang="ts">
-import OverlayWindow from '@/web/components/OverlayWindow/OverlayWindow.vue'
-import PriceCheck from '@/web/components/PriceCheck/PriceCheck.vue'
-import { onMounted, onUnmounted, ref, useTemplateRef } from 'vue'
+import OverlayWindow from '@/renderer/components/OverlayWindow/OverlayWindow.vue'
+import PriceCheck from '@/renderer/components/PriceCheck/PriceCheck.vue'
+import { onUnmounted, ref, useTemplateRef } from 'vue'
 import { loadAPIData } from './lib/APIdata'
-import { initMarketData } from './lib/market'
 const priceCheckRef = useTemplateRef('priceCheck')
 const reloadLeagues = () => {
   priceCheckRef.value?.loadLeagues()

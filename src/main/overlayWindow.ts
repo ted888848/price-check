@@ -1,9 +1,10 @@
-import { BrowserWindow, ipcMain, shell } from 'electron'
+import { BrowserWindow, ipcMain, nativeImage, shell } from 'electron'
 import { OverlayController, OVERLAY_WINDOW_OPTS } from 'electron-overlay-window'
 import { PoeWindow } from './POEWindow'
 import IPC from '@/ipc'
 import { join } from 'path'
 import { config } from './config'
+import SextantOrb128 from '../assets/SextantOrb128.ico?asset'
 export let win: BrowserWindow
 let isOverlayOpen: boolean
 export async function createWindow() {
@@ -11,23 +12,23 @@ export async function createWindow() {
     width: 800,
     height: 600,
     ...OVERLAY_WINDOW_OPTS,
-    icon: join(process.env.PUBLIC, 'SextantOrb128.ico'),
+    icon: nativeImage.createFromPath(SextantOrb128),
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: true,
       webSecurity: false,
       webviewTag: true,
-      preload: join(process.env.DIST, 'preload.mjs'),
+      preload: join(__dirname, '../preload/index.js'),
     },
   })
-  if (process.env.VITE_DEV_SERVER_URL) {
-    await win.loadURL(process.env.VITE_DEV_SERVER_URL)
+  if (process.env.ELECTRON_RENDERER_URL) {
+    await win.loadURL(process.env.ELECTRON_RENDERER_URL)
     win.webContents.openDevTools({
       mode: 'detach', activate: false
     })
   }
   else {
-    await win.loadFile(join(process.env.DIST, 'index.html'))
+    await win.loadFile(join(__dirname, '../renderer/index.html'))
   }
   ipcMain.on(IPC.FORCE_POE, () => {
     forcePOE()

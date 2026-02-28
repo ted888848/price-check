@@ -473,11 +473,11 @@ export async function searchExchange(item: ParsedItem, league: string): Promise<
     })
   const tempResultCountBy = countBy(tempResult)
   for (const key in tempResultCountBy) {
-    const [price, currency] = key.split('|')
+    const [price, currency] = key.split('|') as [string, string]
     exchangeResult.result.push({
       price,
       currency,
-      amount: tempResultCountBy[key],
+      amount: tempResultCountBy[key]!,
       image: `${import.meta.env.VITE_URL_BASE}${currencyImageUrl.find(ele => ele.id === currency)?.image}`
     })
   }
