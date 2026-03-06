@@ -29,7 +29,7 @@ export const marketQueryOption = queryOptions({
   queryFn: async () => getLatestMarketData(),
   refetchOnWindowFocus: false,
   refetchOnReconnect: false,
-  refetchInterval: 30 * 60 * 1000,
+  refetchInterval: 10 * 60 * 1000,
   enabled: !!leagueSelectRef.value && false,
 })
 export async function getLatestMarketData() {
