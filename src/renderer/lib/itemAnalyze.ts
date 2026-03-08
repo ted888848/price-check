@@ -149,7 +149,7 @@ export function itemAnalyze(item: string) {
     case '記憶':
       parseOtherNeedMods(itemSection)
       break
-    case '異界地圖':
+    case '地圖':
       findUnique('map', isFindUnique)
       parseMap(itemSection)
       break
@@ -250,7 +250,7 @@ function parseItemName(section: string[], itemSection: string[][]) {
     複合藥劑: 'flask',
     功能藥劑: 'flask',
     飾品: 'accessory.trinket',
-    異界地圖: 'map',
+    地圖: 'map',
     輿圖地區升級道具: 'watchstone',
     記憶: 'memoryline',
     技能寶石: 'gem.activegem',
@@ -931,14 +931,16 @@ function parseMap(item: string[][]) {
       { value: 4, text: '圖拉克斯', exchange: 'droxs-map' }
     ]
   } as const
-
-  item[0]!.forEach(line => {
-    const lineMatch = line.match(/地圖階級: (\d+)/)
-    if (lineMatch) {
-      itemParsed.mapTier = {
-        min: parseInt(lineMatch[1]!), max: undefined, search: true
-      }
+  const mapTier = itemParsed.baseType.match(/（階級 (\d{1,2})）/)
+  if (mapTier) {
+    itemParsed.mapTier = {
+      min: parseInt(mapTier[1]!), max: undefined, search: true
     }
+  }
+  if (mapTier && itemParsed.raritySearch.value !== 'unique') {
+    itemParsed.type.searchByType = true
+  }
+  item[0]!.forEach(line => {
     const completionMatch = line.match(/獎勵: 貼模 \((.+)\)/)
     if (completionMatch) {
       itemParsed.map_completion_reward = completionMatch[1]

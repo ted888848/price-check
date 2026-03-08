@@ -194,6 +194,12 @@ export function getSearchJSON(item: ParsedItem) {
       option: item.type.option
     }
   }
+  if (item.type.option === 'map' && item.baseType.includes('（階級')) {
+    searchJSON.query.type = {
+      discriminator: 'map',
+      option: 'Map'
+    }
+  }
   if (item.quality.search) {
     searchJSON.query.filters.misc_filters.filters.quality = {
       min: item.quality.min, max: item.quality.max
@@ -310,7 +316,7 @@ export interface ISearchResult {
   errData?: string;
   err: boolean;
 }
-export async function searchItem(searchJson: ISearchJson, league: string) {
+export async function searchItem(searchJson: ISearchJson, league: string): Promise<ISearchResult> {
   const searchResult: ISearchResult = {
     searchID: { type: 'search' },
     result: [],
@@ -342,7 +348,10 @@ export async function searchItem(searchJson: ISearchJson, league: string) {
       }
     })
   if (searchResult.errData)
-    throw searchResult.errData
+    return {
+      ...searchResult,
+      err: true,
+    }
   return {
     ...searchResult
   }
