@@ -422,11 +422,11 @@ function getStrReg(section: string[], type: string) {
 function parseMultilineMod(regSection: RegExp[], section: string[], type: keyof ParsedAPIMods | 'mutated') {
   const isMutated = type === 'mutated'
   type = isMutated ? 'explicit' : type as keyof ParsedAPIMods
-  if (!APImods[type].mutiLines) return []
+  if (!APImods[type]!.mutiLines) return []
   const tempArr: ItemStat[] = []
   for (let i = 0; i < regSection.length; ++i) {
     try {
-      const matchModList = APImods[type].mutiLines?.filter(s => regSection[i]!.test(s.text[0]!))
+      const matchModList = APImods[type]!.mutiLines?.filter(s => regSection[i]!.test(s.text[0]!))
       if (!matchModList) continue
       outer:
       for (const matchMod of matchModList) {
@@ -459,11 +459,11 @@ function parseMultilineMod(regSection: RegExp[], section: string[], type: keyof 
               min: tempValue / valueCount
             },
             disabled: isMutated ? false : true,
-            type: isMutated ? '穢生' : APImods[type].type
+            type: isMutated ? '穢生' : APImods[type]!.type
           })
         else
           tempArr.push({
-            ...matchMod, disabled: isMutated ? false : true, type: isMutated ? '穢生' : APImods[type].type
+            ...matchMod, disabled: isMutated ? false : true, type: isMutated ? '穢生' : APImods[type]!.type
           })
       }
     }
@@ -477,10 +477,11 @@ function parseMod(section: string[], type: keyof ParsedAPIMods | 'mutated') {
   const isMutated = type === 'mutated'
   const regSection = getStrReg(section, type)
   type = isMutated ? 'explicit' : type as keyof ParsedAPIMods
+  if (!APImods[type as keyof ParsedAPIMods]) return ParseResult.PARSE_SECTION_FAIL
   const tempArr = parseMultilineMod(regSection, section, type)
   regSection.forEach((line, index) => {
     try {
-      let matchMods = APImods[type].entries.filter(s => line.test(s.text))
+      let matchMods = APImods[type]!.entries.filter(s => line.test(s.text))
       if (matchMods.length > 1) {
         if (itemParsed.isWeaponOrArmor && matchMods.find(ele => ele.text.endsWith(' (部分)')))
           matchMods = matchMods.filter(mod => mod.text.endsWith(' (部分)'))
@@ -507,12 +508,12 @@ function parseMod(section: string[], type: keyof ParsedAPIMods | 'mutated') {
               [diffSign ? 'max' : 'min']: minValue,
             },
             disabled: isMutated ? false : true,
-            type: isMutated ? '穢生' : APImods[type].type
+            type: isMutated ? '穢生' : APImods[type]!.type
           })
         }
         else {
           tempArr.push({
-            ...matchMod, disabled: isMutated ? false : true, type: isMutated ? '穢生' : APImods[type].type
+            ...matchMod, disabled: isMutated ? false : true, type: isMutated ? '穢生' : APImods[type]!.type
           })
         }
       })
@@ -1046,6 +1047,13 @@ function parseGem(item: string[][]) {
     }
     if (parseCorrupt(section) === ParseResult.PARSE_SECTION_SUCC) {
 
+    }
+    if (parseMod(section, 'imbued') === ParseResult.PARSE_SECTION_SUCC) {
+      const mod = itemParsed.stats.find(stat => stat.type === 'imbued');
+      if (mod) {
+        mod.disabled = false;
+        mod.type = "充能"
+      }
     }
   }
   itemParsed.quality.search = !!(itemParsed.isCorrupt && itemParsed.quality.search)

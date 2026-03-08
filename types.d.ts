@@ -83,6 +83,7 @@ interface ParsedAPIMods {
   forbiddenJewel: ParsedAPIMod;
   sanctum: ParsedAPIMod;
   necropolis: ParsedAPIMod;
+  imbued?: ParsedAPIMod; //3.28
 }
 interface Static {
   id: string;

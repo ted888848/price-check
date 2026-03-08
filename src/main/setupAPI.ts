@@ -245,6 +245,15 @@ function setupAPIMods(statsJson: APIStats) {
         }
         APImods.necropolis.mutiLines = checkNewline(statsGroup)
       default:
+        APImods[statsGroup.id as keyof ParsedAPIMods] = {
+          label: statsGroup.label,
+          entries: statsGroup.entries.map((ele) => ({
+            ...ele
+          })).filter((stat) => !stat.text.includes('\n')),
+          type: statsGroup.id
+        }
+        APImods[statsGroup.id as keyof ParsedAPIMods].mutiLines = checkNewline(statsGroup);
+        APImods[statsGroup.id as keyof ParsedAPIMods].type = statsGroup.id
         return
     }
   })
