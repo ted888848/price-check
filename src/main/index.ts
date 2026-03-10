@@ -9,6 +9,14 @@ import IPC from '@/ipc'
 import './proxyServer'
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
+process.on('uncaughtException', (error) => {
+  console.error('[uncaughtException]', error)
+})
+
+process.on('unhandledRejection', (reason) => {
+  console.error('[unhandledRejection]', reason)
+})
+
 if (process.platform === 'win32') app.setAppUserModelId('com.electron.price-check')
 
 app.disableHardwareAcceleration()

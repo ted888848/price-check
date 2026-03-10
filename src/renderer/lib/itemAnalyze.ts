@@ -1011,13 +1011,18 @@ function parseMap(item: string[][]) {
     }
   }
   const parseFuns = [
-    parseCorrupt, parseIdentify,
+    parseCorrupt, parseIdentify, parseEnchantMod
   ]
   if (itemParsed.map_completion_reward) {
     item = item.filter(section => !section[0]!.startsWith('怪物等級：'))
     parseFuns.push(parseExplicitMod)
   }
   parseAllfuns(item, parseFuns)
+  itemParsed.stats.forEach(stat => {
+    if (stat.type === '附魔') {
+      stat.disabled = false
+    }
+  })
 }
 function parseGem(item: string[][]) {
   itemParsed.autoSearch = true
