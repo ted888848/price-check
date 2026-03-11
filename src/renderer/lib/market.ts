@@ -1,6 +1,7 @@
 import axios from "axios"
 import { leagueSelectRef, poeVersion } from "."
 import { queryOptions } from "@tanstack/vue-query"
+import { APIStatic } from "./APIdata"
 const baseUrl = `${import.meta.env.VITE_MARKET_API_URL}/api/v1/${poeVersion === '2' ? 'poe2' : 'poe1'}/currency/latest`
 
 export interface TMarketDataItem {
@@ -41,8 +42,8 @@ export async function getLatestMarketData() {
 
 const rtf = new Intl.RelativeTimeFormat('zh-TW', { numeric: 'auto' });
 export function getMarketPrice(itemParsed: ParsedItem, marketData: TMarketDataItem[]) {
-
-  const marketItem = marketData.find(m => m.name === itemParsed.baseType)
+  const apiName = APIStatic.find(item => item.text === itemParsed.baseType)?.id
+  const marketItem = marketData.find(m => m.name === itemParsed.baseType || m.name === apiName)
   if (!marketItem || !marketItem.last_updated) return null;
 
   try {
