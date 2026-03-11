@@ -25,17 +25,18 @@ export interface TMarketDataItem {
 
 
 export const marketQueryOption = queryOptions({
-  queryKey: ['market-data', leagueSelectRef],
+  queryKey: ['market-data', leagueSelectRef.value],
   queryFn: async () => getLatestMarketData(),
   refetchOnWindowFocus: false,
   refetchOnReconnect: false,
   refetchInterval: 10 * 60 * 1000,
-  enabled: !!leagueSelectRef.value && false,
+  enabled: () => !!leagueSelectRef.value,
 })
 export async function getLatestMarketData() {
-  return axios.get(baseUrl, {
+  const data = await axios.get(baseUrl, {
     params: { league: leagueSelectRef.value },
   }).then(res => res.data) as unknown as Promise<TMarketDataItem[]>
+  return data
 }
 
 const rtf = new Intl.RelativeTimeFormat('zh-TW', { numeric: 'auto' });
