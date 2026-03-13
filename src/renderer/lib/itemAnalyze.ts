@@ -624,7 +624,7 @@ function parseCorrupt(section: string[]) {
 function parseIdentify(section: string[]) {
   if (section[0]?.match(/^未鑑定$/)) {
     itemParsed.isIdentify = false
-    return ParseResult.PARSE_ITEM_SKIP
+    return ParseResult.PARSE_SECTION_SUCC
   }
   return ParseResult.PARSE_SECTION_SKIP
 }
@@ -1124,7 +1124,7 @@ function parseRGB(item: string[]) {
 
 function parseRelic(item: string[][]) {
   for (const line of item) {
-    if (parseIdentify(line) === ParseResult.PARSE_ITEM_SKIP) return
+    if (parseIdentify(line) === ParseResult.PARSE_SECTION_SUCC) return
     parseItemLevel(line)
   }
   item.shift()
