@@ -379,7 +379,7 @@ const isSearching = computed(() => isFetchingSearchResult.value || isFetchingNex
 
 const fetchedCount = computed(() => {
   if (item.value.searchExchange.option) {
-    return (searchResult.value as IExchangeResult).result.length
+    return (searchResult.value as IExchangeResult).totalCount
   }
   else {
     return searchItemFetchResult.value ? searchItemFetchResult.value.pages.flat().length : 0

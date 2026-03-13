@@ -192,6 +192,7 @@ interface ParsedItem {
 
   //3.27 
   foulborn?: boolean;
+  itemID?: string;
 }
 
 interface ItemUniques {
@@ -216,6 +217,7 @@ interface Config {
   poeVersion: POEVersion;
   searchOnlineType: 'online' | '1week' | 'securable' | 'all';
   prevPriceCheckHotkey?: string;
+  autoSearchStackableItems?: boolean;
 }
 
 interface APIStaticItem {

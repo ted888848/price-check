@@ -16,17 +16,24 @@
         :reducer="i => i.value" />
     </div>
     <div class="flex items-center py-1 select-none">
-      <span class="mx-1 text-white">搜尋類型:</span>
+      <span class="mx-1 text-xl text-white">搜尋類型:</span>
       <MySelect v-model="config.searchOnlineType" :options="searchOnlineTypeOptions" label-key="label"
         :reducer="i => i.value" class="min-w-100px" />
+    </div>
+    <div class="flex items-center py-1 select-none"
+      @click="config.autoSearchStackableItems = !config.autoSearchStackableItems">
+      <span class="mx-1 text-xl text-white">自動搜尋堆疊物品</span>
+      <CircleCheck :checked="config.autoSearchStackableItems ?? true" />
     </div>
   </div>
 </template>
 <script setup lang="ts">
 import { selectOptions } from '@/renderer/lib/tradeSide'
 import MySelect from '../utility/MySelect.vue'
+import CircleCheck from '../utility/CircleCheck.vue'
 const { exchangeHave, searchOnlineTypeOptions } = selectOptions
 const config = defineModel<Config>('config', {
   required: true
 })
+console.log(config.value)
 </script>

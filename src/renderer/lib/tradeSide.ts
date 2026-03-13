@@ -494,6 +494,7 @@ export async function searchExchange(item: ParsedItem, league: string): Promise<
     ...exchangeResult, err: true
   }
   return {
-    ...exchangeResult
+    ...exchangeResult,
+    totalCount: tempResult.length
   }
 }

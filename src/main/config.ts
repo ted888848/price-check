@@ -35,6 +35,7 @@ const defaultStore: Config = {
   poeVersion: '1',
   searchOnlineType: 'online',
   prevPriceCheckHotkey: 'Shift+Ctrl+D',
+  autoSearchStackableItems: true,
 }
 const storeSchema: Schema<Config> = {
   characterName: {
@@ -78,6 +79,9 @@ const storeSchema: Schema<Config> = {
   prevPriceCheckHotkey: {
     type: 'string',
   },
+  autoSearchStackableItems: {
+    type: 'boolean',
+  }
 }
 export const store = new Store({
   name: 'appConfig',

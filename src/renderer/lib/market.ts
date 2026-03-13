@@ -42,8 +42,7 @@ export async function getLatestMarketData() {
 
 const rtf = new Intl.RelativeTimeFormat('zh-TW', { numeric: 'auto' });
 export function getMarketPrice(itemParsed: ParsedItem, marketData: TMarketDataItem[]) {
-  const apiName = APIStatic.find(item => item.text === itemParsed.baseType)?.id
-  const marketItem = marketData.find(m => m.name === itemParsed.baseType || m.name === apiName)
+  const marketItem = marketData.find(m => m.name === itemParsed.baseType || m.code === itemParsed.itemID)
   if (!marketItem || !marketItem.last_updated) return null;
 
   try {

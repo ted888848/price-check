@@ -161,8 +161,10 @@ export function itemAnalyze(item: string) {
     case '地圖碎片':
     case '掘獄可堆疊有插槽通貨': {
       if (skip) break;
-      itemParsed.autoSearch = true
-      if (APIStatic.some((ele: Static) => ele.text === itemParsed.baseType)) {
+      if (config.autoSearchStackableItems) itemParsed.autoSearch = true
+      const staticItem = APIStatic.find((ele: Static) => ele.text === itemParsed.baseType)
+      if (staticItem) {
+        itemParsed.itemID = staticItem.id
         itemParsed.searchExchange.option = true
         // const searchExchangeDivine = config.searchExchangeDivine
         // itemParsed.searchExchange.have = ['divine', 'chaos']
