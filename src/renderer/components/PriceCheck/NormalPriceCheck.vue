@@ -196,22 +196,17 @@
         BV
       </button>
     </div>
-    <div v-if="marketPrice" class="text-white text-16px text-center my-1 center gap-4px">
-      市場價({{ marketPrice.last_updated_formatted ?? marketPrice.last_updated }}):
-      <span class="center gap-2px">
-        {{ marketPrice.price.divinePer1.toFixed(2) ?? 'Null' }}
-        <span v-if="marketPrice.price.divinePer1 < 1">
-          (1/{{ (1 / marketPrice.price.divinePer1).toFixed(0) }})
-        </span>
-        <img :src="divineImage" class="flex-shrink-0 w-20px h-20px" />
-      </span>或
-      <span v-if="marketPrice.price.secondCurrencyPer1" class="center gap-2px">
-        {{ marketPrice.price.secondCurrencyPer1?.toFixed(2) ?? 'Null' }}
-        <span v-if="marketPrice.price.secondCurrencyPer1 < 1">
-          (1/{{ (1 / marketPrice.price.secondCurrencyPer1).toFixed(0) }})
-        </span>
-        <img :src="chaosOrExImage" class="flex-shrink-0 w-20px h-20px" />
-      </span>
+    <div v-if="marketPrice" class="text-white text-18px text-center my-1 flex-col center gap-2px">
+      <div class="text-16px">市場價:</div>
+      <MarketPrice v-if="marketPrice.divine.amount !== null" :amount="marketPrice.divine.amount"
+        :timestamp="marketPrice.divine.timestamp" :item-image="currency2Img" :currency-image="divineImage" type="divine"
+        :divineToChaosOrExalted="divineToChaosOrExalted" />
+      <MarketPrice v-if="marketPrice.exalted && marketPrice.exalted.amount !== null"
+        :amount="marketPrice.exalted.amount" :timestamp="marketPrice.exalted.timestamp" :item-image="currency2Img"
+        :currency-image="chaosOrExImage" type="chaosOrEx" :divineToChaosOrExalted="divineToChaosOrExalted" />
+      <MarketPrice v-if="marketPrice.chaos && marketPrice.chaos.amount !== null" :amount="marketPrice.chaos.amount"
+        :timestamp="marketPrice.chaos.timestamp" :item-image="currency2Img" :currency-image="chaosOrExImage"
+        type="chaosOrEx" :divineToChaosOrExalted="divineToChaosOrExalted" />
     </div>
     <table v-if="fetchResultSorted.length"
       class="bg-blue-500 text-center text-white text-sm my-1 mx-5 w-1/2 self-center">
@@ -274,7 +269,8 @@ import { secondCurrency, tradeUrl } from '@/renderer/lib'
 import MySelect from '../utility/MySelect.vue'
 import { getIsCounting } from '@/renderer/lib/ratetimelimit'
 import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/vue-query'
-import { getMarketPrice, marketQueryOption, type TMarketDataItem } from '@/renderer/lib/market'
+import { getMarketPrice, marketQueryOption, type TMarketItemRate } from '@/renderer/lib/market'
+import MarketPrice from '../utility/MarketPrice.vue'
 const props = defineProps<{
   itemProp: ParsedItem;
   leagueSelect: string;
@@ -283,7 +279,8 @@ const props = defineProps<{
   isOverflow: () => boolean;
   prevSearch?: boolean;
 }>()
-
+const modTbodyToggle = ref(true)
+const currency2Img = ref('')
 const queryClient = useQueryClient()
 if (!props.prevSearch) {
   queryClient.removeQueries({ queryKey: ['searchItem'] })
@@ -295,12 +292,15 @@ const item = ref(props.itemProp)
 if (process.env.NODE_ENV === 'development') console.log(item.value)
 const undefinedUnique = item.value.isIdentify === false && item.value.raritySearch.label === '傳奇'
 
-const marketPrice = ref<TMarketDataItem | null>(null)
+const marketPrice = ref<TMarketItemRate | null>(null)
 watch(() => item.value, () => {
   const marketData = queryClient.getQueryData(marketQueryOption.queryKey)
-  if (marketData) marketPrice.value = getMarketPrice(item.value, marketData)
+  if (marketData) {
+    marketPrice.value = getMarketPrice(item.value, marketData, props.leagueSelect)
+    const image = APIStatic.find(ele => ele.id === item.value.itemID)?.image
+    currency2Img.value = image ? `${import.meta.env.VITE_URL_BASE}${image}` : ''
+  }
 }, { immediate: true })
-
 const {
   generalOption, influencesOptions, elderMapOptions,
   conquerorMapOptions, rarityOptions, exchangeHave,
@@ -324,8 +324,7 @@ function modTextColor(type?: string) {
       return 'white'
   }
 }
-const modTbodyToggle = ref(true)
-const currency2Img = ref('')
+
 
 const { data: searchResult, isFetching: isFetchingSearchResult, refetch: refetchSearchItem, isFetched: isFetchedSearchItem } = useQuery<ISearchResult | IExchangeResult>({
   queryKey: ['searchItem'],

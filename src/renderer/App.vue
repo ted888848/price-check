@@ -6,7 +6,7 @@
 <script setup lang="ts">
 import OverlayWindow from '@/renderer/components/OverlayWindow/OverlayWindow.vue'
 import PriceCheck from '@/renderer/components/PriceCheck/PriceCheck.vue'
-import { useTemplateRef } from 'vue'
+import { onUnmounted, useTemplateRef } from 'vue'
 import { loadAPIData } from './lib/APIdata'
 import { useQuery } from '@tanstack/vue-query'
 import { marketQueryOption } from './lib/market'
@@ -17,5 +17,8 @@ const reloadLeagues = () => {
 loadAPIData()
 
 useQuery(marketQueryOption)
-
+console.log('test')
+onUnmounted(() => {
+  console.log('unmounted')
+})
 </script>

@@ -136,25 +136,25 @@ export function itemAnalyze(item: string) {
     case '戒指':
     case '腰帶':
       findUnique('accessory', isFindUnique)
+    case '箭袋':
+    case '飾品':
+    case '劫盜裝備':
+    case '守望號令':
+    case '記憶':
+
+      parseOtherHaveMods(itemSection)
+      break
     case '永恆珠寶':
     case '珠寶':
     case '深淵珠寶':
       parseJewel(itemSection)
       findUnique('jewel', isFindUnique)
       break
-    case '箭袋':
-    case '飾品':
-    case '劫盜裝備':
-    case '守望號令':
-    case '記憶':
-      parseOtherNeedMods(itemSection)
-      break
     case '地圖':
       findUnique('map', isFindUnique)
       parseMap(itemSection)
       break
-    case '契約書':
-      findUnique('heistmission', isFindUnique)
+
     case '可堆疊通貨':
       skip = parseBeastItem(itemSection)
     case '預兆':
@@ -194,6 +194,8 @@ export function itemAnalyze(item: string) {
     case '接肢':
       parseGraft(itemSection)
       break;
+    case '契約書':
+      findUnique('heistmission', isFindUnique)
     default:
       parseAllfuns(itemSection)
       break
@@ -885,7 +887,7 @@ function parseThreadOfHope(item: string[][]) {
   const parseFuns = [parseItemLevel, parseCorrupt, parseIdentify, parseImplicitMod, parseRangeMod]
   parseAllfuns(item, parseFuns)
 }
-function parseOtherNeedMods(item: string[][]) {
+function parseOtherHaveMods(item: string[][]) {
   if (itemParsed.name === '贗品．龍牙翱翔') {
     outer: for (const section of item) {
       for (let index = 0; index < section.length; index++) {

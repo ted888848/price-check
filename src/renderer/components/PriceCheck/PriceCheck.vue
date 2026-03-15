@@ -21,8 +21,7 @@
             </ul>
           </div>
           <span class=" text-white text-2xl">:{{ divineToChaosOrEx }}</span>
-          <img :src="chaosOrExImage" class=" w-8 h-8 hover:cursor-pointer"
-            @dblclick="() => refreshDivineToChaosOrExalted()">
+          <img :src="chaosOrExImage" class=" w-8 h-8 hover:cursor-pointer">
         </div>
         <div class="flex justify-end mr-1 ml-auto flex-1">
           <button class=" text-white hover:text-red-500" @click="closePriceCheck">
@@ -51,13 +50,13 @@ import { ref, computed, nextTick, onBeforeMount } from 'vue'
 import { range } from 'lodash-es'
 import IPC from '@/ipc'
 import { itemAnalyze } from '@/renderer/lib/itemAnalyze'
-import { getDivineToChaosOrExalted } from '@/renderer/lib/tradeSide'
 import { leagues, divineImage, chaosOrExImage } from '@/renderer/lib/APIdata'
 import NormalPriceCheck from './NormalPriceCheck.vue'
 import HeistPriceCheck from './HeistPriceCheck.vue'
-import { leagueSelectRef, tradeUrl } from '@/renderer/lib'
+import { leagueSelectRef, secondCurrency, tradeUrl } from '@/renderer/lib'
 import MySelect from '../utility/MySelect.vue'
 import { useQuery } from '@tanstack/vue-query'
+import { getMarketPrice, marketQueryOption } from '@/renderer/lib/market'
 const isWebViewOpen = ref(false)
 const prevSearch = ref(false)
 const priceCheckPos = ref({
@@ -116,12 +115,17 @@ const currentPriceCheck = ref<PriceCheckTabs>(undefined)
 const item = ref<ParsedItem | null>(null)
 const parseError = ref<string | null>(null)
 
-const { data: divineToChaosOrEx, refetch: refreshDivineToChaosOrExalted } = useQuery({
-  queryKey: ['divineToChaosOrExalted', () => leagueSelect.value],
-  queryFn: () => getDivineToChaosOrExalted(leagueSelect.value),
-  refetchInterval: 10 * 60 * 1000,
-  staleTime: 5 * 60 * 1000,
-  enabled: computed(() => !!leagueSelect.value)
+const { data: marketData } = useQuery(marketQueryOption)
+
+const divineToChaosOrEx = computed(() => {
+  if (!leagueSelect.value || !marketData.value) return 0
+  // itemParsed 先只放 itemID，後續可再補完整欄位
+  const divineMarketPrice = getMarketPrice({ itemID: 'divine' } as ParsedItem, marketData.value, leagueSelect.value)
+  const rate = secondCurrency === 'chaos'
+    ? divineMarketPrice?.chaos?.amount
+    : divineMarketPrice?.exalted?.amount
+  if (typeof rate !== 'number' || !Number.isFinite(rate)) return 0
+  return Number(rate.toFixed(0))
 })
 
 const divineToChaosDec = computed(() => {
