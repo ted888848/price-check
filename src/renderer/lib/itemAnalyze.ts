@@ -141,7 +141,6 @@ export function itemAnalyze(item: string) {
     case '劫盜裝備':
     case '守望號令':
     case '記憶':
-
       parseOtherHaveMods(itemSection)
       break
     case '永恆珠寶':
@@ -154,21 +153,23 @@ export function itemAnalyze(item: string) {
       findUnique('map', isFindUnique)
       parseMap(itemSection)
       break
-
     case '可堆疊通貨':
       skip = parseBeastItem(itemSection)
     case '預兆':
     case '地圖碎片':
+    case '遺鑰':
+    case '命運卡':
     case '掘獄可堆疊有插槽通貨': {
       if (skip) break;
       if (config.autoSearchStackableItems) itemParsed.autoSearch = true
       const staticItem = APIStatic.find((ele: Static) => ele.text === itemParsed.baseType)
+      console.log(staticItem)
       if (staticItem) {
-        itemParsed.itemID = staticItem.id
         itemParsed.searchExchange.option = true
         // const searchExchangeDivine = config.searchExchangeDivine
         // itemParsed.searchExchange.have = ['divine', 'chaos']
       }
+      parseAllfuns(itemSection)
       break
     }
     case '技能寶石':
@@ -178,17 +179,12 @@ export function itemAnalyze(item: string) {
     case '探險日誌':
       parseLogbook(itemSection)
       break
-    case '命運卡':
-      itemParsed.searchOnlineType = 'online'
-    case '遺鑰':
     case '屍體':
       itemParsed.autoSearch = true
       break
     case '聖物':
       parseRelic(itemSection)
       break
-    case '咒語':
-    case '其它':
     case '輿圖升級道具':
       break
     case '接肢':
@@ -196,6 +192,8 @@ export function itemAnalyze(item: string) {
       break;
     case '契約書':
       findUnique('heistmission', isFindUnique)
+    case '咒語':
+    case '其它':
     default:
       parseAllfuns(itemSection)
       break
@@ -865,7 +863,7 @@ function parseThreadOfHope(item: string[][]) {
       }
     }
     const reg = new RegExp(`^${mod.text.replace('#', `(${mod.option.options.map(ele => ele.text).join('|')})`)}$`)
-    if (parseExplicitMod(section) === ParseResult.PARSE_SECTION_SKIP) return ParseResult.PARSE_SECTION_SKIP
+    parseExplicitMod(section)
     for (const line of section) {
       const match = line.match(reg)
       if (match) {

@@ -1,9 +1,10 @@
 import type { AxiosResponseHeaders } from "axios";
-import { ref } from "vue";
+import { computed, ref, watch, type Ref } from "vue";
 import { RateLimiter } from '@tanstack/pacer'
+import { useCountdown, useIntervalFn } from "@vueuse/core";
 
 interface TRateTimeLimitItem {
-  inTime: number;
+  window: number;
   times: number;
   timeout?: number;
 }
@@ -25,31 +26,31 @@ interface TRateTimeLimitState {
 export const apiRateTimeLimitMax: TRateTimeLimitState = {
   search: {
     ip: [
-      { times: 8, inTime: 10, timeout: 60 },
-      { times: 15, inTime: 60, timeout: 120 },
-      { times: 60, inTime: 300, timeout: 1800 }
+      { times: 8, window: 10, timeout: 60 },
+      { times: 15, window: 60, timeout: 120 },
+      { times: 60, window: 300, timeout: 1800 }
     ],
     account: [
-      { times: 3, inTime: 5, timeout: 60 }
+      { times: 3, window: 5, timeout: 60 }
     ]
   },
   fetch: {
     ip: [
-      { times: 12, inTime: 4, timeout: 60 },
-      { times: 16, inTime: 12, timeout: 120 },
+      { times: 12, window: 4, timeout: 60 },
+      { times: 16, window: 12, timeout: 120 },
     ],
     account: [
-      { times: 6, inTime: 4, timeout: 10 }
+      { times: 6, window: 4, timeout: 10 }
     ]
   },
   exchange: {
     ip: [
-      { times: 7, inTime: 15, timeout: 60 },
-      { times: 15, inTime: 90, timeout: 120 },
-      { times: 45, inTime: 300, timeout: 1800 }
+      { times: 7, window: 15, timeout: 60 },
+      { times: 15, window: 90, timeout: 120 },
+      { times: 45, window: 300, timeout: 1800 }
     ],
     account: [
-      { times: 3, inTime: 5, timeout: 60 }
+      { times: 3, window: 5, timeout: 60 }
     ]
   }
 } as const
@@ -80,8 +81,8 @@ function createRateLimiter() {
             .map((ele) =>
               new RateLimiter(() => { }, {
                 windowType: 'sliding',
-                window: ele.inTime * 1000,
-                limit: ele.times,
+                window: ele.window * 1000,
+                limit: ele.times - ((ele.timeout ?? 0) > 60 ? 1 : 0),
               }))
         });
     });
@@ -90,78 +91,47 @@ createRateLimiter()
 export function getRateLimiters() {
   return { ratetimelimiters }
 }
-export const rateTimeLimitArr = {
-  search: {
-    ip: [
-      { limit: 45, time: 60 },
-      { limit: 13, time: 20 },
-      { limit: 6, time: 3 }
-    ],
-    account: [
-      { limit: 2, time: 1 }
-    ]
-  },
-  fetch: {
-    ip: [
-      { limit: 14, time: 4 },
-      { limit: 10, time: 1 }
-    ],
-    account: [
-      { limit: 5, time: 1 }
-    ]
-  },
-  exchange: {
-    ip: [
-      { limit: 40, time: 60 },
-      { limit: 13, time: 30 },
-      { limit: 5, time: 3 }
-    ],
-    account: [
-      { limit: 2, time: 2 }
-    ]
-  }
-} as const
-const rateTimeLimitCounting = ref({
-  flag: false, second: 0
-})
-export function getIsCounting() {
-  return {
-    rateTimeLimit: rateTimeLimitCounting
-  }
-}
 
+export const waitUntil: Ref<null | Date> = ref(null)
 
 const rateTimeLimitState = ref<TRateTimeLimitState>({})
 
 export function getRateTimeLimitState() {
   return { rateTimeLimitState }
 }
-
-let interval: NodeJS.Timeout | undefined
-const countDownStep = 0.1
+//                            wait time in second
 export function startCountdown(time: number) {
-  if (time < rateTimeLimitCounting.value.second) return
-  if (interval) {
-    clearInterval(interval)
-    interval = undefined
+  waitUntil.value = new Date(Date.now() + time * 1000)
+}
+
+export function useMyCountdown() {
+  const rateLimitTimeLeft = ((waitUntil.value?.getTime() || Date.now()) - Date.now()) / 1000
+  // *10 讓時間可以顯示小數點後第一位, useCountdown的scheduler預設是1000ms，改成100ms可以讓倒數更順暢
+  const { start, remaining: remainingBy10, isActive } = useCountdown(rateLimitTimeLeft * 10, {
+    scheduler: (cb) => useIntervalFn(cb, 100, { immediate: false }),
+  })
+  if (waitUntil.value && rateLimitTimeLeft > 0) {
+    start()
   }
-  rateTimeLimitCounting.value.flag = true
-  rateTimeLimitCounting.value.second = time
-  interval = setInterval(() => {
-    rateTimeLimitCounting.value.second = Math.max(0, rateTimeLimitCounting.value.second - countDownStep)
-    if (rateTimeLimitCounting.value.second <= 0) {
-      rateTimeLimitCounting.value.flag = false
-      clearInterval(interval)
-      interval = undefined
+  watch(waitUntil, (value) => {
+    if (value) {
+      const timeLeft = (value.getTime() - Date.now()) / 1000
+      if (timeLeft > 0) {
+        start(timeLeft * 10)
+      }
     }
-  }, 1000 * countDownStep)
+  })
+  const remaining = computed(() => remainingBy10.value / 10)
+  return { remaining, isActive }
 }
 
 export function parseRateTimeLimit(header?: AxiosResponseHeaders) {
   if (!header) return
+  if (waitUntil.value && new Date() < waitUntil.value) return
+  waitUntil.value = null
   const rules = header['x-rate-limit-rules'].split(',').map((ele: string) => ele.toLowerCase()) as ('ip' | 'account')[]
-  const type = header['x-rate-limit-policy'].split('-')[1] as keyof typeof rateTimeLimitArr
-  if (Object.keys(rateTimeLimitArr).includes(type)) {
+  const type = header['x-rate-limit-policy'].split('-')[1] as keyof TRateTimeLimitState
+  if (Object.keys(apiRateTimeLimitMax).includes(type)) {
     for (const rule of rules) {
       const maxLimit = header[`x-rate-limit-${rule}`].split(',')
       const arr = header[`x-rate-limit-${rule}-state`].split(',')
@@ -173,7 +143,7 @@ export function parseRateTimeLimit(header?: AxiosResponseHeaders) {
         const [times, inTime, timeout] = arr[i].split(':').map((e: string) => parseInt(e))
         const [maxTimes, maxInTime] = maxLimit[i].split(':').map((e: string) => parseInt(e))
         if (rateTimeLimitState.value[type]![rule]) {
-          rateTimeLimitState.value[type]![rule].push({ times, inTime, timeout })
+          rateTimeLimitState.value[type]![rule].push({ times, window: inTime, timeout })
         }
         const limiter = ratetimelimiters.value[type]![rule][i]
         if (limiter) {
@@ -186,7 +156,9 @@ export function parseRateTimeLimit(header?: AxiosResponseHeaders) {
             limiter.maybeExecute()
           }
           const nextWindow = (limiter.getMsUntilNextWindow()) / 1000
-          if (nextWindow > 0) startCountdown(nextWindow + 0.25)
+          if (nextWindow > 0) {
+            startCountdown(nextWindow + 0.25)
+          }
         }
       }
     }

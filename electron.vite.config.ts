@@ -5,6 +5,9 @@ import UnoCSS from 'unocss/vite'
 import ElementPlus from 'unplugin-element-plus/vite'
 
 const baseConfig = {
+  server: {
+    port: 8080
+  },
   resolve: {
     alias: {
       '@': `${__dirname}/src`,

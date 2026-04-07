@@ -46,6 +46,7 @@
   "dependencies": {
     "@tanstack/pacer": "^0.18.0",
     "@tanstack/vue-query": "^5.92.9",
+    "@vueuse/core": "^14.2.1",
     "electron-overlay-window": "^4.0.2",
     "uiohook-napi": "^1.5.4"
   },

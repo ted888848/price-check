@@ -262,7 +262,10 @@ function setupAPIMods(statsJson: APIStats) {
 function setupAPIStatic(data: APIStaticItem[]) {
   let APIStatic: Static[] = []
   data.forEach((group) => {
-    if (group.label?.match(/^地圖(（|\s\()|命運卡/)) return
+    if (group.label?.match(/^地圖(（|\s\()/)) return
+    if (group.label === '命運卡') {
+      group.entries = group.entries.map((ele => ({ ...ele, image: '/gen/image/WzI1LDE0LHsiZiI6IjJESXRlbXMvRGl2aW5hdGlvbi9JbnZlbnRvcnlJY29uIiwidyI6MSwiaCI6MSwic2NhbGUiOjF9XQ/f34bf8cbb5/InventoryIcon.png' })))
+    }
     APIStatic = APIStatic.concat(structuredClone(group.entries))
   })
   return APIStatic

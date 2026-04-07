@@ -7,8 +7,8 @@
     <span v-else>
       {{ priceFormatter(props.amount) }}：1
     </span>
-    <img :src="props.itemImage" class=" w-7 h-7">
-    &nbsp;({{ rtf.format(Math.floor((props.timestamp! - Date.now()) / 60000), 'minutes') }})
+    <img v-if="props.itemImage" :src="props.itemImage" class=" w-7 h-7">
+    &nbsp;({{ getTimesAgo(props.timestamp) }})
   </div>
 </template>
 <script setup lang="ts">
@@ -23,5 +23,16 @@ const props = defineProps<{
   divineToChaosOrExalted: number;
 }>()
 const rtf = new Intl.RelativeTimeFormat('zh-TW', { numeric: 'auto', style: 'short' });
+
+function getTimesAgo(timestamp: number | null) {
+  if (!timestamp) return '未知'
+  const now = Date.now()
+  const diff = now - timestamp
+  if (diff < 120 * 60 * 1000) {
+    return rtf.format(-Math.round(diff / (60 * 1000)), 'minute')
+  } else {
+    return rtf.format(-Math.round(diff / (60 * 60 * 1000)), 'hour')
+  }
+}
 const priceFormatter = new Intl.NumberFormat('zh-TW', { maximumFractionDigits: 1 }).format
 </script>

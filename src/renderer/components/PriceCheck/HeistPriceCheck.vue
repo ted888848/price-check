@@ -18,18 +18,18 @@
   <div v-if="!isSearching" class="my-2 justify-center flex text-xl">
     <button
       class="mx-2 bg-gray-500 text-white rounded px-1 hover:bg-gray-400 disabled:cursor-default disabled:opacity-60 disabled:bg-gray-500"
-      :disabled="rateTimeLimit.flag" @click="() => searchBtn(false)">
+      :disabled="isActive" @click="() => searchBtn(false)">
       Search
     </button>
     <button
       class="mx-2 bg-gray-500 text-white rounded px-1 hover:bg-gray-400 disabled:cursor-default disabled:opacity-60 disabled:bg-gray-500"
-      :disabled="rateTimeLimit.flag" @click="() => searchBtn(true)">
+      :disabled="isActive" @click="() => searchBtn(true)">
       Search2
     </button>
     <div v-if="searchResult.err || searchResult.searchID.ID">
       <button
         class="mx-2 bg-green-400 text-black rounded px-1 hover:bg-green-300 disabled:cursor-default disabled:opacity-60 disabled:bg-green-400"
-        :disabled="rateTimeLimit.flag || !hasNextPage" @click="fetchMore">
+        :disabled="isActive || !hasNextPage" @click="fetchMore">
         在20筆
       </button>
       <button
@@ -77,8 +77,8 @@
   <div v-if="isSearching" class=" text-8xl text-white my-5 text-center flex justify-center">
     <div class="i-svg-spinners:tadpole" />
   </div>
-  <span v-if="rateTimeLimit.flag" class="text-white bg-red-600 text-xl text-center my-2 hover:cursor-default">API次數限制
-    {{ rateTimeLimit.second.toFixed(1) }} 秒後再回來
+  <span v-if="isActive" class="text-white bg-red-600 text-xl text-center my-2 hover:cursor-default">API次數限制
+    {{ remaining.toFixed(1) }} 秒後再回來
   </span>
 </template>
 
@@ -90,7 +90,7 @@ import { currencyImageUrl, heistReward as gemReplicaOptions } from '@/renderer/l
 import type { ISearchResult, ISearchJson, IFetchResult } from '@/renderer/lib/tradeSide'
 import { secondCurrency, tradeUrl } from '@/renderer/lib'
 import MySelect from '../utility/MySelect.vue'
-import { getIsCounting } from '@/renderer/lib/ratetimelimit'
+import { useMyCountdown } from '@/renderer/lib/ratetimelimit'
 import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/vue-query'
 const props = defineProps<{
   itemProp: ParsedItem;
@@ -99,7 +99,7 @@ const props = defineProps<{
   parseError?: string | null;
   isOverflow: () => boolean;
 }>()
-const { rateTimeLimit } = getIsCounting()
+const { remaining, isActive } = useMyCountdown()
 const { searchOnlineTypeOptions: searchOnlineTypeOptions } = selectOptions
 const baseSearchJSON = Object.freeze({
   query: {
@@ -241,7 +241,7 @@ const { data: searchItemFetchResult, hasNextPage, fetchNextPage, isFetchingNextP
 })
 
 function fetchMore() {
-  if (rateTimeLimit.value.flag) return
+  if (isActive.value) return
   fetchNextPage()
 }
 
@@ -279,7 +279,7 @@ const fetchResult = computed<IFetchResult[]>(() => {
 const queryClient = useQueryClient()
 
 async function searchBtn(onlyChaosOrExalted = false) {
-  if (rateTimeLimit.value.flag) return
+  if (isActive.value) return
   searchJSON.query.filters.trade_filters.filters.price.option = onlyChaosOrExalted ? 'chaos' : undefined
   queryClient.removeQueries({ queryKey: ['fetchItemHeist'] })
   queryClient.removeQueries({ queryKey: ['searchItemHeist'] })
