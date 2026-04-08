@@ -1,7 +1,7 @@
 <template>
   <DraggableWidgetContainer :title="widget.name || 'Regex 快捷'" :x="widget.x" :y="widget.y"
     @save-position="handleSavePosition">
-    <template #default="{ dragDisabled }">
+    <template v-slot="{ dragDisabled }">
       <RegexItem v-for="regex in widget.list" :key="regex.id" :regex="regex" @update:regex="handleUpdateRegex"
         @delete:regex="handleDeleteRegex" :disabled="!dragDisabled" />
       <RegexItem @update:regex="handleUpdateRegex" :empty="true" :regex="{ regex: '', id: '' }"
@@ -12,7 +12,7 @@
 
 <script setup lang="ts">
 import RegexItem from './RegexItem.vue';
-import DraggableWidgetContainer from './DraggableWidgetContainer.vue';
+import DraggableWidgetContainer from '../DraggableWidgetContainer.vue';
 import { toRaw } from 'vue';
 const props = defineProps<{
   widget: TWidgetRegex
