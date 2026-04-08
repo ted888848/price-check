@@ -1,10 +1,10 @@
 import IPC from '@/ipc'
-import { clipboard, globalShortcut, ipcMain } from 'electron'
+import { globalShortcut, ipcMain } from 'electron'
 import { toggleOverlay, togglePriceCheck } from './overlayWindow'
-import { PoeWindow, POEWindowClass } from './POEWindow'
-import { MyClipBoard, getClipboard } from './clipboard'
+import { PoeWindow } from './POEWindow'
+import { getClipboard, withTemporaryClipboardText } from './clipboard'
 import { config } from './config'
-import { uIOhook, UiohookKey, UiohookWheelEvent } from 'uiohook-napi'
+import { uIOhook, UiohookKey } from 'uiohook-napi'
 export function setupShortcut() {
   if (PoeWindow.isActive) {
     registerShortcut()
@@ -64,12 +64,7 @@ export function unRegisterShortcut() {
 }
 
 function pasteTextToChat(text: string, lastMsg?: boolean, moveToFront?: boolean) {
-  MyClipBoard.delayRestoreClipboard(() => {
-    clipboard.writeText(text)
-    for (let i = 0; i < 5; ++i) {
-      if (clipboard.readText() === text) break
-      clipboard.writeText(text)
-    }
+  withTemporaryClipboardText(text, () => {
     if (lastMsg) {
       uIOhook.keyTap(UiohookKey.Enter, [UiohookKey.Ctrl])
     }
@@ -95,12 +90,7 @@ function pasteTextToChat(text: string, lastMsg?: boolean, moveToFront?: boolean)
 }
 
 ipcMain.on(IPC.SET_SEARCH_REGEX, (_, regex: string) => {
-  MyClipBoard.delayRestoreClipboard(() => {
-    clipboard.writeText(regex)
-    for (let i = 0; i < 5; ++i) {
-      if (clipboard.readText() === regex) break
-      clipboard.writeText(regex)
-    }
+  withTemporaryClipboardText(regex, () => {
     uIOhook.keyTap(UiohookKey.F, [UiohookKey.Ctrl]);
     uIOhook.keyTap(UiohookKey.V, [UiohookKey.Ctrl]);
   })

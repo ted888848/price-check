@@ -1,22 +1,8 @@
 import { clipboard } from 'electron'
-import { debounce, throttle } from 'lodash-es'
 const DELAY = 50
 const LIMIT = 250
 let clipboardPromise: Promise<string> | null
-export class MyClipBoard {
-  private static clipSave: string | null = null
-  private static debounceFun = debounce(() => {
-    if (this.clipSave !== null) clipboard.writeText(this.clipSave)
-    this.clipSave = null
-  }, 250)
-  public static delayRestoreClipboard = throttle((callback: () => void) => {
-    if (this.clipSave === null) {
-      this.clipSave = clipboard.readText()
-    }
-    callback()
-    this.debounceFun()
-  }, 50, { leading: true, trailing: false })
-}
+
 export async function getClipboard() {
   let timeLimit = 0
   if (clipboardPromise) {
@@ -48,4 +34,41 @@ export async function getClipboard() {
     foo()
   })
   return clipboardPromise
+}
+
+export function withTemporaryClipboardText(
+  text: string,
+  action: () => void,
+  options?: { maxRetry?: number, retryIntervalMs?: number, restoreDelayMs?: number }
+) {
+  const beforeText = clipboard.readText()
+  const maxRetry = options?.maxRetry ?? 10
+  const retryIntervalMs = options?.retryIntervalMs ?? 20
+  const restoreDelayMs = options?.restoreDelayMs ?? 250
+  let retryCount = 0
+
+  const runAction = () => {
+    action()
+    setTimeout(() => {
+      clipboard.writeText(beforeText)
+    }, restoreDelayMs)
+  }
+
+  const ensureClipboard = () => {
+    clipboard.writeText(text)
+    if (clipboard.readText() === text) {
+      runAction()
+      return
+    }
+
+    retryCount += 1
+    if (retryCount > maxRetry) {
+      runAction()
+      return
+    }
+
+    setTimeout(ensureClipboard, retryIntervalMs)
+  }
+
+  ensureClipboard()
 }
