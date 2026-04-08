@@ -1,4 +1,5 @@
-import { clipboard, globalShortcut } from 'electron'
+import IPC from '@/ipc'
+import { clipboard, globalShortcut, ipcMain } from 'electron'
 import { toggleOverlay, togglePriceCheck } from './overlayWindow'
 import { PoeWindow, POEWindowClass } from './POEWindow'
 import { MyClipBoard, getClipboard } from './clipboard'
@@ -93,3 +94,15 @@ function pasteTextToChat(text: string, lastMsg?: boolean, moveToFront?: boolean)
   })
 }
 
+ipcMain.on(IPC.SET_SEARCH_REGEX, (_, regex: string) => {
+  MyClipBoard.delayRestoreClipboard(() => {
+    clipboard.writeText(regex)
+    for (let i = 0; i < 5; ++i) {
+      if (clipboard.readText() === regex) break
+      clipboard.writeText(regex)
+    }
+    uIOhook.keyTap(UiohookKey.F, [UiohookKey.Ctrl]);
+    uIOhook.keyTap(UiohookKey.V, [UiohookKey.Ctrl]);
+  })
+
+})

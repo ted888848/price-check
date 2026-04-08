@@ -2,6 +2,7 @@ import Store, { Schema } from 'electron-store'
 import { ipcMain, session } from 'electron'
 import IPC from '@/ipc'
 import { registerShortcut, unRegisterShortcut } from './shortcuts'
+import { win } from './overlayWindow'
 const defaultStore: Config = {
   characterName: '',
   searchExchangePrefer: 'divine&(C or Ex)',
@@ -36,6 +37,7 @@ const defaultStore: Config = {
   searchOnlineType: 'online',
   prevPriceCheckHotkey: 'Shift+Ctrl+D',
   autoSearchStackableItems: true,
+  widgets: []
 }
 const storeSchema: Schema<Config> = {
   characterName: {
@@ -81,6 +83,12 @@ const storeSchema: Schema<Config> = {
   },
   autoSearchStackableItems: {
     type: 'boolean',
+  },
+  widgets: {
+    type: 'array',
+    items: {
+      type: 'object'
+    }
   }
 }
 export const store = new Store({
@@ -103,16 +111,7 @@ export function setupConfig() {
     store.store = config
   }
   ipcMain.on(IPC.SET_CONFIG, (_e, configData: string) => {
-    // const prevSetVersion = store.store.poeVersion
-    store.store = JSON.parse(configData) as Config
-    config = store.store
-    unRegisterShortcut()
-    registerShortcut()
-    setCookie()
-    // if (prevSetVersion !== config.poeVersion) {
-    //   app.relaunch()
-    //   app.quit()
-    // }
+    updateConfig(JSON.parse(configData))
   })
   ipcMain.on(IPC.GET_CONFIG, (e) => {
     e.returnValue = config
@@ -139,6 +138,7 @@ export function updateConfig(newConfig: Partial<Config>) {
   unRegisterShortcut()
   registerShortcut()
   setCookie()
+  win.webContents.send(IPC.UPDATE_CONFIG, JSON.stringify(config))
 }
 function setCookie() {
   if (config.POESESSID) {

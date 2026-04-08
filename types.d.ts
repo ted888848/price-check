@@ -201,6 +201,23 @@ interface ItemUniques {
 }
 type hotkeyType = 'type-in-chat'
 type POEVersion = '1' | '2'
+
+
+interface TWidgetBase {
+  id: string;
+  type: string;
+  name?: string;
+  x: number;
+  y: number;
+  show: boolean;
+}
+interface TWidgetRegex extends TWidgetBase {
+  type: 'regex';
+  list: {
+    regex: string;
+    id: string;
+  }[];
+}
 interface Config {
   characterName: string;
   searchExchangePrefer: 'divine&(C or Ex)' | 'chaos' | 'divine' | 'exalted';
@@ -218,6 +235,7 @@ interface Config {
   searchOnlineType: 'online' | '1week' | 'securable' | 'all';
   prevPriceCheckHotkey?: string;
   autoSearchStackableItems?: boolean;
+  widgets?: TWidgetRegex[];
 }
 
 interface APIStaticItem {

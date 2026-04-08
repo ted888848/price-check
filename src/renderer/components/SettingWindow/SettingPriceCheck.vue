@@ -35,5 +35,4 @@ const { exchangeHave, searchOnlineTypeOptions } = selectOptions
 const config = defineModel<Config>('config', {
   required: true
 })
-console.log(config.value)
 </script>

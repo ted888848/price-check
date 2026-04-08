@@ -12,6 +12,7 @@ interface IPCEventMap {
     status: false; error: unknown;
   });
   'getProxyPort': () => number;
+  'setSearchRegex': (regex: string) => void;
 }
 export type Channel = keyof IPCEventMap;
 
@@ -29,5 +30,6 @@ export const channels = {
   UPDATE_CONFIG: 'updateConfig',
   RELOAD_APIDATA: 'reloadAPIData',
   GET_PROXY_PORT: 'getProxyPort',
+  SET_SEARCH_REGEX: 'setSearchRegex'
 } as const satisfies Record<string, Channel>
 export default channels
