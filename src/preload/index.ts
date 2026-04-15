@@ -14,7 +14,11 @@ export const ipc = {
   },
   on<C extends Channel>(channel: C, listener: IPCListener<C>) {
     return ipcRenderer.on(channel, listener)
+  },
+  removeListener<C extends Channel>(channel: C, listener: IPCListener<C>) {
+    return ipcRenderer.removeListener(channel, listener)
   }
+
 }
 contextBridge.exposeInMainWorld('ipc', ipc)
 

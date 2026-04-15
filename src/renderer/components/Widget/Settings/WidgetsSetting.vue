@@ -40,6 +40,7 @@
 </template>
 
 <script setup lang="ts">
+import { customEvent } from '@/renderer/lib/customEvent'
 import { computed, onBeforeUnmount, ref } from 'vue'
 
 const config = defineModel<Config>('config', {
@@ -122,16 +123,12 @@ function togglePreview(widgetId: string) {
   }
 
   previewWidgetId.value = widgetId
-  window.dispatchEvent(new CustomEvent('widget-preview', {
-    detail: { widgetId }
-  }))
+  customEvent.dispatchEvent('widget-preview', { widgetId })
 }
 
 function clearPreview() {
   previewWidgetId.value = null
-  window.dispatchEvent(new CustomEvent('widget-preview', {
-    detail: { widgetId: null }
-  }))
+  customEvent.dispatchEvent('widget-preview', { widgetId: null })
 }
 
 onBeforeUnmount(() => {

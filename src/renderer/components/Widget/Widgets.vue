@@ -8,18 +8,27 @@
 import { onBeforeUnmount, onMounted, ref, toRaw } from 'vue';
 import IPC from '@/ipc';
 import RegexWidget from './RegexWidget/Widget.vue';
+import { customEvent, type MyCustomEventMap } from '@/renderer/lib/customEvent';
 const config = ref<Config>()
 const previewWidgetId = ref<string | null>(null)
 const props = defineProps<{
   isSettingWindowShow: boolean
 }>()
+
+function ipcHandleUpdateConfig(_: unknown, newConfig: string) {
+  config.value = JSON.parse(newConfig)
+}
+
 onMounted(() => {
   config.value = window.ipc.sendSync(IPC.GET_CONFIG)
-  window.addEventListener('widget-preview', handleWidgetPreview as EventListener)
+  // window.addEventListener('widget-preview', handleWidgetPreview as EventListener)
+  customEvent.addEventListener('widget-preview', handleWidgetPreview)
+  window.ipc.on(IPC.UPDATE_CONFIG, ipcHandleUpdateConfig)
 })
 
 onBeforeUnmount(() => {
-  window.removeEventListener('widget-preview', handleWidgetPreview as EventListener)
+  customEvent.removeEventListener('widget-preview', handleWidgetPreview)
+  window.ipc.removeListener(IPC.UPDATE_CONFIG, ipcHandleUpdateConfig)
 })
 
 function handleUpdateWidget(newWidget: TWidgetRegex) {
@@ -33,9 +42,8 @@ function handleUpdateWidget(newWidget: TWidgetRegex) {
   }
 }
 
-function handleWidgetPreview(event: Event) {
-  const customEvent = event as CustomEvent<{ widgetId?: string | null }>
-  previewWidgetId.value = customEvent.detail?.widgetId ?? null
+function handleWidgetPreview(event: MyCustomEventMap['widget-preview']) {
+  previewWidgetId.value = event.detail?.widgetId ?? null
 }
 
 function shouldDisplayWidget(widget: TWidgetRegex) {
@@ -46,7 +54,4 @@ function shouldDisplayWidget(widget: TWidgetRegex) {
   return widget.show ?? true
 }
 
-window.ipc.on(IPC.UPDATE_CONFIG, (_, newConfig) => {
-  config.value = JSON.parse(newConfig)
-})
 </script>

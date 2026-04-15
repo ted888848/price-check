@@ -1,7 +1,6 @@
 import { Tray, Menu, app, nativeImage } from 'electron'
-import { win } from './overlayWindow'
+import { toggleOverlay, win } from './overlayWindow'
 import { checkForUpdate } from './setupAPI'
-import { join } from 'path'
 import { updateState } from './setupAPI'
 import { config, updateConfig } from './config'
 import SextantOrb128 from '../assets/SextantOrb128.ico?asset'
@@ -16,6 +15,13 @@ export function buildTray() {
         win.webContents.openDevTools({
           mode: 'detach', activate: false
         })
+      }
+    },
+    {
+      label: '打開 Overlay',
+      type: 'normal',
+      click() {
+        toggleOverlay()
       }
     },
     {

@@ -1,6 +1,6 @@
 {
   "name": "price-check",
-  "version": "3.28.7",
+  "version": "3.28.8",
   "main": "dist/main/index.js",
   "description": "一個POE查價器",
   "author": "ted <ted888848@gmail.com>",
@@ -25,8 +25,8 @@
     "@unocss/preset-uno": "^66.6.0",
     "@vitejs/plugin-vue": "^6.0.4",
     "@vue/tsconfig": "^0.8.1",
-    "axios": "^1.13.4",
-    "electron": "^39.8.0",
+    "axios": "^1.15.0",
+    "electron": "^41.2.0",
     "electron-builder": "^26.7.0",
     "electron-store": "^11.0.2",
     "electron-updater": "^6.7.3",
@@ -47,7 +47,7 @@
     "@tanstack/pacer": "^0.18.0",
     "@tanstack/vue-query": "^5.92.9",
     "@vueuse/core": "^14.2.1",
-    "electron-overlay-window": "^4.0.2",
+    "electron-overlay-window": "^4.1.0",
     "uiohook-napi": "^1.5.4"
   },
   "repository": {
