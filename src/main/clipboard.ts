@@ -3,6 +3,28 @@ const DELAY = 50
 const LIMIT = 250
 let clipboardPromise: Promise<string> | null
 
+type TempClipboardJob = {
+  id: number
+  beforeText: string
+  ensureTimer?: ReturnType<typeof setTimeout>
+  restoreTimer?: ReturnType<typeof setTimeout>
+  cancelled: boolean
+}
+
+let tempClipboardJob: TempClipboardJob | null = null
+let tempClipboardJobId: null | number = null
+
+function cancelTempClipboardJob(restore = true) {
+  if (!tempClipboardJob) return
+  tempClipboardJob.cancelled = true
+  if (tempClipboardJob.ensureTimer) clearTimeout(tempClipboardJob.ensureTimer)
+  if (tempClipboardJob.restoreTimer) clearTimeout(tempClipboardJob.restoreTimer)
+  if (restore) {
+    clipboard.writeText(tempClipboardJob.beforeText)
+  }
+  tempClipboardJob = null
+}
+
 export async function getClipboard() {
   let timeLimit = 0
   if (clipboardPromise) {
@@ -41,20 +63,43 @@ export function withTemporaryClipboardText(
   action: () => void,
   options?: { maxRetry?: number, retryIntervalMs?: number, restoreDelayMs?: number }
 ) {
+  // Keep only the latest request; cancel any previous in-flight clipboard task.
+  cancelTempClipboardJob(true)
+
   const beforeText = clipboard.readText()
   const maxRetry = options?.maxRetry ?? 10
   const retryIntervalMs = options?.retryIntervalMs ?? 20
   const restoreDelayMs = options?.restoreDelayMs ?? 250
   let retryCount = 0
 
+  const job: TempClipboardJob = {
+    id: Date.now(),
+    beforeText,
+    cancelled: false,
+  }
+  tempClipboardJob = job
+
+  const isCurrentJob = () => !!tempClipboardJob && tempClipboardJob.id === job.id && !job.cancelled
+
+  const finishJob = () => {
+    if (tempClipboardJob?.id === job.id) {
+      tempClipboardJob = null
+    }
+  }
+
   const runAction = () => {
+    if (!isCurrentJob()) return
     action()
-    setTimeout(() => {
+    job.restoreTimer = setTimeout(() => {
+      if (!isCurrentJob()) return
       clipboard.writeText(beforeText)
+      finishJob()
     }, restoreDelayMs)
   }
 
   const ensureClipboard = () => {
+    if (!isCurrentJob()) return
+
     clipboard.writeText(text)
     if (clipboard.readText() === text) {
       runAction()
@@ -63,11 +108,14 @@ export function withTemporaryClipboardText(
 
     retryCount += 1
     if (retryCount > maxRetry) {
-      runAction()
+      if (isCurrentJob()) {
+        clipboard.writeText(beforeText)
+        finishJob()
+      }
       return
     }
 
-    setTimeout(ensureClipboard, retryIntervalMs)
+    job.ensureTimer = setTimeout(ensureClipboard, retryIntervalMs)
   }
 
   ensureClipboard()
