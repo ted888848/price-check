@@ -64,7 +64,9 @@ function handleBIEvent(event: Electron.Event, input: Electron.Input) {
     case 'Ctrl+W':
     case 'Escape':
       event.preventDefault()
-      forcePOE()
+      process.nextTick(() => {
+        forcePOE()
+      })
       break
     default:
       return

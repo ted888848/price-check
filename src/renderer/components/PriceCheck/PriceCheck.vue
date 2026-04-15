@@ -2,7 +2,7 @@
   <div v-show="windowShowHide"
     class="absolute top-0 left-0 w-screen h-screen priceCheckRoot bg-gray-400 bg-opacity-25 flex"
     @click.self="closePriceCheck">
-    <webview v-show="isWebViewOpen" ref="webView" class=" flex-1" :src="webViewSrc" />
+    <webview v-show="isWebViewOpen" v-if="enableWebView" ref="webViewRef" class=" flex-1" :src="webViewSrc" />
     <div ref="priceCheckDiv" class="bg-gray-900 priceCheck h-full flex flex-col" :style="priceCheckPos"
       :class="{ 'absolute': !isWebViewOpen }">
       <div class="bg-gray-800 flex justify-between max-h-9 items-center">
@@ -46,7 +46,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, nextTick, onBeforeMount } from 'vue'
+import { ref, computed, nextTick, onBeforeMount, onMounted } from 'vue'
 import { range } from 'lodash-es'
 import IPC from '@/ipc'
 import { itemAnalyze } from '@/renderer/lib/itemAnalyze'
@@ -62,6 +62,15 @@ const prevSearch = ref(false)
 const priceCheckPos = ref({
   right: '0px'
 })
+
+// 延遲載入讓 win.webContents.on('did-attach-webview') 可以觸發事件綁定
+const enableWebView = ref(false)
+onMounted(() => {
+  setTimeout(() => {
+    enableWebView.value = true
+  }, 100)
+})
+
 const webViewSrc = ref('about:blank')
 function openWebView(extendUrl: string) {
   priceCheckPos.value.right = '0px'
