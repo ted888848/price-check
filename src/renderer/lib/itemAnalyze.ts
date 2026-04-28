@@ -163,11 +163,9 @@ export function itemAnalyze(item: string) {
       if (skip) break;
       if (config.autoSearchStackableItems) itemParsed.autoSearch = true
       const staticItem = APIStatic.find((ele: Static) => ele.text === itemParsed.baseType)
-      console.log(staticItem)
       if (staticItem) {
+        itemParsed.itemID = staticItem.id
         itemParsed.searchExchange.option = true
-        // const searchExchangeDivine = config.searchExchangeDivine
-        // itemParsed.searchExchange.have = ['divine', 'chaos']
       }
       parseAllfuns(itemSection)
       break
