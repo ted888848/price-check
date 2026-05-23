@@ -10,13 +10,13 @@
     "dev": "electron-vite dev --watch",
     "build": "vue-tsc --noEmit && electron-vite build && electron-builder",
     "preview": "electron-vite preview",
-    "buildP": "powershell ./setGithubToken.ps1; npm run build -- -p always",
+    "buildP": "powershell ./setGithubToken.ps1; pnpm run build -- -p always",
     "vuetsc": "vue-tsc --noEmit",
     "test": " vitest",
     "ipc-type": "tsc ./src/ipc/index.ts --emitDeclarationOnly --declaration --outDir src/ipc"
   },
   "devDependencies": {
-    "@hono/node-server": "^1.19.9",
+    "@hono/node-server": "^2.0.1",
     "@iconify-json/material-symbols": "^1.2.53",
     "@iconify-json/svg-spinners": "^1.2.4",
     "@types/lodash-es": "^4.17.12",
@@ -25,14 +25,14 @@
     "@unocss/preset-uno": "^66.6.0",
     "@vitejs/plugin-vue": "^6.0.4",
     "@vue/tsconfig": "^0.8.1",
-    "axios": "^1.15.0",
+    "axios": "^1.16.0",
     "electron": "^41.2.0",
     "electron-builder": "^26.7.0",
     "electron-store": "^11.0.2",
     "electron-updater": "^6.7.3",
     "electron-vite": "^5.0.0",
     "element-plus": "^2.13.2",
-    "hono": "^4.11.7",
+    "hono": "^4.12.18",
     "lodash-es": "^4.17.23",
     "typescript": "^5.9.3",
     "unocss": "^66.6.0",
@@ -48,7 +48,7 @@
     "@tanstack/vue-query": "^5.92.9",
     "@vueuse/core": "^14.2.1",
     "electron-overlay-window": "^4.1.0",
-    "uiohook-napi": "^1.5.4"
+    "uiohook-napi": "^1.5.5"
   },
   "repository": {
     "type": "git",

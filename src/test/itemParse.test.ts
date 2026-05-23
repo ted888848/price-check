@@ -44,7 +44,7 @@ vi.stubGlobal('window', {
   }
 })
 
-const { itemAnalyze } = await import('../web/lib/itemAnalyze')
+const { itemAnalyze } = await import('../renderer/lib/itemAnalyze')
 
 for (const item of exampleItems.items) {
   it(`parse ${item.name}`, () => {

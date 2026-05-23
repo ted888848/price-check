@@ -25,6 +25,5 @@ release
 *.sw?
 
 # lockfile
-pnpm-lock.yaml
 yarn.lock
 setGithubToken.ps1
