@@ -4,6 +4,7 @@ import { app, session, dialog } from 'electron' //, shell
 import { autoUpdater } from 'electron-updater'
 import { buildTray } from './tray'
 import { config } from './config'
+import axios from 'axios'
 const store1 = new Store({
   name: 'APIData'
 })
@@ -299,8 +300,15 @@ async function getStatic(poeVersion: POEVersion = '1') {
   store.set('currencyImageUrl', _currencyImageUrl)
   store.set('APIStatic', setupAPIStatic(data.result))
 }
+async function getItemNameTranslation(poeVersion: POEVersion = '1') {
+  const response = await axios.get<POEDBItemTranslationResponse>(`https://poe${poeVersion === '2' ? '2' : ''}db.tw/tw/api/Trade`)
+  const data = response.data.data.filter((ele) => ele.lang && !ele.lang.includes('外觀'))
+  const store = poeVersion === '2' ? store2 : store1
+  store.set('itemNameTranslation', data)
+
+}
 export async function get1APIdata() {
-  const result = await Promise.allSettled([getLeagues(), getItems(), getStatic(), getStats()])
+  const result = await Promise.allSettled([getLeagues(), getItems(), getStatic(), getStats()/*, getItemNameTranslation()*/])
   let error: any
   result.forEach((e) => {
     if (e.status === 'rejected') {
@@ -312,7 +320,7 @@ export async function get1APIdata() {
 }
 
 export async function get2APIdata() {
-  const result = await Promise.allSettled([getLeagues('2'), getItems('2'), getStatic('2'), getStats('2')])
+  const result = await Promise.allSettled([getLeagues('2'), getItems('2'), getStatic('2'), getStats('2')/*, getItemNameTranslation('2')*/])
   let error: any
   result.forEach((e) => {
     if (e.status === 'rejected') {
@@ -323,6 +331,15 @@ export async function get2APIdata() {
   })
   store1.set('APIVersion', app.getVersion())
   if (error?.length) throw error
+}
+
+export async function getPOEApiData() {
+  if (config.poeVersion === '1') {
+    await get1APIdata()
+  }
+  else if (config.poeVersion === '2') {
+    await get2APIdata()
+  }
 }
 
 

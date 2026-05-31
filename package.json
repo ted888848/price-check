@@ -1,6 +1,6 @@
 {
   "name": "price-check",
-  "version": "3.28.8",
+  "version": "3.28.9",
   "main": "dist/main/index.js",
   "description": "一個POE查價器",
   "author": "ted <ted888848@gmail.com>",
@@ -10,7 +10,7 @@
     "dev": "electron-vite dev --watch",
     "build": "vue-tsc --noEmit && electron-vite build && electron-builder",
     "preview": "electron-vite preview",
-    "buildP": "powershell ./setGithubToken.ps1; pnpm run build -- -p always",
+    "buildP": "powershell ./setGithubToken.ps1; pnpm run build -p always",
     "vuetsc": "vue-tsc --noEmit",
     "test": " vitest",
     "ipc-type": "tsc ./src/ipc/index.ts --emitDeclarationOnly --declaration --outDir src/ipc"

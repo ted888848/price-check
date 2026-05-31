@@ -1,6 +1,7 @@
 import IPC from '@/ipc'
-import { APIitems, APImods, APIStatic } from './APIdata'
+import { APIitems, APImods, APIStatic, itemNameTranslation } from './APIdata'
 import { secondCurrency } from '.'
+import { getModMatchRegex, getStrReg } from './regex'
 enum ParseResult {
   PARSE_SECTION_FAIL,
   PARSE_SECTION_SUCC,
@@ -304,13 +305,20 @@ function parseItemName(section: string[], itemSection: string[][]) {
 
   // 物品名稱與基底
   const itemTypeApi = itemParsed.type.option?.substring(0, itemParsed.type.option.indexOf('.')) as keyof typeof APIitems
-  const itemNameLine = section.at(-1)?.replace(/(精良的|追憶之)\s/, '') ?? ''
+  let itemNameLine = section.at(-1)?.replace(/(精良的|追憶之|Synthesised)\s/, '') ?? ''
+
+  //把英文baseType轉成中文
+  if (itemNameTranslation.length > 0) {
+    itemNameLine = itemNameTranslation.find(ele => ele.us.toLocaleLowerCase() === itemNameLine.toLocaleLowerCase())?.lang ?? itemNameLine
+  }
+
   const apiBaseTypes = (APIitems[itemTypeApi]?.entries ?? Object.values(APIitems).flatMap(item => item.entries))
     .filter((entry) => {
       let sectionLine = itemNameLine
       if (!sectionLine) return false
       if (sectionLine.startsWith('精良的')) sectionLine = sectionLine.substring(4)
       if (sectionLine.startsWith('追憶之')) sectionLine = sectionLine.substring(4)
+      if (sectionLine.startsWith('Synthesised')) sectionLine = sectionLine.substring(11)
 
       return entry.type === sectionLine || sectionLine?.endsWith(entry.type)
     }).map((entry) => (entry.type))
@@ -358,11 +366,15 @@ function parseItemName(section: string[], itemSection: string[][]) {
     itemParsed.name = section.pop()
   }
 
-  if (itemParsed.name?.startsWith('穢生 ')) {
-    itemParsed.name = itemParsed.name.replace('穢生 ', '')
+  if (/^穢生\s|^Foulborn\s/.test(itemParsed.name || '')) {
+    itemParsed.name = itemParsed.name?.replace(/穢生\s|Foulborn\s/, '')
     itemParsed.foulborn = true
   }
 
+  //把英文傳奇名稱轉成中文
+  if (itemParsed.rarity === '傳奇' && itemNameTranslation.length > 0) {
+    itemParsed.name = itemNameTranslation.find(ele => ele.type === 'Unique' && ele.us?.toLocaleLowerCase() === itemParsed.name?.toLocaleLowerCase())?.lang ?? itemParsed.name
+  }
   return ParseResult.PARSE_SECTION_SUCC
 }
 
@@ -407,18 +419,7 @@ function parseItemLevel(section: string[]) {
   }
   return ParseResult.PARSE_SECTION_SUCC
 }
-function getStrReg(section: string[], type: string) {
-  const retArr: RegExp[] = []
-  section.forEach(line => {
-    const indexOfType = line.indexOf(` (${type})`)
-    line = indexOfType > -1 ? line.substring(0, indexOfType) : line
-    line = line.replace(/[+-]?\d+(?:\.\d+)?/g, '__NUMBER__')
-    line = line.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-    retArr.push(new RegExp(`^${line.replace(/__NUMBER__/g, '[+-]?(\\d+|#)')
-      .replace(/減少|增加/, "(?:減少|增加)")}( \\(部分\\))?$`))
-  })
-  return retArr
-}
+
 function parseMultilineMod(regSection: RegExp[], section: string[], type: keyof ParsedAPIMods | 'mutated') {
   const isMutated = type === 'mutated'
   type = isMutated ? 'explicit' : type as keyof ParsedAPIMods
@@ -438,8 +439,7 @@ function parseMultilineMod(regSection: RegExp[], section: string[], type: keyof 
           }
         }
         if (!flag) continue
-        const matchReg = matchMod.text.map(mod => new RegExp(mod.replace(/[+-]?#/g, String.raw`[+-]?(\d+(?:\.\d+)?)`)
-          .replace(' (部分)', '').replace(/減少|增加/, String.raw`(?:減少|增加)`)))
+        const matchReg = matchMod.text.map(mod => getModMatchRegex(mod))
         let tempValue = 0
         let valueCount = 0
         for (const ind in matchReg) {
@@ -475,10 +475,11 @@ function parseMultilineMod(regSection: RegExp[], section: string[], type: keyof 
 }
 function parseMod(section: string[], type: keyof ParsedAPIMods | 'mutated') {
   const isMutated = type === 'mutated'
-  const regSection = getStrReg(section, type)
+  const cleanSection = section.filter(line => !/{.*}/.test(line))
+  const regSection = getStrReg(cleanSection, type)
   type = isMutated ? 'explicit' : type as keyof ParsedAPIMods
   if (!APImods[type as keyof ParsedAPIMods]) return ParseResult.PARSE_SECTION_FAIL
-  const tempArr = parseMultilineMod(regSection, section, type)
+  const tempArr = parseMultilineMod(regSection, cleanSection, type)
   regSection.forEach((line, index) => {
     try {
       let matchMods = APImods[type]!.entries.filter(s => line.test(s.text))
@@ -487,19 +488,18 @@ function parseMod(section: string[], type: keyof ParsedAPIMods | 'mutated') {
           matchMods = matchMods.filter(mod => mod.text.endsWith(' (部分)'))
         else {
           matchMods = matchMods.filter(mod => !mod.text.endsWith(' (部分)'))
-          const regTemp = section[index]?.match(/增加|減少/)?.[0]
+          const regTemp = cleanSection[index]?.match(/增加|減少/)?.[0]
           if (regTemp)
             matchMods = matchMods.filter(mod => mod.text.includes(regTemp))
         }
       }
       if (!matchMods.length) return false
       matchMods.forEach((matchMod) => {
-        const matchReg = new RegExp(matchMod.text.replace(/[+-]?#/g, String.raw`([+-]?\d+(?:\.\d+)?)`)
-          .replace(' (部分)', '').replace(/減少|增加/, String.raw`(?:減少|增加)`))
-        const regGroup = section[index]?.match(matchReg)
+        const matchReg = getModMatchRegex(matchMod.text)
+        const regGroup = cleanSection[index]?.match(matchReg)
         regGroup?.shift()
         if (regGroup?.length) {
-          const diffSign = matchMod.text.match(/減少|增加/)?.[0] !== section[index]?.match(/減少|增加/)?.[0]
+          const diffSign = matchMod.text.match(/減少|增加/)?.[0] !== cleanSection[index]?.match(/減少|增加/)?.[0]
           //數字前增加與減少不相等，把數字變負數
           const minValue = (diffSign ? -1 : 1) * (regGroup.reduce((pre, ele) => pre + Number(ele), 0) / regGroup.length)
           tempArr.push({
@@ -534,7 +534,7 @@ function parseEnchantMod(section: string[]) {
   return ParseResult.PARSE_SECTION_FAIL
 }
 function parseImplicitMod(section: string[]) {
-  if (!section.find(line => line.endsWith('(implicit)'))) return ParseResult.PARSE_SECTION_SKIP
+  if (!section.find(line => /\(implicit\)&|{\s.*固定詞綴.*\s}/.test(line))) return ParseResult.PARSE_SECTION_SKIP
   if (parseMod(section, 'implicit') === ParseResult.PARSE_SECTION_SUCC) return ParseResult.PARSE_SECTION_SUCC
   return ParseResult.PARSE_SECTION_FAIL
 }
@@ -545,9 +545,27 @@ function parseExplicitMod(section: string[]) {
     craftedSection: string[] = [],
     mutatedSection: string[] = []
   let parsed = false
-  section.forEach(line => {
-    const type = line.match(/fractured|crafted|mutated/)
-    switch (type?.[0]) {
+  let sectionModArr: string[] = []
+  let sectionModTypeArr: string[] = [];
+  if (/{.*}/.test(section[0] ?? '')) {
+    section.forEach(line => {
+      if (/{.*}/.test(line)) {
+        sectionModTypeArr.push(line);
+      }
+      else {
+        sectionModArr.push(line);
+      }
+    })
+  }
+  for (let i = 0; i < sectionModArr.length; i++) {
+    const line = sectionModArr[i] ?? '';
+    let type = line?.match(/fractured|crafted|mutated/)?.[0]
+    if (sectionModTypeArr[i]) {
+      type = sectionModTypeArr[i]?.startsWith('{ 已破裂') ? 'fractured' :
+        sectionModTypeArr[i]?.startsWith('{ 已大師工藝') ? 'crafted' :
+          sectionModTypeArr[i]?.startsWith('{ Foulborn') ? 'mutated' : type
+    }
+    switch (type) {
       case 'crafted':
         craftedSection.push(line)
         break
@@ -561,7 +579,8 @@ function parseExplicitMod(section: string[]) {
         line !== '隱匿前綴' && line !== '隱匿後綴' && explicitSection.push(line)
         break
     }
-  })
+  }
+
   if (craftedSection.length) parsed = parseMod(craftedSection, 'crafted') === ParseResult.PARSE_SECTION_SUCC || parsed
   if (fracturedSection.length) parsed = parseMod(fracturedSection, 'fractured') === ParseResult.PARSE_SECTION_SUCC || parsed
   if (explicitSection.length) parsed = parseMod(explicitSection, 'explicit') === ParseResult.PARSE_SECTION_SUCC || parsed

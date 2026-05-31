@@ -9,6 +9,7 @@ export let APIStatic: Static[]
 export let currencyImageUrl: Static[]
 export let divineImage = ''
 export let chaosOrExImage = ''
+export let itemNameTranslation: ItemTranslation[] = []
 export function loadAPIData(poeVersion?: POEVersion) {
   if (!poeVersion) {
     const config = window.ipc.sendSync(IPC.GET_CONFIG)
@@ -27,6 +28,7 @@ function loadAPIPoe1Data() {
   APIStatic = window.store.get('APIStatic') as Static[] ?? []
   APImods = window.store.get('APImods') as ParsedAPIMods ?? []
   currencyImageUrl = window.store.get('currencyImageUrl') as Static[] ?? []
+  itemNameTranslation = window.store.get('itemNameTranslation') as ItemTranslation[] ?? []
 }
 
 
@@ -37,4 +39,5 @@ function loadAPIPoe2Data() {
   APIStatic = window.store.get('APIStatic', '2') as Static[] ?? []
   APImods = window.store.get('APImods', '2') as ParsedAPIMods ?? []
   currencyImageUrl = window.store.get('currencyImageUrl', '2') as Static[] ?? []
+  itemNameTranslation = window.store.get('itemNameTranslation', '2') as ItemTranslation[] ?? []
 }

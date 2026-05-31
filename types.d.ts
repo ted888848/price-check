@@ -295,3 +295,15 @@ interface APILeagues {
     text: string;
   }[];
 }
+
+interface ItemTranslation {
+  type: 'Unique' | 'Monster' | 'BaseType' | 'Class' | string;
+  us: string;
+  lang: string;//TW
+}
+
+interface POEDBItemTranslationResponse {
+  code: number;
+  size: number;
+  data: ItemTranslation[];
+}
