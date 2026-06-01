@@ -114,6 +114,12 @@ export function itemAnalyze(item: string) {
     case '雙手錘':
     case '魚竿':
     case '征戰長杖':
+    case '長鋒':
+    case '長矛':
+    case '鏈錘':
+    case '魔符':
+    case '細杖':
+    case '十字弓':
       findUnique('weapon', isFindUnique)
       parseWeapon(itemSection)
       break
@@ -122,6 +128,7 @@ export function itemAnalyze(item: string) {
     case '胸甲':
     case '頭部':
     case '盾':
+    case '輕盾':
     case '法器':
       findUnique('armour', isFindUnique)
       parseArmor(itemSection)
@@ -230,6 +237,9 @@ function parseItemName(section: string[], itemSection: string[][]) {
     魚竿: 'weapon.rod',
     征戰長杖: 'weapon.warstaff',
     長鋒: 'weapon.spear',
+    長矛: 'weapon.spear',
+    鏈錘: 'weapon.flail',
+    魔符: 'weapon.talisman',
     細杖: 'weapon.warstaff',
     十字弓: 'weapon.crossbow',
     手套: 'armour.gloves',
