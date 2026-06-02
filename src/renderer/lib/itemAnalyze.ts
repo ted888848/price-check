@@ -1,6 +1,6 @@
 import IPC from '@/ipc'
 import { APIitems, APImods, APIStatic, itemNameTranslation } from './APIdata'
-import { secondCurrency } from '.'
+import { poeVersion, secondCurrency } from '.'
 import { getModMatchRegex, getStrReg } from './regex'
 enum ParseResult {
   PARSE_SECTION_FAIL,
@@ -17,6 +17,7 @@ const parseFuns: (((section: string[]) => ParseResult) | undefined)[] = [
   parseCorrupt,
   parseEnchantMod,
   parseImplicitMod,
+  (poeVersion === '2' ? parseRuneMod : () => ParseResult.PARSE_SECTION_SKIP),
   parseIdentify,
   parseExplicitMod,
 ]
@@ -170,11 +171,7 @@ export function itemAnalyze(item: string) {
     case '掘獄可堆疊有插槽通貨': {
       if (skip) break;
       if (config.autoSearchStackableItems) itemParsed.autoSearch = true
-      const staticItem = APIStatic.find((ele: Static) => ele.text === itemParsed.baseType)
-      if (staticItem) {
-        itemParsed.itemID = staticItem.id
-        itemParsed.searchExchange.option = true
-      }
+
       parseAllfuns(itemSection)
       break
     }
@@ -203,6 +200,11 @@ export function itemAnalyze(item: string) {
     default:
       parseAllfuns(itemSection)
       break
+  }
+  const staticItem = APIStatic.find((ele: Static) => ele.text === itemParsed.baseType)
+  if (staticItem) {
+    itemParsed.itemID = staticItem.id
+    itemParsed.searchExchange.option = true
   }
   parsePseudoEleResistance()
   if (itemParsed.rarity === '傳奇' && itemParsed.isIdentify === false && itemParsed.uniques.length === 1) {
@@ -430,14 +432,19 @@ function parseItemLevel(section: string[]) {
   return ParseResult.PARSE_SECTION_SUCC
 }
 
-function parseMultilineMod(regSection: RegExp[], section: string[], type: keyof ParsedAPIMods | 'mutated') {
-  const isMutated = type === 'mutated'
-  type = isMutated ? 'explicit' : type as keyof ParsedAPIMods
-  if (!APImods[type]!.mutiLines) return []
+function parseMultilineMod(regSection: RegExp[], section: string[], type: keyof ParsedAPIMods | 'mutated' | 'rune') {
+  let modType = type
+  if (modType === 'mutated' || modType === 'rune') {
+    modType = 'explicit'
+  }
+  else {
+    modType = modType as keyof ParsedAPIMods
+  }
+  if (!APImods[modType]?.mutiLines) return []
   const tempArr: ItemStat[] = []
   for (let i = 0; i < regSection.length; ++i) {
     try {
-      const matchModList = APImods[type]!.mutiLines?.filter(s => regSection[i]!.test(s.text[0]!))
+      const matchModList = APImods[modType]!.mutiLines?.filter(s => regSection[i]!.test(s.text[0]!))
       if (!matchModList) continue
       outer:
       for (const matchMod of matchModList) {
@@ -462,19 +469,20 @@ function parseMultilineMod(regSection: RegExp[], section: string[], type: keyof 
         regSection.splice(i, matchMod.text.length)
         i -= matchMod.text.length
         i = i < 0 ? -1 : i
+        const baseOption = {
+          ...matchMod,
+          disabled: type === 'mutated' ? false : true,
+          type: type === 'mutated' ? '穢生' : (APImods[type as keyof ParsedAPIMods]?.type ?? type)
+        }
         if (tempValue)
           tempArr.push({
-            ...matchMod,
             value: {
               min: tempValue / valueCount
             },
-            disabled: isMutated ? false : true,
-            type: isMutated ? '穢生' : APImods[type]!.type
+            ...baseOption
           })
         else
-          tempArr.push({
-            ...matchMod, disabled: isMutated ? false : true, type: isMutated ? '穢生' : APImods[type]!.type
-          })
+          tempArr.push({ ...baseOption })
       }
     }
     catch (e) {
@@ -483,16 +491,21 @@ function parseMultilineMod(regSection: RegExp[], section: string[], type: keyof 
   }
   return tempArr
 }
-function parseMod(section: string[], type: keyof ParsedAPIMods | 'mutated') {
-  const isMutated = type === 'mutated'
+function parseMod(section: string[], type: keyof ParsedAPIMods | 'mutated' | 'rune') {
+  let modType = type
   const cleanSection = section.filter(line => !/{.*}/.test(line))
-  const regSection = getStrReg(cleanSection, type)
-  type = isMutated ? 'explicit' : type as keyof ParsedAPIMods
-  if (!APImods[type as keyof ParsedAPIMods]) return ParseResult.PARSE_SECTION_FAIL
-  const tempArr = parseMultilineMod(regSection, cleanSection, type)
+  const regSection = getStrReg(cleanSection, modType)
+  if (modType === 'mutated' || modType === 'rune') {
+    modType = 'explicit'
+  }
+  else {
+    modType = modType as keyof ParsedAPIMods
+  }
+  if (!APImods[modType as keyof ParsedAPIMods]) return ParseResult.PARSE_SECTION_FAIL
+  const tempArr = parseMultilineMod(regSection, cleanSection, modType)
   regSection.forEach((line, index) => {
     try {
-      let matchMods = APImods[type]!.entries.filter(s => line.test(s.text))
+      let matchMods = APImods[modType]!.entries.filter(s => line.test(s.text))
       if (matchMods.length > 1) {
         if (itemParsed.isWeaponOrArmor && matchMods.find(ele => ele.text.endsWith(' (部分)')))
           matchMods = matchMods.filter(mod => mod.text.endsWith(' (部分)'))
@@ -508,23 +521,24 @@ function parseMod(section: string[], type: keyof ParsedAPIMods | 'mutated') {
         const matchReg = getModMatchRegex(matchMod.text)
         const regGroup = cleanSection[index]?.match(matchReg)
         regGroup?.shift()
+        const baseOption = {
+          ...matchMod,
+          disabled: type === 'mutated' ? false : true,
+          type: type === 'mutated' ? '穢生' : APImods[type as keyof ParsedAPIMods]?.type ?? type
+        }
         if (regGroup?.length) {
           const diffSign = matchMod.text.match(/減少|增加/)?.[0] !== cleanSection[index]?.match(/減少|增加/)?.[0]
           //數字前增加與減少不相等，把數字變負數
           const minValue = (diffSign ? -1 : 1) * (regGroup.reduce((pre, ele) => pre + Number(ele), 0) / regGroup.length)
           tempArr.push({
-            ...matchMod,
             value: {
               [diffSign ? 'max' : 'min']: minValue,
             },
-            disabled: isMutated ? false : true,
-            type: isMutated ? '穢生' : APImods[type]!.type
+            ...baseOption
           })
         }
         else {
-          tempArr.push({
-            ...matchMod, disabled: isMutated ? false : true, type: isMutated ? '穢生' : APImods[type]!.type
-          })
+          tempArr.push({ ...baseOption })
         }
       })
     }
@@ -546,6 +560,11 @@ function parseEnchantMod(section: string[]) {
 function parseImplicitMod(section: string[]) {
   if (!section.find(line => /\(implicit\)&|{\s.*固定詞綴.*\s}/.test(line))) return ParseResult.PARSE_SECTION_SKIP
   if (parseMod(section, 'implicit') === ParseResult.PARSE_SECTION_SUCC) return ParseResult.PARSE_SECTION_SUCC
+  return ParseResult.PARSE_SECTION_FAIL
+}
+function parseRuneMod(section: string[]) {
+  if (!section.find(line => line.endsWith(' (rune)'))) return ParseResult.PARSE_SECTION_SKIP
+  if (parseMod(section, 'rune') === ParseResult.PARSE_SECTION_SUCC) return ParseResult.PARSE_SECTION_SUCC
   return ParseResult.PARSE_SECTION_FAIL
 }
 function parseExplicitMod(section: string[]) {
