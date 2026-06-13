@@ -5,6 +5,7 @@ import IPC from '@/ipc'
 import { join } from 'path'
 import { config } from './config'
 import SextantOrb128 from '../assets/SextantOrb128.ico?asset'
+import { match } from 'ts-pattern'
 export let win: BrowserWindow
 let isOverlayOpen: boolean
 export async function createWindow() {
@@ -60,17 +61,14 @@ function handleBIEvent(event: Electron.Event, input: Electron.Input) {
   const { control, alt, shift } = input
   if (code.indexOf('Key') !== -1) code = code.substring(code.indexOf('Key') + 3)
   if (control && !alt && !shift) code = 'Ctrl+' + code
-  switch (code) {
-    case 'Ctrl+W':
-    case 'Escape':
+
+  match(code)
+    .with('Ctrl+W', 'Escape', () => {
       event.preventDefault()
       process.nextTick(() => {
         forcePOE()
       })
-      break
-    default:
-      return
-  }
+    })
 }
 
 export function toggleOverlay() {

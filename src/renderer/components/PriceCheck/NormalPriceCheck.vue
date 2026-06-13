@@ -271,6 +271,7 @@ import { useMyCountdown } from '@/renderer/lib/ratetimelimit'
 import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/vue-query'
 import { getMarketPrice, marketQueryOption, type TMarketItemRate } from '@/renderer/lib/market'
 import MarketPrice from '../utility/MarketPrice.vue'
+import { match } from 'ts-pattern'
 const props = defineProps<{
   itemProp: ParsedItem;
   leagueSelect: string;
@@ -307,22 +308,14 @@ const {
   searchOnlineTypeOptions: searchOnlineTypeOptions,
 } = selectOptions
 function modTextColor(type?: string) {
-  switch (type) {
-    case '固定':
-      return '#346beb'
-    case '附魔':
-      return '#41e635'
-    case '破裂':
-      return '#eba536'
-    case '隨機':
-      return 'red'
-    case '偽屬性':
-      return '#9936eb'
-    case '穢生':
-      return '#8B4513'
-    default:
-      return 'white'
-  }
+  return match(type)
+    .with('固定', () => '#346beb')
+    .with('附魔', () => '#41e635')
+    .with('破裂', () => '#eba536')
+    .with('隨機', () => 'red')
+    .with('偽屬性', () => '#9936eb')
+    .with('穢生', () => '#8B4513')
+    .otherwise(() => 'white')
 }
 
 

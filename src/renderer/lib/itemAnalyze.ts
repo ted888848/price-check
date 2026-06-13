@@ -2,6 +2,7 @@ import IPC from '@/ipc'
 import { APIitems, APImods, APIStatic, itemNameTranslation } from './APIdata'
 import { poeVersion, secondCurrency } from '.'
 import { getModMatchRegex, getStrReg } from './regex'
+import { match, P } from 'ts-pattern'
 enum ParseResult {
   PARSE_SECTION_FAIL,
   PARSE_SECTION_SUCC,
@@ -97,110 +98,60 @@ export function itemAnalyze(item: string) {
   const isFindUnique = {
     flag: false
   }
-  let skip = false
-  switch (itemParsed.type.text) {
-    case '爪':
-    case '匕首':
-    case '法杖':
-    case '單手劍':
-    case '細劍':
-    case '單手斧':
-    case '單手錘':
-    case '權杖':
-    case '符紋匕首':
-    case '弓':
-    case '長杖':
-    case '雙手劍':
-    case '雙手斧':
-    case '雙手錘':
-    case '魚竿':
-    case '征戰長杖':
-    case '長鋒':
-    case '長矛':
-    case '鏈錘':
-    case '魔符':
-    case '細杖':
-    case '十字弓':
-      findUnique('weapon', isFindUnique)
-      parseWeapon(itemSection)
-      break
-    case '手套':
-    case '鞋子':
-    case '胸甲':
-    case '頭部':
-    case '盾':
-    case '輕盾':
-    case '法器':
-      findUnique('armour', isFindUnique)
-      parseArmor(itemSection)
-      break
-    case '生命藥劑':
-    case '魔力藥劑':
-    case '複合藥劑':
-    case '功能藥劑':
-      findUnique('flask', isFindUnique)
-      parseFlask(itemSection)
-      break
-    case '項鍊':
-    case '戒指':
-    case '腰帶':
-      findUnique('accessory', isFindUnique)
-    case '箭袋':
-    case '飾品':
-    case '劫盜裝備':
-    case '守望號令':
-    case '記憶':
-      parseOtherHaveMods(itemSection)
-      break
-    case '永恆珠寶':
-    case '珠寶':
-    case '深淵珠寶':
-      parseJewel(itemSection)
-      findUnique('jewel', isFindUnique)
-      break
-    case '地圖':
-      findUnique('map', isFindUnique)
-      parseMap(itemSection)
-      break
-    case '可堆疊通貨':
-      skip = parseBeastItem(itemSection)
-    case '預兆':
-    case '地圖碎片':
-    case '遺鑰':
-    case '命運卡':
-    case '掘獄可堆疊有插槽通貨': {
-      if (skip) break;
-      if (config.autoSearchStackableItems) itemParsed.autoSearch = true
-
-      parseAllfuns(itemSection)
-      break
-    }
-    case '技能寶石':
-    case '輔助寶石':
-      parseGem(itemSection)
-      break
-    case '探險日誌':
-      parseLogbook(itemSection)
-      break
-    case '屍體':
-      itemParsed.autoSearch = true
-      break
-    case '聖物':
-      parseRelic(itemSection)
-      break
-    case '輿圖升級道具':
-      break
-    case '接肢':
-      parseGraft(itemSection)
-      break;
-    case '契約書':
-      findUnique('heistmission', isFindUnique)
-    case '咒語':
-    case '其它':
-    default:
-      parseAllfuns(itemSection)
-      break
-  }
+  match(itemParsed.type)
+    .with({ option: P.string.startsWith('weapon') }, () => {
+      findUnique('weapon', isFindUnique);
+      parseWeapon(itemSection);
+    })
+    .with({ option: P.string.startsWith('armour') }, () => {
+      findUnique('armour', isFindUnique);
+      parseArmor(itemSection);
+    })
+    .with({ option: P.string.startsWith('flask') }, () => {
+      findUnique('flask', isFindUnique);
+      parseFlask(itemSection);
+    })
+    .with({ option: P.string.startsWith('accessory') }, () => {
+      findUnique('accessory', isFindUnique);
+      parseOtherHaveMods(itemSection);
+    })
+    .with({ option: P.string.startsWith('jewel') }, () => {
+      parseJewel(itemSection);
+      findUnique('jewel', isFindUnique);
+    })
+    .with({ option: P.string.startsWith('map') }, () => {
+      findUnique('map', isFindUnique);
+      parseMap(itemSection);
+    })
+    .with({ text: P.union('可堆疊通貨', '預兆', '地圖碎片', '遺鑰', '命運卡', '掘獄可堆疊有插槽通貨') }, ({ text }) => {
+      let shouldSkip = false;
+      if (text === '可堆疊通貨') {
+        shouldSkip = parseBeastItem(itemSection);
+      }
+      if (!shouldSkip) {
+        if (config.autoSearchStackableItems) itemParsed.autoSearch = true;
+        parseAllfuns(itemSection);
+      }
+    })
+    .with({ text: P.union('技能寶石', '輔助寶石') }, () => {
+      parseGem(itemSection);
+    })
+    .with({ text: '探險日誌' }, () => {
+      parseLogbook(itemSection);
+    })
+    .with({ text: '屍體' }, () => {
+      itemParsed.autoSearch = true;
+    })
+    .with({ text: '聖物' }, () => {
+      parseRelic(itemSection);
+    })
+    .with({ text: '接肢' }, () => {
+      parseGraft(itemSection);
+    })
+    .with({ text: '契約書' }, () => {
+      findUnique('heistmission', isFindUnique);
+    })
+  parseAllfuns(itemSection);
   const staticItem = APIStatic.find((ele: Static) => ele.text === itemParsed.baseType)
   if (staticItem) {
     itemParsed.itemID = staticItem.id
@@ -319,10 +270,10 @@ function parseItemName(section: string[], itemSection: string[][]) {
   const itemTypeApi = itemParsed.type.option?.substring(0, itemParsed.type.option.indexOf('.')) as keyof typeof APIitems
   let itemNameLine = section.at(-1)?.replace(/(精良的|追憶之|Synthesised)\s/, '') ?? ''
 
-  //把英文baseType轉成中文
-  if (itemNameTranslation.length > 0) {
-    itemNameLine = itemNameTranslation.find(ele => ele.us.toLocaleLowerCase() === itemNameLine.toLocaleLowerCase())?.lang ?? itemNameLine
-  }
+  //把英文baseType轉成中文，看起來暫時不用
+  // if (itemNameTranslation.length > 0) {
+  //   itemNameLine = itemNameTranslation.find(ele => ele.us.toLocaleLowerCase() === itemNameLine.toLocaleLowerCase())?.lang ?? itemNameLine
+  // }
 
   const apiBaseTypes = (APIitems[itemTypeApi]?.entries ?? Object.values(APIitems).flatMap(item => item.entries))
     .filter((entry) => {
@@ -469,6 +420,9 @@ function parseMultilineMod(regSection: RegExp[], section: string[], type: keyof 
         regSection.splice(i, matchMod.text.length)
         i -= matchMod.text.length
         i = i < 0 ? -1 : i
+        if (type === 'rune') {
+          matchMod.id = matchMod.id.replace(/^explicit/, 'rune')
+        }
         const baseOption = {
           ...matchMod,
           disabled: type === 'mutated' ? false : true,
@@ -521,6 +475,9 @@ function parseMod(section: string[], type: keyof ParsedAPIMods | 'mutated' | 'ru
         const matchReg = getModMatchRegex(matchMod.text)
         const regGroup = cleanSection[index]?.match(matchReg)
         regGroup?.shift()
+        if (type === 'rune') {
+          matchMod.id = matchMod.id.replace(/^explicit/, 'rune')
+        }
         const baseOption = {
           ...matchMod,
           disabled: type === 'mutated' ? false : true,
@@ -594,20 +551,13 @@ function parseExplicitMod(section: string[]) {
         sectionModTypeArr[i]?.startsWith('{ 已大師工藝') ? 'crafted' :
           sectionModTypeArr[i]?.startsWith('{ Foulborn') ? 'mutated' : type
     }
-    switch (type) {
-      case 'crafted':
-        craftedSection.push(line)
-        break
-      case 'fractured':
-        fracturedSection.push(line)
-        break
-      case 'mutated':
-        mutatedSection.push(line)
-        break
-      default:
-        line !== '隱匿前綴' && line !== '隱匿後綴' && explicitSection.push(line)
-        break
-    }
+    match(type)
+      .with('crafted', () => craftedSection.push(line))
+      .with('fractured', () => fracturedSection.push(line))
+      .with('mutated', () => mutatedSection.push(line))
+      .otherwise(() => {
+        if (line !== '隱匿前綴' && line !== '隱匿後綴') explicitSection.push(line)
+      })
   }
 
   if (craftedSection.length) parsed = parseMod(craftedSection, 'crafted') === ParseResult.PARSE_SECTION_SUCC || parsed
@@ -678,20 +628,20 @@ function parsePseudoEleResistance() {
   let eleRes = 0
   let flag = false
   itemParsed.stats.forEach(mod => {
-    switch (true) {
-      case mod.id.endsWith('stat_3372524247') || mod.id.endsWith('stat_1671376347') || mod.id.endsWith('stat_4220027924'):
+    match(mod.id)
+      .with(P.string.endsWith('stat_3372524247'), P.string.endsWith('stat_1671376347'), P.string.endsWith('stat_4220027924'), () => {
         eleRes += mod.value!.min! ?? mod.value!.max ?? 0
         flag = true
-        break
-      case mod.id.endsWith('stat_3441501978') || mod.id.endsWith('stat_4277795662') || mod.id.endsWith('stat_2915988346'):
+      })
+      .with(P.string.endsWith('stat_3441501978'), P.string.endsWith('stat_4277795662'), P.string.endsWith('stat_2915988346'), () => {
         eleRes += ((mod.value!.min! ?? mod.value!.max ?? 0) * 2)
         flag = true
-        break
-      case mod.id.endsWith('stat_2901986750'):
+      })
+      .with(P.string.endsWith('stat_2901986750'), () => {
         eleRes += ((mod.value!.min! ?? mod.value!.max ?? 0) * 3)
         flag = true
-        break
-    }
+      })
+      .otherwise(() => { })
   })
   if (flag) {
     itemParsed.stats.push({
@@ -712,7 +662,7 @@ function parseAllfuns(item: string[][], functions: typeof parseFuns = parseFuns)
       if (!fun) continue
       const state = fun(section)
       if (state === ParseResult.PARSE_SECTION_SUCC) {
-        item = item.filter(s => s !== section)
+        item.splice(item.indexOf(section), 1)
         break
       }
       else if (state === ParseResult.PARSE_ITEM_SKIP) {
@@ -795,16 +745,14 @@ function parseClusterJewel(item: string[][]) {
   item.shift()
   if (itemParsed.rarity !== '傳奇') {
     parseEnchantMod(item[0]!.slice(0, 2))
-    switch (itemParsed.baseType) {
-      case '巨型星團珠寶':
-      case '小型星團珠寶':
-        itemParsed.stats[0]!.value!.max = itemParsed.stats[0]!.value!.min
-        break
-      case '中型星團珠寶':
+    match(itemParsed.baseType)
+      .with('巨型星團珠寶', '小型星團珠寶', () => {
+        itemParsed.stats[0]!.value!.min = itemParsed.stats[0]!.value!.max
+      })
+      .with('中型星團珠寶', () => {
         itemParsed.stats[0]!.value!.min = itemParsed.stats[0]!.value!.min === 6 ? 6 : 4
         itemParsed.stats[0]!.value!.max = itemParsed.stats[0]!.value!.min === 6 ? 6 : 5
-        break
-    }
+      })
     let clusterType: string = item[0]!.find(ele => ele.startsWith('附加的小型天賦給予：'))!
     clusterType = clusterType.substring(10, clusterType.indexOf(' (enchant)'))
     let tempMod = APImods.clusterJewel.entries.find(mod => mod.text.includes(clusterType))
@@ -996,20 +944,17 @@ function parseMap(item: string[][]) {
     }
   })
   item.shift()
-  switch (true) {
-    case itemParsed.baseType.startsWith('凋落的'):
+  match(itemParsed.baseType)
+    .with(P.string.startsWith('凋落的'), () => {
       itemParsed.baseType = itemParsed.baseType.substring(4)
       itemParsed.blightedMap = true
       itemParsed.type.searchByType = true
-      break
-    case itemParsed.baseType.startsWith('凋落蔓延的'):
+    })
+    .with(P.string.startsWith('凋落蔓延的'), () => {
       itemParsed.baseType = itemParsed.baseType.substring(6)
       itemParsed.UberBlightedMap = true
       itemParsed.type.searchByType = true
-      break
-    default:
-      break
-  }
+    })
   for (const section of item) {
     for (const line of section) {
       if (!itemParsed.elderMap) {

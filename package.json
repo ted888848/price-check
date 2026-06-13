@@ -48,6 +48,7 @@
     "@tanstack/vue-query": "^5.92.9",
     "@vueuse/core": "^14.2.1",
     "electron-overlay-window": "^4.1.0",
+    "ts-pattern": "^5.9.0",
     "uiohook-napi": "^1.5.5"
   },
   "repository": {

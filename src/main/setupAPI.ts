@@ -5,6 +5,7 @@ import { autoUpdater } from 'electron-updater'
 import { buildTray } from './tray'
 import { config } from './config'
 import axios from 'axios'
+import { match } from 'ts-pattern'
 const store1 = new Store({
   name: 'APIData'
 })
@@ -77,45 +78,35 @@ function setupAPIItems(itemsJson: APIItems) {
   const heistReward: HeistReward[] = []
   itemsJson.result.forEach((itemGroup) => {
     const groupID = itemGroup.id as keyof ParsedAPIitems
-    switch (groupID) {
-      case 'accessory':
-      case 'armour':
-      case 'flask':
-      case 'jewel':
-      case 'weapon':
-      case 'watchstones':
-      case 'heistequipment':
-      case 'heistmission':
-      case 'logbook':
-        APIitems[groupID] = {
+    match(groupID)
+      .with('accessory', 'armour', 'flask', 'jewel', 'weapon', 'watchstones', 'heistequipment', 'heistmission', 'logbook', (id) => {
+        APIitems[id] = {
           id: itemGroup.id,
           label: itemGroup.label,
           entries: setupItemEntries(itemGroup.entries, heistReward)
         }
-        break
-      case 'map':
+      })
+      .with('map', () => {
         APIitems[groupID] = {
           id: itemGroup.id,
           label: itemGroup.label,
           entries: setupItemEntries(itemGroup.entries.filter((ele) => ele.disc === 'warfortheatlas'), heistReward)
         }
-        break
-      case 'card':
-      case 'currency':
+      })
+      .with('card', 'currency', () => {
         APIitems[groupID] = itemGroup
-        break
-      case 'gem':
+      })
+      .with('gem', () => {
         APIitems[groupID] = {
           ...itemGroup, entries: parseGams(itemGroup.entries), id: 'gems'
         }
         heistReward.push(...parseGams(itemGroup.entries))
-        break
-      default:
+      })
+      .otherwise(() => {
         APIitems[groupID] = {
           ...itemGroup, entries: setupItemEntries(itemGroup.entries, heistReward), id: groupID as string
         }
-        return
-    }
+      })
   })
   return {
     APIitems, heistReward
@@ -138,8 +129,8 @@ function setupAPIMods(statsJson: APIStats) {
   const APImods: Partial<ParsedAPIMods> = {
   }
   statsJson.result.forEach((statsGroup) => {
-    switch (statsGroup.id) {
-      case 'pseudo':
+    match(statsGroup.id)
+      .with('pseudo', (id) => {
         APImods.pseudo = {
           label: statsGroup.label,
           entries: statsGroup.entries.filter((stat) => stat.text.indexOf('有房間：') === -1)
@@ -160,8 +151,8 @@ function setupAPIMods(statsJson: APIStats) {
             })),
           type: '神廟'
         }
-        break
-      case 'explicit':
+      })
+      .with('explicit', () => {
         APImods.forbiddenJewel = {
           label: statsGroup.label,
           entries: statsGroup.entries.filter((ele) => /^若你在禁忌(烈焰|血肉)上有符合的詞綴，配置 #$/.test(ele.text)),
@@ -175,8 +166,8 @@ function setupAPIMods(statsJson: APIStats) {
           type: '隨機'
         }
         APImods.explicit.mutiLines = checkNewline(statsGroup)
-        break
-      case 'implicit':
+      })
+      .with('implicit', () => {
         APImods.implicit = {
           label: statsGroup.label,
           entries: statsGroup.entries.map((ele) => ({
@@ -185,8 +176,8 @@ function setupAPIMods(statsJson: APIStats) {
           type: '固定'
         }
         APImods.implicit.mutiLines = checkNewline(statsGroup)
-        break
-      case 'fractured':
+      })
+      .with('fractured', () => {
         APImods.fractured = {
           label: statsGroup.label,
           entries: statsGroup.entries.map((ele) => ({
@@ -195,8 +186,8 @@ function setupAPIMods(statsJson: APIStats) {
           type: '破裂'
         }
         APImods.fractured.mutiLines = checkNewline(statsGroup)
-        break
-      case 'enchant':
+      })
+      .with('enchant', () => {
         APImods.clusterJewel = {
           label: statsGroup.label,
           entries:
@@ -216,8 +207,8 @@ function setupAPIMods(statsJson: APIStats) {
           type: '附魔'
         }
         APImods.enchant.mutiLines = checkNewline(statsGroup)
-        break
-      case 'crafted':
+      })
+      .with('crafted', () => {
         APImods.crafted = {
           label: statsGroup.label,
           entries: statsGroup.entries.map((ele) => ({
@@ -226,8 +217,8 @@ function setupAPIMods(statsJson: APIStats) {
           type: '工藝'
         }
         APImods.crafted.mutiLines = checkNewline(statsGroup)
-        break
-      case 'sanctum':
+      })
+      .with('sanctum', () => {
         APImods.sanctum = {
           label: statsGroup.label,
           entries: statsGroup.entries.map((ele) => ({
@@ -236,7 +227,8 @@ function setupAPIMods(statsJson: APIStats) {
           type: '聖域'
         }
         APImods.sanctum.mutiLines = checkNewline(statsGroup)
-      case 'necropolis':
+      })
+      .with('necropolis', () => {
         APImods.necropolis = {
           label: statsGroup.label,
           entries: statsGroup.entries.map((ele) => ({
@@ -245,7 +237,8 @@ function setupAPIMods(statsJson: APIStats) {
           type: '棺材'
         }
         APImods.necropolis.mutiLines = checkNewline(statsGroup)
-      default:
+      })
+      .otherwise(() => {
         APImods[statsGroup.id as keyof ParsedAPIMods] = {
           label: statsGroup.label,
           entries: statsGroup.entries.map((ele) => ({
@@ -255,8 +248,7 @@ function setupAPIMods(statsJson: APIStats) {
         }
         APImods[statsGroup.id as keyof ParsedAPIMods].mutiLines = checkNewline(statsGroup);
         APImods[statsGroup.id as keyof ParsedAPIMods].type = statsGroup.id
-        return
-    }
+      })
   })
   return APImods
 }
