@@ -51,4 +51,4 @@ jobs:
           # GitHub 會自動提供這個 Token，讓 electron-builder 有權限上傳檔案到 Release
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          pnpm run buildP
+          pnpm run build -p always
