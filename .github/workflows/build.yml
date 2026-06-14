@@ -17,6 +17,7 @@ jobs:
         with:
           fetch-depth: 0 # 很重要！必須設為 0 才能抓到完整的 Git 歷史紀錄來產生 Changelog
 
+
       # Step 2: 自動建立含有 Commit 紀錄的 Draft Release
       - name: Create Draft Release with Changelog
         id: create_release
@@ -29,6 +30,11 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       # Step 3: 設定 Node.js 環境
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
