@@ -19,17 +19,49 @@ jobs:
         with:
           fetch-depth: 0 # 很重要！必須設為 0 才能抓到完整的 Git 歷史紀錄來產生 Changelog
 
-
-      # Step 2: 自動建立含有 Commit 紀錄的 Draft Release
-      - name: Create Draft Release with Changelog
-        id: create_release
-        uses: softprops/action-gh-release@v2
-        with:
-          draft: true              # 建立為草稿 (Draft)
-          prerelease: false
-          generate_release_notes: true # 自動抓取與前一個 Tag 之間的 Commit 紀錄
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # Step 2: 只提取純 Commit 標題，格式化為 "- 訊息"
+      - name: Generate Pure Changelog
+        run: |
+          $currentTag = "${{ github.ref_name }}"
+          
+          # 嘗試取得上一個 Tag，如果失敗（例如第一個 tag）則設為空字串
+          $previousTag = ""
+          try {
+              $previousTag = git describe --tags --abbrev=0 "${currentTag}^" 2>$null
+          } catch {
+              $previousTag = ""
+          }
+          
+          # 根據是否有舊 Tag 來決定 Git Log 範圍
+          if ([string]::IsNullOrEmpty($previousTag)) {
+              $rawLogs = git log --format="%B" $currentTag
+          } else {
+              $rawLogs = git log --format="%B" "${previousTag}..${currentTag}"
+          }
+          
+          # 處理多行文字 (PowerShell 邏輯)
+          # 1. 過濾掉空白行
+          # 2. 清除前後空白
+          # 3. 如果不是以 '-' 或 '*' 開頭，就補上 '- '
+          $commitLines = $rawLogs -split "`r?`n" | Where-Object { $_ -match '\S' } | ForEach-Object {
+              $line = $_.Trim()
+              if ($line -match '^[-\*]') {
+                  $line
+              } else {
+                  "- $line"
+              }
+          }
+          
+          if ($commitLines.Count -eq 0) {
+              $commitLogs = "- 無新更新項目"
+          } else {
+              $commitLogs = $commitLines -join "`n"
+          }
+          
+          # 寫入 GitHub 環境變數 (PowerShell 的多行寫法)
+          "RELEASE_NOTES<<EOF" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          $commitLogs | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          "EOF" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
       # Step 3: 設定 Node.js 環境
       - name: Install pnpm
@@ -55,3 +87,16 @@ jobs:
           VITE_MARKET_API_URL: ${{ secrets.VITE_MARKET_API_URL }}
         run: |
           pnpm run build -p always
+
+      # Step 6: 更新 Release Notes
+      - name: Update Existing Draft Release Notes
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: true
+          tag_name: ${{ github.ref_name }}
+          append_body: false # 設為 false 會直接覆蓋 Electron builder 預設的空白內文
+          body: |
+            ## 🛠 更新日誌 (Commits)
+            ${{ steps.changelog.outputs.RELEASE_NOTES }} 
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
