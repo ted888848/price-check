@@ -9,11 +9,13 @@ on:
 jobs:
   release:
     runs-on: windows-latest
+    permissions:
+      contents: write # 必須賦予寫入權限才能建立 Release 草稿
 
     steps:
       # Step 1: 複製專案原始碼
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0 # 很重要！必須設為 0 才能抓到完整的 Git 歷史紀錄來產生 Changelog
 
@@ -31,12 +33,12 @@ jobs:
 
       # Step 3: 設定 Node.js 環境
       - name: Install pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v6
         with:
           version: 11
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: 22 # 建議改成你專案使用的 Node.js 版本
           cache: 'pnpm'     # 如果用 yarn 或 pnpm，請改成對應名稱
@@ -50,5 +52,6 @@ jobs:
         env:
           # GitHub 會自動提供這個 Token，讓 electron-builder 有權限上傳檔案到 Release
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VITE_MARKET_API_URL: ${{ secrets.VITE_MARKET_API_URL }}
         run: |
           pnpm run build -p always
