@@ -2,46 +2,47 @@ name: Build
 
 on:
   push:
-    branches: [main]
-    paths-ignore:
-      - "**.md"
-      - "**.spec.js"
-      - ".idea"
-      - ".vscode"
-      - ".dockerignore"
-      - "Dockerfile"
-      - ".gitignore"
-      - ".github/**"
-      - "!.github/workflows/build.yml"
+    tags:
+      - 'v*' # 當推送標籤如 v1.0.0 時觸發自動打包與發佈
+  workflow_dispatch: # 允許手動在 GitHub 網頁上觸發
 
 jobs:
-  build:
-    runs-on: ${{ matrix.os }}
-
-    strategy:
-      matrix:
-        os: [macos-latest, ubuntu-latest, windows-latest]
+  release:
+    runs-on: windows-latest
 
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
+      # Step 1: 複製專案原始碼
+      - name: Check out repository
+        uses: actions/checkout@v4
         with:
-          node-version: 18
+          fetch-depth: 0 # 很重要！必須設為 0 才能抓到完整的 Git 歷史紀錄來產生 Changelog
 
-      - name: Install Dependencies
-        run: npm install
-
-      - name: Build Release Files
-        run: npm run build
+      # Step 2: 自動建立含有 Commit 紀錄的 Draft Release
+      - name: Create Draft Release with Changelog
+        id: create_release
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: true              # 建立為草稿 (Draft)
+          prerelease: false
+          generate_release_notes: true # 自動抓取與前一個 Tag 之間的 Commit 紀錄
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v3
+      # Step 3: 設定 Node.js 環境
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          name: release_on_${{ matrix. os }}
-          path: release/
-          retention-days: 5
+          node-version: 22 # 建議改成你專案使用的 Node.js 版本
+          cache: 'pnpm'     # 如果用 yarn 或 pnpm，請改成對應名稱
+
+      # Step 4: 安裝專案依賴套件
+      - name: Install dependencies
+        run: pnpm i
+
+      # Step 5: 執行打包並自動發佈到 GitHub Release
+      - name: Build and Publish Electron App
+        env:
+          # GitHub 會自動提供這個 Token，讓 electron-builder 有權限上傳檔案到 Release
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          pnpm run buildP
