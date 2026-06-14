@@ -15,8 +15,8 @@
   },
   "include": [
     "types.d.ts",
-    "src/test/*",
+    "src/test/**/*",
     "src/renderer",
-    "src/ipc"
+    "src/ipc",
   ],
 }

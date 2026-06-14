@@ -128,7 +128,6 @@ const { data: marketData } = useQuery(marketQueryOption)
 
 const divineToChaosOrEx = computed(() => {
   if (!leagueSelect.value || !marketData.value) return 0
-  // itemParsed 先只放 itemID，後續可再補完整欄位
   const divineMarketPrice = getMarketPrice({ itemID: 'divine' } as ParsedItem, marketData.value, leagueSelect.value)
   const rate = secondCurrency === 'chaos'
     ? divineMarketPrice?.chaos?.amount

@@ -162,30 +162,27 @@ function setupAPIMods(statsJson: APIStats) {
           label: statsGroup.label,
           entries: statsGroup.entries.map((ele) => ({
             ...ele
-          })).filter((stat) => !stat.text.includes('\n')),
+          })),
           type: '隨機'
         }
-        APImods.explicit.mutiLines = checkNewline(statsGroup)
       })
       .with('implicit', () => {
         APImods.implicit = {
           label: statsGroup.label,
           entries: statsGroup.entries.map((ele) => ({
             ...ele
-          })).filter((stat) => !stat.text.includes('\n')),
+          })),
           type: '固定'
         }
-        APImods.implicit.mutiLines = checkNewline(statsGroup)
       })
       .with('fractured', () => {
         APImods.fractured = {
           label: statsGroup.label,
           entries: statsGroup.entries.map((ele) => ({
             ...ele
-          })).filter((stat) => !stat.text.includes('\n')),
+          })),
           type: '破裂'
         }
-        APImods.fractured.mutiLines = checkNewline(statsGroup)
       })
       .with('enchant', () => {
         APImods.clusterJewel = {
@@ -203,50 +200,45 @@ function setupAPIMods(statsJson: APIStats) {
           entries: statsGroup.entries.map((ele) => ({
             ...ele
           }))
-            .filter((stat) => !stat.text.includes('\n')),
+          ,
           type: '附魔'
         }
-        APImods.enchant.mutiLines = checkNewline(statsGroup)
       })
       .with('crafted', () => {
         APImods.crafted = {
           label: statsGroup.label,
           entries: statsGroup.entries.map((ele) => ({
             ...ele
-          })).filter((stat) => !stat.text.includes('\n')),
+          })),
           type: '工藝'
         }
-        APImods.crafted.mutiLines = checkNewline(statsGroup)
       })
       .with('sanctum', () => {
         APImods.sanctum = {
           label: statsGroup.label,
           entries: statsGroup.entries.map((ele) => ({
             ...ele
-          })).filter((stat) => !stat.text.includes('\n')),
+          })),
           type: '聖域'
         }
-        APImods.sanctum.mutiLines = checkNewline(statsGroup)
       })
       .with('necropolis', () => {
         APImods.necropolis = {
           label: statsGroup.label,
           entries: statsGroup.entries.map((ele) => ({
             ...ele
-          })).filter((stat) => !stat.text.includes('\n')),
+          })),
           type: '棺材'
         }
-        APImods.necropolis.mutiLines = checkNewline(statsGroup)
       })
       .otherwise(() => {
         APImods[statsGroup.id as keyof ParsedAPIMods] = {
           label: statsGroup.label,
           entries: statsGroup.entries.map((ele) => ({
             ...ele
-          })).filter((stat) => !stat.text.includes('\n')),
+          })),
           type: statsGroup.id
         }
-        APImods[statsGroup.id as keyof ParsedAPIMods].mutiLines = checkNewline(statsGroup);
         APImods[statsGroup.id as keyof ParsedAPIMods].type = statsGroup.id
       })
   })

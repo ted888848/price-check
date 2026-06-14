@@ -148,10 +148,7 @@
             {{ mod.type }}
           </td>
           <td @click="() => mod.disabled = !mod.disabled">
-            <span v-if="!Array.isArray(mod.text)">{{ mod.text }}</span>
-            <div v-else class=" text-center">
-              <span v-for="t in mod.text" :key="t">{{ t }}<br></span>
-            </div>
+            <div class="text-center whitespace-pre-line">{{ mod.text }}</div>
           </td>
           <td>
             <input v-if="mod.value && !mod.value.option" v-model.number="mod.value.min" type="number"

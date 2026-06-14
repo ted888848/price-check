@@ -8,13 +8,21 @@ export function getStrReg(section: string[], type: string) {
     line = line.replace(numberPattern, '__NUMBER__')
     line = line.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
     line = line.replace(' — 無法使用的值', '')
-    retArr.push(new RegExp(`^${line.replace(/__NUMBER__/g, "[+-]?(\\d+|#)(?:\\(\\d+-\\d+\\))?")
-      .replace(/減少|增加/, "(?:減少|增加)")}( \\(部分\\))?$`))
+    retArr.push(new RegExp(`^${line
+        .replace(/__NUMBER__/g, "[+-]?(\\d+|#)(?:\\(\\d+-\\d+\\))?")
+        .replace(/減少|增加/, "(?:減少|增加)")
+        .replace(/更多|更少/, "(?:更多|更少)")
+      }( \\(部分\\))?$`))
   })
   return retArr
 }
 
 export function getModMatchRegex(modLine: string) {
-  return new RegExp(modLine.replace(/[+-]?#/g, numberPattern.source)
-    .replace(' (部分)', '').replace(/減少|增加/, String.raw`(?:減少|增加)`))
+  return new RegExp(
+    modLine
+      .replace(/[+-]?#/g, numberPattern.source)
+      .replace(' (部分)', '')
+      .replace(/減少|增加/, String.raw`(?:減少|增加)`)
+      .replace(/更多|更少/, String.raw`(?:更多|更少)`)
+  )
 }

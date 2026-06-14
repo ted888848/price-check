@@ -113,7 +113,7 @@ interface ParsedItem {
   name?: string; //物品名稱
   uniques: ItemUniques[];
   raritySearch: {
-    value: string | undefined;
+    value?: string;
     label: string;
   };
   rarity: string;
