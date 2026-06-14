@@ -9,61 +9,15 @@ on:
 jobs:
   release:
     runs-on: windows-latest
-    permissions:
-      contents: write # 必須賦予寫入權限才能建立 Release 草稿
 
     steps:
-      # Step 1: 複製專案原始碼
+      # Step 1: 複製專案原始碼（需要完整 history 才能讀取 tag 之間的 commit）
       - name: Check out repository
         uses: actions/checkout@v6
         with:
-          fetch-depth: 0 # 很重要！必須設為 0 才能抓到完整的 Git 歷史紀錄來產生 Changelog
+          fetch-depth: 0  # 抓取完整 git history，才能比對 tag 之間的 commit
 
-      # Step 2: 只提取純 Commit 標題，格式化為 "- 訊息"
-      - name: Generate Pure Changelog
-        run: |
-          $currentTag = "${{ github.ref_name }}"
-          
-          # 嘗試取得上一個 Tag，如果失敗（例如第一個 tag）則設為空字串
-          $previousTag = ""
-          try {
-              $previousTag = git describe --tags --abbrev=0 "${currentTag}^" 2>$null
-          } catch {
-              $previousTag = ""
-          }
-          
-          # 根據是否有舊 Tag 來決定 Git Log 範圍
-          if ([string]::IsNullOrEmpty($previousTag)) {
-              $rawLogs = git log --format="%B" $currentTag
-          } else {
-              $rawLogs = git log --format="%B" "${previousTag}..${currentTag}"
-          }
-          
-          # 處理多行文字 (PowerShell 邏輯)
-          # 1. 過濾掉空白行
-          # 2. 清除前後空白
-          # 3. 如果不是以 '-' 或 '*' 開頭，就補上 '- '
-          $commitLines = $rawLogs -split "`r?`n" | Where-Object { $_ -match '\S' } | ForEach-Object {
-              $line = $_.Trim()
-              if ($line -match '^[-\*]') {
-                  $line
-              } else {
-                  "- $line"
-              }
-          }
-          
-          if ($commitLines.Count -eq 0) {
-              $commitLogs = "- 無新更新項目"
-          } else {
-              $commitLogs = $commitLines -join "`n"
-          }
-          
-          # 寫入 GitHub 環境變數 (PowerShell 的多行寫法)
-          "RELEASE_NOTES<<EOF" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-          $commitLogs | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-          "EOF" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-
-      # Step 3: 設定 Node.js 環境
+      # Step 2: 設定環境
       - name: Install pnpm
         uses: pnpm/action-setup@v6
         with:
@@ -75,11 +29,11 @@ jobs:
           node-version: 22 # 建議改成你專案使用的 Node.js 版本
           cache: 'pnpm'     # 如果用 yarn 或 pnpm，請改成對應名稱
 
-      # Step 4: 安裝專案依賴套件
+      # Step 3: 安裝專案依賴套件
       - name: Install dependencies
         run: pnpm i
 
-      # Step 5: 執行打包並自動發佈到 GitHub Release
+      # Step 4: 執行打包並自動發佈到 GitHub Release
       - name: Build and Publish Electron App
         env:
           # GitHub 會自動提供這個 Token，讓 electron-builder 有權限上傳檔案到 Release
@@ -88,15 +42,33 @@ jobs:
         run: |
           pnpm run build -p always
 
-      # Step 6: 更新 Release Notes
-      - name: Update Existing Draft Release Notes
-        uses: softprops/action-gh-release@v2
-        with:
-          draft: true
-          tag_name: ${{ github.ref_name }}
-          append_body: false # 設為 false 會直接覆蓋 Electron builder 預設的空白內文
-          body: |
-            ## 🛠 更新日誌 (Commits)
-            ${{ steps.changelog.outputs.RELEASE_NOTES }} 
+      # Step 5: 從前兩個 tag 之間的 commit body 產生 release notes，並更新 draft release
+      - name: Generate release notes and update draft
+        if: startsWith(github.ref, 'refs/tags/')
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          CURRENT_TAG="${GITHUB_REF_NAME}"
+
+          # 取得排序後倒數第二個 tag（即上一個 release tag）
+          PREV_TAG=$(git tag --sort=-version:refname | grep -E '^v' | sed -n '2p')
+
+          echo "目前 tag：$CURRENT_TAG"
+          echo "前一個 tag：$PREV_TAG"
+
+          if [ -z "$PREV_TAG" ]; then
+            # 若沒有前一個 tag，就取所有 commit
+            RAW=$(git log "$CURRENT_TAG" --pretty=format:"%B" -- )
+          else
+            RAW=$(git log "$PREV_TAG".."$CURRENT_TAG" --pretty=format:"%B" --)
+          fi
+
+          # 將每一行非空白文字轉成 "- 內容" 格式，並過濾掉只有空白的行
+          NOTES=$(echo "$RAW" | awk 'NF > 0 { print "- " $0 }')
+
+          echo "生成的 release notes："
+          echo "$NOTES"
+
+          # 使用 gh CLI 更新對應 tag 的 draft release notes（覆蓋）
+          gh release edit "$CURRENT_TAG" --notes "$NOTES"
