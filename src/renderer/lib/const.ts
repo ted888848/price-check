@@ -1,0 +1,80 @@
+export const rarityOptions: TRarityOptions = [{ value: undefined, label: '任何' }, { value: 'normal', label: '普通' }, { value: 'magic', label: '魔法' }, { value: 'rare', label: '稀有' }, { value: 'unique', label: '傳奇' }, { value: 'nonunique', label: '非傳奇' }] as const
+
+export const defaultItemParsed: ParsedItem = Object.freeze({
+  type: {
+    text: '',
+    searchByType: false
+  },
+  baseType: '',
+  name: undefined,
+  uniques: [],
+  raritySearch: rarityOptions[0],
+  rarity: '',
+  itemLevel: {
+    search: false
+  },
+  isWeaponOrArmor: false,
+  isCorrupt: false,
+  stats: [],
+  influences: [],
+  quality: {
+    search: false
+  },
+  autoSearch: false,
+  searchExchange: {
+    option: false, have: []
+  },
+  searchOnlineType: 'online',
+  fetchCount: 20,
+})
+export const typeTrans = {
+  爪: 'weapon.claw',
+  匕首: 'weapon.dagger',
+  法杖: 'weapon.wand',
+  單手劍: 'weapon.onesword',
+  細劍: 'weapon.onesword',
+  單手斧: 'weapon.oneaxe',
+  單手錘: 'weapon.onemace',
+  權杖: 'weapon.sceptre',
+  符紋匕首: 'weapon.runedagger',
+  弓: 'weapon.bow',
+  長杖: 'weapon.staff',
+  雙手劍: 'weapon.twosword',
+  雙手斧: 'weapon.twoaxe',
+  雙手錘: 'weapon.twomace',
+  魚竿: 'weapon.rod',
+  征戰長杖: 'weapon.warstaff',
+  長鋒: 'weapon.spear',
+  長矛: 'weapon.spear',
+  鏈錘: 'weapon.flail',
+  魔符: 'weapon.talisman',
+  細杖: 'weapon.warstaff',
+  十字弓: 'weapon.crossbow',
+  手套: 'armour.gloves',
+  鞋子: 'armour.boots',
+  胸甲: 'armour.chest',
+  頭部: 'armour.helmet',
+  箭袋: 'armour.quiver',
+  盾: 'armour.shield',
+  輕盾: 'armour.buckler',
+  法器: 'armour.focus',
+  項鍊: 'accessory.amulet',
+  戒指: 'accessory.ring',
+  腰帶: 'accessory.belt',
+  永恆珠寶: 'jewel',
+  珠寶: 'jewel',
+  深淵珠寶: 'jewel',
+  生命藥劑: 'flask',
+  魔力藥劑: 'flask',
+  複合藥劑: 'flask',
+  功能藥劑: 'flask',
+  飾品: 'accessory.trinket',
+  地圖: 'map',
+  輿圖地區升級道具: 'watchstone',
+  記憶: 'memoryline',
+  技能寶石: 'gem.activegem',
+  咒語: 'azmeri.charm',
+  不滅之火餘燼: undefined,
+  接肢: 'graft',
+  萃取物: 'tincture'
+} as const

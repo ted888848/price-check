@@ -103,6 +103,25 @@ interface ItemStat {
     option?: number;
   };
 }
+type TRarityOptions = [{
+  readonly value: undefined;
+  readonly label: "任何";
+}, {
+  readonly value: "normal";
+  readonly label: "普通";
+}, {
+  readonly value: "magic";
+  readonly label: "魔法";
+}, {
+  readonly value: "rare";
+  readonly label: "稀有";
+}, {
+  readonly value: "unique";
+  readonly label: "傳奇";
+}, {
+  readonly value: "nonunique";
+  readonly label: "非傳奇";
+}]
 interface ParsedItem {
   baseType: string; //物品基底
   type: { //物品類型
@@ -112,10 +131,7 @@ interface ParsedItem {
   };
   name?: string; //物品名稱
   uniques: ItemUniques[];
-  raritySearch: {
-    value?: string;
-    label: string;
-  };
+  raritySearch: TRarityOptions[number];
   rarity: string;
   itemLevel?: {
     min?: number;
@@ -197,7 +213,7 @@ interface ParsedItem {
 
 interface ItemUniques {
   text: string;
-  name: string;
+  name?: string;
 }
 type hotkeyType = 'type-in-chat'
 type POEVersion = '1' | '2'

@@ -80,7 +80,7 @@
         <span class="mx-1 text-white hover:cursor-default">勢力:</span>
         <div class=" flex-grow mx-1">
           <MySelect v-model="item.influences" :options="influencesOptions" label-key="label" value-key="id"
-            :multiple="true" :center-label="false" class="flex-1" log />
+            :multiple="true" :center-label="false" class="flex-1" />
         </div>
       </div>
       <div v-if="item.search6L !== undefined" class="flex items-center justify-center py-1 hover:cursor-pointer"
@@ -253,7 +253,7 @@
 
 <script setup lang="ts">
 import { countBy, maxBy } from 'lodash-es'
-import { computed, ref, nextTick, watch, onUnmounted } from 'vue'
+import { computed, ref, nextTick, watch, onUnmounted, toRaw } from 'vue'
 import {
   getSearchJSON, searchItem, fetchItem, searchExchange, selectOptions,
 } from '@/renderer/lib/tradeSide'
@@ -287,7 +287,7 @@ if (!props.prevSearch) {
 
 const { remaining, isActive } = useMyCountdown()
 const item = ref(props.itemProp)
-if (process.env.NODE_ENV === 'development') console.log(item.value)
+if (process.env.NODE_ENV === 'development') console.log(structuredClone(toRaw(item.value)))
 const undefinedUnique = item.value.isIdentify === false && item.value.raritySearch.label === '傳奇'
 
 const marketPrice = ref<TMarketItemRate | null>(null)
