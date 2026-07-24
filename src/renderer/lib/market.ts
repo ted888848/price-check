@@ -47,9 +47,9 @@ export async function getLatestMarketData() {
 
 export function getMarketPrice(itemParsed: ParsedItem, marketData: TCurrencyMarket, league: string) {
   if (!marketData[league]) return null;
-  const itemId = APIStatic.find(i => i.id === itemParsed.itemID)?.id;
-  if (!itemId) return null;
-  const marketItem = marketData[league][itemId];
+  const itemId = APIStatic.find(i => i.id === itemParsed.itemID)?.id ?? '';
+  if (!itemId && !itemParsed.baseType) return null;
+  const marketItem = marketData[league][itemId] ?? marketData[league][itemParsed.baseType];
   if (!marketItem) return null;
   return marketItem
 }

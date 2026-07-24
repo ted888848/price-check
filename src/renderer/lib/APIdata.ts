@@ -1,6 +1,5 @@
 import IPC from '@/ipc'
 import { secondCurrency } from '.'
-
 export let leagues: string[] = []
 export let APIitems: ParsedAPIitems
 export let heistReward: HeistReward[] = []
