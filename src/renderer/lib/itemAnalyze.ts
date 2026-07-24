@@ -330,10 +330,12 @@ class ItemAnalyzer {
           if (type === 'rune') {
             matchMod.id = matchMod.id.replace(/^explicit/, 'rune')
           }
+          const isSearchWithEmptyValue = matchMods.length === 1 && this.itemParsed.raritySearch.value === 'unique' && (type === 'explicit' || type === 'implicit')
           const baseOption: ItemStat = {
             ...matchMod,
             disabled: type === 'mutated' ? false : true,
-            type: type === 'mutated' ? '穢生' : APImods[modType]?.type ?? type
+            type: type === 'mutated' ? '穢生' : APImods[modType]?.type ?? type,
+            searchWithEmptyValue: isSearchWithEmptyValue
           }
           if (regGroup?.length) {
             const diffSign = matchMod.text.match(/減少|增加|更多|更少/)?.[0] !== cleanSection[index]?.match(/減少|增加|更多|更少/)?.[0]

@@ -102,7 +102,9 @@ interface ItemStat {
     max?: number;
     option?: number;
   };
+  searchWithEmptyValue?: boolean;
 }
+
 type TRarityOptions = [{
   readonly value: undefined;
   readonly label: "任何";

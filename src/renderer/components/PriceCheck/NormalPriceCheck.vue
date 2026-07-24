@@ -140,14 +140,14 @@
       </thead>
       <tbody v-show="modTbodyToggle" class="modsTbody" style="">
         <tr v-for="mod in item.stats" :key="mod.id" class=" border-b-2 border-gray-400">
-          <td class="text-base" @click="() => mod.disabled = !mod.disabled">
-            <CircleCheck :checked="!mod.disabled" />
+          <td class="text-base" @click="() => handleModClick(mod)">
+            <CircleCheck :checked="mod.searchWithEmptyValue ? 'indeterminate' : !mod.disabled" />
           </td>
           <td class="whitespace-nowrap text-lg font-semibold hover:cursor-default"
-            :style="{ color: modTextColor(mod.type) }" @click="() => mod.disabled = !mod.disabled">
+            :style="{ color: modTextColor(mod.type) }" @click="() => handleModClick(mod)">
             {{ mod.type }}
           </td>
-          <td @click="() => mod.disabled = !mod.disabled">
+          <td @click="() => handleModClick(mod)">
             <div class="text-center whitespace-pre-line">{{ mod.text }}</div>
           </td>
           <td>
@@ -518,6 +518,14 @@ function handleKeydown(e: KeyboardEvent) {
       }
     }
   }
+}
+
+function handleModClick(mod: ItemStat) {
+  if (mod.searchWithEmptyValue) {
+    mod.disabled = false
+    delete mod.searchWithEmptyValue
+  }
+  else mod.disabled = !mod.disabled
 }
 window.addEventListener('keydown', handleKeydown)
 onUnmounted(() => {

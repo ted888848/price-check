@@ -250,8 +250,18 @@ export function getSearchJSON(item: ParsedItem) {
   if (item.onlyChaosOrExalted) {
     searchJSON.query.filters.trade_filters.filters.price.option = secondCurrency
   }
-
-  searchJSON.query.stats[0].filters.push(...(item.stats))
+  for (const stat of item.stats) {
+    const isSearchWithEmptyValue = stat.searchWithEmptyValue
+    const { searchWithEmptyValue, ..._stat } = stat
+    if (isSearchWithEmptyValue) {
+      const { value, ...statWithoutVale } = _stat
+      statWithoutVale.disabled = false
+      searchJSON.query.stats[0].filters.push(statWithoutVale)
+    }
+    else {
+      searchJSON.query.stats[0].filters.push(_stat)
+    }
+  }
   searchJSON.query.stats[0].filters.push(...(item.influences))
 
   if (!isUndefined(item.blightedMap)) {
