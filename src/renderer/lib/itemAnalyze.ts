@@ -301,11 +301,15 @@ class ItemAnalyzer {
         let matchMods = APImods[modType]?.entries.filter(mod => line.test(mod.text) || line.test(mod.text.split('\n').at(0) ?? ''))
         if (!matchMods || !matchMods.length) continue
         if (matchMods.length > 1) {
-          if (this.itemParsed.isWeaponOrArmor &&
+          if (this.itemParsed.isWeaponOrArmor && matchMods.find(ele => ele.text.endsWith(' (部分)')) && ((
+            this.itemParsed.type.option?.startsWith('armour') &&
             this.itemParsed.type.option !== 'armour.quiver' &&
-            matchMods.some(ele => /閃避|護甲|能量護盾|保護/.test(ele.text)) &&
-            matchMods.find(ele => ele.text.endsWith(' (部分)')))
+            matchMods.some(ele => /閃避|護甲|能量護盾|保護/.test(ele.text))
+          ) ||
+            this.itemParsed.type.option?.startsWith('weapon') && !matchMods.some(ele => /閃避|護甲|能量護盾|保護/.test(ele.text))
+          )) {
             matchMods = matchMods.filter(mod => mod.text.endsWith(' (部分)'))
+          }
           else {
             matchMods = matchMods.filter(mod => !mod.text.endsWith(' (部分)'))
             const sectionSign = Array.from(cleanSection[index]?.match(/增加|減少|更多|更少/g) ?? []).join('')
@@ -331,7 +335,7 @@ class ItemAnalyzer {
           if (type === 'rune') {
             matchMod.id = matchMod.id.replace(/^explicit/, 'rune')
           }
-          const isSearchWithEmptyValue = matchMods.length === 1 && this.itemParsed.raritySearch.value === 'unique' && (type === 'explicit' || type === 'implicit')
+          const isSearchWithEmptyValue = false//matchMods.length === 1 && this.itemParsed.raritySearch.value === 'unique' && (type === 'explicit' || type === 'implicit')
           const baseOption: ItemStat = {
             ...matchMod,
             disabled: type === 'mutated' ? false : true,
@@ -834,19 +838,22 @@ class ItemAnalyzer {
       this.parseClusterJewel(item)
       return
     }
-    // if (/^禁忌(血肉|烈焰)$/.test(this.itemParsed.name!)) {
-    //   this.parseForbiddenJewel(item)
-    //   return
-    // }
-    // if (this.itemParsed.name === '逃脫不能') {
-    //   this.parseImpossibleEscape(item)
-    //   return
-    // }
+    let enableAllStats = false
+    if (/^禁忌(血肉|烈焰)$/.test(this.itemParsed.name!)) {
+      // this.parseForbiddenJewel(item)
+      enableAllStats = true
+    }
+    if (this.itemParsed.name === '逃脫不能') {
+      // this.parseImpossibleEscape(item)
+      enableAllStats = true
+      return
+    }
     if (this.itemParsed.name === '希望之絃') {
       this.parseThreadOfHope(item)
       return
     }
     this.parseAllfuns(item)
+    if (enableAllStats) this.itemParsed.stats.forEach(ele => ele.disabled = false)
     if (this.itemParsed.baseType === '永恆珠寶' && this.itemParsed.rarity === '傳奇') {
       this.parseTimelessJewel(item)
     }
