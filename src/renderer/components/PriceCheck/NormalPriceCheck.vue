@@ -121,7 +121,10 @@
     <table v-if="item.stats.length" class="bg-gray-700 text-center mt-1 text-white text-sm">
       <thead class="bg-green-600" @click="_event => modTbodyToggle = !modTbodyToggle">
         <tr class="text-lg">
-          <td class="w-6 text-center hover:cursor-default">
+          <td class="w-6 text-center hover:cursor-default" @click="(e) => {
+            e.stopPropagation();
+            item.stats.forEach(mod => handleModClick(mod))
+          }">
             查
           </td>
           <td class="w-14 text-center hover:cursor-default">

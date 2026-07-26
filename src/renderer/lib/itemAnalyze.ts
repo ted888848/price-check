@@ -295,15 +295,16 @@ class ItemAnalyzer {
     if (modType === 'mutated' || modType === 'rune') modType = 'explicit'
     else modType = modType as keyof ParsedAPIMods
     if (!APImods[modType]) return ParseResult.PARSE_SECTION_FAIL
-
     const tempArr: ItemStat[] = []
     for (const [index, line] of regSection.entries()) {
       try {
         let matchMods = APImods[modType]?.entries.filter(mod => line.test(mod.text) || line.test(mod.text.split('\n').at(0) ?? ''))
         if (!matchMods || !matchMods.length) continue
-
         if (matchMods.length > 1) {
-          if (this.itemParsed.isWeaponOrArmor && this.itemParsed.type.option !== 'armour.quiver' && matchMods.find(ele => ele.text.endsWith(' (部分)')))
+          if (this.itemParsed.isWeaponOrArmor &&
+            this.itemParsed.type.option !== 'armour.quiver' &&
+            matchMods.some(ele => /閃避|護甲|能量護盾|保護/.test(ele.text)) &&
+            matchMods.find(ele => ele.text.endsWith(' (部分)')))
             matchMods = matchMods.filter(mod => mod.text.endsWith(' (部分)'))
           else {
             matchMods = matchMods.filter(mod => !mod.text.endsWith(' (部分)'))
@@ -546,13 +547,9 @@ class ItemAnalyzer {
           this.itemParsed.stats[0]!.value!.max = this.itemParsed.stats[0]!.value!.min === 6 ? 6 : 5
         })
       let clusterType: string = item[0]!.find(ele => ele.startsWith('附加的小型天賦給予：'))!
-      clusterType = clusterType.substring(10, clusterType.indexOf(' (enchant)'))
-      let tempMod = APImods.clusterJewel.entries.find(mod => mod.text.includes(clusterType))
-      if (tempMod!.text.endsWith('(古典)') && this.itemParsed.baseType === '小型星團珠寶') {
-        const tempText = tempMod!.text.substring(0, tempMod!.text.length - 5)
-        tempMod = APImods.clusterJewel.entries.reverse().find(mod => mod.text.includes(tempText))
-      }
-      this.itemParsed.stats.push({ id: 'enchant.stat_3948993189', text: tempMod!.text, value: { option: Number(tempMod?.id) }, type: '附魔', disabled: false })
+      clusterType = clusterType.substring(0, clusterType.indexOf(' (enchant)'))
+      let tempMod = APImods.enchant.entries.find(mod => mod.text.includes(clusterType)) as ItemStat
+      this.itemParsed.stats.push({ ...tempMod, type: '附魔', disabled: false })
       this.itemParsed.stats.forEach(ele => ele.disabled = false)
       item.shift()
     }
@@ -560,40 +557,41 @@ class ItemAnalyzer {
     this.itemParsed.autoSearch = true
   }
 
-  private parseForbiddenJewel(item: string[][]) {
-    this.itemParsed.autoSearch = true
-    for (const section of item) {
-      if (this.parseCorrupt(section) === ParseResult.PARSE_SECTION_SUCC) continue
-      const sectionMatch = section[0]!.match(/若禁忌(烈焰|血肉)上有符合的詞綴，配置 (.*)/)
-      if (sectionMatch) {
-        const type = sectionMatch[1]
-        const passive = sectionMatch[2]!
-        const matchStat = APImods.forbiddenJewel.entries.find(e => e.text.indexOf(type!) > -1)
-        const matchPassive = matchStat?.option?.options.find(e => e.text === passive)
-        this.itemParsed.stats.push({ id: matchStat!.id, text: matchStat!.text.replace('#', passive), value: { option: matchPassive?.id }, disabled: false })
-      }
-    }
-  }
+  // private parseForbiddenJewel(item: string[][]) {
+  //   this.itemParsed.autoSearch = true
+  //   for (const section of item) {
+  //     if (this.parseCorrupt(section) === ParseResult.PARSE_SECTION_SUCC) continue
+  //     const sectionMatch = section[0]!.match(/若禁忌(烈焰|血肉)上有符合的詞綴，配置 (.*)/)
+  //     if (sectionMatch) {
+  //       const type = sectionMatch[1]
+  //       const passive = sectionMatch[2]!
+  //       const matchStat = APImods.forbiddenJewel.entries.find(e => e.text.indexOf(type!) > -1)
+  //       const matchPassive = matchStat?.option?.options.find(e => e.text === passive)
+  //       this.itemParsed.stats.push({ id: matchStat!.id, text: matchStat!.text.replace('#', passive), value: { option: matchPassive?.id }, disabled: false })
+  //     }
+  //   }
+  // }
 
-  private parseImpossibleEscape(item: string[][]) {
-    this.itemParsed.autoSearch = true
-    this.itemParsed.isCorrupt = true
-    outer:
-    for (const section of item) {
-      for (const line of section) {
-        const result = line.match(/天賦樹中在範圍(.+)內未連結的天賦仍然可以配置/)
-        if (result) {
-          const statDetail = APImods.explicit.mutiLines?.find(ele => ele.id === 'explicit.stat_2422708892')!
-          const matchOption = statDetail.option?.options.find(ele => ele.text === result[1])
-          this.itemParsed.stats.push({ id: statDetail.id, text: statDetail.text[0]!.replace('#', result[1]!), value: { option: matchOption?.id }, disabled: false })
-          break outer
-        }
-      }
-    }
-  }
+  // private parseImpossibleEscape(item: string[][]) {
+  //   this.itemParsed.autoSearch = true
+  //   this.itemParsed.isCorrupt = true
+  //   outer:
+  //   for (const section of item) {
+  //     for (const line of section) {
+  //       const result = line.match(/天賦樹中在範圍(.+)內未連結的天賦仍然可以配置/)
+  //       if (result) {
+  //         const statDetail = APImods.explicit.mutiLines?.find(ele => ele.id === 'explicit.stat_2422708892')!
+  //         const matchOption = statDetail.option?.options.find(ele => ele.text === result[1])
+  //         this.itemParsed.stats.push({ id: statDetail.id, text: statDetail.text[0]!.replace('#', result[1]!), value: { option: matchOption?.id }, disabled: false })
+  //         break outer
+  //       }
+  //     }
+  //   }
+  // }
 
   private parseThreadOfHope(item: string[][]) {
     const parseRangeMod = (section: string[]) => {
+      //TODO: api option
       const mod = {
         id: 'explicit.stat_3642528642',
         text: '只會影響#範圍內的天賦',
@@ -641,6 +639,7 @@ class ItemAnalyzer {
 
   private parseMap(item: string[][]) {
     this.itemParsed.autoSearch = true
+    //TODO: api option
     const elderMap = { id: 'implicit.stat_3624393862', text: '地圖被 # 佔據', type: 'implicit', options: [{ value: 1, text: '異界．奴役', exchange: 'enslaver-map' }, { value: 2, text: '異界．根除', exchange: 'eradicator-map' }, { value: 3, text: '異界．干擾', exchange: 'constrictor-map' }, { value: 4, text: '異界．淨化', exchange: 'purifier-map' }] } as const
     const conquerorMap = { id: 'implicit.stat_2563183002', text: '地圖含有 # 的壁壘', type: 'implicit', options: [{ value: 1, text: '巴倫', exchange: 'barans-map' }, { value: 2, text: '維羅提尼亞', exchange: 'veritanias-map' }, { value: 3, text: '奧赫茲明', exchange: 'al-hezmins-map' }, { value: 4, text: '圖拉克斯', exchange: 'droxs-map' }] } as const
     const mapTier = this.itemParsed.baseType.match(/（階級 (\d{1,2})）/)
@@ -835,14 +834,14 @@ class ItemAnalyzer {
       this.parseClusterJewel(item)
       return
     }
-    if (/^禁忌(血肉|烈焰)$/.test(this.itemParsed.name!)) {
-      this.parseForbiddenJewel(item)
-      return
-    }
-    if (this.itemParsed.name === '逃脫不能') {
-      this.parseImpossibleEscape(item)
-      return
-    }
+    // if (/^禁忌(血肉|烈焰)$/.test(this.itemParsed.name!)) {
+    //   this.parseForbiddenJewel(item)
+    //   return
+    // }
+    // if (this.itemParsed.name === '逃脫不能') {
+    //   this.parseImpossibleEscape(item)
+    //   return
+    // }
     if (this.itemParsed.name === '希望之絃') {
       this.parseThreadOfHope(item)
       return

@@ -49,7 +49,7 @@ export function getMarketPrice(itemParsed: ParsedItem, marketData: TCurrencyMark
   if (!marketData[league]) return null;
   const itemId = APIStatic.find(i => i.id === itemParsed.itemID)?.id ?? '';
   if (!itemId && !itemParsed.baseType) return null;
-  const marketItem = marketData[league][itemId] ?? marketData[league][itemParsed.baseType];
+  const marketItem = marketData[league][itemParsed.baseType] ?? marketData[league][itemId];
   if (!marketItem) return null;
   return marketItem
 }

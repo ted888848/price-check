@@ -128,7 +128,7 @@ const { data: marketData } = useQuery(marketQueryOption)
 
 const divineToChaosOrEx = computed(() => {
   if (!leagueSelect.value || !marketData.value) return 0
-  const divineMarketPrice = getMarketPrice({ itemID: 'divine' } as ParsedItem, marketData.value, leagueSelect.value)
+  const divineMarketPrice = getMarketPrice({ itemID: 'divine', baseType: '神聖石' } as ParsedItem, marketData.value, leagueSelect.value)
   const rate = secondCurrency === 'chaos'
     ? divineMarketPrice?.chaos?.amount
     : divineMarketPrice?.exalted?.amount

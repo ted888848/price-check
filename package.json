@@ -1,6 +1,6 @@
 {
   "name": "price-check",
-  "version": "3.29.0",
+  "version": "3.29.1",
   "main": "dist/main/index.js",
   "description": "一個POE查價器",
   "author": "ted <ted888848@gmail.com>",
@@ -28,7 +28,7 @@
     "@vue/tsconfig": "^0.9.1",
     "axios": "^1.18.1",
     "electron": "^41.9.0",
-    "electron-builder": "^26.15.5",
+    "electron-builder": "^26.7.0",
     "electron-store": "^11.0.2",
     "electron-updater": "^6.8.9",
     "electron-vite": "^5.0.0",

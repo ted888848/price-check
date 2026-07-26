@@ -187,16 +187,6 @@ function setupAPIMods(statsJson: APIStats) {
         }
       })
       .with('enchant', () => {
-        APImods.clusterJewel = {
-          label: statsGroup.label,
-          entries:
-            statsGroup.entries.splice(statsGroup.entries
-              .findIndex((ele) => ele.text === '附加的小型天賦給予：#'), 1)[0].option?.options
-              .map(option => ({
-                id: option.id.toString(), text: option.text
-              })) ?? [],
-          type: '附魔'
-        }
         APImods.enchant = {
           label: statsGroup.label,
           entries: statsGroup.entries.map((ele) => ({

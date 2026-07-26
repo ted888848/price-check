@@ -79,7 +79,6 @@ interface ParsedAPIMods {
   enchant: ParsedAPIMod;
   crafted: ParsedAPIMod;
   temple: ParsedAPIMod;
-  clusterJewel: ParsedAPIMod;
   forbiddenJewel: ParsedAPIMod;
   sanctum: ParsedAPIMod;
   necropolis: ParsedAPIMod;
