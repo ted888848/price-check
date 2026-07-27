@@ -386,6 +386,7 @@ class ItemAnalyzer {
     const sectionModArr: string[] = []
     const sectionModTypeArr: string[] = []
     section.forEach(line => {
+      if (/^（.*）$/.test(line)) return;
       if (/{.*}/.test(line)) sectionModTypeArr.push(line)
       else sectionModArr.push(line)
     })
