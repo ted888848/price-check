@@ -67,6 +67,8 @@ class ItemAnalyzer {
   analyze(item: string) {
     this.itemSection = this.getItemSections(item)
 
+    this.itemSection = this.itemSection.filter(section => !section[0].startsWith("無形性:"))
+
     if (this.parseFirstSection(this.itemSection[0]!) === ParseResult.PARSE_SECTION_FAIL) return null
     this.itemParsed.searchOnlineType = this.config.searchOnlineType ?? this.itemParsed.searchOnlineType
     this.itemSection.shift()
