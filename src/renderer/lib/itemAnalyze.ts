@@ -544,14 +544,15 @@ class ItemAnalyzer {
     this.itemParsed.itemLevel = { min: tempIlvl >= 84 ? 84 : tempIlvl >= 75 ? 75 : tempIlvl >= 68 ? 68 : tempIlvl >= 50 ? 50 : 1, max: tempIlvl >= 84 ? 100 : tempIlvl >= 75 ? 83 : tempIlvl >= 68 ? 74 : tempIlvl >= 50 ? 67 : 49, search: true }
     item.shift()
     if (this.itemParsed.rarity !== '傳奇') {
-      this.parseEnchantMod(item[0]!.slice(0, 2))
+      this.parseEnchantMod(item[0]!.slice(0, 1))
+      const nodeCountStat = this.itemParsed.stats[0]!
       match(this.itemParsed.baseType)
         .with('巨型星團珠寶', '小型星團珠寶', () => {
-          this.itemParsed.stats[0]!.value!.min = this.itemParsed.stats[0]!.value!.max
+          nodeCountStat.value!.max = nodeCountStat.value!.min
         })
         .with('中型星團珠寶', () => {
-          this.itemParsed.stats[0]!.value!.min = this.itemParsed.stats[0]!.value!.min === 6 ? 6 : 4
-          this.itemParsed.stats[0]!.value!.max = this.itemParsed.stats[0]!.value!.min === 6 ? 6 : 5
+          nodeCountStat.value!.min = nodeCountStat.value!.min === 6 ? 6 : 4
+          nodeCountStat.value!.max = nodeCountStat.value!.min === 6 ? 6 : 5
         })
       let clusterType: string = item[0]!.find(ele => ele.startsWith('附加的小型天賦給予：'))!
       clusterType = clusterType.substring(0, clusterType.indexOf(' (enchant)'))
