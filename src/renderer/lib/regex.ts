@@ -8,10 +8,11 @@ export function getStrReg(section: string[], type: string) {
     line = line.replace(numberPattern, '__NUMBER__')
     line = line.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
     line = line.replace(' — 無法使用的值', '')
+    line = line.replace(/((?:（|\()(.+?-.+?)(?:）|\)))/, '($1)?')
     retArr.push(new RegExp(`^${line
-        .replace(/__NUMBER__/g, "[+-]?(\\d+|#)(?:\\(\\d+-\\d+\\))?")
-        .replace(/減少|增加/, "(?:減少|增加)")
-        .replace(/更多|更少/, "(?:更多|更少)")
+      .replace(/__NUMBER__/g, "[+-]?(\\d+|#)(?:\\(\\d+-\\d+\\))?")
+      .replace(/減少|增加/, "(?:減少|增加)")
+      .replace(/更多|更少/, "(?:更多|更少)")
       }( \\(部分\\))?$`))
   })
   return retArr

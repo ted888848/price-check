@@ -25,6 +25,7 @@ function getDefaultItemParsed(config: Config) {
 class ItemAnalyzer {
   private config: Config
   private itemParsed: ParsedItem
+  //TODO 讓所有 parseFunction 都直接用這個
   private itemSection: string[][] = []
   private readonly parseFuns: ParseFun[]
 
@@ -67,11 +68,12 @@ class ItemAnalyzer {
   analyze(item: string) {
     this.itemSection = this.getItemSections(item)
 
-    this.itemSection = this.itemSection.filter(section => !section[0].startsWith("無形性:"))
+    this.itemSection = this.itemSection.filter(section => !section[0]?.startsWith("無形性:"))
 
     if (this.parseFirstSection(this.itemSection[0]!) === ParseResult.PARSE_SECTION_FAIL) return null
     this.itemParsed.searchOnlineType = this.config.searchOnlineType ?? this.itemParsed.searchOnlineType
     this.itemSection.shift()
+    let searchExchange = false
     match(this.itemParsed.type)
       .with({ option: P.string.startsWith('weapon') }, () => {
         this.findUnique('weapon')
@@ -106,6 +108,7 @@ class ItemAnalyzer {
           if (this.config.autoSearchStackableItems) this.itemParsed.autoSearch = true
           this.parseAllfuns(this.itemSection)
         }
+        searchExchange = true
       })
       .with({ text: P.union('技能寶石', '輔助寶石') }, () => {
         this.parseGem(this.itemSection)
@@ -129,7 +132,7 @@ class ItemAnalyzer {
     this.parsePseudoEleResistance()
 
     const staticItem = APIStatic.find((ele: Static) => ele.text === this.itemParsed.baseType)
-    if (staticItem) {
+    if (staticItem && searchExchange) {
       this.itemParsed.itemID = staticItem.id
       this.itemParsed.searchExchange.option = true
     }
@@ -698,12 +701,12 @@ class ItemAnalyzer {
         }
       }
     }
-    const parseFuns = [this.parseCorrupt.bind(this), this.parseIdentify.bind(this), this.parseEnchantMod.bind(this)]
+    const parseFuns = [this.parseCorrupt.bind(this), this.parseIdentify.bind(this), this.parseEnchantMod.bind(this), this.parseExplicitMod.bind(this)]
     if (this.itemParsed.map_completion_reward) {
       item = item.filter(section => !section[0]!.startsWith('怪物等級：'))
-      parseFuns.push(this.parseExplicitMod.bind(this))
     }
     this.parseAllfuns(item, parseFuns)
+    if (this.itemParsed.map_completion_reward) this.itemParsed.stats.forEach(stat => stat.disabled = false)
     this.itemParsed.stats.forEach(stat => {
       if (stat.type === '附魔') stat.disabled = false
     })
