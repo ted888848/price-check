@@ -37,6 +37,7 @@ class ItemAnalyzer {
       this.parseRequirement.bind(this),
       this.parseSocket.bind(this),
       this.parseItemLevel.bind(this),
+      this.parseMirrored.bind(this),
       this.parseInfluence.bind(this),
       this.parseCorrupt.bind(this),
       this.parseEnchantMod.bind(this),
@@ -384,36 +385,48 @@ class ItemAnalyzer {
     return this.parseMod(section, 'rune') === ParseResult.PARSE_SECTION_SUCC ? ParseResult.PARSE_SECTION_SUCC : ParseResult.PARSE_SECTION_FAIL
   }
 
+  private parseVeiledMod(veiledSection: { line: string, advance: string }[]) {
+    veiledSection.forEach(({ advance }) => {
+      const veiledMod = advance.match(/{ .綴 "(.+)" }/)
+      if (!veiledMod) return
+      const matchMod = APImods.veiled?.entries.find(mod => mod.text === veiledMod[1])
+      if (!matchMod) return
+      this.itemParsed.stats.push({ ...matchMod, type: '隱匿', disabled: false })
+    })
+  }
+
   private parseExplicitMod(section: string[]) {
     if (!['魔法', '稀有', '傳奇'].includes(this.itemParsed.rarity)) return ParseResult.PARSE_SECTION_SKIP
-    const explicitSection: string[] = [], fracturedSection: string[] = [], craftedSection: string[] = [], mutatedSection: string[] = []
+    const explicitSection: string[] = [], fracturedSection: string[] = [], craftedSection: string[] = [], mutatedSection: string[] = [], veiledSection: { line: string, advance: string }[] = []
     let parsed = false
-    const sectionModArr: string[] = []
-    const sectionModTypeArr: string[] = []
-    section.forEach(line => {
+    section.forEach((line, index) => {
       if (/^（.*）$/.test(line)) return;
-      if (/{.*}/.test(line)) sectionModTypeArr.push(line)
-      else sectionModArr.push(line)
-    })
-    for (let i = 0; i < sectionModArr.length; i++) {
-      const line = sectionModArr[i] ?? ''
+      if (/{.*}/.test(line)) return;
+
       let type = line?.match(/fractured|crafted|mutated/)?.[0]
-      if (sectionModTypeArr[i]) {
-        type = sectionModTypeArr[i]?.startsWith('{ 已破裂') ? 'fractured' : sectionModTypeArr[i]?.startsWith('{ 已大師工藝') ? 'crafted' : sectionModTypeArr[i]?.startsWith('{ Foulborn') ? 'mutated' : type
+      const modAdvanceLine = section[index - 1] ?? ''
+      if (modAdvanceLine) {
+        type = modAdvanceLine?.startsWith('{ 已破裂') ? 'fractured' : modAdvanceLine?.startsWith('{ 已大師工藝') ? 'crafted' : modAdvanceLine?.startsWith('{ Foulborn') ? 'mutated' : type
       }
+
       match(type)
         .with('crafted', () => craftedSection.push(line))
         .with('fractured', () => fracturedSection.push(line))
         .with('mutated', () => mutatedSection.push(line))
         .otherwise(() => {
-          if (line !== '隱匿前綴' && line !== '隱匿後綴') explicitSection.push(line)
+          if (line === '隱匿前綴' || line === '隱匿後綴') {
+            veiledSection.push({ line, advance: modAdvanceLine })
+            return;
+          }
+          explicitSection.push(line)
         })
-    }
+    })
 
     if (craftedSection.length) parsed = this.parseMod(craftedSection, 'crafted') === ParseResult.PARSE_SECTION_SUCC || parsed
     if (fracturedSection.length) parsed = this.parseMod(fracturedSection, 'fractured') === ParseResult.PARSE_SECTION_SUCC || parsed
     if (explicitSection.length) parsed = this.parseMod(explicitSection, 'explicit') === ParseResult.PARSE_SECTION_SUCC || parsed
     if (mutatedSection.length) parsed = this.parseMod(mutatedSection, 'mutated') === ParseResult.PARSE_SECTION_SUCC || parsed
+    if (veiledSection.length) this.parseVeiledMod(veiledSection)
 
     return parsed ? ParseResult.PARSE_SECTION_SUCC : ParseResult.PARSE_SECTION_SKIP
   }
@@ -430,6 +443,12 @@ class ItemAnalyzer {
       if (influence) this.itemParsed.influences.push(influence)
     }
     return this.itemParsed.influences.length > 0 ? ParseResult.PARSE_SECTION_SUCC : ParseResult.PARSE_SECTION_SKIP
+  }
+
+  private parseMirrored(section: string[]) {
+    if (!section.some(line => line === '已複製')) return ParseResult.PARSE_SECTION_SKIP
+    this.itemParsed.isMirrored = true
+    return ParseResult.PARSE_SECTION_SUCC
   }
 
   private parseCorrupt(section: string[]) {
@@ -778,7 +797,7 @@ class ItemAnalyzer {
   private parseRGB(item: string[]) {
     for (const line of item) {
       if (line.startsWith('貼模傳奇')) {
-        this.itemParsed.isRGB = true
+        this.itemParsed.isRGB = false
         return ParseResult.PARSE_SECTION_SUCC
       }
     }
@@ -853,7 +872,6 @@ class ItemAnalyzer {
     if (this.itemParsed.name === '逃脫不能') {
       // this.parseImpossibleEscape(item)
       enableAllStats = true
-      return
     }
     if (this.itemParsed.name === '希望之絃') {
       this.parseThreadOfHope(item)

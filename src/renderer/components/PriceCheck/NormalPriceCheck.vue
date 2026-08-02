@@ -104,16 +104,22 @@
           :reducer="i => i.value" class="flex-1" />
       </div>
 
-      <div v-if="item.type.option === 'gem.activegem'" class="flex items-center justify-center"
+      <div v-if="item.type.option === 'gem.activegem'" class="flex items-center justify-center hover:cursor-pointer"
         @click="() => item.vaalVer = !item.vaalVer">
-        <span class="mx-1 text-white hover:cursor-default">瓦爾版</span>
+        <span class="mx-1 text-white">瓦爾版</span>
         <CircleCheck :have-undefined="true" :checked="item.vaalVer ?? false" />
       </div>
 
+      <div v-if="item.isMirrored !== undefined" class="flex items-center justify-center hover:cursor-pointer"
+        @click="() => item.isMirrored = !item.isMirrored">
+        <span class="mx-1 text-white">已複製</span>
+        <CircleCheck :have-undefined="true" :checked="item.isMirrored ?? false" />
+      </div>
+
       <!-- 3.27 新增穢生選項 -->
-      <div v-if="item.foulborn !== undefined" class="flex items-center justify-center"
+      <div v-if="item.foulborn !== undefined" class="flex items-center justify-center hover:cursor-pointer"
         @click="() => item.foulborn = !item.foulborn">
-        <span class="mx-1 text-white hover:cursor-default">穢生:</span>
+        <span class="mx-1 text-white">穢生:</span>
         <CircleCheck :have-undefined="true" :checked="item.foulborn ?? false" />
       </div>
     </div>

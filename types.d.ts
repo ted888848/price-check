@@ -83,6 +83,7 @@ interface ParsedAPIMods {
   sanctum: ParsedAPIMod;
   necropolis: ParsedAPIMod;
   imbued?: ParsedAPIMod; //3.28
+  veiled?: ParsedAPIMod; //3.28
 }
 interface Static {
   id: string;
@@ -161,6 +162,7 @@ interface ParsedItem {
   isIdentify?: boolean;
   isFractured?: boolean;
   isSynthesized?: boolean;
+  isMirrored?: boolean;
   blightedMap?: boolean;
   UberBlightedMap?: boolean;
   quality: {

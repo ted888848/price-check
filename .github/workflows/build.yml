@@ -72,3 +72,61 @@ jobs:
 
           # 使用 gh CLI 更新對應 tag 的 draft release notes（覆蓋）
           gh release edit "$CURRENT_TAG" --notes "$NOTES"
+
+# 打包與發佈成功時，發送 Discord 通知
+  notify-success:
+    needs: release
+    if: success()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Discord success notification
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        shell: bash
+        run: |
+          curl -H "Content-Type: application/json" \
+            -d '{
+              "embeds": [{
+                "title": "✅ ${{ github.repository }} 打包發佈成功",
+                "description": "Tag: `${{ github.ref_name }}`\n觸發者: ${{ github.actor }}",
+                "color": 3066993,
+                "fields": [
+                  {
+                    "name": "Release 連結",
+                    "value": "${{ github.server_url }}/${{ github.repository }}/releases/tag/${{ github.ref_name }}"
+                  },
+                  {
+                    "name": "Workflow 紀錄",
+                    "value": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                  }
+                ]
+              }]
+            }' \
+            "$DISCORD_WEBHOOK"
+
+  # 打包或發佈失敗時，發送 Discord 通知
+  notify-failure:
+    needs: release
+    if: failure()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Discord failure notification
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        shell: bash
+        run: |
+          curl -H "Content-Type: application/json" \
+            -d '{
+              "embeds": [{
+                "title": "❌ ${{ github.repository }} 打包發佈失敗",
+                "description": "Tag: `${{ github.ref_name }}`\n觸發者: ${{ github.actor }}",
+                "color": 15158332,
+                "fields": [
+                  {
+                    "name": "Workflow 紀錄",
+                    "value": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                  }
+                ]
+              }]
+            }' \
+            "$DISCORD_WEBHOOK"

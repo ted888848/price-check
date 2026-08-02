@@ -47,6 +47,7 @@ export interface ISearchJson {
           alternate_art?: { option: boolean };
           //3.27
           foulborn_item?: { option: boolean };
+          mirrored?: { option: boolean };
         };
       };
       type_filters: {
@@ -137,7 +138,9 @@ const defaultSearchJson: ISearchJson = {
         }
       },
       misc_filters: {
-        filters: {}
+        filters: {
+          mirrored: { option: false }
+        }
       },
       type_filters: {
         filters: {}
@@ -298,6 +301,12 @@ export function getSearchJSON(item: ParsedItem) {
   if (item.foulborn) {
     searchJSON.query.filters.misc_filters.filters.foulborn_item = {
       option: (true ? 'yes' : 'no') as unknown as boolean
+    }
+  }
+
+  if (item.isMirrored) {
+    searchJSON.query.filters.misc_filters.filters.mirrored = {
+      option: item.isMirrored
     }
   }
 
