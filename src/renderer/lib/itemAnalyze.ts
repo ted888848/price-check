@@ -1,7 +1,7 @@
 import IPC from '@/ipc'
 import { APIitems, APImods, APIStatic } from './APIdata'
 import { poeVersion, secondCurrency } from '.'
-import { getModMatchRegex, getStrReg } from './regex'
+import { getModMatchRegex, getStrReg, hasPossibilityReg } from './regex'
 import { match, P } from 'ts-pattern'
 import { defaultItemParsed, rarityOptions, typeTrans } from './const'
 enum ParseResult {
@@ -304,7 +304,7 @@ class ItemAnalyzer {
     const tempArr: ItemStat[] = []
     for (const [index, line] of regSection.entries()) {
       try {
-        let matchMods = APImods[modType]?.entries.filter(mod => line.test(mod.text) || line.test(mod.text.split('\n').at(0) ?? ''))
+        let matchMods = APImods[modType]?.entries.filter(mod => line.test(mod.text) || line.test(mod.text.replace(hasPossibilityReg, '')) || line.test(mod.text.split('\n').at(0) ?? ''))
         if (!matchMods || !matchMods.length) continue
         if (matchMods.length > 1) {
           if (this.itemParsed.isWeaponOrArmor && matchMods.find(ele => ele.text.endsWith(' (部分)')) && ((
@@ -330,13 +330,16 @@ class ItemAnalyzer {
           const modMultiLineLength = modMultiLine.length
           const regSectionMultiLines = regSection.slice(index, index + modMultiLineLength)
           if (regSectionMultiLines.length !== modMultiLineLength) return false
-          return regSectionMultiLines.every((regSectionMultiLine, mi) => regSectionMultiLine.test(modMultiLine[mi] ?? ''))
+          return regSectionMultiLines.every((regSectionMultiLine, mi) => regSectionMultiLine.test(modMultiLine[mi] ?? '') || regSectionMultiLine.test(modMultiLine[mi]?.replace(hasPossibilityReg, '')))
         })
         if (!matchMods.length) continue
         matchMods.forEach((matchMod) => {
           const matchModMultiLineLength = matchMod.text.split('\n').length
           const matchReg = getModMatchRegex(matchMod.text)
-          const regGroup = cleanSection.slice(index, index + matchModMultiLineLength).join('\n').match(matchReg)
+          let regGroup = cleanSection.slice(index, index + matchModMultiLineLength).join('\n').match(matchReg)
+          if (!regGroup && matchMod.text.match(hasPossibilityReg) && !line.source.match(hasPossibilityReg)) {
+            regGroup = [line.source, '100']
+          }
           regGroup?.shift()
           if (type === 'rune') {
             matchMod.id = matchMod.id.replace(/^explicit/, 'rune')

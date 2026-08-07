@@ -9,6 +9,8 @@ on:
 jobs:
   release:
     runs-on: windows-latest
+    outputs:
+      release_url: ${{ steps.get_release_url.outputs.url }}
 
     steps:
       # Step 1: 複製專案原始碼（需要完整 history 才能讀取 tag 之間的 commit）
@@ -73,6 +75,17 @@ jobs:
           # 使用 gh CLI 更新對應 tag 的 draft release notes（覆蓋）
           gh release edit "$CURRENT_TAG" --notes "$NOTES"
 
+      - name: Get release URL
+        id: get_release_url
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          URL=$(gh release view "${GITHUB_REF_NAME}" --json url -q .url)
+          echo "release url: $URL"
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
+
 # 打包與發佈成功時，發送 Discord 通知
   notify-success:
     needs: release
@@ -82,6 +95,7 @@ jobs:
       - name: Send Discord success notification
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          RELEASE_URL: ${{ needs.release.outputs.release_url }}
         shell: bash
         run: |
           curl -H "Content-Type: application/json" \
@@ -93,7 +107,7 @@ jobs:
                 "fields": [
                   {
                     "name": "Release 連結",
-                    "value": "${{ github.server_url }}/${{ github.repository }}/releases/tag/${{ github.ref_name }}"
+                    "value": "'"$RELEASE_URL"'"
                   },
                   {
                     "name": "Workflow 紀錄",
