@@ -106,7 +106,7 @@ interface ItemStat {
 }
 
 type TRarityOptions = [{
-  readonly value: undefined;
+  readonly value?: undefined;
   readonly label: "任何";
 }, {
   readonly value: "normal";

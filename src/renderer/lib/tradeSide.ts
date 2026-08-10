@@ -281,7 +281,7 @@ export function getSearchJSON(item: ParsedItem) {
   if (item.memoryMap) {
     searchJSON.query.stats[0].filters.push({ id: "implicit.stat_2696470877", text: '區域受到開創者的記憶影響' })
   }
-  if (!isUndefined(item.isRGB)) {
+  if (item.isRGB) {
     searchJSON.query.filters.misc_filters.filters.alternate_art = {
       option: item.isRGB
     }

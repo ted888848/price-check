@@ -333,7 +333,8 @@ class ItemAnalyzer {
           return regSectionMultiLines.every((regSectionMultiLine, mi) => regSectionMultiLine.test(modMultiLine[mi] ?? '') || regSectionMultiLine.test(modMultiLine[mi]?.replace(hasPossibilityReg, '')))
         })
         if (!matchMods.length) continue
-        matchMods.forEach((matchMod) => {
+        matchMods.forEach((_matchMod) => {
+          const matchMod = structuredClone(_matchMod)
           const matchModMultiLineLength = matchMod.text.split('\n').length
           const matchReg = getModMatchRegex(matchMod.text)
           let regGroup = cleanSection.slice(index, index + matchModMultiLineLength).join('\n').match(matchReg)
@@ -402,28 +403,37 @@ class ItemAnalyzer {
     if (!['魔法', '稀有', '傳奇'].includes(this.itemParsed.rarity)) return ParseResult.PARSE_SECTION_SKIP
     const explicitSection: string[] = [], fracturedSection: string[] = [], craftedSection: string[] = [], mutatedSection: string[] = [], veiledSection: { line: string, advance: string }[] = []
     let parsed = false
-    section.forEach((line, index) => {
-      if (/^（.*）$/.test(line)) return;
-      if (/{.*}/.test(line)) return;
-
-      let type = line?.match(/fractured|crafted|mutated/)?.[0]
-      const modAdvanceLine = section[index - 1] ?? ''
-      if (modAdvanceLine) {
-        type = modAdvanceLine?.startsWith('{ 已破裂') ? 'fractured' : modAdvanceLine?.startsWith('{ 已大師工藝') ? 'crafted' : modAdvanceLine?.startsWith('{ Foulborn') ? 'mutated' : type
+    let tempAdvanceLine = ''
+    const advanceLineReg = /{ .+ }/
+    for (let i = 0; i < section.length; i++) {
+      if (/^（.*）$/.test(section[i])) continue;
+      if (advanceLineReg.test(section[i])) {
+        tempAdvanceLine = section[i]
+        continue
       }
+      let j = i
+      for (; j < section.length && !advanceLineReg.test(section[j]); j++) {
+        const line = section[j]
+        let type = line?.match(/fractured|crafted|mutated/)?.[0]
+        if (tempAdvanceLine) {
+          type = tempAdvanceLine?.startsWith('{ 已破裂') ? 'fractured' : tempAdvanceLine?.startsWith('{ 已大師工藝') ? 'crafted' : tempAdvanceLine?.startsWith('{ Foulborn') ? 'mutated' : type
+        }
 
-      match(type)
-        .with('crafted', () => craftedSection.push(line))
-        .with('fractured', () => fracturedSection.push(line))
-        .with('mutated', () => mutatedSection.push(line))
-        .otherwise(() => {
-          if (line === '隱匿前綴' || line === '隱匿後綴') {
-            veiledSection.push({ line, advance: modAdvanceLine })
-            return;
-          }
-          explicitSection.push(line)
-        })
-    })
+        match(type)
+          .with('crafted', () => craftedSection.push(line))
+          .with('fractured', () => fracturedSection.push(line))
+          .with('mutated', () => mutatedSection.push(line))
+          .otherwise(() => {
+            if (line === '隱匿前綴' || line === '隱匿後綴') {
+              veiledSection.push({ line, advance: tempAdvanceLine })
+              return;
+            }
+            explicitSection.push(line)
+          })
+      }
+      i = j - 1
+      tempAdvanceLine = ''
+    }
 
     if (craftedSection.length) parsed = this.parseMod(craftedSection, 'crafted') === ParseResult.PARSE_SECTION_SUCC || parsed
     if (fracturedSection.length) parsed = this.parseMod(fracturedSection, 'fractured') === ParseResult.PARSE_SECTION_SUCC || parsed
@@ -622,29 +632,28 @@ class ItemAnalyzer {
   //   }
   // }
 
-  private parseThreadOfHope(item: string[][]) {
-    const parseRangeMod = (section: string[]) => {
-      //TODO: api option
-      const mod = {
-        id: 'explicit.stat_3642528642',
-        text: '只會影響#範圍內的天賦',
-        type: 'explicit',
-        option: { options: [{ id: 1, text: '小' }, { id: 2, text: '中' }, { id: 3, text: '大' }, { id: 4, text: '非常大' }, { id: 5, text: '極大' }] }
-      }
-      const reg = new RegExp(`^${mod.text.replace('#', `(${mod.option.options.map(ele => ele.text).join('|')})`)}$`)
-      this.parseExplicitMod(section)
-      for (const line of section) {
-        const match = line.match(reg)
-        if (match) {
-          const matchOption = mod.option?.options.find(ele => ele.text === match[1])
-          this.itemParsed.stats.push({ id: mod.id, text: match[0], value: { option: matchOption?.id }, type: '隨機', disabled: false })
-          return ParseResult.PARSE_SECTION_SUCC
-        }
-      }
-      return ParseResult.PARSE_SECTION_SKIP
-    }
-    this.parseAllfuns(item, [this.parseItemLevel.bind(this), this.parseCorrupt.bind(this), this.parseIdentify.bind(this), this.parseImplicitMod.bind(this), parseRangeMod])
-  }
+  // private parseThreadOfHope(item: string[][]) {
+  //   const parseRangeMod = (section: string[]) => {
+  //     const mod = {
+  //       id: 'explicit.stat_3642528642',
+  //       text: '只會影響#範圍內的天賦',
+  //       type: 'explicit',
+  //       option: { options: [{ id: 1, text: '小' }, { id: 2, text: '中' }, { id: 3, text: '大' }, { id: 4, text: '非常大' }, { id: 5, text: '極大' }] }
+  //     }
+  //     const reg = new RegExp(`^${mod.text.replace('#', `(${mod.option.options.map(ele => ele.text).join('|')})`)}$`)
+  //     this.parseExplicitMod(section)
+  //     for (const line of section) {
+  //       const match = line.match(reg)
+  //       if (match) {
+  //         const matchOption = mod.option?.options.find(ele => ele.text === match[1])
+  //         this.itemParsed.stats.push({ id: mod.id, text: match[0], value: { option: matchOption?.id }, type: '隨機', disabled: false })
+  //         return ParseResult.PARSE_SECTION_SUCC
+  //       }
+  //     }
+  //     return ParseResult.PARSE_SECTION_SKIP
+  //   }
+  //   this.parseAllfuns(item, [this.parseItemLevel.bind(this), this.parseCorrupt.bind(this), this.parseIdentify.bind(this), this.parseImplicitMod.bind(this), parseRangeMod])
+  // }
 
   private parseOtherHaveMods(item: string[][]) {
     if (this.itemParsed.name === '贗品．龍牙翱翔') {
@@ -869,16 +878,21 @@ class ItemAnalyzer {
     }
     let enableAllStats = false
     if (/^禁忌(血肉|烈焰)$/.test(this.itemParsed.name!)) {
-      // this.parseForbiddenJewel(item)
       enableAllStats = true
     }
-    if (this.itemParsed.name === '逃脫不能') {
-      // this.parseImpossibleEscape(item)
+    else if (this.itemParsed.name === '逃脫不能') {
       enableAllStats = true
     }
-    if (this.itemParsed.name === '希望之絃') {
-      this.parseThreadOfHope(item)
-      return
+    else if (this.itemParsed.name === '希望之絃') {
+      item.forEach(section => {
+        section.forEach((line, index) => {
+          const match = line.match(/(只會影響.+範圍內的天賦)/)
+          if (match?.[1]) {
+            section[index] = match[1]
+          }
+        })
+      })
+      enableAllStats = true
     }
     this.parseAllfuns(item)
     if (enableAllStats) this.itemParsed.stats.forEach(ele => ele.disabled = false)

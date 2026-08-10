@@ -83,8 +83,10 @@ jobs:
         shell: bash
         run: |
           URL=$(gh release view "${GITHUB_REF_NAME}" --json url -q .url)
-          echo "release url: $URL"
-          echo "url=$URL" >> "$GITHUB_OUTPUT"
+          EDIT_URL=$(echo "$URL" | sed 's#/tag/#/edit/#')
+          echo "view url: $URL"
+          echo "edit url: $EDIT_URL"
+          echo "url=$EDIT_URL" >> "$GITHUB_OUTPUT"
 
 # 打包與發佈成功時，發送 Discord 通知
   notify-success:
