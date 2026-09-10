@@ -1,5 +1,5 @@
 const decimalPattern = /\d+(?:\.\d+)?/
-const numberPattern = new RegExp(`[+-]?(${decimalPattern.source})(?:\\(${decimalPattern.source}-${decimalPattern.source}\\))?`, 'g')
+const numberPattern = new RegExp(`([+-]?${decimalPattern.source})(?:\\(${decimalPattern.source}-${decimalPattern.source}\\))?`, 'g')
 export const hasPossibilityReg = /(有 \+?#% 機率)/
 export function getStrReg(section: string[], type: string) {
   const retArr: RegExp[] = []

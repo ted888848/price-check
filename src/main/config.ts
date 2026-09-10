@@ -89,6 +89,9 @@ const storeSchema: Schema<Config> = {
     items: {
       type: 'object'
     }
+  },
+  enableAutoEnableUniqueMods: {
+    type: 'boolean',
   }
 }
 export const store = new Store({

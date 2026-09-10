@@ -920,7 +920,56 @@ export const itemTemplateRaw = {
           "text": "怪物等級：#",
           "type": "隨機",
           "disabled": true
-        }
+        }, {
+          "disabled": true,
+          "id": "explicit.stat_3126771445",
+          "searchWithEmptyValue": undefined,
+          "text": "增加 #% 稀有怪物的數量",
+          "type": "隨機",
+          "value": {
+            "min": 29,
+          },
+        },
+        {
+          "disabled": true,
+          "id": "explicit.stat_1309819744",
+          "searchWithEmptyValue": undefined,
+          "text": "怪物發射 # 額外投射物",
+          "type": "隨機",
+          "value": {
+            "min": 2,
+          },
+        },
+        {
+          "disabled": true,
+          "id": "explicit.stat_3416853625",
+          "searchWithEmptyValue": undefined,
+          "text": "怪物造成 #% 額外物理傷害視為閃電",
+          "type": "隨機",
+          "value": {
+            "min": 110,
+          },
+        },
+        {
+          "disabled": true,
+          "id": "explicit.stat_687813731",
+          "searchWithEmptyValue": undefined,
+          "text": "怪物擊中時有 #% 機率獲得 1 顆耐力球",
+          "type": "隨機",
+          "value": {
+            "min": 100,
+          },
+        },
+        {
+          "disabled": true,
+          "id": "explicit.stat_3707756896",
+          "searchWithEmptyValue": undefined,
+          "text": "怪物擊中時有 #% 機率獲得 1 顆耐力球",
+          "type": "隨機",
+          "value": {
+            "min": 100,
+          },
+        },
       ],
       "influences": [],
       "quality": {
@@ -1028,29 +1077,20 @@ export const itemTemplateRaw = {
       "isCorrupt": false,
       "stats": [
         {
-          "value": {},
+          "disabled": false,
           "id": "enchant.stat_3086156145",
           "text": "附加 # 個天賦",
           "type": "附魔",
-          "disabled": false
+          "value": {
+            "max": 8,
+            "min": 8,
+          },
         },
         {
-          "value": {
-            "min": 2
-          },
-          "id": "enchant.stat_4079888060",
-          "text": "# 個附加的天賦為珠寶插槽",
+          "disabled": false,
+          "id": "enchant.stat_3948993189|5",
+          "text": "附加的小型天賦給予：法杖攻擊增加 12% 擊中和異常狀態傷害",
           "type": "附魔",
-          "disabled": false
-        },
-        {
-          "id": "enchant.stat_3948993189",
-          "text": "法杖攻擊增加 12% 擊中和異常狀態傷害",
-          "value": {
-            "option": 5
-          },
-          "type": "附魔",
-          "disabled": false
         },
         {
           "value": {

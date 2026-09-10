@@ -114,19 +114,19 @@ function setupAPIItems(itemsJson: APIItems) {
     APIitems, heistReward
   }
 }
-function checkNewline(statsGroup: APIStatsItem) {
-  const mutiLines: ParsedAPIMod['mutiLines'] = []
-  statsGroup.entries.forEach((stat: any) => {
-    if (stat.text.includes('\n')) {
-      const lines = stat.text.split('\n')
-      mutiLines.push({
-        ...stat, id: stat.id, text: lines
-      })
-    }
-  })
-  if (mutiLines.length) return mutiLines.slice()
-  return undefined
-}
+// function checkNewline(statsGroup: APIStatsItem) {
+//   const mutiLines: ParsedAPIMod['mutiLines'] = []
+//   statsGroup.entries.forEach((stat: any) => {
+//     if (stat.text.includes('\n')) {
+//       const lines = stat.text.split('\n')
+//       mutiLines.push({
+//         ...stat, id: stat.id, text: lines
+//       })
+//     }
+//   })
+//   if (mutiLines.length) return mutiLines.slice()
+//   return undefined
+// }
 function setupAPIMods(statsJson: APIStats) {
   const APImods: Partial<ParsedAPIMods> = {
   }

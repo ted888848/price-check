@@ -60,16 +60,16 @@ interface ParsedAPIMod {
       }[];
     };
   }[];
-  mutiLines?: {
-    id: string;
-    text: string[];
-    option?: {
-      options: {
-        id: number;
-        text: string;
-      }[];
-    };
-  }[];
+  // mutiLines?: {
+  //   id: string;
+  //   text: string[];
+  //   option?: {
+  //     options: {
+  //       id: number;
+  //       text: string;
+  //     }[];
+  //   };
+  // }[];
 }
 interface ParsedAPIMods {
   pseudo: ParsedAPIMod;
@@ -255,6 +255,7 @@ interface Config {
   prevPriceCheckHotkey?: string;
   autoSearchStackableItems?: boolean;
   widgets?: TWidgetRegex[];
+  enableAutoEnableUniqueMods?: boolean;
 }
 
 interface APIStaticItem {

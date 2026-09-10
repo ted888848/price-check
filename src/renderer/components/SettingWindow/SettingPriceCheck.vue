@@ -22,8 +22,13 @@
     </div>
     <div class="flex items-center py-1 select-none"
       @click="config.autoSearchStackableItems = !config.autoSearchStackableItems">
-      <span class="mx-1 text-xl text-white">自動搜尋堆疊物品</span>
+      <span class="mx-1 text-xl text-white">自動搜尋可堆疊物品</span>
       <CircleCheck :checked="config.autoSearchStackableItems ?? true" />
+    </div>
+    <div class="flex items-center py-1 select-none"
+      @click="config.enableAutoEnableUniqueMods = !config.enableAutoEnableUniqueMods">
+      <span class="mx-1 text-xl text-white">自動啟用傳奇物品詞綴</span>
+      <CircleCheck :checked="config.enableAutoEnableUniqueMods ?? false" />
     </div>
   </div>
 </template>

@@ -50,7 +50,6 @@ class ItemAnalyzer {
 
   private getItemSections(item: string) {
     const itemArr = item.split(/\r?\n/)
-    itemArr.pop()
     const result: string[][] = [[]]
     itemArr.reduce((section, line) => {
       if (line !== '--------') {
@@ -294,6 +293,21 @@ class ItemAnalyzer {
     return ParseResult.PARSE_SECTION_SUCC
   }
 
+  private needFilterRegional(matchMods: ParsedAPIMod['entries']) {
+    if (!this.itemParsed.isWeaponOrArmor) return false;
+    if (!matchMods.find(ele => ele.text.endsWith(' (部分)'))) return false;
+    if (this.itemParsed.type.option?.startsWith('armour') &&
+      this.itemParsed.type.option !== 'armour.quiver' &&
+      matchMods.some(ele => /閃避|護甲|能量護盾|保護/.test(ele.text))
+    )
+      return true;
+
+    if (this.itemParsed.type.option?.startsWith('weapon') &&
+      !matchMods.some(ele => /閃避|護甲|能量護盾|保護/.test(ele.text))
+    )
+      return true;
+    return false;
+  }
   private parseMod(section: string[], type: keyof ParsedAPIMods | 'mutated' | 'rune') {
     let modType = type
     const cleanSection = section.filter(line => !/{.*}/.test(line))
@@ -307,13 +321,7 @@ class ItemAnalyzer {
         let matchMods = APImods[modType]?.entries.filter(mod => line.test(mod.text) || line.test(mod.text.replace(hasPossibilityReg, '')) || line.test(mod.text.split('\n').at(0) ?? ''))
         if (!matchMods || !matchMods.length) continue
         if (matchMods.length > 1) {
-          if (this.itemParsed.isWeaponOrArmor && matchMods.find(ele => ele.text.endsWith(' (部分)')) && ((
-            this.itemParsed.type.option?.startsWith('armour') &&
-            this.itemParsed.type.option !== 'armour.quiver' &&
-            matchMods.some(ele => /閃避|護甲|能量護盾|保護/.test(ele.text))
-          ) ||
-            this.itemParsed.type.option?.startsWith('weapon') && !matchMods.some(ele => /閃避|護甲|能量護盾|保護/.test(ele.text))
-          )) {
+          if (this.needFilterRegional(matchMods)) {
             matchMods = matchMods.filter(mod => mod.text.endsWith(' (部分)'))
           }
           else {
@@ -345,7 +353,8 @@ class ItemAnalyzer {
           if (type === 'rune') {
             matchMod.id = matchMod.id.replace(/^explicit/, 'rune')
           }
-          const isSearchWithEmptyValue = false//matchMods.length === 1 && this.itemParsed.raritySearch.value === 'unique' && (type === 'explicit' || type === 'implicit')
+
+          const isSearchWithEmptyValue = this.config.enableAutoEnableUniqueMods && this.itemParsed.raritySearch.value === 'unique' && matchMods.length === 1 && (type === 'explicit' || type === 'implicit')
           const baseOption: ItemStat = {
             ...matchMod,
             disabled: type === 'mutated' ? false : true,
