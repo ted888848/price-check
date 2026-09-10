@@ -1,6 +1,7 @@
 import IPC from '@/ipc'
 import { ref } from 'vue'
 export const poeVersion = window.ipc.sendSync(IPC.GET_CONFIG).poeVersion
+export const isPOE2 = poeVersion === '2'
 /**
  *POE1: Chaos, POE2: Exalted
  */

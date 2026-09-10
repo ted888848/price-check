@@ -1,9 +1,10 @@
 import IPC from '@/ipc'
 import { APIitems, APImods, APIStatic } from './APIdata'
-import { poeVersion, secondCurrency } from '.'
+import { isPOE2, poeVersion, secondCurrency } from '.'
 import { getModMatchRegex, getStrReg, hasPossibilityReg } from './regex'
 import { match, P } from 'ts-pattern'
 import { defaultItemParsed, rarityOptions, typeTrans } from './const'
+import { countBy } from 'lodash-es'
 enum ParseResult {
   PARSE_SECTION_FAIL,
   PARSE_SECTION_SUCC,
@@ -11,6 +12,7 @@ enum ParseResult {
   PARSE_ITEM_SKIP
 }
 type ParseFun = (section: string[]) => ParseResult
+
 
 function getDefaultItemParsed(config: Config) {
   const itemParsed = structuredClone(defaultItemParsed)
@@ -234,6 +236,10 @@ class ItemAnalyzer {
       this.itemParsed.foulborn = true
     }
 
+    if (itemNameLine.startsWith('卓越 ')) {
+      this.itemParsed.isExcellenceItem = true
+    }
+
     return ParseResult.PARSE_SECTION_SUCC
   }
 
@@ -274,12 +280,23 @@ class ItemAnalyzer {
 
   private parseSocket(section: string[]) {
     if (!section[0]?.startsWith('插槽')) return ParseResult.PARSE_SECTION_SKIP
-    const sockets = section[0]!.replace(/R|G|B|W/g, '#')
+    const sockets = section[0]!.replace(/R|G|B|W|S/g, '#')
     if (sockets.indexOf('#-#-#-#-#-#') > -1) {
       this.itemParsed.search6L = true
     }
     else if (['弓', '長杖', '雙手劍', '雙手斧', '雙手錘', '征戰長杖', '胸甲'].includes(this.itemParsed.type.text)) {
       this.itemParsed.search6L = false
+    }
+
+    if (isPOE2) {
+      const count = countBy(sockets.split(''))['#']
+      if (count) {
+        this.itemParsed.socketCount = {
+          min: count,
+          max: count,
+          search: !!this.itemParsed.isExcellenceItem
+        }
+      }
     }
     return ParseResult.PARSE_SECTION_SUCC
   }
@@ -338,7 +355,7 @@ class ItemAnalyzer {
           const modMultiLineLength = modMultiLine.length
           const regSectionMultiLines = regSection.slice(index, index + modMultiLineLength)
           if (regSectionMultiLines.length !== modMultiLineLength) return false
-          return regSectionMultiLines.every((regSectionMultiLine, mi) => regSectionMultiLine.test(modMultiLine[mi] ?? '') || regSectionMultiLine.test(modMultiLine[mi]?.replace(hasPossibilityReg, '')))
+          return regSectionMultiLines.every((regSectionMultiLine, mi) => regSectionMultiLine.test(modMultiLine[mi] ?? '') || regSectionMultiLine.test(modMultiLine[mi]?.replace(hasPossibilityReg, '') ?? ''))
         })
         if (!matchMods.length) continue
         matchMods.forEach((_matchMod) => {
@@ -415,14 +432,17 @@ class ItemAnalyzer {
     let tempAdvanceLine = ''
     const advanceLineReg = /{ .+ }/
     for (let i = 0; i < section.length; i++) {
-      if (/^（.*）$/.test(section[i])) continue;
-      if (advanceLineReg.test(section[i])) {
-        tempAdvanceLine = section[i]
+      const sectionLine = section[i]
+      if (!sectionLine) continue
+      if (/^（.*）$/.test(sectionLine)) continue;
+      if (advanceLineReg.test(sectionLine)) {
+        tempAdvanceLine = sectionLine
         continue
       }
       let j = i
-      for (; j < section.length && !advanceLineReg.test(section[j]); j++) {
+      for (; j < section.length && !advanceLineReg.test(section[j]!); j++) {
         const line = section[j]
+        if (!line) continue
         let type = line?.match(/fractured|crafted|mutated/)?.[0]
         if (tempAdvanceLine) {
           type = tempAdvanceLine?.startsWith('{ 已破裂') ? 'fractured' : tempAdvanceLine?.startsWith('{ 已大師工藝') ? 'crafted' : tempAdvanceLine?.startsWith('{ Foulborn') ? 'mutated' : type

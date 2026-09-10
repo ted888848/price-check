@@ -122,6 +122,9 @@
         <span class="mx-1 text-white">穢生:</span>
         <CircleCheck :have-undefined="true" :checked="item.foulborn ?? false" />
       </div>
+      <ValueMinMax v-if="item.socketCount" v-model="item.socketCount" class="flex p-2 items-center justify-center">
+        插槽:
+      </ValueMinMax>
     </div>
 
     <table v-if="item.stats.length" class="bg-gray-700 text-center mt-1 text-white text-sm">

@@ -124,6 +124,11 @@ type TRarityOptions = [{
   readonly value: "nonunique";
   readonly label: "非傳奇";
 }]
+type ItemValue = {
+  min?: number;
+  max?: number;
+  search: boolean;
+}
 interface ParsedItem {
   baseType: string; //物品基底
   type: { //物品類型
@@ -135,21 +140,9 @@ interface ParsedItem {
   uniques: ItemUniques[];
   raritySearch: TRarityOptions[number];
   rarity: string;
-  itemLevel?: {
-    min?: number;
-    max?: number;
-    search: boolean;
-  };
-  mapTier?: {
-    min?: number;
-    max?: number;
-    search: boolean;
-  };
-  gemLevel?: {
-    min?: number;
-    max?: number;
-    search: boolean;
-  };
+  itemLevel?: ItemValue;
+  mapTier?: ItemValue;
+  gemLevel?: ItemValue;
   altQType?: number;
   vaalVer?: boolean;
   vaalBaseType?: string;
@@ -165,11 +158,7 @@ interface ParsedItem {
   isMirrored?: boolean;
   blightedMap?: boolean;
   UberBlightedMap?: boolean;
-  quality: {
-    min?: number;
-    max?: number;
-    search: boolean;
-  };
+  quality: ItemValue;
   phyDamage?: {
     min: number;
     max: number;
@@ -206,8 +195,11 @@ interface ParsedItem {
   };
   searchOnlineType: Config['searchOnlineType'];
   fetchCount: number;
-  map_completion_reward?: string
+  map_completion_reward?: string;
+  socketCount?: ItemValue;
+  isExcellenceItem?: boolean; //POE2
   // [key: string]: any;
+
 
   //3.27 
   foulborn?: boolean;
