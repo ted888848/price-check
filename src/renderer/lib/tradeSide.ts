@@ -68,6 +68,11 @@ export interface ISearchJson {
         disabled: boolean;
         filters: { links: { min?: number; max?: number } };
       };
+      equipment_filters?: {
+        filters: {
+          rune_sockets?: { min?: number; max?: number };
+        }
+      }
     };
     stats: [{ type: 'and'; filters: ItemStat[] }];
     status: { option: 'any' | 'online' | 'onlineleague' | 'securable' | 'available' };
@@ -307,6 +312,18 @@ export function getSearchJSON(item: ParsedItem) {
   if (item.isMirrored) {
     searchJSON.query.filters.misc_filters.filters.mirrored = {
       option: item.isMirrored
+    }
+  }
+
+  if (item.socketCount && item.socketCount.search) {
+    searchJSON.query.filters.equipment_filters = {
+      filters: {
+        ...searchJSON.query.filters.equipment_filters?.filters,
+        rune_sockets: {
+          min: item.socketCount.min,
+          max: item.socketCount.max
+        }
+      }
     }
   }
 
