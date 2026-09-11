@@ -40,7 +40,7 @@
     "unplugin-element-plus": "^0.11.2",
     "vite": "^7.3.6",
     "vite-tsconfig-paths": "^6.1.1",
-    "vitest": "^4.1.9",
+    "vitest": "^4.1.11",
     "vue": "^3.5.39",
     "vue-tsc": "^3.3.7"
   },
