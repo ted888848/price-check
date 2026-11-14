@@ -76,5 +76,6 @@ export const typeTrans = {
   咒語: 'azmeri.charm',
   不滅之火餘燼: undefined,
   接肢: 'graft',
-  萃取物: 'tincture'
+  萃取物: 'tincture',
+  臟器: 'viscera'
 } as const
