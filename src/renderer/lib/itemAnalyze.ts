@@ -1,7 +1,7 @@
 import IPC from '@/ipc'
 import { APIitems, APImods, APIStatic } from './APIdata'
 import { isPOE2, poeVersion, secondCurrency } from '.'
-import { getModMatchRegex, getStrReg, hasPossibilityReg } from './regex'
+import { getModMatchRegex, getStrReg, hasPossibilityReg, numberPatternWithNameGroup } from './regex'
 import { match, P } from 'ts-pattern'
 import { defaultItemParsed, rarityOptions, typeTrans } from './const'
 import { countBy } from 'lodash-es'
@@ -130,6 +130,9 @@ class ItemAnalyzer {
       .with({ text: '契約書' }, () => {
         this.findUnique('heistmission')
       })
+      .with({ text: '臟器' }, () => {
+        this.parseViscera()
+      })
     this.parseAllfuns()
     this.parsePseudoEleResistance()
 
@@ -144,16 +147,6 @@ class ItemAnalyzer {
     }
     if (this.itemParsed.raritySearch.label === '傳奇' && this.itemParsed.name) this.itemParsed.autoSearch = true
     if (this.itemParsed.baseType === '阿茲瓦特史記') this.parseTemple()
-
-    if (this.itemParsed.type.text === '臟器') {
-      this.itemParsed.stats.forEach(stat => {
-        if (stat.type === '固定') {
-          stat.disabled = false
-          stat.searchWithEmptyValue = true
-        }
-      })
-      this.itemParsed.autoSearch = true
-    }
 
     return this.itemParsed
   }
@@ -384,6 +377,7 @@ class ItemAnalyzer {
           const matchModMultiLineLength = matchMod.text.split('\n').length
           const matchReg = getModMatchRegex(matchMod.text)
           let regGroup = cleanSection.slice(index, index + matchModMultiLineLength).join('\n').match(matchReg)
+          console.log(regGroup)
           if (!regGroup && matchMod.text.match(hasPossibilityReg) && !line.source.match(hasPossibilityReg)) {
             regGroup = [line.source, '100']
           }
@@ -401,8 +395,19 @@ class ItemAnalyzer {
           }
           if (regGroup?.length) {
             const diffSign = matchMod.text.match(/減少|增加|更多|更少/)?.[0] !== cleanSection[index]?.match(/減少|增加|更多|更少/)?.[0]
-            const minValue = (diffSign ? -1 : 1) * (regGroup.reduce((pre, ele) => pre + Number(ele), 0) / regGroup.length)
-            tempArr.push({ value: { [diffSign ? 'max' : 'min']: minValue }, ...baseOption })
+            let valueArr: string[] = [], lowerBoundArr: string[] = [], upperBoundArr: string[] = []
+            regGroup.forEach((valueGroup) => {
+              const valueMatch = valueGroup.match(numberPatternWithNameGroup)
+              if (valueMatch?.groups) {
+                valueArr.push(valueMatch.groups.value)
+                lowerBoundArr.push(valueMatch.groups.lowerBound)
+                upperBoundArr.push(valueMatch.groups.upperBound)
+              }
+            })
+            const minValue = (diffSign ? -1 : 1) * (valueArr.reduce((pre, ele) => pre + Number(ele), 0) / valueArr.length)
+            const lowerBound = (diffSign ? -1 : 1) * (lowerBoundArr.reduce((pre, ele) => pre + Number(ele), 0) / lowerBoundArr.length)
+            const upperBound = (diffSign ? -1 : 1) * (upperBoundArr.reduce((pre, ele) => pre + Number(ele), 0) / upperBoundArr.length)
+            tempArr.push({ value: { [diffSign ? 'max' : 'min']: minValue }, lowerBound, upperBound, ...baseOption })
           }
           else {
             tempArr.push({ ...baseOption })
@@ -523,7 +528,7 @@ class ItemAnalyzer {
   }
 
   private parseIdentify(section: string[]) {
-    if (section[0]?.match(/^未鑑定$/)) {
+    if (section[0]?.match(/^未鑑定(\(階級 \d\))?$/)) {
       this.itemParsed.isIdentify = false
       return ParseResult.PARSE_SECTION_SUCC
     }
@@ -986,6 +991,20 @@ class ItemAnalyzer {
     if (this.itemParsed.baseType === '永恆珠寶' && this.itemParsed.rarity === '傳奇') {
       this.parseTimelessJewel()
     }
+  }
+  private parseViscera() {
+    this.parseAllfuns()
+    this.itemParsed.stats.forEach(stat => {
+      if (stat.type === '固定') {
+        stat.disabled = false
+        if (stat.lowerBound && stat.upperBound && stat.value) {
+          stat.value.min = Math.min(stat.lowerBound, stat.upperBound)
+          stat.value.max = Math.max(stat.lowerBound, stat.upperBound)
+        }
+      }
+    })
+    this.itemParsed.autoSearch = true
+    if (this.itemParsed.itemLevel) this.itemParsed.itemLevel.search = false
   }
 }
 

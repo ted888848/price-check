@@ -102,6 +102,8 @@ interface ItemStat {
     max?: number;
     option?: number;
   };
+  lowerBound?: number;
+  upperBound?: number;
   searchWithEmptyValue?: boolean;
 }
 
