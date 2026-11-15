@@ -309,11 +309,15 @@ export async function get2APIdata() {
 }
 
 export async function getPOEApiData() {
-  if (config.poeVersion === '1') {
-    await get1APIdata()
-  }
-  else if (config.poeVersion === '2') {
-    await get2APIdata()
+  try {
+    if (config.poeVersion === '1') {
+      await get1APIdata()
+    }
+    else if (config.poeVersion === '2') {
+      await get2APIdata()
+    }
+  } catch (err: any) {
+    throw new Error(err)
   }
 }
 
@@ -374,24 +378,5 @@ export async function checkForUpdate() {
     updateState.canClick = true
     buildTray()
   }
-  if (config.poeVersion === '1') {
-    if (store1.get('APIVersion', '') !== app.getVersion()) {
-      try {
-        await get1APIdata()
-      }
-      catch (err: any) {
-        throw new Error(err)
-      }
-    }
-  }
-  else {
-    if (store2.get('APIVersion', '') !== app.getVersion()) {
-      try {
-        await get2APIdata()
-      }
-      catch (err: any) {
-        throw new Error(err)
-      }
-    }
-  }
+  await getPOEApiData()
 }

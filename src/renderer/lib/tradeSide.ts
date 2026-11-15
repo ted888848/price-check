@@ -4,6 +4,7 @@ import type { AxiosResponseHeaders } from 'axios'
 import axios from 'axios'
 import { poeVersion, secondCurrency, tradeUrl } from './index'
 import { parseRateTimeLimit, startCountdown } from './ratetimelimit'
+import { NOT_MATCHED_ID } from './const'
 
 const tradeApi = axios.create({
   baseURL: `http://localhost:${window.proxyServer.getPort()}/proxy`,
@@ -259,6 +260,8 @@ export function getSearchJSON(item: ParsedItem) {
     searchJSON.query.filters.trade_filters.filters.price.option = secondCurrency
   }
   for (const stat of item.stats) {
+    if (stat.id === NOT_MATCHED_ID) continue
+    if (item.isIdentify === false && stat.type && (['隨機', '穢生'].includes(stat.type))) continue
     const isSearchWithEmptyValue = stat.searchWithEmptyValue
     const { searchWithEmptyValue, ..._stat } = stat
     if (isSearchWithEmptyValue) {

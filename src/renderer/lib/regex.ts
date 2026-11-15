@@ -8,10 +8,11 @@ export function getStrReg(section: string[], type: string) {
     const indexOfType = line.indexOf(` (${type})`)
     line = indexOfType > -1 ? line.substring(0, indexOfType) : line
     line = line.replace(numberPattern, '__NUMBER__')
-    line = line.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-    line = line.replace(' — 無法使用的值', '')
-    line = line.replace(/((?:（|\()(.+?-.+?)(?:）|\)))/, '($1)?')
-    line = line.replace(/幸運|不幸/, "(?:幸運|不幸)")
+      .replace(/\(\.\.\.\)/, "")
+      .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+      .replace(' — 無法使用的值', '')
+      .replace(/((?:（|\()(.+?-.+?)(?:）|\)))/, '($1)?')
+      .replace(/幸運|不幸/, "(?:幸運|不幸)")
     retArr.push(new RegExp(`^${line
       .replace(/__NUMBER__/g, "[+-]?(\\d+|#)(?:\\(\\d+-\\d+\\))?")
       .replace(/減少|增加/, "(?:減少|增加)")

@@ -151,7 +151,7 @@
         </tr>
       </thead>
       <tbody v-show="modTbodyToggle" class="modsTbody" style="">
-        <tr v-for="mod in item.stats" :key="mod.id" class=" border-b-2 border-gray-400">
+        <tr v-for="(mod, index) in item.stats" :key="mod.id + index" class=" border-b-2 border-gray-400">
           <td class="text-base" @click="() => handleModClick(mod)">
             <CircleCheck :checked="mod.searchWithEmptyValue ? 'indeterminate' : !mod.disabled" />
           </td>
@@ -281,6 +281,7 @@ import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/vue-query'
 import { getMarketPrice, marketQueryOption, type TMarketItemRate } from '@/renderer/lib/market'
 import MarketPrice from '../utility/MarketPrice.vue'
 import { match } from 'ts-pattern'
+import { NOT_MATCHED_ID } from '@/renderer/lib/const.ts'
 const props = defineProps<{
   itemProp: ParsedItem;
   leagueSelect: string;
@@ -533,6 +534,7 @@ function handleKeydown(e: KeyboardEvent) {
 }
 
 function handleModClick(mod: ItemStat) {
+  if (mod.id === NOT_MATCHED_ID) return
   if (mod.searchWithEmptyValue) {
     mod.disabled = false
     delete mod.searchWithEmptyValue

@@ -3,7 +3,7 @@ import { APIitems, APImods, APIStatic } from './APIdata'
 import { isPOE2, poeVersion, secondCurrency } from '.'
 import { getModMatchRegex, getStrReg, hasPossibilityReg, numberPatternWithNameGroup } from './regex'
 import { match, P } from 'ts-pattern'
-import { defaultItemParsed, rarityOptions, typeTrans } from './const'
+import { defaultItemParsed, NOT_MATCHED_ID, rarityOptions, typeTrans } from './const'
 import { countBy } from 'lodash-es'
 enum ParseResult {
   PARSE_SECTION_FAIL,
@@ -341,15 +341,21 @@ class ItemAnalyzer {
   }
   private parseMod(section: string[], type: keyof ParsedAPIMods | 'mutated' | 'rune') {
     let modType = type
-    const cleanSection = section.filter(line => !/{.*}/.test(line))
+    const cleanSection = section.filter(line => !/^[{（].*[}）]$/.test(line))
     const regSection = getStrReg(cleanSection, modType)
     if (modType === 'mutated' || modType === 'rune') modType = 'explicit'
     else modType = modType as keyof ParsedAPIMods
     if (!APImods[modType]) return ParseResult.PARSE_SECTION_FAIL
     const tempArr: ItemStat[] = []
-    for (const [index, line] of regSection.entries()) {
+    const notMatchMods: ItemStat[] = []
+
+    for (let index = 0; index < regSection.length; index++) {
+      const line = regSection[index]
       try {
         let matchMods = APImods[modType]?.entries.filter(mod => line.test(mod.text) || line.test(mod.text.replace(hasPossibilityReg, '')) || line.test(mod.text.split('\n').at(0) ?? ''))
+        if (!matchMods?.length) {
+          notMatchMods.push({ text: cleanSection[index], type: "未知", disabled: true, id: NOT_MATCHED_ID })
+        }
         if (!matchMods || !matchMods.length) continue
         if (matchMods.length > 1) {
           if (this.needFilterRegional(matchMods)) {
@@ -371,13 +377,12 @@ class ItemAnalyzer {
           if (regSectionMultiLines.length !== modMultiLineLength) return false
           return regSectionMultiLines.every((regSectionMultiLine, mi) => regSectionMultiLine.test(modMultiLine[mi] ?? '') || regSectionMultiLine.test(modMultiLine[mi]?.replace(hasPossibilityReg, '') ?? ''))
         })
-        if (!matchMods.length) continue
+
         matchMods.forEach((_matchMod) => {
           const matchMod = structuredClone(_matchMod)
           const matchModMultiLineLength = matchMod.text.split('\n').length
           const matchReg = getModMatchRegex(matchMod.text)
           let regGroup = cleanSection.slice(index, index + matchModMultiLineLength).join('\n').match(matchReg)
-          console.log(regGroup)
           if (!regGroup && matchMod.text.match(hasPossibilityReg) && !line.source.match(hasPossibilityReg)) {
             regGroup = [line.source, '100']
           }
@@ -412,6 +417,7 @@ class ItemAnalyzer {
           else {
             tempArr.push({ ...baseOption })
           }
+          index += matchModMultiLineLength - 1
         })
       }
       catch (e) {
@@ -420,7 +426,7 @@ class ItemAnalyzer {
     }
 
     if (tempArr.length) {
-      this.itemParsed.stats.push(...tempArr)
+      this.itemParsed.stats.push(...tempArr, ...notMatchMods)
       return ParseResult.PARSE_SECTION_SUCC
     }
     return ParseResult.PARSE_SECTION_SKIP
@@ -747,9 +753,6 @@ class ItemAnalyzer {
 
   private parseMap() {
     this.itemParsed.autoSearch = true
-    //TODO: api option
-    const elderMap = { id: 'implicit.stat_3624393862', text: '地圖被 # 佔據', type: 'implicit', options: [{ value: 1, text: '異界．奴役', exchange: 'enslaver-map' }, { value: 2, text: '異界．根除', exchange: 'eradicator-map' }, { value: 3, text: '異界．干擾', exchange: 'constrictor-map' }, { value: 4, text: '異界．淨化', exchange: 'purifier-map' }] } as const
-    const conquerorMap = { id: 'implicit.stat_2563183002', text: '地圖含有 # 的壁壘', type: 'implicit', options: [{ value: 1, text: '巴倫', exchange: 'barans-map' }, { value: 2, text: '維羅提尼亞', exchange: 'veritanias-map' }, { value: 3, text: '奧赫茲明', exchange: 'al-hezmins-map' }, { value: 4, text: '圖拉克斯', exchange: 'droxs-map' }] } as const
     const mapTier = this.itemParsed.baseType.match(/（階級 (\d{1,2})）/)
     if (mapTier) this.itemParsed.mapTier = { min: parseInt(mapTier[1]!), max: undefined, search: true }
     if (mapTier && this.itemParsed.raritySearch.value !== 'unique') this.itemParsed.type.searchByType = true
@@ -774,29 +777,6 @@ class ItemAnalyzer {
     const parsedSections = new Set<string[]>()
     for (const section of this.itemSection) {
       for (const line of section) {
-        if (!this.itemParsed.elderMap) {
-          const elderMatch = elderMap.options.filter(ele => line.includes(`地圖被${ele.text}佔據`))[0]
-          if (elderMatch) {
-            const elderStat = { id: 'implicit.stat_3624393862', text: elderMatch.text, value: { option: elderMatch.value }, disabled: false }
-            this.itemParsed.elderMap = elderStat
-            this.itemParsed.stats.push(elderStat)
-            parsedSections.add(section)
-            if (this.itemParsed.mapTier?.search) this.itemParsed.mapTier.search = false
-          }
-        }
-
-        if (!this.itemParsed.conquerorMap) {
-          const conquerorMatch = conquerorMap.options.filter(ele => line.includes(`地圖含有${ele.text}的壁壘`))[0]
-          if (conquerorMatch) {
-            const conquerorStat = { id: 'implicit.stat_2563183002', text: conquerorMatch.text, value: { option: conquerorMatch.value }, disabled: false }
-            this.itemParsed.conquerorMap = conquerorStat
-            this.itemParsed.stats.push(conquerorStat)
-            parsedSections.add(section)
-            if (this.itemParsed.mapTier?.search) this.itemParsed.mapTier.search = false
-            this.itemParsed.type.searchByType = true
-          }
-        }
-
         if (line.includes('區域受到開創者的記憶影響')) {
           this.itemParsed.autoSearch = true
           this.itemParsed.memoryMap = true
@@ -804,14 +784,14 @@ class ItemAnalyzer {
       }
     }
     this.itemSection = this.itemSection.filter(section => !parsedSections.has(section))
-    const parseFuns = [this.parseCorrupt.bind(this), this.parseIdentify.bind(this), this.parseEnchantMod.bind(this), this.parseExplicitMod.bind(this)]
     if (this.itemParsed.map_completion_reward) {
       this.itemSection = this.itemSection.filter(section => !section[0]?.startsWith('怪物等級：'))
     }
-    this.parseAllfuns(parseFuns)
+    this.parseAllfuns()
     if (this.itemParsed.map_completion_reward) this.itemParsed.stats.forEach(stat => stat.disabled = false)
     this.itemParsed.stats.forEach(stat => {
       if (stat.type === '附魔') stat.disabled = false
+      if (stat.id.startsWith('implicit.stat_3624393862') || stat.id.startsWith('implicit.stat_2563183002')) stat.disabled = false
     })
   }
 
