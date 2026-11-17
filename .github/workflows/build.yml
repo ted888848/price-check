@@ -1,5 +1,8 @@
 name: Build
 
+permissions:
+  contents: write
+
 on:
   push:
     tags:
@@ -35,45 +38,42 @@ jobs:
       - name: Install dependencies
         run: pnpm i
 
-      # Step 4: 執行打包並自動發佈到 GitHub Release
-      - name: Build and Publish Electron App
-        env:
-          # GitHub 會自動提供這個 Token，讓 electron-builder 有權限上傳檔案到 Release
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          VITE_MARKET_API_URL: ${{ secrets.VITE_MARKET_API_URL }}
-        run: |
-          pnpm run build -p always
-
-      # Step 5: 從前兩個 tag 之間的 commit body 產生 release notes，並更新 draft release
-      - name: Generate release notes and update draft
+      # Create the draft release with notes before uploading build artifacts.
+      - name: Create draft release with release notes
         if: startsWith(github.ref, 'refs/tags/')
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: bash
         run: |
           CURRENT_TAG="${GITHUB_REF_NAME}"
-
-          # 取得排序後倒數第二個 tag（即上一個 release tag）
           PREV_TAG=$(git tag --sort=-version:refname | grep -E '^v' | sed -n '2p')
 
-          echo "目前 tag：$CURRENT_TAG"
-          echo "前一個 tag：$PREV_TAG"
-
           if [ -z "$PREV_TAG" ]; then
-            # 若沒有前一個 tag，就取所有 commit
-            RAW=$(git log "$CURRENT_TAG" --pretty=format:"%B" -- )
+            RAW=$(git log "$CURRENT_TAG" --pretty=format:"%B" --)
           else
             RAW=$(git log "$PREV_TAG".."$CURRENT_TAG" --pretty=format:"%B" --)
           fi
 
-          # 將每一行非空白文字轉成 "- 內容" 格式，並過濾掉只有空白的行
           NOTES=$(echo "$RAW" | awk 'NF > 0 { print "- " $0 }')
-
-          echo "生成的 release notes："
+          echo "Release notes:"
           echo "$NOTES"
 
-          # 使用 gh CLI 更新對應 tag 的 draft release notes（覆蓋）
-          gh release edit "$CURRENT_TAG" --notes "$NOTES"
+          if gh release view "$CURRENT_TAG" >/dev/null 2>&1; then
+            gh release edit "$CURRENT_TAG" --notes "$NOTES"
+          else
+            gh release create "$CURRENT_TAG" \
+              --draft \
+              --title "$CURRENT_TAG" \
+              --notes "$NOTES"
+          fi
+
+      - name: Build and Publish Electron App
+        env:
+          # GitHub 會自動提供這個 Token，讓 electron-builder 有權限上傳檔案到 Release
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VITE_MARKET_API_URL: ${{ secrets.VITE_MARKET_API_URL }}
+        run: |
+          pnpm run build -p onTagOrDraft
 
       - name: Get release URL
         id: get_release_url

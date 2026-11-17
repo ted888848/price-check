@@ -34,7 +34,7 @@
     <div class="mx-0  bg-blue-900 grid grid-cols-3 select-none">
       <div v-if="!item.searchExchange.option" class="flex p-2 items-center justify-center">
         <span class="mx-1 text-white hover:cursor-default">汙染:</span>
-        <MySelect v-model="item.isCorrupt" :options="generalOption" label-key="label" :reducer="i => i.value"
+        <MySelect v-model="corruptComputed" :options="corruptOption" label-key="label" :reducer="i => i.value"
           class="flex-1" />
       </div>
       <div v-if="!item.searchExchange.option && !item.type.text.endsWith('技能寶石')"
@@ -281,7 +281,7 @@ import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/vue-query'
 import { getMarketPrice, marketQueryOption, type TMarketItemRate } from '@/renderer/lib/market'
 import MarketPrice from '../utility/MarketPrice.vue'
 import { match } from 'ts-pattern'
-import { NOT_MATCHED_ID } from '@/renderer/lib/const.ts'
+import { DOUBLE_CORRUPT_VALUE, NOT_MATCHED_ID } from '@/renderer/lib/const.ts'
 const props = defineProps<{
   itemProp: ParsedItem;
   leagueSelect: string;
@@ -313,7 +313,7 @@ watch(() => item.value, () => {
   }
 }, { immediate: true })
 const {
-  generalOption, influencesOptions, elderMapOptions,
+  generalOption, corruptOption, influencesOptions, elderMapOptions,
   conquerorMapOptions, rarityOptions, exchangeHave,
   searchOnlineTypeOptions: searchOnlineTypeOptions,
 } = selectOptions
@@ -488,6 +488,27 @@ const searchExchangeState = computed<Config['searchExchangePrefer']>({
     searchBtn()
   }
 })
+
+const corruptComputed = computed<typeof corruptOption[number]['value']>(
+  {
+    set(value) {
+      if (value === DOUBLE_CORRUPT_VALUE) {
+        item.value.isDoubleCorrupt = true
+        item.value.isCorrupt = undefined
+      }
+      else {
+        item.value.isDoubleCorrupt = undefined
+        item.value.isCorrupt = !!value
+      }
+    },
+    get() {
+      if (item.value.isDoubleCorrupt) {
+        return DOUBLE_CORRUPT_VALUE
+      }
+      return item.value.isCorrupt
+    }
+  }
+)
 watch(searchExchangeState, (value) => {
   window.ipc.send(IPC.UPDATE_CONFIG, JSON.stringify({ searchExchangePrefer: value } satisfies Partial<Config>))
 })

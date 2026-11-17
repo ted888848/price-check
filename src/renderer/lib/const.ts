@@ -1,5 +1,6 @@
 export const rarityOptions: TRarityOptions = [{ value: undefined, label: '任何' }, { value: 'normal', label: '普通' }, { value: 'magic', label: '魔法' }, { value: 'rare', label: '稀有' }, { value: 'unique', label: '傳奇' }, { value: 'nonunique', label: '非傳奇' }] as const
 export const NOT_MATCHED_ID = '__NOT_MATCHED__'
+export const DOUBLE_CORRUPT_VALUE = '__DOUBLE_CORRUPT__'
 export const defaultItemParsed: ParsedItem = Object.freeze({
   type: {
     text: '',

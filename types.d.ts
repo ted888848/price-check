@@ -154,6 +154,7 @@ interface ParsedItem {
   requireDex?: number;
   isWeaponOrArmor: boolean;
   isCorrupt?: boolean;
+  isDoubleCorrupt?: boolean;
   isIdentify?: boolean;
   isFractured?: boolean;
   isSynthesized?: boolean;

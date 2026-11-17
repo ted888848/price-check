@@ -4,7 +4,7 @@ import type { AxiosResponseHeaders } from 'axios'
 import axios from 'axios'
 import { poeVersion, secondCurrency, tradeUrl } from './index'
 import { parseRateTimeLimit, startCountdown } from './ratetimelimit'
-import { NOT_MATCHED_ID } from './const'
+import { DOUBLE_CORRUPT_VALUE, NOT_MATCHED_ID } from './const'
 
 const tradeApi = axios.create({
   baseURL: `http://localhost:${window.proxyServer.getPort()}/proxy`,
@@ -40,6 +40,7 @@ export interface ISearchJson {
       misc_filters: {
         filters: {
           corrupted?: { option: boolean };
+          twice_corrupted?: { option: boolean };
           identified?: { option: boolean };
           gem_alternate_quality?: { option: number };
           ilvl?: { min?: number; max?: number };
@@ -84,6 +85,12 @@ export interface ISearchJson {
 export const selectOptions = Object.freeze({
   generalOption: [
     { label: '任何', value: undefined },
+    { label: '是', value: true },
+    { label: '否', value: false }
+  ],
+  corruptOption: [
+    { label: '任何', value: undefined },
+    { label: '雙瓦', value: DOUBLE_CORRUPT_VALUE },
     { label: '是', value: true },
     { label: '否', value: false }
   ],
@@ -168,11 +175,18 @@ export function getSearchJSON(item: ParsedItem) {
   if (item.raritySearch.value === 'unique' && !item.type.searchByType) {
     searchJSON.query.name = item.name || undefined
   }
-  if (!isUndefined(item.isCorrupt)) {
+
+  if (!isUndefined(item.isDoubleCorrupt)) {
+    searchJSON.query.filters.misc_filters.filters.twice_corrupted = {
+      option: item.isDoubleCorrupt
+    }
+  }
+  else if (!isUndefined(item.isCorrupt)) {
     searchJSON.query.filters.misc_filters.filters.corrupted = {
       option: item.isCorrupt
     }
   }
+
   if (!isUndefined(item.isIdentify)) {
     searchJSON.query.filters.misc_filters.filters.identified = {
       option: item.isIdentify

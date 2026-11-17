@@ -530,6 +530,10 @@ class ItemAnalyzer {
       this.itemParsed.isCorrupt = true
       return ParseResult.PARSE_SECTION_SUCC
     }
+    if (section[0]?.match(/^二次汙染$/)) {
+      this.itemParsed.isDoubleCorrupt = true
+      return ParseResult.PARSE_SECTION_SUCC
+    }
     return ParseResult.PARSE_SECTION_SKIP
   }
 
