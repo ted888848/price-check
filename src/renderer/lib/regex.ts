@@ -8,6 +8,7 @@ export function getStrReg(section: string[], type: string) {
     const indexOfType = line.indexOf(` (${type})`)
     line = indexOfType > -1 ? line.substring(0, indexOfType) : line
     line = line.replace(numberPattern, '__NUMBER__')
+      .replaceAll(/​/g, "")
       .replace(/\(\.\.\.\)/, "")
       .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
       .replace(' — 無法使用的值', '')
