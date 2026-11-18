@@ -341,7 +341,7 @@ class ItemAnalyzer {
   }
   private parseMod(section: string[], type: keyof ParsedAPIMods | 'mutated' | 'rune') {
     let modType = type
-    const cleanSection = section.filter(line => !/^[{（].*[}）]$/.test(line))
+    const cleanSection = section.filter(line => !/^[{（].*[}）]( \(\w+\))?$/.test(line))
     const regSection = getStrReg(cleanSection, modType)
     if (modType === 'mutated' || modType === 'rune') modType = 'explicit'
     else modType = modType as keyof ParsedAPIMods

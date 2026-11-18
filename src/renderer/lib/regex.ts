@@ -1,6 +1,6 @@
-const decimalPattern = /\d+(?:\.\d+)?/
-const numberPattern = new RegExp(`([+-]?${decimalPattern.source}(?:\\(${decimalPattern.source}-${decimalPattern.source}\\))?)`, 'g')
-export const numberPatternWithNameGroup = new RegExp(`(?<value>[+-]?${decimalPattern.source})(?:\\((?<lowerBound>${decimalPattern.source})-(?<upperBound>${decimalPattern.source})\\))?`)
+const decimalPattern = /[+-]?\d+(?:\.\d+)?/
+const numberPattern = new RegExp(`(${decimalPattern.source}(?:\\(${decimalPattern.source}-${decimalPattern.source}\\))?)`, 'g')
+export const numberPatternWithNameGroup = new RegExp(`(?<value>${decimalPattern.source})(?:\\((?<lowerBound>${decimalPattern.source})-(?<upperBound>${decimalPattern.source})\\))?`)
 export const hasPossibilityReg = /(有 \+?#% 機率)/
 export function getStrReg(section: string[], type: string) {
   const retArr: RegExp[] = []
@@ -13,11 +13,10 @@ export function getStrReg(section: string[], type: string) {
       .replace(' — 無法使用的值', '')
       .replace(/((?:（|\()(.+?-.+?)(?:）|\)))/, '($1)?')
       .replace(/幸運|不幸/, "(?:幸運|不幸)")
-    retArr.push(new RegExp(`^${line
-      .replace(/__NUMBER__/g, "[+-]?(\\d+|#)(?:\\(\\d+-\\d+\\))?")
+      .replace(/__NUMBER__/g, "[+-]?(\\d+|#)(?:\\(-?\\d+--?\\d+\\))?")
       .replace(/減少|增加/, "(?:減少|增加)")
       .replace(/更多|更少/, "(?:更多|更少)")
-      }( \\(部分\\))?$`))
+    retArr.push(new RegExp(`^${line}( \\(部分\\))?$`))
   })
   return retArr
 }
