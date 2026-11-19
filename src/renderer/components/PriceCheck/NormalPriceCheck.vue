@@ -498,7 +498,7 @@ const corruptComputed = computed<typeof corruptOption[number]['value']>(
       }
       else {
         item.value.isDoubleCorrupt = undefined
-        item.value.isCorrupt = !!value
+        item.value.isCorrupt = (value as boolean | undefined)
       }
     },
     get() {
