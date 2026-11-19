@@ -4,7 +4,7 @@ import { isPOE2, poeVersion, secondCurrency } from '.'
 import { getModMatchRegex, getStrReg, hasPossibilityReg, numberPatternWithNameGroup } from './regex'
 import { match, P } from 'ts-pattern'
 import { defaultItemParsed, NOT_MATCHED_ID, rarityOptions, typeTrans } from './const'
-import { countBy } from 'lodash-es'
+import { countBy, isUndefined } from 'lodash-es'
 enum ParseResult {
   PARSE_SECTION_FAIL,
   PARSE_SECTION_SUCC,
@@ -982,8 +982,10 @@ class ItemAnalyzer {
       if (stat.type === '固定') {
         stat.disabled = false
         if (stat.lowerBound && stat.upperBound && stat.value) {
-          stat.value.min = Math.min(stat.lowerBound, stat.upperBound)
-          stat.value.max = Math.max(stat.lowerBound, stat.upperBound)
+          const [lowerBound, upperBound] = [stat.lowerBound, stat.upperBound].sort((a, b) => a - b)
+          stat.value.min = !isUndefined(stat.value.min) ? Math.max(stat.value.min, lowerBound) : lowerBound
+          stat.value.max = upperBound
+
         }
       }
     })
