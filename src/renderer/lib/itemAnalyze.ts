@@ -101,16 +101,13 @@ class ItemAnalyzer {
         this.findUnique('map')
         this.parseMap()
       })
-      .with({ text: P.union('可堆疊通貨', '預兆', '地圖碎片', '遺鑰', '命運卡', '掘獄可堆疊有插槽通貨') }, ({ text }) => {
-        let shouldSkip = false
-        if (text === '可堆疊通貨') {
-          shouldSkip = this.parseBeastItem()
-        }
-        if (!shouldSkip) {
+      .with({ text: P.union('可堆疊通貨', '預兆', '地圖碎片', '遺鑰', '命運卡', '掘獄可堆疊有插槽通貨') }, () => {
+        const isBeastItem = this.parseBeastItem()
+        if (!isBeastItem) {
           if (this.config.autoSearchStackableItems) this.itemParsed.autoSearch = true
           this.parseAllfuns()
+          searchExchange = true
         }
-        searchExchange = true
       })
       .with({ text: P.union('技能寶石', '輔助寶石') }, () => {
         this.parseGem()
@@ -902,6 +899,7 @@ class ItemAnalyzer {
   }
 
   private parseBeastItem() {
+    if (this.itemParsed.type.text !== "可堆疊通貨") return false
     let isBeastItem = false
     APIitems['monster']?.entries.forEach(monster => {
       if (monster.type === this.itemParsed.baseType) {
