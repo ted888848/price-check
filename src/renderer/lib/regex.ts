@@ -17,7 +17,7 @@ export function getStrReg(section: string[], type: string) {
       .replace(/__NUMBER__/g, "[+-]?(\\d+|#)(?:\\(-?\\d+--?\\d+\\))?")
       .replace(/減少|增加/, "(?:減少|增加)")
       .replace(/更多|更少/, "(?:更多|更少)")
-    retArr.push(new RegExp(`^${line}( \\(部分\\))?$`))
+    retArr.push(new RegExp(`^${line}( \\(部分\\))?`))
   })
   return retArr
 }

@@ -355,6 +355,7 @@ class ItemAnalyzer {
         }
         if (!matchMods || !matchMods.length) continue
         if (matchMods.length > 1) {
+          matchMods = matchMods.filter(mod => !mod.text.endsWith('(古典)'))
           if (this.needFilterRegional(matchMods)) {
             matchMods = matchMods.filter(mod => mod.text.endsWith(' (部分)'))
           }
