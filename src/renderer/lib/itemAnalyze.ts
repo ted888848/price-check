@@ -53,7 +53,7 @@ class ItemAnalyzer {
     const itemArr = item.split(/\r?\n/)
     const result: string[][] = [[]]
     itemArr.reduce((section, line) => {
-      if (line !== '--------') {
+      if (line !== '--------' && line) {
         section?.push(line)
         return section
       }

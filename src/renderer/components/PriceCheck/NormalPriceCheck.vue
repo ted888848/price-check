@@ -325,6 +325,7 @@ function modTextColor(type?: string) {
     .with('隨機', () => 'red')
     .with('偽屬性', () => '#9936eb')
     .with('穢生', () => '#8B4513')
+    .with('未知', () => 'gray')
     .otherwise(() => 'white')
 }
 
