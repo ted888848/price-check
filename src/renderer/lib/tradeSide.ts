@@ -74,6 +74,13 @@ export interface ISearchJson {
         filters: {
           rune_sockets?: { min?: number; max?: number };
         }
+      };
+      ultimatum_filters?: {
+        filters: {
+          ultimatum_input?: { option: string };
+          ultimatum_output?: { option: string };
+          ultimatum_reward?: { option: string };
+        }
       }
     };
     stats: [{ type: 'and'; filters: ItemStat[] }];
@@ -339,6 +346,43 @@ export function getSearchJSON(item: ParsedItem) {
         rune_sockets: {
           min: item.socketCount.min,
           max: item.socketCount.max
+        }
+      }
+    }
+  }
+
+  if (item.inscribed) {
+    const isDoubleInput = item.inscribed.rewardItem?.startsWith('翻倍獻祭的')
+    const isMirror = item.inscribed.rewardItem === '物品和複製品'
+    if (isMirror) {
+      searchJSON.query.filters.ultimatum_filters = {
+        filters: {
+          ultimatum_reward: {
+            option: 'MirrorRare'
+          }
+        }
+      }
+    }
+    else if (isDoubleInput && item.inscribed.requirementItem) {
+      searchJSON.query.filters.ultimatum_filters = {
+        filters: {
+          ultimatum_input: {
+            option: item.inscribed.requirementItem
+          }
+        }
+      }
+    }
+    else if (item.inscribed.rewardItem) {
+      searchJSON.query.filters.ultimatum_filters = {
+        filters: {
+          ultimatum_output: {
+            option: item.inscribed.rewardItem
+          }
+        }
+      }
+      if (item.inscribed.searchRequirementItem && item.inscribed.requirementItem) {
+        searchJSON.query.filters.ultimatum_filters.filters.ultimatum_input = {
+          option: item.inscribed.requirementItem
         }
       }
     }

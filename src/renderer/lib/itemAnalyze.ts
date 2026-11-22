@@ -144,6 +144,7 @@ class ItemAnalyzer {
     }
     if (this.itemParsed.raritySearch.label === '傳奇' && this.itemParsed.name) this.itemParsed.autoSearch = true
     if (this.itemParsed.baseType === '阿茲瓦特史記') this.parseTemple()
+    if (this.itemParsed.baseType === '最後通牒雕刻') this.parseInscribed()
 
     return this.itemParsed
   }
@@ -974,6 +975,17 @@ class ItemAnalyzer {
     if (this.itemParsed.baseType === '永恆珠寶' && this.itemParsed.rarity === '傳奇') {
       this.parseTimelessJewel()
     }
+  }
+  //最終通牒雕刻
+  private parseInscribed() {
+    const inscribedSection = this.itemSection.find(section => section.some(line => line.startsWith('挑戰: ')))
+    if (!inscribedSection) return
+    //需求獻祭: 混沌石 x10
+    const requirementItem = inscribedSection.find(line => line.startsWith('需求獻祭: '))?.match(/需求獻祭: (?<item>.+?)(?:\sx(\d+))?$/)?.groups?.item
+    const rewardItem = inscribedSection.find(line => line.startsWith('獎勵: '))?.match(/獎勵: (?<item>.+?)(?:\sx(\d+))?$/)?.groups?.item
+    const defaultSearchRequirement = rewardItem?.startsWith('翻倍獻祭的') || rewardItem === '物品和複製品'
+    this.itemParsed.inscribed = { requirementItem, rewardItem, searchRequirementItem: defaultSearchRequirement } satisfies ParsedItem['inscribed']
+    this.itemParsed.autoSearch = true
   }
   private parseViscera() {
     this.parseAllfuns()

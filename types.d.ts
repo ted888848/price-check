@@ -201,6 +201,11 @@ interface ParsedItem {
   map_completion_reward?: string;
   socketCount?: ItemValue;
   isExcellenceItem?: boolean; //POE2
+  inscribed?: {
+    requirementItem?: string;
+    searchRequirementItem?: boolean;
+    rewardItem?: string;
+  }
   // [key: string]: any;
 
 

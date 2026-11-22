@@ -31,6 +31,20 @@
         {{ item.map_completion_reward }}
       </span>
     </div>
+    <div v-if="item.inscribed" class="text-white text-center flex justify-center px-2">
+      <div class="flex-1 flex flex-col" :class="{ 'text-red-500': !item.inscribed.searchRequirementItem }" @click="() => {
+        if (!item.inscribed || item.inscribed.rewardItem?.startsWith('翻倍獻祭的') || item.inscribed.rewardItem === '物品和複製品') return
+        item.inscribed.searchRequirementItem = !item.inscribed.searchRequirementItem
+      }">
+        獻祭: {{ item.inscribed.requirementItem }}
+        <span v-if="item.inscribed.rewardItem?.startsWith('翻倍獻祭的')" class="text-yellow-500 text-xs">
+          目前沒有辦法顯示該筆是x1還是x4翻倍
+        </span>
+      </div>
+      <span class="flex-1">
+        獎勵: {{ item.inscribed.rewardItem }}
+      </span>
+    </div>
     <div class="mx-0  bg-blue-900 grid grid-cols-3 select-none">
       <div v-if="!item.searchExchange.option" class="flex p-2 items-center justify-center">
         <span class="mx-1 text-white hover:cursor-default">汙染:</span>
