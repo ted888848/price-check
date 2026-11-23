@@ -4,7 +4,6 @@ import { app, session, dialog } from "electron"; //, shell
 import { autoUpdater } from "electron-updater";
 import { buildTray } from "./tray";
 import { config } from "./config";
-import axios from "axios";
 import { match } from "ts-pattern";
 const store1 = new Store({
   name: "APIData",
@@ -156,7 +155,7 @@ function setupAPIMods(statsJson: APIStats) {
   const APImods: Partial<ParsedAPIMods> = {};
   statsJson.result.forEach((statsGroup) => {
     match(statsGroup.id)
-      .with("pseudo", (id) => {
+      .with("pseudo", () => {
         APImods.pseudo = {
           label: statsGroup.label,
           entries: statsGroup.entries
@@ -308,14 +307,7 @@ async function getStatic(poeVersion: POEVersion = "1") {
   store.set("currencyImageUrl", _currencyImageUrl);
   store.set("APIStatic", setupAPIStatic(data.result));
 }
-async function getItemNameTranslation(poeVersion: POEVersion = "1") {
-  const response = await axios.get<POEDBItemTranslationResponse>(
-    `https://poe${poeVersion === "2" ? "2" : ""}db.tw/tw/api/Trade`,
-  );
-  const data = response.data.data.filter((ele) => ele.lang && !ele.lang.includes("外觀"));
-  const store = poeVersion === "2" ? store2 : store1;
-  store.set("itemNameTranslation", data);
-}
+
 export async function get1APIdata() {
   const result = await Promise.allSettled([
     getLeagues(),

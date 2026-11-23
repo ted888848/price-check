@@ -12,7 +12,6 @@ type TempClipboardJob = {
 };
 
 let tempClipboardJob: TempClipboardJob | null = null;
-let tempClipboardJobId: null | number = null;
 
 function cancelTempClipboardJob(restore = true) {
   if (!tempClipboardJob) return;

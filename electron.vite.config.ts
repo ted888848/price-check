@@ -17,7 +17,7 @@ const baseConfig = {
 } satisfies import("vite").UserConfig;
 
 // https://vitejs.dev/config/
-export default defineConfig(({ command }) => {
+export default defineConfig(() => {
   return {
     main: {
       ...baseConfig,

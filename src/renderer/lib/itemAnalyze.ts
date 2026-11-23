@@ -684,7 +684,7 @@ class ItemAnalyzer {
           eleRes += (mod.value?.min ?? mod.value?.max ?? 0) * 3;
           flag = true;
         })
-        .otherwise(() => {});
+        .otherwise(() => { });
     });
     if (flag) {
       this.itemParsed.stats.push({
@@ -886,9 +886,9 @@ class ItemAnalyzer {
 
   private parseOtherHaveMods() {
     if (this.itemParsed.name === "贗品．龍牙翱翔") {
-      outer: for (const section of this.itemSection) {
+      for (const section of this.itemSection) {
         for (let index = 0; index < section.length; index++) {
-          const match = section[index]!.match(/全部 ([^\s]+) 寶石等級 \+3/);
+          const match = section[index]!.match(/^全部 ([^\s]+) 寶石等級 \+3$/);
           if (match) section[index] = `全部 # 寶石等級 +${match[1]}`;
         }
       }
@@ -903,7 +903,7 @@ class ItemAnalyzer {
     }
     if (this.itemParsed.type.option === "memoryline") {
       this.itemParsed.stats.forEach((ele) => (ele.disabled = false));
-      this.itemParsed.itemLevel && (this.itemParsed.itemLevel.search = false);
+      if (this.itemParsed.itemLevel) this.itemParsed.itemLevel.search = false
       this.itemParsed.autoSearch = true;
     }
   }

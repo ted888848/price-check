@@ -498,7 +498,7 @@ const {
   conquerorMapOptions,
   rarityOptions,
   exchangeHave,
-  searchOnlineTypeOptions: searchOnlineTypeOptions,
+  searchOnlineTypeOptions,
 } = selectOptions;
 function modTextColor(type?: string) {
   return match(type)

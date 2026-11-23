@@ -137,7 +137,7 @@ const props = defineProps<{
   isOverflow: () => boolean;
 }>();
 const { remaining, isActive } = useMyCountdown();
-const { searchOnlineTypeOptions: searchOnlineTypeOptions } = selectOptions;
+const { searchOnlineTypeOptions } = selectOptions;
 const baseSearchJSON = Object.freeze({
   query: {
     filters: {

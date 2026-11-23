@@ -18,11 +18,11 @@ const tradeApi = axios.create({
 export interface ISearchJson {
   query: {
     type?:
-      | {
-          discriminator: string;
-          option: string;
-        }
-      | string;
+    | {
+      discriminator: string;
+      option: string;
+    }
+    | string;
     name?: string;
     filters: {
       trade_filters: {
@@ -50,7 +50,7 @@ export interface ISearchJson {
           quality?: { min?: number; max?: number };
           alternate_art?: { option: boolean };
           //3.27
-          foulborn_item?: { option: boolean };
+          mutated?: { option: boolean };
           mirrored?: { option: boolean };
         };
       };
@@ -286,13 +286,13 @@ export function getSearchJSON(item: ParsedItem) {
     if (stat.id === NOT_MATCHED_ID) continue;
     if (item.isIdentify === false && stat.type && ["隨機", "穢生"].includes(stat.type)) continue;
     const isSearchWithEmptyValue = stat.searchWithEmptyValue;
-    const { searchWithEmptyValue, ..._stat } = stat;
+    const { searchWithEmptyValue: _searchWithEmptyValue, ...otherStat } = stat;
     if (isSearchWithEmptyValue) {
-      const { value, ...statWithoutVale } = _stat;
+      const { value: _value, ...statWithoutVale } = otherStat;
       statWithoutVale.disabled = false;
       searchJSON.query.stats[0].filters.push(statWithoutVale);
     } else {
-      searchJSON.query.stats[0].filters.push(_stat);
+      searchJSON.query.stats[0].filters.push(otherStat);
     }
   }
   searchJSON.query.stats[0].filters.push(...item.influences);
@@ -332,8 +332,8 @@ export function getSearchJSON(item: ParsedItem) {
 
   //3.27
   if (item.foulborn) {
-    searchJSON.query.filters.misc_filters.filters.foulborn_item = {
-      option: (true ? "yes" : "no") as unknown as boolean,
+    searchJSON.query.filters.misc_filters.filters.mutated = {
+      option: true
     };
   }
 
@@ -521,7 +521,7 @@ export async function getDivineToChaosOrExalted(league: string) {
         (pre, curr) =>
           pre +
           data.result[curr].listing.offers[0].item.amount /
-            data.result[curr].listing.offers[0].exchange.amount,
+          data.result[curr].listing.offers[0].exchange.amount,
         chaosOrExalted,
       );
       chaosOrExalted /= temp.length;

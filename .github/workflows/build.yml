@@ -49,9 +49,9 @@ jobs:
           PREV_TAG=$(git tag --sort=-version:refname | grep -E '^v' | sed -n '2p')
 
           if [ -z "$PREV_TAG" ]; then
-            RAW=$(git log "$CURRENT_TAG" --pretty=format:"%B" --)
+            RAW=$(git log "$CURRENT_TAG" --pretty=format:"%B" --invert-grep --grep='^chore:' --)
           else
-            RAW=$(git log "$PREV_TAG".."$CURRENT_TAG" --pretty=format:"%B" --)
+            RAW=$(git log "$PREV_TAG".."$CURRENT_TAG" --pretty=format:"%B" --invert-grep --grep='^chore:' --)
           fi
 
           NOTES=$(echo "$RAW" | awk 'NF > 0 { print "- " $0 }')
