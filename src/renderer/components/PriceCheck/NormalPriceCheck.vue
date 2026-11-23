@@ -199,7 +199,7 @@
       <button
         class="mx-2 bg-gray-500 text-white rounded px-1 hover:bg-gray-400 disabled:cursor-default disabled:opacity-60 disabled:bg-gray-500"
         :disabled="isActive" @click="() => searchBtn(true)">
-        Search2
+        Search{{ poeVersion === "2" ? "E" : "C" }}
       </button>
       <div v-if="searchResult.err || searchResult.searchID.ID">
         <button
@@ -288,7 +288,7 @@ import { APIStatic, divineImage, chaosOrExImage, currencyImageUrl } from '@/rend
 import CircleCheck from '../utility/CircleCheck.vue'
 import ValueMinMax from '../utility/ValueMinMax.vue'
 import type { ISearchResult, IExchangeResult, IFetchResult } from '@/renderer/lib/tradeSide'
-import { secondCurrency, tradeUrl } from '@/renderer/lib'
+import { poeVersion, secondCurrency, tradeUrl } from '@/renderer/lib'
 import MySelect from '../utility/MySelect.vue'
 import { useMyCountdown } from '@/renderer/lib/ratetimelimit'
 import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/vue-query'
