@@ -458,7 +458,7 @@ class ItemAnalyzer {
             (type === "explicit" || type === "implicit");
           const baseOption: ItemStat = {
             ...matchMod,
-            disabled: type === "mutated" ? false : true,
+            disabled: type === "mutated" ? false : !isSearchWithEmptyValue,
             type: type === "mutated" ? "穢生" : (APImods[modType]?.type ?? type),
             searchWithEmptyValue: isSearchWithEmptyValue,
           };

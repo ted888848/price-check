@@ -265,6 +265,24 @@
           <td class="w-14 text-center hover:cursor-default">種類</td>
           <td class="text-center hover:cursor-default">詞綴</td>
           <td class="w-11 text-center hover:cursor-default">最小</td>
+          <td
+            class="w-3 text-center hover:cursor-default"
+            @click="
+              (e) => {
+                e.stopPropagation();
+                const firstHaveEmptyValue = item.stats.find(
+                  (mod) => !isUndefined(mod.searchWithEmptyValue),
+                );
+                if (!firstHaveEmptyValue) return;
+                const nextState = !firstHaveEmptyValue.searchWithEmptyValue;
+                item.stats.forEach((mod) => (mod.searchWithEmptyValue = nextState));
+              }
+            "
+          >
+            <ElTooltip content="可以點擊'-'設定是否搜尋最大最小值" placement="top">
+              <div class="i-material-symbols:info-outline size-4" />
+            </ElTooltip>
+          </td>
           <td class="w-11 text-center hover:cursor-default">最大</td>
         </tr>
       </thead>
@@ -275,7 +293,7 @@
           class="border-b-2 border-gray-400"
         >
           <td class="text-base" @click="() => handleModClick(mod)">
-            <CircleCheck :checked="mod.searchWithEmptyValue ? 'indeterminate' : !mod.disabled" />
+            <CircleCheck :checked="!mod.disabled" />
           </td>
           <td
             class="whitespace-nowrap text-lg font-semibold hover:cursor-default"
@@ -293,8 +311,20 @@
               v-model.number="mod.value.min"
               type="number"
               class="w-8 appearance-none rounded bg-gray-400 text-center text-black font-bold"
+              :class="{ 'opacity-20': mod.searchWithEmptyValue }"
               @dblclick="() => delete mod.value!.min"
             />
+          </td>
+          <td
+            class="cursor-pointer"
+            @click="
+              () => {
+                if (!(mod.value && !mod.value.option)) return;
+                mod.searchWithEmptyValue = !mod.searchWithEmptyValue;
+              }
+            "
+          >
+            <span v-if="mod.value && !mod.value.option" class="text-white font-bold"> - </span>
           </td>
           <td>
             <input
@@ -302,6 +332,7 @@
               v-model.number="mod.value.max"
               type="number"
               class="w-8 appearance-none rounded bg-gray-400 text-center text-black font-bold"
+              :class="{ 'opacity-20': mod.searchWithEmptyValue }"
               @dblclick="() => delete mod.value!.max"
             />
           </td>
@@ -434,7 +465,7 @@
 </template>
 
 <script setup lang="ts">
-import { countBy, maxBy } from "lodash-es";
+import { countBy, isUndefined, maxBy } from "lodash-es";
 import { computed, ref, nextTick, watch, onUnmounted, toRaw } from "vue";
 import {
   getSearchJSON,
@@ -456,6 +487,7 @@ import { getMarketPrice, marketQueryOption, type TMarketItemRate } from "@/rende
 import MarketPrice from "../utility/MarketPrice.vue";
 import { match } from "ts-pattern";
 import { DOUBLE_CORRUPT_VALUE, NOT_MATCHED_ID } from "@/renderer/lib/const";
+import { ElTooltip } from "element-plus";
 const props = defineProps<{
   itemProp: ParsedItem;
   leagueSelect: string;
@@ -785,10 +817,7 @@ function handleKeydown(e: KeyboardEvent) {
 
 function handleModClick(mod: ItemStat) {
   if (mod.id === NOT_MATCHED_ID) return;
-  if (mod.searchWithEmptyValue) {
-    mod.disabled = false;
-    delete mod.searchWithEmptyValue;
-  } else mod.disabled = !mod.disabled;
+  mod.disabled = !mod.disabled;
 }
 window.addEventListener("keydown", handleKeydown);
 onUnmounted(() => {

@@ -294,7 +294,6 @@ export function getSearchJSON(item: ParsedItem) {
     const { searchWithEmptyValue: _searchWithEmptyValue, ...otherStat } = stat;
     if (isSearchWithEmptyValue) {
       const { value: _value, ...statWithoutVale } = otherStat;
-      statWithoutVale.disabled = false;
       searchJSON.query.stats[0].filters.push(statWithoutVale);
     } else {
       searchJSON.query.stats[0].filters.push(otherStat);
