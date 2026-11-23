@@ -1,118 +1,143 @@
-import { GGCapi } from '@/lib/api'
-import Store from 'electron-store'
-import { app, session, dialog } from 'electron' //, shell
-import { autoUpdater } from 'electron-updater'
-import { buildTray } from './tray'
-import { config } from './config'
-import axios from 'axios'
-import { match } from 'ts-pattern'
+import { GGCapi } from "@/lib/api";
+import Store from "electron-store";
+import { app, session, dialog } from "electron"; //, shell
+import { autoUpdater } from "electron-updater";
+import { buildTray } from "./tray";
+import { config } from "./config";
+import axios from "axios";
+import { match } from "ts-pattern";
 const store1 = new Store({
-  name: 'APIData'
-})
+  name: "APIData",
+});
 
 const store2 = new Store({
-  name: 'API2Data'
-})
+  name: "API2Data",
+});
 
-function setupItemEntries(itemArray: APIItem['entries'], heistReward: HeistReward[]) {
-  const itemBaseType: Item['entries'] = []
+function setupItemEntries(itemArray: APIItem["entries"], heistReward: HeistReward[]) {
+  const itemBaseType: Item["entries"] = [];
   try {
     itemArray.slice().forEach((item) => {
-      let tempItem = itemBaseType.find(element => element.type === item.type)
+      let tempItem = itemBaseType.find((element) => element.type === item.type);
       if (!tempItem) {
         tempItem = {
           type: item.type,
           text: item.type,
-          unique: []
-        }
+          unique: [],
+        };
       }
       if (item.flags?.unique === true) {
-        tempItem.unique ||= []
+        tempItem.unique ||= [];
         tempItem.unique.push({
-          name: item.name, text: item.text
-        })
-        if (item.name?.startsWith('贗品')) {
+          name: item.name,
+          text: item.text,
+        });
+        if (item.name?.startsWith("贗品")) {
           heistReward.push({
-            name: item.name, type: item.type, text: item.text
-          })
+            name: item.name,
+            type: item.type,
+            text: item.text,
+          });
         }
       }
-      itemBaseType.push(tempItem)
-    })
+      itemBaseType.push(tempItem);
+    });
   } catch (e) {
-    console.log(e)
+    console.log(e);
   }
-  return itemBaseType
+  return itemBaseType;
 }
-function parseGams(gemEntries: APIItem['entries']) {
-  const result: ItemGem['entries'] = []
+function parseGams(gemEntries: APIItem["entries"]) {
+  const result: ItemGem["entries"] = [];
   gemEntries.forEach((gem) => {
-    if (gem.disc && !gem.disc.startsWith('alt_')) return
-    if (gem.disc && gem.disc.startsWith('alt_')) {
-      const sameTypeGem = result.find(resultGem => resultGem.type === gem.type)
+    if (gem.disc && !gem.disc.startsWith("alt_")) return;
+    if (gem.disc && gem.disc.startsWith("alt_")) {
+      const sameTypeGem = result.find((resultGem) => resultGem.type === gem.type);
       if (sameTypeGem) {
-        sameTypeGem.trans ||= []
+        sameTypeGem.trans ||= [];
         sameTypeGem.trans.push({
-          text: gem.text, disc: gem.disc
-        })
-      }
-      else {
+          text: gem.text,
+          disc: gem.disc,
+        });
+      } else {
         result.push({
           type: gem.type,
           text: gem.type,
-          trans: [{
-            text: gem.text, disc: gem.disc
-          }]
-        })
+          trans: [
+            {
+              text: gem.text,
+              disc: gem.disc,
+            },
+          ],
+        });
       }
-    }
-    else {
+    } else {
       result.push({
-        type: gem.type, text: gem.type, trans: []
-      })
+        type: gem.type,
+        text: gem.type,
+        trans: [],
+      });
     }
-  })
-  return result
+  });
+  return result;
 }
 function setupAPIItems(itemsJson: APIItems) {
-  const APIitems: Partial<ParsedAPIitems> = {
-  }
-  const heistReward: HeistReward[] = []
+  const APIitems: Partial<ParsedAPIitems> = {};
+  const heistReward: HeistReward[] = [];
   itemsJson.result.forEach((itemGroup) => {
-    const groupID = itemGroup.id as keyof ParsedAPIitems
+    const groupID = itemGroup.id as keyof ParsedAPIitems;
     match(groupID)
-      .with('accessory', 'armour', 'flask', 'jewel', 'weapon', 'watchstones', 'heistequipment', 'heistmission', 'logbook', (id) => {
-        APIitems[id] = {
-          id: itemGroup.id,
-          label: itemGroup.label,
-          entries: setupItemEntries(itemGroup.entries, heistReward)
-        }
-      })
-      .with('map', () => {
+      .with(
+        "accessory",
+        "armour",
+        "flask",
+        "jewel",
+        "weapon",
+        "watchstones",
+        "heistequipment",
+        "heistmission",
+        "logbook",
+        (id) => {
+          APIitems[id] = {
+            id: itemGroup.id,
+            label: itemGroup.label,
+            entries: setupItemEntries(itemGroup.entries, heistReward),
+          };
+        },
+      )
+      .with("map", () => {
         APIitems[groupID] = {
           id: itemGroup.id,
           label: itemGroup.label,
-          entries: setupItemEntries(itemGroup.entries.filter((ele) => ele.disc === 'warfortheatlas'), heistReward)
-        }
+          entries: setupItemEntries(
+            itemGroup.entries.filter((ele) => ele.disc === "warfortheatlas"),
+            heistReward,
+          ),
+        };
       })
-      .with('card', 'currency', () => {
-        APIitems[groupID] = itemGroup
+      .with("card", "currency", () => {
+        APIitems[groupID] = itemGroup;
       })
-      .with('gem', () => {
+      .with("gem", () => {
         APIitems[groupID] = {
-          ...itemGroup, entries: parseGams(itemGroup.entries), id: 'gems'
-        }
-        heistReward.push(...parseGams(itemGroup.entries))
+          ...itemGroup,
+          entries: parseGams(itemGroup.entries),
+          id: "gems",
+        };
+        heistReward.push(...parseGams(itemGroup.entries));
       })
       .otherwise(() => {
         APIitems[groupID] = {
-          ...itemGroup, entries: setupItemEntries(itemGroup.entries, heistReward), id: groupID as string
-        }
-      })
-  })
+          ...itemGroup,
+          entries: setupItemEntries(itemGroup.entries, heistReward),
+          id: groupID as string,
+        };
+      });
+  });
   return {
-    APIitems, heistReward
-  }
+    APIitems,
+    heistReward,
+  };
 }
 // function checkNewline(statsGroup: APIStatsItem) {
 //   const mutiLines: ParsedAPIMod['mutiLines'] = []
@@ -128,255 +153,272 @@ function setupAPIItems(itemsJson: APIItems) {
 //   return undefined
 // }
 function setupAPIMods(statsJson: APIStats) {
-  const APImods: Partial<ParsedAPIMods> = {
-  }
+  const APImods: Partial<ParsedAPIMods> = {};
   statsJson.result.forEach((statsGroup) => {
     match(statsGroup.id)
-      .with('pseudo', (id) => {
+      .with("pseudo", (id) => {
         APImods.pseudo = {
           label: statsGroup.label,
-          entries: statsGroup.entries.filter((stat) => stat.text.indexOf('有房間：') === -1)
-            .map((stat) => ({
-              id: stat.id, text: stat.text, option: stat.option
-            })),
-          type: '偽屬性'
-        }
-        APImods.temple = {
-          label: statsGroup.label,
-          entries: statsGroup.entries.filter((stat) => stat.text.indexOf('有房間：') > -1)
+          entries: statsGroup.entries
+            .filter((stat) => stat.text.indexOf("有房間：") === -1)
             .map((stat) => ({
               id: stat.id,
-              text: stat.text.substring(4).replace(/（階級 [123]）/, ''),
-              value: {
-                option: 1
-              }
+              text: stat.text,
+              option: stat.option,
             })),
-          type: '神廟'
-        }
+          type: "偽屬性",
+        };
+        APImods.temple = {
+          label: statsGroup.label,
+          entries: statsGroup.entries
+            .filter((stat) => stat.text.indexOf("有房間：") > -1)
+            .map((stat) => ({
+              id: stat.id,
+              text: stat.text.substring(4).replace(/（階級 [123]）/, ""),
+              value: {
+                option: 1,
+              },
+            })),
+          type: "神廟",
+        };
       })
-      .with('explicit', () => {
+      .with("explicit", () => {
         APImods.forbiddenJewel = {
           label: statsGroup.label,
-          entries: statsGroup.entries.filter((ele) => /^若你在禁忌(烈焰|血肉)上有符合的詞綴，配置 #$/.test(ele.text)),
-          type: '隨機'
-        }
+          entries: statsGroup.entries.filter((ele) =>
+            /^若你在禁忌(烈焰|血肉)上有符合的詞綴，配置 #$/.test(ele.text),
+          ),
+          type: "隨機",
+        };
         APImods.explicit = {
           label: statsGroup.label,
           entries: statsGroup.entries.map((ele) => ({
-            ...ele
+            ...ele,
           })),
-          type: '隨機'
-        }
+          type: "隨機",
+        };
       })
-      .with('implicit', () => {
+      .with("implicit", () => {
         APImods.implicit = {
           label: statsGroup.label,
           entries: statsGroup.entries.map((ele) => ({
-            ...ele
+            ...ele,
           })),
-          type: '固定'
-        }
+          type: "固定",
+        };
       })
-      .with('fractured', () => {
+      .with("fractured", () => {
         APImods.fractured = {
           label: statsGroup.label,
           entries: statsGroup.entries.map((ele) => ({
-            ...ele
+            ...ele,
           })),
-          type: '破裂'
-        }
+          type: "破裂",
+        };
       })
-      .with('enchant', () => {
+      .with("enchant", () => {
         APImods.enchant = {
           label: statsGroup.label,
           entries: statsGroup.entries.map((ele) => ({
-            ...ele
-          }))
-          ,
-          type: '附魔'
-        }
+            ...ele,
+          })),
+          type: "附魔",
+        };
       })
-      .with('crafted', () => {
+      .with("crafted", () => {
         APImods.crafted = {
           label: statsGroup.label,
           entries: statsGroup.entries.map((ele) => ({
-            ...ele
+            ...ele,
           })),
-          type: '工藝'
-        }
+          type: "工藝",
+        };
       })
-      .with('sanctum', () => {
+      .with("sanctum", () => {
         APImods.sanctum = {
           label: statsGroup.label,
           entries: statsGroup.entries.map((ele) => ({
-            ...ele
+            ...ele,
           })),
-          type: '聖域'
-        }
+          type: "聖域",
+        };
       })
-      .with('necropolis', () => {
+      .with("necropolis", () => {
         APImods.necropolis = {
           label: statsGroup.label,
           entries: statsGroup.entries.map((ele) => ({
-            ...ele
+            ...ele,
           })),
-          type: '棺材'
-        }
+          type: "棺材",
+        };
       })
       .otherwise(() => {
         APImods[statsGroup.id as keyof ParsedAPIMods] = {
           label: statsGroup.label,
           entries: statsGroup.entries.map((ele) => ({
-            ...ele
+            ...ele,
           })),
-          type: statsGroup.id
-        }
-      })
-  })
-  return APImods
+          type: statsGroup.id,
+        };
+      });
+  });
+  return APImods;
 }
 function setupAPIStatic(data: APIStaticItem[]) {
-  let APIStatic: Static[] = []
+  let APIStatic: Static[] = [];
   data.forEach((group) => {
-    if (group.label?.match(/^地圖(（|\s\()/)) return
-    if (group.label === '命運卡') {
-      group.entries = group.entries.map((ele => ({ ...ele, image: '/gen/image/WzI1LDE0LHsiZiI6IjJESXRlbXMvRGl2aW5hdGlvbi9JbnZlbnRvcnlJY29uIiwidyI6MSwiaCI6MSwic2NhbGUiOjF9XQ/f34bf8cbb5/InventoryIcon.png' })))
+    if (group.label?.match(/^地圖(（|\s\()/)) return;
+    if (group.label === "命運卡") {
+      group.entries = group.entries.map((ele) => ({
+        ...ele,
+        image:
+          "/gen/image/WzI1LDE0LHsiZiI6IjJESXRlbXMvRGl2aW5hdGlvbi9JbnZlbnRvcnlJY29uIiwidyI6MSwiaCI6MSwic2NhbGUiOjF9XQ/f34bf8cbb5/InventoryIcon.png",
+      }));
     }
-    APIStatic = APIStatic.concat(structuredClone(group.entries))
-  })
-  return APIStatic
+    APIStatic = APIStatic.concat(structuredClone(group.entries));
+  });
+  return APIStatic;
 }
-async function getLeagues(poeVersion: POEVersion = '1') {
-  const response = await GGCapi.get(`trade${poeVersion === '2' ? '2' : ''}/data/leagues`)
-  const data = response.data as APILeagues
-  const leagues = data.result.map((l) => l.text)
-  const store = poeVersion === '2' ? store2 : store1
-  store.set('Leagues', leagues)
+async function getLeagues(poeVersion: POEVersion = "1") {
+  const response = await GGCapi.get(`trade${poeVersion === "2" ? "2" : ""}/data/leagues`);
+  const data = response.data as APILeagues;
+  const leagues = data.result.map((l) => l.text);
+  const store = poeVersion === "2" ? store2 : store1;
+  store.set("Leagues", leagues);
 }
-async function getItems(poeVersion: POEVersion = '1') {
-  const response = await GGCapi.get(`trade${poeVersion === '2' ? '2' : ''}/data/items`)
-  const data = response.data as APIItems
-  const { APIitems, heistReward } = setupAPIItems(data)
-  const store = poeVersion === '2' ? store2 : store1
-  store.set('APIitems', APIitems)
-  store.set('heistReward', heistReward)
+async function getItems(poeVersion: POEVersion = "1") {
+  const response = await GGCapi.get(`trade${poeVersion === "2" ? "2" : ""}/data/items`);
+  const data = response.data as APIItems;
+  const { APIitems, heistReward } = setupAPIItems(data);
+  const store = poeVersion === "2" ? store2 : store1;
+  store.set("APIitems", APIitems);
+  store.set("heistReward", heistReward);
 }
-async function getStats(poeVersion: POEVersion = '1') {
-  const response = await GGCapi.get(`trade${poeVersion === '2' ? '2' : ''}/data/stats`)
-  const data = response.data as APIStats
-  const store = poeVersion === '2' ? store2 : store1
-  store.set('APImods', setupAPIMods(data))
+async function getStats(poeVersion: POEVersion = "1") {
+  const response = await GGCapi.get(`trade${poeVersion === "2" ? "2" : ""}/data/stats`);
+  const data = response.data as APIStats;
+  const store = poeVersion === "2" ? store2 : store1;
+  store.set("APImods", setupAPIMods(data));
 }
-async function getStatic(poeVersion: POEVersion = '1') {
-  const response = await GGCapi.get(`trade${poeVersion === '2' ? '2' : ''}/data/static`)
-  const data = response.data as APIStatic
-  const _currencyImageUrl = data.result[0].entries
-  const store = poeVersion === '2' ? store2 : store1
-  store.set('currencyImageUrl', _currencyImageUrl)
-  store.set('APIStatic', setupAPIStatic(data.result))
+async function getStatic(poeVersion: POEVersion = "1") {
+  const response = await GGCapi.get(`trade${poeVersion === "2" ? "2" : ""}/data/static`);
+  const data = response.data as APIStatic;
+  const _currencyImageUrl = data.result[0].entries;
+  const store = poeVersion === "2" ? store2 : store1;
+  store.set("currencyImageUrl", _currencyImageUrl);
+  store.set("APIStatic", setupAPIStatic(data.result));
 }
-async function getItemNameTranslation(poeVersion: POEVersion = '1') {
-  const response = await axios.get<POEDBItemTranslationResponse>(`https://poe${poeVersion === '2' ? '2' : ''}db.tw/tw/api/Trade`)
-  const data = response.data.data.filter((ele) => ele.lang && !ele.lang.includes('外觀'))
-  const store = poeVersion === '2' ? store2 : store1
-  store.set('itemNameTranslation', data)
-
+async function getItemNameTranslation(poeVersion: POEVersion = "1") {
+  const response = await axios.get<POEDBItemTranslationResponse>(
+    `https://poe${poeVersion === "2" ? "2" : ""}db.tw/tw/api/Trade`,
+  );
+  const data = response.data.data.filter((ele) => ele.lang && !ele.lang.includes("外觀"));
+  const store = poeVersion === "2" ? store2 : store1;
+  store.set("itemNameTranslation", data);
 }
 export async function get1APIdata() {
-  const result = await Promise.allSettled([getLeagues(), getItems(), getStatic(), getStats()/*, getItemNameTranslation()*/])
-  let error: any
+  const result = await Promise.allSettled([
+    getLeagues(),
+    getItems(),
+    getStatic(),
+    getStats() /*, getItemNameTranslation()*/,
+  ]);
+  let error: any;
   result.forEach((e) => {
-    if (e.status === 'rejected') {
-      error = e.reason
+    if (e.status === "rejected") {
+      error = e.reason;
     }
-  })
-  store1.set('APIVersion', app.getVersion())
-  if (error?.length) throw error
+  });
+  store1.set("APIVersion", app.getVersion());
+  if (error?.length) throw error;
 }
 
 export async function get2APIdata() {
-  const result = await Promise.allSettled([getLeagues('2'), getItems('2'), getStatic('2'), getStats('2')/*, getItemNameTranslation('2')*/])
-  let error: any
+  const result = await Promise.allSettled([
+    getLeagues("2"),
+    getItems("2"),
+    getStatic("2"),
+    getStats("2") /*, getItemNameTranslation('2')*/,
+  ]);
+  let error: any;
   result.forEach((e) => {
-    if (e.status === 'rejected') {
-      error = e.reason
-      console.log(error)
+    if (e.status === "rejected") {
+      error = e.reason;
+      console.log(error);
     }
-
-  })
-  store1.set('APIVersion', app.getVersion())
-  if (error?.length) throw error
+  });
+  store1.set("APIVersion", app.getVersion());
+  if (error?.length) throw error;
 }
 
 export async function getPOEApiData() {
   try {
-    if (config.poeVersion === '1') {
-      await get1APIdata()
-    }
-    else if (config.poeVersion === '2') {
-      await get2APIdata()
+    if (config.poeVersion === "1") {
+      await get1APIdata();
+    } else if (config.poeVersion === "2") {
+      await get2APIdata();
     }
   } catch (err: any) {
-    throw new Error(err)
+    throw new Error(err);
   }
 }
-
 
 export const updateState = {
-  label: '', canClick: true
-}
+  label: "",
+  canClick: true,
+};
 
-autoUpdater.on('update-available', ({ version, releaseNotes }) => {
-  updateState.label = `下載新版本 v${version}中`
-  updateState.canClick = false
-  buildTray()
+autoUpdater.on("update-available", ({ version, releaseNotes }) => {
+  updateState.label = `下載新版本 v${version}中`;
+  updateState.canClick = false;
+  buildTray();
   dialog.showMessageBox({
-    title: '有新版本',
-    type: 'info',
+    title: "有新版本",
+    type: "info",
     message: `有新版本 v${version}，並已經開始在背景下載\n
-    ${releaseNotes!.toString().replaceAll(/<[/]?(ul|li)>/g, '')}`,
-  })
-})
-autoUpdater.on('update-downloaded', () => {
-  updateState.label = '下載完成，關閉後將自動安裝'
-  updateState.canClick = false
-  buildTray()
-  dialog.showMessageBox({
-    title: '下載完成',
-    type: 'info',
-    message: '更新安裝擋已經下載完成，如果沒有自動重新啟動，\n請手動離開後稍等安裝完畢再打開',
-    buttons: ['重新開啟並安裝更新', '稍後再安裝'],
-    defaultId: 0
-  })
+    ${releaseNotes!.toString().replaceAll(/<[/]?(ul|li)>/g, "")}`,
+  });
+});
+autoUpdater.on("update-downloaded", () => {
+  updateState.label = "下載完成，關閉後將自動安裝";
+  updateState.canClick = false;
+  buildTray();
+  dialog
+    .showMessageBox({
+      title: "下載完成",
+      type: "info",
+      message: "更新安裝擋已經下載完成，如果沒有自動重新啟動，\n請手動離開後稍等安裝完畢再打開",
+      buttons: ["重新開啟並安裝更新", "稍後再安裝"],
+      defaultId: 0,
+    })
     .then((result) => {
       if (result.response === 0) {
-        setImmediate(() => { autoUpdater.quitAndInstall() })
+        setImmediate(() => {
+          autoUpdater.quitAndInstall();
+        });
       }
-    })
-})
-autoUpdater.on('update-not-available', () => {
-  updateState.label = '目前沒有新版本'
-  updateState.canClick = true
-  buildTray()
-})
+    });
+});
+autoUpdater.on("update-not-available", () => {
+  updateState.label = "目前沒有新版本";
+  updateState.canClick = true;
+  buildTray();
+});
 export async function checkForUpdate() {
-  if ((await session.defaultSession?.getCacheSize() >>> 20) >= 30) { //大於30MB
-    session.defaultSession.clearCache()
-      .catch(err => console.log(err))
-    session.defaultSession.clearCodeCaches({
-    })
-      .catch(err => console.log(err))
+  if ((await session.defaultSession?.getCacheSize()) >>> 20 >= 30) {
+    //大於30MB
+    session.defaultSession.clearCache().catch((err) => console.log(err));
+    session.defaultSession.clearCodeCaches({}).catch((err) => console.log(err));
   }
-  updateState.label = '檢查更新中'
-  updateState.canClick = false
-  buildTray()
+  updateState.label = "檢查更新中";
+  updateState.canClick = false;
+  buildTray();
   try {
-    await autoUpdater.checkForUpdates()
+    await autoUpdater.checkForUpdates();
+  } catch {
+    updateState.label = "檢查更新錯誤";
+    updateState.canClick = true;
+    buildTray();
   }
-  catch {
-    updateState.label = '檢查更新錯誤'
-    updateState.canClick = true
-    buildTray()
-  }
-  await getPOEApiData()
+  await getPOEApiData();
 }

@@ -7,14 +7,9 @@
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
     "paths": {
-      "@/*": [
-        "./src/*"
-      ]
+      "@/*": ["./src/*"]
     },
-    "types": [
-      "electron-vite/node",
-      "node"
-    ]
+    "types": ["electron-vite/node", "node"]
   },
   "include": [
     "src/main",
@@ -22,6 +17,6 @@
     "src/ipc",
     "electron.vite.config.ts",
     "package.json",
-    "types.d.ts",
+    "types.d.ts"
   ]
 }

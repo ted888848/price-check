@@ -1,186 +1,240 @@
 <template>
-  <div v-show="windowShowHide"
+  <div
+    v-show="windowShowHide"
     class="absolute top-0 left-0 w-screen h-screen priceCheckRoot bg-gray-400 bg-opacity-25 flex"
-    @click.self="closePriceCheck">
-    <webview v-show="isWebViewOpen" v-if="enableWebView" ref="webViewRef" class=" flex-1" :src="webViewSrc" />
-    <div ref="priceCheckDiv" class="bg-gray-900 priceCheck h-full flex flex-col" :style="priceCheckPos"
-      :class="{ 'absolute': !isWebViewOpen }">
+    @click.self="closePriceCheck"
+  >
+    <webview
+      v-show="isWebViewOpen"
+      v-if="enableWebView"
+      ref="webViewRef"
+      class="flex-1"
+      :src="webViewSrc"
+    />
+    <div
+      ref="priceCheckDiv"
+      class="bg-gray-900 priceCheck h-full flex flex-col"
+      :style="priceCheckPos"
+      :class="{ absolute: !isWebViewOpen }"
+    >
       <div class="bg-gray-800 flex justify-between max-h-9 items-center">
         <div class="flex justify-start mr-auto ml-1 flex-1">
-          <MySelect v-model="currentPriceCheck" :options="priceCheckOptions" label-key="label" :reducer="i => i.value"
-            class="w-100px" />
+          <MySelect
+            v-model="currentPriceCheck"
+            :options="priceCheckOptions"
+            label-key="label"
+            :reducer="(i) => i.value"
+            class="w-100px"
+          />
         </div>
         <div class="flex justify-center flex-1">
-          <div class="relative exaltedImg ">
-            <img :src="divineImage" class=" w-8 h-8 ">
-            <ul v-if="divineToChaosOrEx"
-              class="exaltedImgTooltip invisible bg-gray-700 z-10 text-center absolute text-white rounded">
-              <li v-for="line in divineToChaosDec" :key="line.e" class="flex px-2 min-w-max text-xl">
+          <div class="relative exaltedImg">
+            <img :src="divineImage" class="w-8 h-8" />
+            <ul
+              v-if="divineToChaosOrEx"
+              class="exaltedImgTooltip invisible bg-gray-700 z-10 text-center absolute text-white rounded"
+            >
+              <li
+                v-for="line in divineToChaosDec"
+                :key="line.e"
+                class="flex px-2 min-w-max text-xl"
+              >
                 {{ line.e }} : {{ line.c }}
               </li>
             </ul>
           </div>
-          <span class=" text-white text-2xl">:{{ divineToChaosOrEx }}</span>
-          <img :src="chaosOrExImage" class=" w-8 h-8 hover:cursor-pointer">
+          <span class="text-white text-2xl">:{{ divineToChaosOrEx }}</span>
+          <img :src="chaosOrExImage" class="w-8 h-8 hover:cursor-pointer" />
         </div>
         <div class="flex justify-end mr-1 ml-auto flex-1">
-          <button class=" text-white hover:text-red-500" @click="closePriceCheck">
+          <button class="text-white hover:text-red-500" @click="closePriceCheck">
             <div class="i-material-symbols:add-circle-rounded text-3xl rotate-45" />
           </button>
         </div>
       </div>
       <div class="p-1">
-        <MySelect v-model="leagueSelect" :options="leagues.map(v => ({ label: v, value: v }))" label-key="label"
-          :reducer="i => i.value" class="flex-1" />
+        <MySelect
+          v-model="leagueSelect"
+          :options="leagues.map((v) => ({ label: v, value: v }))"
+          label-key="label"
+          :reducer="(i) => i.value"
+          class="flex-1"
+        />
       </div>
       <KeepAlive v-if="currentPriceCheck">
-        <NormalPriceCheck v-if="currentPriceCheck === 'NormalPriceCheck'" :item-prop="item!"
-          :league-select="leagueSelect" :divine-to-chaos-or-exalted="divineToChaosOrEx ?? 0" :is-overflow="isOverflow"
-          @open-web-view="openWebView" :parse-error="parseError" :prev-search="prevSearch" />
-        <HeistPriceCheck v-else-if="currentPriceCheck === 'HeistPriceCheck'" :item-prop="item!"
-          :divine-to-chaos-or-exalted="divineToChaosOrEx ?? 0" :league-select="leagueSelect" :is-overflow="isOverflow"
-          @open-web-view="openWebView" :parse-error="parseError" />
+        <NormalPriceCheck
+          v-if="currentPriceCheck === 'NormalPriceCheck'"
+          :item-prop="item!"
+          :league-select="leagueSelect"
+          :divine-to-chaos-or-exalted="divineToChaosOrEx ?? 0"
+          :is-overflow="isOverflow"
+          @open-web-view="openWebView"
+          :parse-error="parseError"
+          :prev-search="prevSearch"
+        />
+        <HeistPriceCheck
+          v-else-if="currentPriceCheck === 'HeistPriceCheck'"
+          :item-prop="item!"
+          :divine-to-chaos-or-exalted="divineToChaosOrEx ?? 0"
+          :league-select="leagueSelect"
+          :is-overflow="isOverflow"
+          @open-web-view="openWebView"
+          :parse-error="parseError"
+        />
       </KeepAlive>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, nextTick, onBeforeMount, onMounted } from 'vue'
-import { range } from 'lodash-es'
-import IPC from '@/ipc'
-import { itemAnalyze } from '@/renderer/lib/itemAnalyze'
-import { leagues, divineImage, chaosOrExImage } from '@/renderer/lib/APIdata'
-import NormalPriceCheck from './NormalPriceCheck.vue'
-import HeistPriceCheck from './HeistPriceCheck.vue'
-import { leagueSelectRef, secondCurrency, tradeUrl } from '@/renderer/lib'
-import MySelect from '../utility/MySelect.vue'
-import { useQuery } from '@tanstack/vue-query'
-import { getMarketPrice, marketQueryOption } from '@/renderer/lib/market'
-const isWebViewOpen = ref(false)
-const prevSearch = ref(false)
+import { ref, computed, nextTick, onBeforeMount, onMounted } from "vue";
+import { range } from "lodash-es";
+import IPC from "@/ipc";
+import { itemAnalyze } from "@/renderer/lib/itemAnalyze";
+import { leagues, divineImage, chaosOrExImage } from "@/renderer/lib/APIdata";
+import NormalPriceCheck from "./NormalPriceCheck.vue";
+import HeistPriceCheck from "./HeistPriceCheck.vue";
+import { leagueSelectRef, secondCurrency, tradeUrl } from "@/renderer/lib";
+import MySelect from "../utility/MySelect.vue";
+import { useQuery } from "@tanstack/vue-query";
+import { getMarketPrice, marketQueryOption } from "@/renderer/lib/market";
+const isWebViewOpen = ref(false);
+const prevSearch = ref(false);
 const priceCheckPos = ref({
-  right: '0px'
-})
+  right: "0px",
+});
 
 // 延遲載入讓 win.webContents.on('did-attach-webview') 可以觸發事件綁定
-const enableWebView = ref(false)
+const enableWebView = ref(false);
 onMounted(() => {
   setTimeout(() => {
-    enableWebView.value = true
-  }, 100)
-})
+    enableWebView.value = true;
+  }, 100);
+});
 
-const webViewSrc = ref('about:blank')
+const webViewSrc = ref("about:blank");
 function openWebView(extendUrl: string) {
-  priceCheckPos.value.right = '0px'
-  isWebViewOpen.value = true
+  priceCheckPos.value.right = "0px";
+  isWebViewOpen.value = true;
   nextTick(() => {
-    webViewSrc.value = encodeURI(`${import.meta.env.VITE_URL_BASE}/${tradeUrl}/${extendUrl}`)
-  })
+    webViewSrc.value = encodeURI(`${import.meta.env.VITE_URL_BASE}/${tradeUrl}/${extendUrl}`);
+  });
 }
 function closeWebView() {
-  webViewSrc.value = 'about:blank'
-  isWebViewOpen.value = false
+  webViewSrc.value = "about:blank";
+  isWebViewOpen.value = false;
 }
 
-const windowShowHide = ref(false)
+const windowShowHide = ref(false);
 function closePriceCheck() {
-  windowShowHide.value = false
-  window.ipc.send(IPC.FORCE_POE)
+  windowShowHide.value = false;
+  window.ipc.send(IPC.FORCE_POE);
 }
 
 const leagueSelect = computed({
   get: () => leagueSelectRef.value,
   set: (val: string) => {
-    const config = window.ipc.sendSync(IPC.GET_CONFIG)
-    leagueSelectRef.value = val
-    window.ipc.send(IPC.SET_CONFIG, JSON.stringify({
-      ...config, league: val
-    }))
-  }
-})
+    const config = window.ipc.sendSync(IPC.GET_CONFIG);
+    leagueSelectRef.value = val;
+    window.ipc.send(
+      IPC.SET_CONFIG,
+      JSON.stringify({
+        ...config,
+        league: val,
+      }),
+    );
+  },
+});
 function loadLeagues() {
-  const configLeagues = window.ipc.sendSync(IPC.GET_CONFIG).league
-  leagueSelect.value = leagues.includes(configLeagues) ? configLeagues : (leagues.find(ele => !ele.match('^(標準|殘暴|專家)')) ?? leagues[0]) as string
+  const configLeagues = window.ipc.sendSync(IPC.GET_CONFIG).league;
+  leagueSelect.value = leagues.includes(configLeagues)
+    ? configLeagues
+    : ((leagues.find((ele) => !ele.match("^(標準|殘暴|專家)")) ?? leagues[0]) as string);
 }
 defineExpose({
-  loadLeagues
-})
-type PriceCheckTabs = 'NormalPriceCheck' | 'HeistPriceCheck' | undefined
+  loadLeagues,
+});
+type PriceCheckTabs = "NormalPriceCheck" | "HeistPriceCheck" | undefined;
 type PriceCheckOption = {
   label: string;
   value: PriceCheckTabs;
-}
-const priceCheckOptions: PriceCheckOption[] = [{
-  label: '普通查價',
-  value: 'NormalPriceCheck'
-}, {
-  label: '劫盜查價',
-  value: 'HeistPriceCheck'
-}]
-const lastPriceCheckTab = ref<PriceCheckTabs>(undefined)
-const currentPriceCheck = ref<PriceCheckTabs>(undefined)
-const item = ref<ParsedItem | null>(null)
-const parseError = ref<string | null>(null)
+};
+const priceCheckOptions: PriceCheckOption[] = [
+  {
+    label: "普通查價",
+    value: "NormalPriceCheck",
+  },
+  {
+    label: "劫盜查價",
+    value: "HeistPriceCheck",
+  },
+];
+const lastPriceCheckTab = ref<PriceCheckTabs>(undefined);
+const currentPriceCheck = ref<PriceCheckTabs>(undefined);
+const item = ref<ParsedItem | null>(null);
+const parseError = ref<string | null>(null);
 
-const { data: marketData } = useQuery(marketQueryOption)
+const { data: marketData } = useQuery(marketQueryOption);
 
 const divineToChaosOrEx = computed(() => {
-  if (!leagueSelect.value || !marketData.value) return 0
-  const divineMarketPrice = getMarketPrice({ itemID: 'divine', baseType: '神聖石' } as ParsedItem, marketData.value, leagueSelect.value)
-  const rate = secondCurrency === 'chaos'
-    ? divineMarketPrice?.chaos?.amount
-    : divineMarketPrice?.exalted?.amount
-  if (typeof rate !== 'number' || !Number.isFinite(rate)) return 0
-  return Number(rate.toFixed(0))
-})
+  if (!leagueSelect.value || !marketData.value) return 0;
+  const divineMarketPrice = getMarketPrice(
+    { itemID: "divine", baseType: "神聖石" } as ParsedItem,
+    marketData.value,
+    leagueSelect.value,
+  );
+  const rate =
+    secondCurrency === "chaos"
+      ? divineMarketPrice?.chaos?.amount
+      : divineMarketPrice?.exalted?.amount;
+  if (typeof rate !== "number" || !Number.isFinite(rate)) return 0;
+  return Number(rate.toFixed(0));
+});
 
 const divineToChaosDec = computed(() => {
-  return range(0.1, 1, 0.1).map(ele => ({
-    e: ele.toFixed(1), c: (ele * (divineToChaosOrEx.value ?? 0)).toFixed(0)
-  }))
-})
+  return range(0.1, 1, 0.1).map((ele) => ({
+    e: ele.toFixed(1),
+    c: (ele * (divineToChaosOrEx.value ?? 0)).toFixed(0),
+  }));
+});
 
-const priceCheckDiv = ref<HTMLDivElement>()
+const priceCheckDiv = ref<HTMLDivElement>();
 function isOverflow() {
-  if (!priceCheckDiv.value) return false
-  return priceCheckDiv.value.scrollHeight > priceCheckDiv.value.offsetHeight
+  if (!priceCheckDiv.value) return false;
+  return priceCheckDiv.value.scrollHeight > priceCheckDiv.value.offsetHeight;
 }
 
 window.ipc.on(IPC.PRICE_CHECK_SHOW, (_e, clip: string, pos: string, prev: boolean = false) => {
   if (!item.value && prev) {
-    closePriceCheck()
+    closePriceCheck();
     return;
   }
   if (!prev) {
-    closeWebView()
-    priceCheckPos.value.right = pos
-    currentPriceCheck.value = 'NormalPriceCheck'
+    closeWebView();
+    priceCheckPos.value.right = pos;
+    currentPriceCheck.value = "NormalPriceCheck";
     try {
-      parseError.value = null
-      item.value = itemAnalyze(clip)
+      parseError.value = null;
+      item.value = itemAnalyze(clip);
+    } catch (e) {
+      item.value = {} as ParsedItem;
+      parseError.value = (e as Error).message;
+      console.log(e);
     }
-    catch (e) {
-      item.value = {} as ParsedItem
-      parseError.value = (e as Error).message
-      console.log(e)
-    }
+  } else {
+    currentPriceCheck.value = lastPriceCheckTab.value;
   }
-  else {
-    currentPriceCheck.value = lastPriceCheckTab.value
-  }
-  windowShowHide.value = true
-  prevSearch.value = prev
-})
+  windowShowHide.value = true;
+  prevSearch.value = prev;
+});
 window.ipc.on(IPC.POE_ACTIVE, () => {
-  windowShowHide.value = false
-  lastPriceCheckTab.value = currentPriceCheck.value
-  currentPriceCheck.value = undefined
-})
+  windowShowHide.value = false;
+  lastPriceCheckTab.value = currentPriceCheck.value;
+  currentPriceCheck.value = undefined;
+});
 onBeforeMount(() => {
-  loadLeagues()
-})
+  loadLeagues();
+});
 </script>
 
 <style>
@@ -199,7 +253,7 @@ input::-webkit-inner-spin-button {
   margin: 0;
 }
 
-tbody.modsTbody>tr>td {
+tbody.modsTbody > tr > td {
   padding: 5px 1px;
 }
 

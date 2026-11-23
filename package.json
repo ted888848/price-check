@@ -1,11 +1,15 @@
 {
   "name": "price-check",
   "version": "3.30.5",
-  "main": "dist/main/index.js",
-  "description": "一個POE查價器",
-  "author": "ted <ted888848@gmail.com>",
-  "license": "MIT",
   "private": true,
+  "description": "一個POE查價器",
+  "license": "MIT",
+  "author": "ted <ted888848@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ted888848/price-check.git"
+  },
+  "main": "dist/main/index.js",
   "scripts": {
     "dev": "electron-vite dev --watch",
     "build": "vue-tsc --noEmit && electron-vite build && electron-builder",
@@ -14,7 +18,12 @@
     "vuetsc": "vue-tsc --noEmit",
     "test": " vitest --run",
     "ipc-type": "tsc ./src/ipc/index.ts --emitDeclarationOnly --declaration --outDir src/ipc",
-    "type-check": "vue-tsc --noEmit"
+    "type-check": "vue-tsc --noEmit",
+    "fmt": "oxfmt"
+  },
+  "dependencies": {
+    "electron-overlay-window": "^4.1.0",
+    "uiohook-napi": "^1.5.5"
   },
   "devDependencies": {
     "@hono/node-server": "^2.1.8",
@@ -39,6 +48,7 @@
     "element-plus": "^2.14.7",
     "hono": "^4.13.18",
     "lodash-es": "^4.18.1",
+    "oxfmt": "^0.79.0",
     "ts-pattern": "^5.9.0",
     "typescript": "^6.0.3",
     "unocss": "^66.10.5",
@@ -48,13 +58,5 @@
     "vitest": "^5.0.3",
     "vue": "^3.5.43",
     "vue-tsc": "^3.3.13"
-  },
-  "dependencies": {
-    "electron-overlay-window": "^4.1.0",
-    "uiohook-napi": "^1.5.5"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/ted888848/price-check.git"
   }
 }

@@ -1,159 +1,158 @@
-import Store, { Schema } from 'electron-store'
-import { ipcMain, session } from 'electron'
-import IPC from '@/ipc'
-import { registerShortcut, unRegisterShortcut } from './shortcuts'
-import { win } from './overlayWindow'
+import Store, { Schema } from "electron-store";
+import { ipcMain, session } from "electron";
+import IPC from "@/ipc";
+import { registerShortcut, unRegisterShortcut } from "./shortcuts";
+import { win } from "./overlayWindow";
 const defaultStore: Config = {
-  characterName: '',
-  searchExchangePrefer: 'divine&(C or Ex)',
-  POESESSID: '',
+  characterName: "",
+  searchExchangePrefer: "divine&(C or Ex)",
+  POESESSID: "",
   searchTwoWeekOffline: false,
-  priceCheckHotkey: 'Ctrl+D',
-  settingHotkey: 'Ctrl+F2',
+  priceCheckHotkey: "Ctrl+D",
+  settingHotkey: "Ctrl+F2",
   shortcuts: [
     {
-      hotkey: 'F2',
-      type: 'type-in-chat',
-      outputText: '/invite @last'
+      hotkey: "F2",
+      type: "type-in-chat",
+      outputText: "/invite @last",
     },
     {
-      hotkey: 'F3',
-      type: 'type-in-chat',
-      outputText: '%TY'
+      hotkey: "F3",
+      type: "type-in-chat",
+      outputText: "%TY",
     },
     {
-      hotkey: 'F4',
-      type: 'type-in-chat',
-      outputText: '/leave'
+      hotkey: "F4",
+      type: "type-in-chat",
+      outputText: "/leave",
     },
     {
-      hotkey: 'F5',
-      type: 'type-in-chat',
-      outputText: '/hideout'
-    }
+      hotkey: "F5",
+      type: "type-in-chat",
+      outputText: "/hideout",
+    },
   ],
-  league: '',
-  poeVersion: '1',
-  searchOnlineType: 'online',
-  prevPriceCheckHotkey: 'Shift+Ctrl+D',
+  league: "",
+  poeVersion: "1",
+  searchOnlineType: "online",
+  prevPriceCheckHotkey: "Shift+Ctrl+D",
   autoSearchStackableItems: true,
-  widgets: []
-}
+  widgets: [],
+};
 const storeSchema: Schema<Config> = {
   characterName: {
-    type: 'string'
+    type: "string",
   },
   searchExchangePrefer: {
-    type: 'string',
+    type: "string",
   },
   POESESSID: {
-    type: 'string'
+    type: "string",
   },
   priceCheckHotkey: {
-    type: 'string'
+    type: "string",
   },
   settingHotkey: {
-    type: 'string'
+    type: "string",
   },
   shortcuts: {
-    type: 'array',
+    type: "array",
     items: {
-      type: 'object',
+      type: "object",
       properties: {
         hotkey: {
-          type: 'string'
+          type: "string",
         },
         outputText: {
-          type: 'string'
+          type: "string",
         },
-      }
-    }
+      },
+    },
   },
   league: {
-    type: 'string'
+    type: "string",
   },
   poeVersion: {
-    type: 'string'
+    type: "string",
   },
   searchOnlineType: {
-    type: 'string',
+    type: "string",
   },
   prevPriceCheckHotkey: {
-    type: 'string',
+    type: "string",
   },
   autoSearchStackableItems: {
-    type: 'boolean',
+    type: "boolean",
   },
   widgets: {
-    type: 'array',
+    type: "array",
     items: {
-      type: 'object'
-    }
+      type: "object",
+    },
   },
   enableAutoEnableUniqueMods: {
-    type: 'boolean',
-  }
-}
+    type: "boolean",
+  },
+};
 export const store = new Store({
-  name: 'appConfig',
+  name: "appConfig",
   defaults: defaultStore,
-  schema: storeSchema
-})
-export let config: Config
+  schema: storeSchema,
+});
+export let config: Config;
 export function setupConfig() {
-  config = store.store
+  config = store.store;
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   //@ts-ignore
-  if (config.searchExchangePrefer === 'divine&chaos') {
-    config.searchExchangePrefer = 'divine&(C or Ex)'
-    store.store = config
+  if (config.searchExchangePrefer === "divine&chaos") {
+    config.searchExchangePrefer = "divine&(C or Ex)";
+    store.store = config;
   }
   if (config.searchTwoWeekOffline === true && !config.searchOnlineType) {
-    config.searchOnlineType = '1week'
-    delete (config as any).searchTwoWeekOffline
-    store.store = config
+    config.searchOnlineType = "1week";
+    delete (config as any).searchTwoWeekOffline;
+    store.store = config;
   }
   ipcMain.on(IPC.SET_CONFIG, (_e, configData: string) => {
-    updateConfig(JSON.parse(configData))
-  })
+    updateConfig(JSON.parse(configData));
+  });
   ipcMain.on(IPC.GET_CONFIG, (e) => {
-    e.returnValue = config
-  })
+    e.returnValue = config;
+  });
   ipcMain.on(IPC.UPDATE_CONFIG, (_e, newConfigStr: string) => {
     // const prevSetVersion = store.store.poeVersion
     try {
-      const newConfig = JSON.parse(newConfigStr) as Partial<Config>
-      updateConfig(newConfig)
-    }
-    catch (e) {
-      console.error(e)
+      const newConfig = JSON.parse(newConfigStr) as Partial<Config>;
+      updateConfig(newConfig);
+    } catch (e) {
+      console.error(e);
     }
     // if (prevSetVersion !== config.poeVersion) {
     //   app.relaunch()
     //   app.quit()
     // }
-  })
-  setCookie()
+  });
+  setCookie();
 }
 export function updateConfig(newConfig: Partial<Config>) {
-  store.store = { ...store.store, ...newConfig }
-  config = store.store
-  unRegisterShortcut()
-  registerShortcut()
-  setCookie()
-  win.webContents.send(IPC.UPDATE_CONFIG, JSON.stringify(config))
+  store.store = { ...store.store, ...newConfig };
+  config = store.store;
+  unRegisterShortcut();
+  registerShortcut();
+  setCookie();
+  win.webContents.send(IPC.UPDATE_CONFIG, JSON.stringify(config));
 }
 function setCookie() {
   if (config.POESESSID) {
     session.defaultSession.cookies.set({
       url: import.meta.env.VITE_URL_BASE,
-      name: 'POESESSID',
+      name: "POESESSID",
       value: config.POESESSID,
-      path: '/',
+      path: "/",
       httpOnly: true,
       secure: true,
-      sameSite: 'lax',
-      domain: 'pathofexile.tw'
-    })
+      sameSite: "lax",
+      domain: "pathofexile.tw",
+    });
   }
 }

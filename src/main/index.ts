@@ -1,86 +1,84 @@
-'use strict'
-import { app, dialog, ipcMain } from 'electron'
-import { setupShortcut } from './shortcuts'
-import { createWindow } from './overlayWindow'
-import { setupTray } from './tray'
-import { checkForUpdate, getPOEApiData } from './setupAPI'
-import { setupConfig } from './config'
-import IPC from '@/ipc'
-import './proxyServer'
-const isDevelopment = process.env.NODE_ENV !== 'production'
+"use strict";
+import { app, dialog, ipcMain } from "electron";
+import { setupShortcut } from "./shortcuts";
+import { createWindow } from "./overlayWindow";
+import { setupTray } from "./tray";
+import { checkForUpdate, getPOEApiData } from "./setupAPI";
+import { setupConfig } from "./config";
+import IPC from "@/ipc";
+import "./proxyServer";
+const isDevelopment = process.env.NODE_ENV !== "production";
 
-process.on('uncaughtException', (error) => {
-  console.error('[uncaughtException]', error)
-})
+process.on("uncaughtException", (error) => {
+  console.error("[uncaughtException]", error);
+});
 
-process.on('unhandledRejection', (reason) => {
-  console.error('[unhandledRejection]', reason)
-})
+process.on("unhandledRejection", (reason) => {
+  console.error("[unhandledRejection]", reason);
+});
 
-if (process.platform === 'win32') app.setAppUserModelId('com.electron.price-check')
+if (process.platform === "win32") app.setAppUserModelId("com.electron.price-check");
 
-app.disableHardwareAcceleration()
+app.disableHardwareAcceleration();
 if (!app.requestSingleInstanceLock()) {
-  app.quit()
-  process.exit(0)
+  app.quit();
+  process.exit(0);
 }
 
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit()
+app.on("window-all-closed", () => {
+  if (process.platform !== "darwin") {
+    app.quit();
   }
-})
+});
 
-app.on('ready', async () => {
-  setupConfig()
-  setupTray()
+app.on("ready", async () => {
+  setupConfig();
+  setupTray();
   try {
-    await checkForUpdate()
+    await checkForUpdate();
   } catch (error: any) {
-    const detailMessage = error instanceof Error ? error?.stack ?? error.message : error
+    const detailMessage = error instanceof Error ? (error?.stack ?? error.message) : error;
     dialog.showMessageBox({
-      title: '讀取API資料錯誤',
-      message: '請稍後重新讀取API資料',
+      title: "讀取API資料錯誤",
+      message: "請稍後重新讀取API資料",
       detail: detailMessage,
-      type: 'error',
-    })
-
+      type: "error",
+    });
   }
-  await createWindow()
-  setupShortcut()
+  await createWindow();
+  setupShortcut();
 
   ipcMain.handle(IPC.RELOAD_APIDATA, async () => {
     try {
-      await getPOEApiData()
+      await getPOEApiData();
       return {
-        status: true
-      }
+        status: true,
+      };
     } catch (error: any) {
-      const detailMessage = error instanceof Error ? error?.stack ?? error.message : error
+      const detailMessage = error instanceof Error ? (error?.stack ?? error.message) : error;
       dialog.showMessageBox({
-        title: '讀取API資料錯誤',
-        message: '請稍後重新讀取API資料',
+        title: "讀取API資料錯誤",
+        message: "請稍後重新讀取API資料",
         detail: detailMessage,
-        type: 'error',
-      })
+        type: "error",
+      });
       return {
-        status: false, error
-      }
+        status: false,
+        error,
+      };
     }
-  })
-
-})
+  });
+});
 if (isDevelopment) {
-  if (process.platform === 'win32') {
-    process.on('message', (data) => {
-      if (data === 'graceful-exit') {
-        app.quit()
+  if (process.platform === "win32") {
+    process.on("message", (data) => {
+      if (data === "graceful-exit") {
+        app.quit();
       }
-    })
-  }
-  else {
-    process.on('SIGTERM', () => {
-      app.quit()
-    })
+    });
+  } else {
+    process.on("SIGTERM", () => {
+      app.quit();
+    });
   }
 }

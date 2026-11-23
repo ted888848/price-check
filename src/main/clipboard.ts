@@ -1,122 +1,120 @@
-import { clipboard } from 'electron'
-const DELAY = 50
-const LIMIT = 250
-let clipboardPromise: Promise<string> | null
+import { clipboard } from "electron";
+const DELAY = 50;
+const LIMIT = 250;
+let clipboardPromise: Promise<string> | null;
 
 type TempClipboardJob = {
-  id: number
-  beforeText: string
-  ensureTimer?: ReturnType<typeof setTimeout>
-  restoreTimer?: ReturnType<typeof setTimeout>
-  cancelled: boolean
-}
+  id: number;
+  beforeText: string;
+  ensureTimer?: ReturnType<typeof setTimeout>;
+  restoreTimer?: ReturnType<typeof setTimeout>;
+  cancelled: boolean;
+};
 
-let tempClipboardJob: TempClipboardJob | null = null
-let tempClipboardJobId: null | number = null
+let tempClipboardJob: TempClipboardJob | null = null;
+let tempClipboardJobId: null | number = null;
 
 function cancelTempClipboardJob(restore = true) {
-  if (!tempClipboardJob) return
-  tempClipboardJob.cancelled = true
-  if (tempClipboardJob.ensureTimer) clearTimeout(tempClipboardJob.ensureTimer)
-  if (tempClipboardJob.restoreTimer) clearTimeout(tempClipboardJob.restoreTimer)
+  if (!tempClipboardJob) return;
+  tempClipboardJob.cancelled = true;
+  if (tempClipboardJob.ensureTimer) clearTimeout(tempClipboardJob.ensureTimer);
+  if (tempClipboardJob.restoreTimer) clearTimeout(tempClipboardJob.restoreTimer);
   if (restore) {
-    clipboard.writeText(tempClipboardJob.beforeText)
+    clipboard.writeText(tempClipboardJob.beforeText);
   }
-  tempClipboardJob = null
+  tempClipboardJob = null;
 }
 
 export async function getClipboard() {
-  let timeLimit = 0
+  let timeLimit = 0;
   if (clipboardPromise) {
-    return await clipboardPromise
+    return await clipboardPromise;
   }
-  const clipBefore = clipboard.readText()
-  clipboard.writeText('')
+  const clipBefore = clipboard.readText();
+  clipboard.writeText("");
 
   clipboardPromise = new Promise((resolve, reject) => {
     function foo() {
-      const clipAfter = clipboard.readText()
-      if (clipAfter.startsWith('物品種類:')) {
-        clipboard.writeText(clipBefore)
-        clipboardPromise = null
-        resolve(clipAfter)
-      }
-      else {
-        timeLimit += DELAY
+      const clipAfter = clipboard.readText();
+      if (clipAfter.startsWith("物品種類:")) {
+        clipboard.writeText(clipBefore);
+        clipboardPromise = null;
+        resolve(clipAfter);
+      } else {
+        timeLimit += DELAY;
         if (timeLimit > LIMIT) {
-          clipboardPromise = null
-          clipboard.writeText(clipBefore)
-          reject('time limit')
-        }
-        else {
-          setTimeout(foo, DELAY)
+          clipboardPromise = null;
+          clipboard.writeText(clipBefore);
+          reject("time limit");
+        } else {
+          setTimeout(foo, DELAY);
         }
       }
     }
-    foo()
-  })
-  return clipboardPromise
+    foo();
+  });
+  return clipboardPromise;
 }
 
 export function withTemporaryClipboardText(
   text: string,
   action: () => void,
-  options?: { maxRetry?: number, retryIntervalMs?: number, restoreDelayMs?: number }
+  options?: { maxRetry?: number; retryIntervalMs?: number; restoreDelayMs?: number },
 ) {
   // Keep only the latest request; cancel any previous in-flight clipboard task.
-  cancelTempClipboardJob(true)
+  cancelTempClipboardJob(true);
 
-  const beforeText = clipboard.readText()
-  const maxRetry = options?.maxRetry ?? 10
-  const retryIntervalMs = options?.retryIntervalMs ?? 20
-  const restoreDelayMs = options?.restoreDelayMs ?? 250
-  let retryCount = 0
+  const beforeText = clipboard.readText();
+  const maxRetry = options?.maxRetry ?? 10;
+  const retryIntervalMs = options?.retryIntervalMs ?? 20;
+  const restoreDelayMs = options?.restoreDelayMs ?? 250;
+  let retryCount = 0;
 
   const job: TempClipboardJob = {
     id: Date.now(),
     beforeText,
     cancelled: false,
-  }
-  tempClipboardJob = job
+  };
+  tempClipboardJob = job;
 
-  const isCurrentJob = () => !!tempClipboardJob && tempClipboardJob.id === job.id && !job.cancelled
+  const isCurrentJob = () => !!tempClipboardJob && tempClipboardJob.id === job.id && !job.cancelled;
 
   const finishJob = () => {
     if (tempClipboardJob?.id === job.id) {
-      tempClipboardJob = null
+      tempClipboardJob = null;
     }
-  }
+  };
 
   const runAction = () => {
-    if (!isCurrentJob()) return
-    action()
+    if (!isCurrentJob()) return;
+    action();
     job.restoreTimer = setTimeout(() => {
-      if (!isCurrentJob()) return
-      clipboard.writeText(beforeText)
-      finishJob()
-    }, restoreDelayMs)
-  }
+      if (!isCurrentJob()) return;
+      clipboard.writeText(beforeText);
+      finishJob();
+    }, restoreDelayMs);
+  };
 
   const ensureClipboard = () => {
-    if (!isCurrentJob()) return
+    if (!isCurrentJob()) return;
 
-    clipboard.writeText(text)
+    clipboard.writeText(text);
     if (clipboard.readText() === text) {
-      runAction()
-      return
+      runAction();
+      return;
     }
 
-    retryCount += 1
+    retryCount += 1;
     if (retryCount > maxRetry) {
       if (isCurrentJob()) {
-        clipboard.writeText(beforeText)
-        finishJob()
+        clipboard.writeText(beforeText);
+        finishJob();
       }
-      return
+      return;
     }
 
-    job.ensureTimer = setTimeout(ensureClipboard, retryIntervalMs)
-  }
+    job.ensureTimer = setTimeout(ensureClipboard, retryIntervalMs);
+  };
 
-  ensureClipboard()
+  ensureClipboard();
 }

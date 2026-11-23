@@ -1,8 +1,8 @@
-import { poeVersion } from "."
-import { queryOptions } from "@tanstack/vue-query"
-import { APIStatic } from "./APIdata"
-const baseUrl = `${import.meta.env.VITE_MARKET_API_URL}/currency-exchange${poeVersion === '2' ? '/poe2' : ''}`
-let lastMarketData: TCurrencyMarket | null = null
+import { poeVersion } from ".";
+import { queryOptions } from "@tanstack/vue-query";
+import { APIStatic } from "./APIdata";
+const baseUrl = `${import.meta.env.VITE_MARKET_API_URL}/currency-exchange${poeVersion === "2" ? "/poe2" : ""}`;
+let lastMarketData: TCurrencyMarket | null = null;
 export interface TCurrencyMarket {
   [league: string]: {
     [item: string]: TMarketItemRate;
@@ -15,41 +15,45 @@ export interface TMarketQuoteRate {
 }
 
 export interface TMarketItemRate {
-  chaos?: TMarketQuoteRate;  // for POE1
+  chaos?: TMarketQuoteRate; // for POE1
   exalted?: TMarketQuoteRate; // for POE2
   divine: TMarketQuoteRate;
 }
 
 export const marketQueryOption = queryOptions({
-  queryKey: ['market-data'],
+  queryKey: ["market-data"],
   queryFn: async () => getLatestMarketData(),
   refetchOnWindowFocus: false,
   refetchOnReconnect: true,
   refetchInterval: 60 * 10 * 1000 + 5000,
   refetchIntervalInBackground: true,
   retryDelay: 5000,
-  retry: 3
-})
+  retry: 3,
+});
 export async function getLatestMarketData() {
   try {
-    const res = await fetch(baseUrl)
-    if (!res.ok) throw new Error(`Failed to fetch market data: ${res.status}`)
-    const data = await res.json() as TCurrencyMarket
-    lastMarketData = data
-    return data
+    const res = await fetch(baseUrl);
+    if (!res.ok) throw new Error(`Failed to fetch market data: ${res.status}`);
+    const data = (await res.json()) as TCurrencyMarket;
+    lastMarketData = data;
+    return data;
   } catch (error) {
     if (lastMarketData) {
-      return lastMarketData
+      return lastMarketData;
     }
-    throw error
+    throw error;
   }
 }
 
-export function getMarketPrice(itemParsed: ParsedItem, marketData: TCurrencyMarket, league: string) {
+export function getMarketPrice(
+  itemParsed: ParsedItem,
+  marketData: TCurrencyMarket,
+  league: string,
+) {
   if (!marketData[league]) return null;
-  const itemId = APIStatic.find(i => i.id === itemParsed.itemID)?.id ?? '';
+  const itemId = APIStatic.find((i) => i.id === itemParsed.itemID)?.id ?? "";
   if (!itemId && !itemParsed.baseType) return null;
   const marketItem = marketData[league][itemParsed.baseType] ?? marketData[league][itemId];
   if (!marketItem) return null;
-  return marketItem
+  return marketItem;
 }

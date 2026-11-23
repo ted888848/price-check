@@ -9,17 +9,9 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
     "paths": {
-      "@/*": [
-        "./src/*"
-      ]
+      "@/*": ["./src/*"]
     },
-    "types": [
-      "element-plus/global"
-    ]
+    "types": ["element-plus/global"]
   },
-  "include": [
-    "src/renderer",
-    "src/preload",
-    "types.d.ts"
-  ]
+  "include": ["src/renderer", "src/preload", "types.d.ts"]
 }

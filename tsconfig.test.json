@@ -7,15 +7,8 @@
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
     "paths": {
-      "@/*": [
-        "./src/*"
-      ]
+      "@/*": ["./src/*"]
     }
   },
-  "include": [
-    "types.d.ts",
-    "src/test/**/*",
-    "src/renderer",
-    "src/ipc",
-  ],
+  "include": ["types.d.ts", "src/test/**/*", "src/renderer", "src/ipc"]
 }

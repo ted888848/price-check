@@ -1,4 +1,4 @@
-declare type ArrayValueType<T> = T extends (infer E)[] ? E : never
+declare type ArrayValueType<T> = T extends (infer E)[] ? E : never;
 interface HeistReward {
   name?: string;
   type: string;
@@ -18,7 +18,7 @@ interface Item {
   }[];
 }
 interface ItemGem {
-  id: 'gems';
+  id: "gems";
   label: string;
   entries: {
     type: string;
@@ -29,7 +29,6 @@ interface ItemGem {
     }[];
   }[];
 }
-
 
 interface ParsedAPIitems {
   accessory: Item;
@@ -107,33 +106,41 @@ interface ItemStat {
   searchWithEmptyValue?: boolean;
 }
 
-type TRarityOptions = [{
-  readonly value?: undefined;
-  readonly label: "任何";
-}, {
-  readonly value: "normal";
-  readonly label: "普通";
-}, {
-  readonly value: "magic";
-  readonly label: "魔法";
-}, {
-  readonly value: "rare";
-  readonly label: "稀有";
-}, {
-  readonly value: "unique";
-  readonly label: "傳奇";
-}, {
-  readonly value: "nonunique";
-  readonly label: "非傳奇";
-}]
+type TRarityOptions = [
+  {
+    readonly value?: undefined;
+    readonly label: "任何";
+  },
+  {
+    readonly value: "normal";
+    readonly label: "普通";
+  },
+  {
+    readonly value: "magic";
+    readonly label: "魔法";
+  },
+  {
+    readonly value: "rare";
+    readonly label: "稀有";
+  },
+  {
+    readonly value: "unique";
+    readonly label: "傳奇";
+  },
+  {
+    readonly value: "nonunique";
+    readonly label: "非傳奇";
+  },
+];
 type ItemValue = {
   min?: number;
   max?: number;
   search: boolean;
-}
+};
 interface ParsedItem {
   baseType: string; //物品基底
-  type: { //物品類型
+  type: {
+    //物品類型
     text: string;
     option?: string;
     searchByType: boolean;
@@ -196,7 +203,7 @@ interface ParsedItem {
     discriminator: string;
     option: string;
   };
-  searchOnlineType: Config['searchOnlineType'];
+  searchOnlineType: Config["searchOnlineType"];
   fetchCount: number;
   map_completion_reward?: string;
   socketCount?: ItemValue;
@@ -205,11 +212,10 @@ interface ParsedItem {
     requirementItem?: string;
     searchRequirementItem?: boolean;
     rewardItem?: string;
-  }
+  };
   // [key: string]: any;
 
-
-  //3.27 
+  //3.27
   foulborn?: boolean;
   itemID?: string;
 }
@@ -218,9 +224,8 @@ interface ItemUniques {
   text: string;
   name?: string;
 }
-type hotkeyType = 'type-in-chat'
-type POEVersion = '1' | '2'
-
+type hotkeyType = "type-in-chat";
+type POEVersion = "1" | "2";
 
 interface TWidgetBase {
   id: string;
@@ -231,7 +236,7 @@ interface TWidgetBase {
   show: boolean;
 }
 interface TWidgetRegex extends TWidgetBase {
-  type: 'regex';
+  type: "regex";
   list: {
     regex: string;
     id: string;
@@ -239,7 +244,7 @@ interface TWidgetRegex extends TWidgetBase {
 }
 interface Config {
   characterName: string;
-  searchExchangePrefer: 'divine&(C or Ex)' | 'chaos' | 'divine' | 'exalted';
+  searchExchangePrefer: "divine&(C or Ex)" | "chaos" | "divine" | "exalted";
   POESESSID: string;
   searchTwoWeekOffline?: boolean;
   priceCheckHotkey: string;
@@ -251,7 +256,7 @@ interface Config {
   }[];
   league: string;
   poeVersion: POEVersion;
-  searchOnlineType: 'online' | '1week' | 'securable' | 'all';
+  searchOnlineType: "online" | "1week" | "securable" | "all";
   prevPriceCheckHotkey?: string;
   autoSearchStackableItems?: boolean;
   widgets?: TWidgetRegex[];
@@ -284,10 +289,31 @@ interface APIItem {
     flags?: {
       unique: boolean;
     };
-    disc?: 'alt_x' | 'alt_y' | 'atlasofworlds' | 'blighted' | 'original' | 'theawakening' | 'uberblighted' | 'warfortheatlas';
+    disc?:
+      | "alt_x"
+      | "alt_y"
+      | "atlasofworlds"
+      | "blighted"
+      | "original"
+      | "theawakening"
+      | "uberblighted"
+      | "warfortheatlas";
   }[];
 }
-type StatsID = 'crafted' | 'crucible' | 'delve' | 'enchant' | 'explicit' | 'fractured' | 'implicit' | 'pseudo' | 'sanctum' | 'scourge' | 'ultimatum' | 'veiled' | 'necropolis';
+type StatsID =
+  | "crafted"
+  | "crucible"
+  | "delve"
+  | "enchant"
+  | "explicit"
+  | "fractured"
+  | "implicit"
+  | "pseudo"
+  | "sanctum"
+  | "scourge"
+  | "ultimatum"
+  | "veiled"
+  | "necropolis";
 interface APIStats {
   result: APIStatsItem[];
 }
@@ -317,9 +343,9 @@ interface APILeagues {
 }
 
 interface ItemTranslation {
-  type: 'Unique' | 'Monster' | 'BaseType' | 'Class' | string;
+  type: "Unique" | "Monster" | "BaseType" | "Class" | string;
   us: string;
-  lang: string;//TW
+  lang: string; //TW
 }
 
 interface POEDBItemTranslationResponse {

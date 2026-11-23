@@ -1,35 +1,35 @@
-import { OverlayController } from 'electron-overlay-window'
-import { EventEmitter } from 'events'
-import type { BrowserWindow } from 'electron'
+import { OverlayController } from "electron-overlay-window";
+import { EventEmitter } from "events";
+import type { BrowserWindow } from "electron";
 interface TEventMap {
   poeActiveChange: [boolean];
 }
 export class POEWindowClass extends EventEmitter<TEventMap> {
-  private _isActive: boolean
+  private _isActive: boolean;
   constructor() {
-    super()
-    this._isActive = false
+    super();
+    this._isActive = false;
   }
   get bounds() {
-    return OverlayController.targetBounds
+    return OverlayController.targetBounds;
   }
   get priceCheckPos() {
-    return `${Math.round(this.bounds.height * (37 / 60) - 1)}px`
+    return `${Math.round(this.bounds.height * (37 / 60) - 1)}px`;
   }
   set isActive(flag) {
     if (this._isActive !== flag) {
-      this._isActive = flag
-      this.emit('poeActiveChange', this._isActive)
+      this._isActive = flag;
+      this.emit("poeActiveChange", this._isActive);
     }
   }
   get isActive() {
-    return this._isActive
+    return this._isActive;
   }
   attach(win: BrowserWindow, windowName: string) {
-    OverlayController.events.on('focus', () => this.isActive = true)
-    OverlayController.events.on('blur', () => this.isActive = false)
-    OverlayController.attachByTitle(win, windowName)
+    OverlayController.events.on("focus", () => (this.isActive = true));
+    OverlayController.events.on("blur", () => (this.isActive = false));
+    OverlayController.attachByTitle(win, windowName);
   }
 }
 
-export const PoeWindow = new POEWindowClass()
+export const PoeWindow = new POEWindowClass();

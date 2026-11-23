@@ -5,23 +5,16 @@
   "directories": {
     "output": "release/${version}"
   },
-  "files": [
-    "dist-electron",
-    "dist"
-  ],
+  "files": ["dist-electron", "dist"],
   "artifactName": "${productName}${version}.${ext}",
   "copyright": "Copyright©2024 zhou",
-  "publish": [
-    "github"
-  ],
+  "publish": ["github"],
   "win": {
     "requestedExecutionLevel": "requireAdministrator",
     "target": [
       {
         "target": "nsis",
-        "arch": [
-          "x64"
-        ]
+        "arch": ["x64"]
       }
     ]
   },
@@ -34,8 +27,5 @@
     "uninstallerIcon": "src/assets/SextantOrb256.ico",
     "deleteAppDataOnUninstall": true
   },
-  "electronLanguages": [
-    "zh-TW",
-    "en-US"
-  ]
+  "electronLanguages": ["zh-TW", "en-US"]
 }
