@@ -21,10 +21,7 @@ interface IPCEventMap {
 export type Channel = keyof IPCEventMap;
 
 export type IpcArgs<T extends Channel> = Parameters<IPCEventMap[T]>;
-export type IPCListener<T extends Channel> = (
-  event: Electron.IpcRendererEvent,
-  ...args: IpcArgs<T>
-) => void;
+export type IPCListener<T extends Channel> = (event: Electron.IpcRendererEvent, ...args: IpcArgs<T>) => void;
 export type IpcReturn<T extends Channel> = ReturnType<IPCEventMap[T]>;
 
 export const channels = {

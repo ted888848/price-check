@@ -8,16 +8,8 @@
       ref="inputRef"
       @keydown="handleKeydown"
     />
-    <div
-      class="relative flex-1 min-w-0"
-      v-else
-      @mouseenter="handleMouseEnter"
-      @mouseleave="handleMouseLeave"
-    >
-      <button
-        class="w-full min-w-0 text-start text-white text-nowrap text-ellipsis overflow-hidden"
-        @click="handleClick"
-      >
+    <div class="relative flex-1 min-w-0" v-else @mouseenter="handleMouseEnter" @mouseleave="handleMouseLeave">
+      <button class="w-full min-w-0 text-start text-white text-nowrap text-ellipsis overflow-hidden" @click="handleClick">
         {{ regex.regex }}
       </button>
       <div
@@ -27,21 +19,9 @@
         {{ regex.regex }}
       </div>
     </div>
-    <div
-      class="i-material-symbols:edit text-xl cursor-pointer text-green-600"
-      v-if="!isEditing"
-      @click="handleEdit"
-    />
-    <div
-      class="i-material-symbols:check-circle text-xl cursor-pointer text-green-600"
-      v-else
-      @click="handleSave"
-    />
-    <div
-      class="i-material-symbols:delete-rounded text-xl cursor-pointer text-red-600"
-      v-if="!props.empty"
-      @click="handleDelete"
-    />
+    <div class="i-material-symbols:edit text-xl cursor-pointer text-green-600" v-if="!isEditing" @click="handleEdit" />
+    <div class="i-material-symbols:check-circle text-xl cursor-pointer text-green-600" v-else @click="handleSave" />
+    <div class="i-material-symbols:delete-rounded text-xl cursor-pointer text-red-600" v-if="!props.empty" @click="handleDelete" />
   </div>
 </template>
 <script setup lang="ts">

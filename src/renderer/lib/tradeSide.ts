@@ -471,16 +471,12 @@ export async function fetchItem(fetchList: string[], searchID: string) {
   let fetchPriceResult: string[] = [];
   const itemJsonUrl: string[] = [];
   for (let i = 0; i < fetchList.length; i += 10) {
-    itemJsonUrl.push(
-      `${tradeUrl}/fetch/` + fetchList.slice(i, i + 10).join(",") + `?query=${searchID}`,
-    );
+    itemJsonUrl.push(`${tradeUrl}/fetch/` + fetchList.slice(i, i + 10).join(",") + `?query=${searchID}`);
   }
   await Promise.all(itemJsonUrl.map((url) => tradeApi.get("", { params: { url: url } })))
     .then((responses) => {
       responses.forEach((res) => {
-        const tempResult = res.data.result.map(
-          (ele: any) => `${ele.listing.price.amount}|${ele.listing.price.currency}`,
-        ) as string[];
+        const tempResult = res.data.result.map((ele: any) => `${ele.listing.price.amount}|${ele.listing.price.currency}`) as string[];
         fetchPriceResult = fetchPriceResult.concat(tempResult);
       });
       parseRateTimeLimit(responses.pop()?.headers as AxiosResponseHeaders);
@@ -522,10 +518,7 @@ export async function getDivineToChaosOrExalted(league: string) {
     .then((data) => {
       const temp = Object.keys(data.result).slice(0, 5);
       chaosOrExalted = temp.reduce(
-        (pre, curr) =>
-          pre +
-          data.result[curr].listing.offers[0].item.amount /
-            data.result[curr].listing.offers[0].exchange.amount,
+        (pre, curr) => pre + data.result[curr].listing.offers[0].item.amount / data.result[curr].listing.offers[0].exchange.amount,
         chaosOrExalted,
       );
       chaosOrExalted /= temp.length;
@@ -582,9 +575,7 @@ export async function searchExchange(item: ParsedItem, league: string): Promise<
       exchangeResult.currency2 = exchangeJSON.query.want[0];
       for (const key in data.result) {
         for (const offer of data.result[key].listing.offers) {
-          tempResult.push(
-            offer.exchange.amount + "：" + offer.item.amount + "|" + offer.exchange.currency,
-          );
+          tempResult.push(offer.exchange.amount + "：" + offer.item.amount + "|" + offer.exchange.currency);
         }
       }
     })

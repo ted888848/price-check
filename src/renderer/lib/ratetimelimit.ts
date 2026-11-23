@@ -127,10 +127,7 @@ export function parseRateTimeLimit(header?: AxiosResponseHeaders) {
   if (!header) return;
   if (waitUntil.value && new Date() < waitUntil.value) return;
   waitUntil.value = null;
-  const rules = header["x-rate-limit-rules"].split(",").map((ele: string) => ele.toLowerCase()) as (
-    | "ip"
-    | "account"
-  )[];
+  const rules = header["x-rate-limit-rules"].split(",").map((ele: string) => ele.toLowerCase()) as ("ip" | "account")[];
   const type = header["x-rate-limit-policy"].split("-")[1] as keyof TRateTimeLimitState;
   if (Object.keys(apiRateTimeLimitMax).includes(type)) {
     for (const rule of rules) {

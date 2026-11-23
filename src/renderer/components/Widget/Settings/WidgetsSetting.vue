@@ -1,9 +1,7 @@
 <template>
   <div class="flex flex-col pl-2 pt-4 gap-4 max-h-full">
     <div class="text-white text-xl">Widget 設定</div>
-    <button class="w-fit px-3 py-1 rounded bg-amber-500 text-black" @click="addWidget">
-      新增 Widget
-    </button>
+    <button class="w-fit px-3 py-1 rounded bg-amber-500 text-black" @click="addWidget">新增 Widget</button>
     <div v-if="widgetCount > 0" class="flex flex-col gap-2 flex-1 min-h-0 overflow-y-auto">
       <div
         v-for="(widget, index) in widgets"
@@ -31,10 +29,7 @@
           >
             {{ widget.show ? "啟用中" : "停用中" }}
           </button>
-          <button
-            class="px-2 py-1 rounded bg-violet-500 text-black"
-            @click="togglePreview(widget.id)"
-          >
+          <button class="px-2 py-1 rounded bg-violet-500 text-black" @click="togglePreview(widget.id)">
             {{ previewWidgetId === widget.id ? "隱藏位置" : "顯示位置" }}
           </button>
           <button
@@ -43,9 +38,7 @@
           >
             重製位置
           </button>
-          <button class="px-2 py-1 rounded bg-red-500 text-white" @click="deleteWidget(widget.id)">
-            刪除
-          </button>
+          <button class="px-2 py-1 rounded bg-red-500 text-white" @click="deleteWidget(widget.id)">刪除</button>
         </div>
       </div>
     </div>

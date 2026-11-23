@@ -4,43 +4,17 @@
     class="absolute top-0 left-0 w-screen h-screen priceCheckRoot bg-gray-400 bg-opacity-25 flex"
     @click.self="closePriceCheck"
   >
-    <webview
-      v-show="isWebViewOpen"
-      v-if="enableWebView"
-      ref="webViewRef"
-      class="flex-1"
-      :src="webViewSrc"
-    />
-    <div
-      ref="priceCheckDiv"
-      class="bg-gray-900 priceCheck h-full flex flex-col"
-      :style="priceCheckPos"
-      :class="{ absolute: !isWebViewOpen }"
-    >
+    <webview v-show="isWebViewOpen" v-if="enableWebView" ref="webViewRef" class="flex-1" :src="webViewSrc" />
+    <div ref="priceCheckDiv" class="bg-gray-900 priceCheck h-full flex flex-col" :style="priceCheckPos" :class="{ absolute: !isWebViewOpen }">
       <div class="bg-gray-800 flex justify-between max-h-9 items-center">
         <div class="flex justify-start mr-auto ml-1 flex-1">
-          <MySelect
-            v-model="currentPriceCheck"
-            :options="priceCheckOptions"
-            label-key="label"
-            :reducer="(i) => i.value"
-            class="w-100px"
-          />
+          <MySelect v-model="currentPriceCheck" :options="priceCheckOptions" label-key="label" :reducer="(i) => i.value" class="w-100px" />
         </div>
         <div class="flex justify-center flex-1">
           <div class="relative exaltedImg">
             <img :src="divineImage" class="w-8 h-8" />
-            <ul
-              v-if="divineToChaosOrEx"
-              class="exaltedImgTooltip invisible bg-gray-700 z-10 text-center absolute text-white rounded"
-            >
-              <li
-                v-for="line in divineToChaosDec"
-                :key="line.e"
-                class="flex px-2 min-w-max text-xl"
-              >
-                {{ line.e }} : {{ line.c }}
-              </li>
+            <ul v-if="divineToChaosOrEx" class="exaltedImgTooltip invisible bg-gray-700 z-10 text-center absolute text-white rounded">
+              <li v-for="line in divineToChaosDec" :key="line.e" class="flex px-2 min-w-max text-xl">{{ line.e }} : {{ line.c }}</li>
             </ul>
           </div>
           <span class="text-white text-2xl">:{{ divineToChaosOrEx }}</span>
@@ -178,15 +152,8 @@ const { data: marketData } = useQuery(marketQueryOption);
 
 const divineToChaosOrEx = computed(() => {
   if (!leagueSelect.value || !marketData.value) return 0;
-  const divineMarketPrice = getMarketPrice(
-    { itemID: "divine", baseType: "神聖石" } as ParsedItem,
-    marketData.value,
-    leagueSelect.value,
-  );
-  const rate =
-    secondCurrency === "chaos"
-      ? divineMarketPrice?.chaos?.amount
-      : divineMarketPrice?.exalted?.amount;
+  const divineMarketPrice = getMarketPrice({ itemID: "divine", baseType: "神聖石" } as ParsedItem, marketData.value, leagueSelect.value);
+  const rate = secondCurrency === "chaos" ? divineMarketPrice?.chaos?.amount : divineMarketPrice?.exalted?.amount;
   if (typeof rate !== "number" || !Number.isFinite(rate)) return 0;
   return Number(rate.toFixed(0));
 });

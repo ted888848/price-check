@@ -289,15 +289,7 @@ interface APIItem {
     flags?: {
       unique: boolean;
     };
-    disc?:
-      | "alt_x"
-      | "alt_y"
-      | "atlasofworlds"
-      | "blighted"
-      | "original"
-      | "theawakening"
-      | "uberblighted"
-      | "warfortheatlas";
+    disc?: "alt_x" | "alt_y" | "atlasofworlds" | "blighted" | "original" | "theawakening" | "uberblighted" | "warfortheatlas";
   }[];
 }
 type StatsID =

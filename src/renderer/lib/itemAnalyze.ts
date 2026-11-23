@@ -1,12 +1,7 @@
 import IPC from "@/ipc";
 import { APIitems, APImods, APIStatic } from "./APIdata";
 import { isPOE2, poeVersion, secondCurrency } from ".";
-import {
-  getModMatchRegex,
-  getStrReg,
-  hasPossibilityReg,
-  numberPatternWithNameGroup,
-} from "./regex";
+import { getModMatchRegex, getStrReg, hasPossibilityReg, numberPatternWithNameGroup } from "./regex";
 import { match, P } from "ts-pattern";
 import { defaultItemParsed, NOT_MATCHED_ID, rarityOptions, typeTrans } from "./const";
 import { countBy, isUndefined } from "lodash-es";
@@ -74,10 +69,8 @@ class ItemAnalyzer {
     this.itemSection = this.itemSection.filter((section) => !section[0]?.startsWith("無形性:"));
 
     const firstSection = this.itemSection[0];
-    if (!firstSection || this.parseFirstSection(firstSection) === ParseResult.PARSE_SECTION_FAIL)
-      return null;
-    this.itemParsed.searchOnlineType =
-      this.config.searchOnlineType ?? this.itemParsed.searchOnlineType;
+    if (!firstSection || this.parseFirstSection(firstSection) === ParseResult.PARSE_SECTION_FAIL) return null;
+    this.itemParsed.searchOnlineType = this.config.searchOnlineType ?? this.itemParsed.searchOnlineType;
     this.itemSection.shift();
     let searchExchange = false;
     match(this.itemParsed.type)
@@ -148,15 +141,10 @@ class ItemAnalyzer {
       this.itemParsed.searchExchange.option = true;
     }
 
-    if (
-      this.itemParsed.rarity === "傳奇" &&
-      this.itemParsed.isIdentify === false &&
-      this.itemParsed.uniques.length === 1
-    ) {
+    if (this.itemParsed.rarity === "傳奇" && this.itemParsed.isIdentify === false && this.itemParsed.uniques.length === 1) {
       this.itemParsed.name = this.itemParsed.uniques[0]?.name;
     }
-    if (this.itemParsed.raritySearch.label === "傳奇" && this.itemParsed.name)
-      this.itemParsed.autoSearch = true;
+    if (this.itemParsed.raritySearch.label === "傳奇" && this.itemParsed.name) this.itemParsed.autoSearch = true;
     if (this.itemParsed.baseType === "阿茲瓦特史記") this.parseTemple();
     if (this.itemParsed.baseType === "最後通牒雕刻") this.parseInscribed();
 
@@ -192,20 +180,14 @@ class ItemAnalyzer {
     const itemType = itemTypeMatch?.[1] as keyof typeof typeTrans | undefined;
     if (!itemType) return ParseResult.PARSE_SECTION_FAIL;
     this.itemParsed.type = { text: itemType, option: typeTrans[itemType], searchByType: false };
-    if (section.length < 3 && this.itemParsed.type.text !== "臟器")
-      return ParseResult.PARSE_SECTION_FAIL;
+    if (section.length < 3 && this.itemParsed.type.text !== "臟器") return ParseResult.PARSE_SECTION_FAIL;
     section.shift();
     this.parseRarity(section);
 
-    const itemTypeApi = this.itemParsed.type.option?.substring(
-      0,
-      this.itemParsed.type.option.indexOf("."),
-    ) as keyof typeof APIitems;
+    const itemTypeApi = this.itemParsed.type.option?.substring(0, this.itemParsed.type.option.indexOf(".")) as keyof typeof APIitems;
     let itemNameLine = section.at(-1)?.replace(/(精良的|追憶之|Synthesised)\s/, "") ?? "";
 
-    const apiBaseTypes = (
-      APIitems[itemTypeApi]?.entries ?? Object.values(APIitems).flatMap((item) => item.entries)
-    )
+    const apiBaseTypes = (APIitems[itemTypeApi]?.entries ?? Object.values(APIitems).flatMap((item) => item.entries))
       .filter((entry) => {
         let sectionLine = itemNameLine;
         if (!sectionLine) return false;
@@ -237,9 +219,7 @@ class ItemAnalyzer {
 
     if (itemType === "技能寶石") {
       this.itemParsed.baseType = section[0];
-      const transGemInfo = APIitems.gem.entries.find((ele) =>
-        ele.trans?.some(({ text }) => text === this.itemParsed.baseType),
-      );
+      const transGemInfo = APIitems.gem.entries.find((ele) => ele.trans?.some(({ text }) => text === this.itemParsed.baseType));
       if (transGemInfo) {
         const transGem = transGemInfo.trans?.find((g) => g.text === this.itemParsed.baseType);
         if (!transGem) return ParseResult.PARSE_SECTION_FAIL;
@@ -284,9 +264,7 @@ class ItemAnalyzer {
 
     match({ rarity: this.itemParsed.rarity, isPoe2: poeVersion === "2" })
       .with({ isPoe2: true }, () => {
-        this.itemParsed.raritySearch =
-          rarityOptions.find((option) => option.label === this.itemParsed.rarity) ??
-          rarityOptions[5];
+        this.itemParsed.raritySearch = rarityOptions.find((option) => option.label === this.itemParsed.rarity) ?? rarityOptions[5];
       })
       .with({ rarity: P.union("普通", "魔法", "稀有") }, () => {
         this.itemParsed.raritySearch = rarityOptions[5];
@@ -305,14 +283,10 @@ class ItemAnalyzer {
     if (!section[0]?.startsWith("需求:")) return ParseResult.PARSE_SECTION_SKIP;
     section.forEach((line) => {
       let lineMatch: RegExpMatchArray | null;
-      if ((lineMatch = line.match(/^等級: (\d+)/)))
-        this.itemParsed.requireLevel = parseInt(lineMatch[1]);
-      else if ((lineMatch = line.match(/^智慧: (\d+)/)))
-        this.itemParsed.requireInt = parseInt(lineMatch[1]);
-      else if ((lineMatch = line.match(/^力量: (\d+)/)))
-        this.itemParsed.requireStr = parseInt(lineMatch[1]);
-      else if ((lineMatch = line.match(/^敏捷: (\d+)/)))
-        this.itemParsed.requireDex = parseInt(lineMatch[1]);
+      if ((lineMatch = line.match(/^等級: (\d+)/))) this.itemParsed.requireLevel = parseInt(lineMatch[1]);
+      else if ((lineMatch = line.match(/^智慧: (\d+)/))) this.itemParsed.requireInt = parseInt(lineMatch[1]);
+      else if ((lineMatch = line.match(/^力量: (\d+)/))) this.itemParsed.requireStr = parseInt(lineMatch[1]);
+      else if ((lineMatch = line.match(/^敏捷: (\d+)/))) this.itemParsed.requireDex = parseInt(lineMatch[1]);
     });
     return ParseResult.PARSE_SECTION_SUCC;
   }
@@ -322,11 +296,7 @@ class ItemAnalyzer {
     const sockets = section[0].replace(/R|G|B|W|S/g, "#");
     if (sockets.indexOf("#-#-#-#-#-#") > -1) {
       this.itemParsed.search6L = true;
-    } else if (
-      ["弓", "長杖", "雙手劍", "雙手斧", "雙手錘", "征戰長杖", "胸甲"].includes(
-        this.itemParsed.type.text,
-      )
-    ) {
+    } else if (["弓", "長杖", "雙手劍", "雙手斧", "雙手錘", "征戰長杖", "胸甲"].includes(this.itemParsed.type.text)) {
       this.itemParsed.search6L = false;
     }
 
@@ -366,11 +336,7 @@ class ItemAnalyzer {
     )
       return true;
 
-    if (
-      this.itemParsed.type.option?.startsWith("weapon") &&
-      !matchMods.some((ele) => /閃避|護甲|能量護盾|保護/.test(ele.text))
-    )
-      return true;
+    if (this.itemParsed.type.option?.startsWith("weapon") && !matchMods.some((ele) => /閃避|護甲|能量護盾|保護/.test(ele.text))) return true;
     return false;
   }
   private parseMod(section: string[], type: keyof ParsedAPIMods | "mutated" | "rune") {
@@ -387,10 +353,7 @@ class ItemAnalyzer {
       const line = regSection[index];
       try {
         let matchMods = APImods[modType]?.entries.filter(
-          (mod) =>
-            line.test(mod.text) ||
-            line.test(mod.text.replace(hasPossibilityReg, "")) ||
-            line.test(mod.text.split("\n").at(0) ?? ""),
+          (mod) => line.test(mod.text) || line.test(mod.text.replace(hasPossibilityReg, "")) || line.test(mod.text.split("\n").at(0) ?? ""),
         );
         if (!matchMods?.length) {
           notMatchMods.push({
@@ -407,14 +370,9 @@ class ItemAnalyzer {
             matchMods = matchMods.filter((mod) => mod.text.endsWith(" (部分)"));
           } else {
             matchMods = matchMods.filter((mod) => !mod.text.endsWith(" (部分)"));
-            const sectionSign = Array.from(
-              cleanSection[index]?.match(/增加|減少|更多|更少/g) ?? [],
-            ).join("");
+            const sectionSign = Array.from(cleanSection[index]?.match(/增加|減少|更多|更少/g) ?? []).join("");
             if (sectionSign) {
-              matchMods = matchMods.filter(
-                (mod) =>
-                  Array.from(mod.text.match(/增加|減少|更多|更少/g) ?? []).join("") === sectionSign,
-              );
+              matchMods = matchMods.filter((mod) => Array.from(mod.text.match(/增加|減少|更多|更少/g) ?? []).join("") === sectionSign);
             }
           }
         }
@@ -426,8 +384,7 @@ class ItemAnalyzer {
           if (regSectionMultiLines.length !== modMultiLineLength) return false;
           return regSectionMultiLines.every(
             (regSectionMultiLine, mi) =>
-              regSectionMultiLine.test(modMultiLine[mi] ?? "") ||
-              regSectionMultiLine.test(modMultiLine[mi]?.replace(hasPossibilityReg, "") ?? ""),
+              regSectionMultiLine.test(modMultiLine[mi] ?? "") || regSectionMultiLine.test(modMultiLine[mi]?.replace(hasPossibilityReg, "") ?? ""),
           );
         });
 
@@ -439,11 +396,7 @@ class ItemAnalyzer {
             .slice(index, index + matchModMultiLineLength)
             .join("\n")
             .match(matchReg);
-          if (
-            !regGroup &&
-            matchMod.text.match(hasPossibilityReg) &&
-            !line.source.match(hasPossibilityReg)
-          ) {
+          if (!regGroup && matchMod.text.match(hasPossibilityReg) && !line.source.match(hasPossibilityReg)) {
             regGroup = [line.source, "100"];
           }
           regGroup?.shift();
@@ -463,9 +416,7 @@ class ItemAnalyzer {
             searchWithEmptyValue: isSearchWithEmptyValue,
           };
           if (regGroup?.length) {
-            const diffSign =
-              matchMod.text.match(/減少|增加|更多|更少/)?.[0] !==
-              cleanSection[index]?.match(/減少|增加|更多|更少/)?.[0];
+            const diffSign = matchMod.text.match(/減少|增加|更多|更少/)?.[0] !== cleanSection[index]?.match(/減少|增加|更多|更少/)?.[0];
             let valueArr: string[] = [],
               lowerBoundArr: string[] = [],
               upperBoundArr: string[] = [];
@@ -477,15 +428,9 @@ class ItemAnalyzer {
                 upperBoundArr.push(valueMatch.groups.upperBound);
               }
             });
-            const minValue =
-              (diffSign ? -1 : 1) *
-              (valueArr.reduce((pre, ele) => pre + Number(ele), 0) / valueArr.length);
-            const lowerBound =
-              (diffSign ? -1 : 1) *
-              (lowerBoundArr.reduce((pre, ele) => pre + Number(ele), 0) / lowerBoundArr.length);
-            const upperBound =
-              (diffSign ? -1 : 1) *
-              (upperBoundArr.reduce((pre, ele) => pre + Number(ele), 0) / upperBoundArr.length);
+            const minValue = (diffSign ? -1 : 1) * (valueArr.reduce((pre, ele) => pre + Number(ele), 0) / valueArr.length);
+            const lowerBound = (diffSign ? -1 : 1) * (lowerBoundArr.reduce((pre, ele) => pre + Number(ele), 0) / lowerBoundArr.length);
+            const upperBound = (diffSign ? -1 : 1) * (upperBoundArr.reduce((pre, ele) => pre + Number(ele), 0) / upperBoundArr.length);
             tempArr.push({
               value: { [diffSign ? "max" : "min"]: minValue },
               lowerBound,
@@ -511,24 +456,17 @@ class ItemAnalyzer {
 
   private parseEnchantMod(section: string[]) {
     if (!section.find((line) => line.endsWith("(enchant)"))) return ParseResult.PARSE_SECTION_SKIP;
-    return this.parseMod(section, "enchant") === ParseResult.PARSE_SECTION_SUCC
-      ? ParseResult.PARSE_SECTION_SUCC
-      : ParseResult.PARSE_SECTION_FAIL;
+    return this.parseMod(section, "enchant") === ParseResult.PARSE_SECTION_SUCC ? ParseResult.PARSE_SECTION_SUCC : ParseResult.PARSE_SECTION_FAIL;
   }
 
   private parseImplicitMod(section: string[]) {
-    if (!section.find((line) => /(\(implicit\)$)|\{\s.*固定詞綴.*\s\}/.test(line)))
-      return ParseResult.PARSE_SECTION_SKIP;
-    return this.parseMod(section, "implicit") === ParseResult.PARSE_SECTION_SUCC
-      ? ParseResult.PARSE_SECTION_SUCC
-      : ParseResult.PARSE_SECTION_FAIL;
+    if (!section.find((line) => /(\(implicit\)$)|\{\s.*固定詞綴.*\s\}/.test(line))) return ParseResult.PARSE_SECTION_SKIP;
+    return this.parseMod(section, "implicit") === ParseResult.PARSE_SECTION_SUCC ? ParseResult.PARSE_SECTION_SUCC : ParseResult.PARSE_SECTION_FAIL;
   }
 
   private parseRuneMod(section: string[]) {
     if (!section.find((line) => line.endsWith(" (rune)"))) return ParseResult.PARSE_SECTION_SKIP;
-    return this.parseMod(section, "rune") === ParseResult.PARSE_SECTION_SUCC
-      ? ParseResult.PARSE_SECTION_SUCC
-      : ParseResult.PARSE_SECTION_FAIL;
+    return this.parseMod(section, "rune") === ParseResult.PARSE_SECTION_SUCC ? ParseResult.PARSE_SECTION_SUCC : ParseResult.PARSE_SECTION_FAIL;
   }
 
   private parseVeiledMod(veiledSection: { line: string; advance: string }[]) {
@@ -542,8 +480,7 @@ class ItemAnalyzer {
   }
 
   private parseExplicitMod(section: string[]) {
-    if (!["魔法", "稀有", "傳奇"].includes(this.itemParsed.rarity))
-      return ParseResult.PARSE_SECTION_SKIP;
+    if (!["魔法", "稀有", "傳奇"].includes(this.itemParsed.rarity)) return ParseResult.PARSE_SECTION_SKIP;
     const explicitSection: string[] = [],
       fracturedSection: string[] = [],
       craftedSection: string[] = [],
@@ -591,18 +528,10 @@ class ItemAnalyzer {
       tempAdvanceLine = "";
     }
 
-    if (craftedSection.length)
-      parsed =
-        this.parseMod(craftedSection, "crafted") === ParseResult.PARSE_SECTION_SUCC || parsed;
-    if (fracturedSection.length)
-      parsed =
-        this.parseMod(fracturedSection, "fractured") === ParseResult.PARSE_SECTION_SUCC || parsed;
-    if (explicitSection.length)
-      parsed =
-        this.parseMod(explicitSection, "explicit") === ParseResult.PARSE_SECTION_SUCC || parsed;
-    if (mutatedSection.length)
-      parsed =
-        this.parseMod(mutatedSection, "mutated") === ParseResult.PARSE_SECTION_SUCC || parsed;
+    if (craftedSection.length) parsed = this.parseMod(craftedSection, "crafted") === ParseResult.PARSE_SECTION_SUCC || parsed;
+    if (fracturedSection.length) parsed = this.parseMod(fracturedSection, "fractured") === ParseResult.PARSE_SECTION_SUCC || parsed;
+    if (explicitSection.length) parsed = this.parseMod(explicitSection, "explicit") === ParseResult.PARSE_SECTION_SUCC || parsed;
+    if (mutatedSection.length) parsed = this.parseMod(mutatedSection, "mutated") === ParseResult.PARSE_SECTION_SUCC || parsed;
     if (veiledSection.length) this.parseVeiledMod(veiledSection);
 
     return parsed ? ParseResult.PARSE_SECTION_SUCC : ParseResult.PARSE_SECTION_SKIP;
@@ -626,9 +555,7 @@ class ItemAnalyzer {
       const influence = influences.find((inf) => inf.text === line);
       if (influence) this.itemParsed.influences.push(influence);
     }
-    return this.itemParsed.influences.length > 0
-      ? ParseResult.PARSE_SECTION_SUCC
-      : ParseResult.PARSE_SECTION_SKIP;
+    return this.itemParsed.influences.length > 0 ? ParseResult.PARSE_SECTION_SUCC : ParseResult.PARSE_SECTION_SKIP;
   }
 
   private parseMirrored(section: string[]) {
@@ -662,24 +589,14 @@ class ItemAnalyzer {
     let flag = false;
     this.itemParsed.stats.forEach((mod) => {
       match(mod.id)
-        .with(
-          P.string.endsWith("stat_3372524247"),
-          P.string.endsWith("stat_1671376347"),
-          P.string.endsWith("stat_4220027924"),
-          () => {
-            eleRes += mod.value?.min ?? mod.value?.max ?? 0;
-            flag = true;
-          },
-        )
-        .with(
-          P.string.endsWith("stat_3441501978"),
-          P.string.endsWith("stat_4277795662"),
-          P.string.endsWith("stat_2915988346"),
-          () => {
-            eleRes += (mod.value?.min ?? mod.value?.max ?? 0) * 2;
-            flag = true;
-          },
-        )
+        .with(P.string.endsWith("stat_3372524247"), P.string.endsWith("stat_1671376347"), P.string.endsWith("stat_4220027924"), () => {
+          eleRes += mod.value?.min ?? mod.value?.max ?? 0;
+          flag = true;
+        })
+        .with(P.string.endsWith("stat_3441501978"), P.string.endsWith("stat_4277795662"), P.string.endsWith("stat_2915988346"), () => {
+          eleRes += (mod.value?.min ?? mod.value?.max ?? 0) * 2;
+          flag = true;
+        })
         .with(P.string.endsWith("stat_2901986750"), () => {
           eleRes += (mod.value?.min ?? mod.value?.max ?? 0) * 3;
           flag = true;
@@ -747,17 +664,11 @@ class ItemAnalyzer {
     this.itemSection.shift();
     if (this.itemParsed.phyDamage && this.itemParsed.attackSpeed)
       this.itemParsed.pDPS = parseFloat(
-        (
-          ((this.itemParsed.phyDamage.min + this.itemParsed.phyDamage.max) / 2) *
-          this.itemParsed.attackSpeed
-        ).toFixed(2),
+        (((this.itemParsed.phyDamage.min + this.itemParsed.phyDamage.max) / 2) * this.itemParsed.attackSpeed).toFixed(2),
       );
     if (this.itemParsed.eleDamage && this.itemParsed.attackSpeed)
       this.itemParsed.eDPS = parseFloat(
-        (
-          ((this.itemParsed.eleDamage.min + this.itemParsed.eleDamage.max) / 2) *
-          this.itemParsed.attackSpeed
-        ).toFixed(2),
+        (((this.itemParsed.eleDamage.min + this.itemParsed.eleDamage.max) / 2) * this.itemParsed.attackSpeed).toFixed(2),
       );
     this.parseAllfuns();
   }
@@ -766,14 +677,10 @@ class ItemAnalyzer {
     this.itemParsed.isWeaponOrArmor = true;
     this.itemSection[0]?.forEach((line) => {
       let lineMatch: RegExpMatchArray | null;
-      if ((lineMatch = line.match(/品質: \+(\d+)%/)))
-        this.itemParsed.quality.min = parseInt(lineMatch[1]);
-      else if ((lineMatch = line.match(/閃避值: (\d+)/)))
-        this.itemParsed.evasion = parseInt(lineMatch[1]);
-      else if ((lineMatch = line.match(/護甲: (\d+)/)))
-        this.itemParsed.armour = parseInt(lineMatch[1]);
-      else if ((lineMatch = line.match(/能量護盾: (\d+)/)))
-        this.itemParsed.energyShield = parseInt(lineMatch[1]);
+      if ((lineMatch = line.match(/品質: \+(\d+)%/))) this.itemParsed.quality.min = parseInt(lineMatch[1]);
+      else if ((lineMatch = line.match(/閃避值: (\d+)/))) this.itemParsed.evasion = parseInt(lineMatch[1]);
+      else if ((lineMatch = line.match(/護甲: (\d+)/))) this.itemParsed.armour = parseInt(lineMatch[1]);
+      else if ((lineMatch = line.match(/能量護盾: (\d+)/))) this.itemParsed.energyShield = parseInt(lineMatch[1]);
     });
     this.itemSection.shift();
     this.parseAllfuns();
@@ -782,17 +689,14 @@ class ItemAnalyzer {
   private parseClusterJewel() {
     const requirementSection = this.itemSection[0];
     if (!requirementSection) return;
-    if (this.parseRequirement(requirementSection) === ParseResult.PARSE_SECTION_SUCC)
-      this.itemSection.shift();
+    if (this.parseRequirement(requirementSection) === ParseResult.PARSE_SECTION_SUCC) this.itemSection.shift();
     const ilvlSection = this.itemSection[0];
     const ilvlMatch = ilvlSection?.[0]?.match(/物品等級: (\d+)/);
     if (!ilvlMatch?.[1]) return;
     const tempIlvl = parseInt(ilvlMatch[1]);
     this.itemParsed.itemLevel = {
-      min:
-        tempIlvl >= 84 ? 84 : tempIlvl >= 75 ? 75 : tempIlvl >= 68 ? 68 : tempIlvl >= 50 ? 50 : 1,
-      max:
-        tempIlvl >= 84 ? 100 : tempIlvl >= 75 ? 83 : tempIlvl >= 68 ? 74 : tempIlvl >= 50 ? 67 : 49,
+      min: tempIlvl >= 84 ? 84 : tempIlvl >= 75 ? 75 : tempIlvl >= 68 ? 68 : tempIlvl >= 50 ? 50 : 1,
+      max: tempIlvl >= 84 ? 100 : tempIlvl >= 75 ? 83 : tempIlvl >= 68 ? 74 : tempIlvl >= 50 ? 67 : 49,
       search: true,
     };
     this.itemSection.shift();
@@ -911,10 +815,8 @@ class ItemAnalyzer {
   private parseMap() {
     this.itemParsed.autoSearch = true;
     const mapTier = this.itemParsed.baseType.match(/（階級 (\d{1,2})）/);
-    if (mapTier)
-      this.itemParsed.mapTier = { min: parseInt(mapTier[1]), max: undefined, search: true };
-    if (mapTier && this.itemParsed.raritySearch.value !== "unique")
-      this.itemParsed.type.searchByType = true;
+    if (mapTier) this.itemParsed.mapTier = { min: parseInt(mapTier[1]), max: undefined, search: true };
+    if (mapTier && this.itemParsed.raritySearch.value !== "unique") this.itemParsed.type.searchByType = true;
     const mapHeader = this.itemSection[0];
     if (!mapHeader) return;
     mapHeader.forEach((line) => {
@@ -944,20 +846,13 @@ class ItemAnalyzer {
     }
     this.itemSection = this.itemSection.filter((section) => !parsedSections.has(section));
     if (this.itemParsed.map_completion_reward) {
-      this.itemSection = this.itemSection.filter(
-        (section) => !section[0]?.startsWith("怪物等級："),
-      );
+      this.itemSection = this.itemSection.filter((section) => !section[0]?.startsWith("怪物等級："));
     }
     this.parseAllfuns();
-    if (this.itemParsed.map_completion_reward)
-      this.itemParsed.stats.forEach((stat) => (stat.disabled = false));
+    if (this.itemParsed.map_completion_reward) this.itemParsed.stats.forEach((stat) => (stat.disabled = false));
     this.itemParsed.stats.forEach((stat) => {
       if (stat.type === "附魔") stat.disabled = false;
-      if (
-        stat.id.startsWith("implicit.stat_3624393862") ||
-        stat.id.startsWith("implicit.stat_2563183002")
-      )
-        stat.disabled = false;
+      if (stat.id.startsWith("implicit.stat_3624393862") || stat.id.startsWith("implicit.stat_2563183002")) stat.disabled = false;
     });
   }
 
@@ -967,10 +862,8 @@ class ItemAnalyzer {
     if (!gemHeader) return;
     gemHeader.forEach((line) => {
       let lineMatch: RegExpMatchArray | null;
-      if ((lineMatch = line.match(/等級: (\d+)/)))
-        this.itemParsed.gemLevel = { min: parseInt(lineMatch[1]), max: undefined, search: true };
-      else if ((lineMatch = line.match(/品質: \+(\d+)%/)))
-        this.itemParsed.quality = { min: parseInt(lineMatch[1]), max: undefined, search: false };
+      if ((lineMatch = line.match(/等級: (\d+)/))) this.itemParsed.gemLevel = { min: parseInt(lineMatch[1]), max: undefined, search: true };
+      else if ((lineMatch = line.match(/品質: \+(\d+)%/))) this.itemParsed.quality = { min: parseInt(lineMatch[1]), max: undefined, search: false };
     });
     this.itemParsed.quality.search = !/啟蒙|賦予|增幅/.test(this.itemParsed.baseType);
     this.itemSection.shift();
@@ -994,9 +887,7 @@ class ItemAnalyzer {
       }
     }
     this.itemSection = this.itemSection.filter((section) => !parsedSections.has(section));
-    this.itemParsed.quality.search = !!(
-      this.itemParsed.isCorrupt && this.itemParsed.quality.search
-    );
+    this.itemParsed.quality.search = !!(this.itemParsed.isCorrupt && this.itemParsed.quality.search);
   }
 
   private parseTemple() {
@@ -1014,8 +905,7 @@ class ItemAnalyzer {
   private parseFlask() {
     this.itemSection[0]?.forEach((line) => {
       const lineMatch = line.match(/品質: \+(\d+)%/);
-      if (lineMatch)
-        this.itemParsed.quality = { min: parseInt(lineMatch[1]), max: undefined, search: true };
+      if (lineMatch) this.itemParsed.quality = { min: parseInt(lineMatch[1]), max: undefined, search: true };
     });
     this.itemSection.shift();
     this.parseAllfuns();
@@ -1024,11 +914,7 @@ class ItemAnalyzer {
   private parseLogbook() {
     this.itemSection.shift();
     const itemLevelSection = this.itemSection[0];
-    if (
-      !itemLevelSection ||
-      this.parseItemLevel(itemLevelSection) !== ParseResult.PARSE_SECTION_SUCC
-    )
-      return;
+    if (!itemLevelSection || this.parseItemLevel(itemLevelSection) !== ParseResult.PARSE_SECTION_SUCC) return;
     this.itemSection.shift();
     const itemLevel = this.itemParsed.itemLevel;
     if (!itemLevel || itemLevel.min === undefined) return;
@@ -1079,8 +965,7 @@ class ItemAnalyzer {
     this.itemSection.shift();
     const sanctumSection = this.itemSection[0];
     if (!sanctumSection) return;
-    if (this.parseMod(sanctumSection, "sanctum") === ParseResult.PARSE_SECTION_SUCC)
-      parsedSections.add(sanctumSection);
+    if (this.parseMod(sanctumSection, "sanctum") === ParseResult.PARSE_SECTION_SUCC) parsedSections.add(sanctumSection);
     this.itemSection = this.itemSection.filter((section) => !parsedSections.has(section));
   }
 
@@ -1237,9 +1122,7 @@ class ItemAnalyzer {
         .map((ele) => ({
           ...ele,
           disabled: true,
-          value: statAlreadyIn.value
-            ? { min: statAlreadyIn.value.min, max: statAlreadyIn.value.min }
-            : undefined,
+          value: statAlreadyIn.value ? { min: statAlreadyIn.value.min, max: statAlreadyIn.value.min } : undefined,
         })),
     );
   }
@@ -1273,19 +1156,13 @@ class ItemAnalyzer {
   }
   //最終通牒雕刻
   private parseInscribed() {
-    const inscribedSection = this.itemSection.find((section) =>
-      section.some((line) => line.startsWith("挑戰: ")),
-    );
+    const inscribedSection = this.itemSection.find((section) => section.some((line) => line.startsWith("挑戰: ")));
     if (!inscribedSection) return;
     //需求獻祭: 混沌石 x10
-    const requirementItem = inscribedSection
-      .find((line) => line.startsWith("需求獻祭: "))
-      ?.match(/需求獻祭: (?<item>.+?)(?:\sx(\d+))?$/)?.groups?.item;
-    const rewardItem = inscribedSection
-      .find((line) => line.startsWith("獎勵: "))
-      ?.match(/獎勵: (?<item>.+?)(?:\sx(\d+))?$/)?.groups?.item;
-    const defaultSearchRequirement =
-      rewardItem?.startsWith("翻倍獻祭的") || rewardItem === "物品和複製品";
+    const requirementItem = inscribedSection.find((line) => line.startsWith("需求獻祭: "))?.match(/需求獻祭: (?<item>.+?)(?:\sx(\d+))?$/)
+      ?.groups?.item;
+    const rewardItem = inscribedSection.find((line) => line.startsWith("獎勵: "))?.match(/獎勵: (?<item>.+?)(?:\sx(\d+))?$/)?.groups?.item;
+    const defaultSearchRequirement = rewardItem?.startsWith("翻倍獻祭的") || rewardItem === "物品和複製品";
     this.itemParsed.inscribed = {
       requirementItem,
       rewardItem,
@@ -1300,9 +1177,7 @@ class ItemAnalyzer {
         stat.disabled = false;
         if (stat.lowerBound && stat.upperBound && stat.value) {
           const [lowerBound, upperBound] = [stat.lowerBound, stat.upperBound].sort((a, b) => a - b);
-          stat.value.min = !isUndefined(stat.value.min)
-            ? Math.max(stat.value.min, lowerBound)
-            : lowerBound;
+          stat.value.min = !isUndefined(stat.value.min) ? Math.max(stat.value.min, lowerBound) : lowerBound;
           stat.value.max = upperBound;
         }
       }

@@ -13,12 +13,5 @@
     },
     "types": ["electron-vite/node", "node"]
   },
-  "include": [
-    "src/main",
-    "src/lib",
-    "src/ipc",
-    "electron.vite.config.ts",
-    "package.json",
-    "types.d.ts"
-  ]
+  "include": ["src/main", "src/lib", "src/ipc", "electron.vite.config.ts", "package.json", "types.d.ts"]
 }

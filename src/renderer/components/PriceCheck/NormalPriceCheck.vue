@@ -30,15 +30,11 @@
     </div>
 
     <div class="text-white text-center flex justify-between px-2">
-      <span :style="{ visibility: item.pDPS ? 'visible' : 'hidden' }" class="w-40"
-        >PDps: {{ item.pDPS }}</span
-      >
+      <span :style="{ visibility: item.pDPS ? 'visible' : 'hidden' }" class="w-40">PDps: {{ item.pDPS }}</span>
       <span v-if="item.type.text" class="flex-1" :class="{ 'text-3xl': item.type.searchByType }">
         {{ item.type.text }}
       </span>
-      <span :style="{ visibility: item.eDPS ? 'visible' : 'hidden' }" class="w-40"
-        >EDps: {{ item.eDPS }}</span
-      >
+      <span :style="{ visibility: item.eDPS ? 'visible' : 'hidden' }" class="w-40">EDps: {{ item.eDPS }}</span>
     </div>
     <div v-if="item.map_completion_reward" class="text-white text-center flex justify-center px-2">
       <span class="flex-1">
@@ -51,90 +47,35 @@
         :class="{ 'text-red-500': !item.inscribed.searchRequirementItem }"
         @click="
           () => {
-            if (
-              !item.inscribed ||
-              item.inscribed.rewardItem?.startsWith('翻倍獻祭的') ||
-              item.inscribed.rewardItem === '物品和複製品'
-            )
-              return;
+            if (!item.inscribed || item.inscribed.rewardItem?.startsWith('翻倍獻祭的') || item.inscribed.rewardItem === '物品和複製品') return;
             item.inscribed.searchRequirementItem = !item.inscribed.searchRequirementItem;
           }
         "
       >
         獻祭: {{ item.inscribed.requirementItem }}
-        <span
-          v-if="item.inscribed.rewardItem?.startsWith('翻倍獻祭的')"
-          class="text-yellow-500 text-xs"
-        >
-          目前沒有辦法顯示該筆是x1還是x4翻倍
-        </span>
+        <span v-if="item.inscribed.rewardItem?.startsWith('翻倍獻祭的')" class="text-yellow-500 text-xs"> 目前沒有辦法顯示該筆是x1還是x4翻倍 </span>
       </div>
       <span class="flex-1"> 獎勵: {{ item.inscribed.rewardItem }} </span>
     </div>
     <div class="mx-0 bg-blue-900 grid grid-cols-3 select-none">
       <div v-if="!item.searchExchange.option" class="flex p-2 items-center justify-center">
         <span class="mx-1 text-white hover:cursor-default">汙染:</span>
-        <MySelect
-          v-model="corruptComputed"
-          :options="corruptOption"
-          label-key="label"
-          :reducer="(i) => i.value"
-          class="flex-1"
-        />
+        <MySelect v-model="corruptComputed" :options="corruptOption" label-key="label" :reducer="(i) => i.value" class="flex-1" />
       </div>
-      <div
-        v-if="!item.searchExchange.option && !item.type.text.endsWith('技能寶石')"
-        class="flex p-2 items-center justify-center select-none"
-      >
+      <div v-if="!item.searchExchange.option && !item.type.text.endsWith('技能寶石')" class="flex p-2 items-center justify-center select-none">
         <span class="mx-1 text-white hover:cursor-default">已鑑定:</span>
-        <MySelect
-          v-model="item.isIdentify"
-          :options="generalOption"
-          label-key="label"
-          :reducer="(i) => i.value"
-          class="flex-1"
-        />
+        <MySelect v-model="item.isIdentify" :options="generalOption" label-key="label" :reducer="(i) => i.value" class="flex-1" />
       </div>
       <div v-if="item.searchExchange.option" class="center p-2 select-none col-start-2">
         <span class="mx-1 text-white hover:cursor-default">使用:</span>
-        <MySelect
-          v-model="searchExchangeState"
-          :options="exchangeHave"
-          label-key="label"
-          :reducer="(i) => i.value"
-          class="flex-1"
-        />
+        <MySelect v-model="searchExchangeState" :options="exchangeHave" label-key="label" :reducer="(i) => i.value" class="flex-1" />
       </div>
       <div v-if="!item.searchExchange.option" class="flex items-center justify-center">
-        <ValueMinMax
-          v-if="item.gemLevel"
-          v-model="item.gemLevel"
-          class="flex p-2 items-center justify-center"
-        >
-          寶石等級:
-        </ValueMinMax>
-        <ValueMinMax
-          v-else-if="item.mapTier"
-          v-model="item.mapTier"
-          class="flex p-2 items-center justify-center"
-        >
-          地圖階級:
-        </ValueMinMax>
-        <ValueMinMax
-          v-else-if="item.itemLevel"
-          v-model="item.itemLevel"
-          class="flex p-2 items-center justify-center"
-        >
-          物品等級:
-        </ValueMinMax>
+        <ValueMinMax v-if="item.gemLevel" v-model="item.gemLevel" class="flex p-2 items-center justify-center"> 寶石等級: </ValueMinMax>
+        <ValueMinMax v-else-if="item.mapTier" v-model="item.mapTier" class="flex p-2 items-center justify-center"> 地圖階級: </ValueMinMax>
+        <ValueMinMax v-else-if="item.itemLevel" v-model="item.itemLevel" class="flex p-2 items-center justify-center"> 物品等級: </ValueMinMax>
       </div>
-      <ValueMinMax
-        v-if="!item.searchExchange.option"
-        v-model="item.quality"
-        class="flex p-2 items-center justify-center"
-      >
-        品質:
-      </ValueMinMax>
+      <ValueMinMax v-if="!item.searchExchange.option" v-model="item.quality" class="flex p-2 items-center justify-center"> 品質: </ValueMinMax>
       <div v-if="item.blightedMap" class="flex items-center justify-center">
         <span class="mx-1 text-white hover:cursor-default">凋落圖</span>
       </div>
@@ -142,18 +83,12 @@
         <span class="mx-1 text-white hover:cursor-default">Uber凋落圖</span>
       </div>
 
-      <div
-        v-if="item.type.option === 'map'"
-        class="flex items-center justify-center"
-        @click="() => (item.memoryMap = !item.memoryMap)"
-      >
+      <div v-if="item.type.option === 'map'" class="flex items-center justify-center" @click="() => (item.memoryMap = !item.memoryMap)">
         <span class="mx-1 text-white hover:cursor-default">記憶地圖</span>
         <CircleCheck :have-undefined="true" :checked="item.memoryMap ?? false" />
       </div>
       <div
-        v-else-if="
-          item.isWeaponOrArmor || ['項鍊', '戒指', '腰帶', '箭袋'].includes(item.type.text)
-        "
+        v-else-if="item.isWeaponOrArmor || ['項鍊', '戒指', '腰帶', '箭袋'].includes(item.type.text)"
         class="flex col-span-2 items-center justify-center select-none"
       >
         <span class="mx-1 text-white hover:cursor-default">勢力:</span>
@@ -185,31 +120,13 @@
         <span class="mx-1 text-white">RGB?</span>
         <CircleCheck :checked="item.isRGB" />
       </div>
-      <div
-        v-if="!item.searchExchange.option"
-        class="flex items-center justify-center py-1 select-none"
-      >
+      <div v-if="!item.searchExchange.option" class="flex items-center justify-center py-1 select-none">
         <span class="mx-1 text-white hover:cursor-default">稀有度:</span>
-        <MySelect
-          v-model="item.raritySearch"
-          :options="rarityOptions"
-          label-key="label"
-          value-key="value"
-          class="flex-1"
-        />
+        <MySelect v-model="item.raritySearch" :options="rarityOptions" label-key="label" value-key="value" class="flex-1" />
       </div>
-      <div
-        v-if="!item.searchExchange.option"
-        class="flex items-center justify-center py-1 select-none"
-      >
+      <div v-if="!item.searchExchange.option" class="flex items-center justify-center py-1 select-none">
         <span class="mx-1 text-white">搜尋類型:</span>
-        <MySelect
-          v-model="item.searchOnlineType"
-          :options="searchOnlineTypeOptions"
-          label-key="label"
-          :reducer="(i) => i.value"
-          class="flex-1"
-        />
+        <MySelect v-model="item.searchOnlineType" :options="searchOnlineTypeOptions" label-key="label" :reducer="(i) => i.value" class="flex-1" />
       </div>
 
       <div
@@ -239,13 +156,7 @@
         <span class="mx-1 text-white">穢生:</span>
         <CircleCheck :have-undefined="true" :checked="item.foulborn ?? false" />
       </div>
-      <ValueMinMax
-        v-if="item.socketCount"
-        v-model="item.socketCount"
-        class="flex p-2 items-center justify-center"
-      >
-        插槽:
-      </ValueMinMax>
+      <ValueMinMax v-if="item.socketCount" v-model="item.socketCount" class="flex p-2 items-center justify-center"> 插槽: </ValueMinMax>
     </div>
 
     <table v-if="item.stats.length" class="bg-gray-700 text-center mt-1 text-white text-sm">
@@ -270,9 +181,7 @@
             @click="
               (e) => {
                 e.stopPropagation();
-                const firstHaveEmptyValue = item.stats.find(
-                  (mod) => !isUndefined(mod.searchWithEmptyValue),
-                );
+                const firstHaveEmptyValue = item.stats.find((mod) => !isUndefined(mod.searchWithEmptyValue));
                 if (!firstHaveEmptyValue) return;
                 const nextState = !firstHaveEmptyValue.searchWithEmptyValue;
                 item.stats.forEach((mod) => (mod.searchWithEmptyValue = nextState));
@@ -287,11 +196,7 @@
         </tr>
       </thead>
       <tbody v-show="modTbodyToggle" class="modsTbody" style="">
-        <tr
-          v-for="(mod, index) in item.stats"
-          :key="mod.id + index"
-          class="border-b-2 border-gray-400"
-        >
+        <tr v-for="(mod, index) in item.stats" :key="mod.id + index" class="border-b-2 border-gray-400">
           <td class="text-base" @click="() => handleModClick(mod)">
             <CircleCheck :checked="!mod.disabled" />
           </td>
@@ -407,10 +312,7 @@
         :divineToChaosOrExalted="divineToChaosOrExalted"
       />
     </div>
-    <table
-      v-if="fetchResultSorted.length"
-      class="bg-blue-500 text-center text-white text-sm my-1 mx-5 w-1/2 self-center"
-    >
+    <table v-if="fetchResultSorted.length" class="bg-blue-500 text-center text-white text-sm my-1 mx-5 w-1/2 self-center">
       <thead class="">
         <tr class="border-b-2 border-red-500 text-base">
           <td class="hover:cursor-default">價格</td>
@@ -424,18 +326,13 @@
           class="border-b-2 border-gray-600"
           :class="{
             'text-yellow-400 text-xl bg-indigo-700 font-bold': ele.amount === maxAmount?.amount,
-            'text-yellow-300 bg-indigo-500':
-              secondMaxAmount?.amount !== maxAmount?.amount &&
-              ele.amount === secondMaxAmount?.amount,
+            'text-yellow-300 bg-indigo-500': secondMaxAmount?.amount !== maxAmount?.amount && ele.amount === secondMaxAmount?.amount,
           }"
         >
           <td v-if="item.searchExchange.option" class="flex justify-center items-center">
-            <img :src="ele.image" class="w-7 h-7" />{{ ele.price
-            }}<img :src="currency2Img" class="w-7 h-7" />
+            <img :src="ele.image" class="w-7 h-7" />{{ ele.price }}<img :src="currency2Img" class="w-7 h-7" />
           </td>
-          <td v-else class="flex justify-center items-center">
-            {{ ele.price }}<img :src="ele.image" class="w-7 h-7" />
-          </td>
+          <td v-else class="flex justify-center items-center">{{ ele.price }}<img :src="ele.image" class="w-7 h-7" /></td>
           <td>{{ ele.amount }}</td>
         </tr>
       </tbody>
@@ -443,19 +340,13 @@
     <span v-if="searchResult.err" class="text-red-600 text-4xl text-center hover:cursor-default">
       {{ searchResult.errData || "Fail" }}
     </span>
-    <span
-      v-if="searchResult.searchID?.ID"
-      class="text-white text-2xl text-center hover:cursor-default"
-    >
+    <span v-if="searchResult.searchID?.ID" class="text-white text-2xl text-center hover:cursor-default">
       共{{ searchResult.totalCount }}筆,顯示{{ fetchedCount }}筆
     </span>
     <div v-if="isSearching" class="text-8xl text-white my-5 text-center flex justify-center">
       <div class="i-svg-spinners:tadpole" />
     </div>
-    <span
-      v-if="isActive"
-      class="text-white bg-red-600 text-xl text-center my-2 hover:cursor-default"
-    >
+    <span v-if="isActive" class="text-white bg-red-600 text-xl text-center my-2 hover:cursor-default">
       API次數限制 {{ remaining.toFixed(1) }} 秒後再回來
     </span>
   </template>
@@ -467,13 +358,7 @@
 <script setup lang="ts">
 import { countBy, isUndefined, maxBy } from "lodash-es";
 import { computed, ref, nextTick, watch, onUnmounted, toRaw } from "vue";
-import {
-  getSearchJSON,
-  searchItem,
-  fetchItem,
-  searchExchange,
-  selectOptions,
-} from "@/renderer/lib/tradeSide";
+import { getSearchJSON, searchItem, fetchItem, searchExchange, selectOptions } from "@/renderer/lib/tradeSide";
 import IPC from "@/ipc";
 import { APIStatic, divineImage, chaosOrExImage, currencyImageUrl } from "@/renderer/lib/APIdata";
 import CircleCheck from "../utility/CircleCheck.vue";
@@ -571,18 +456,11 @@ const {
   },
 });
 const currency2Img = computed(() => {
-  if (
-    !item.value.searchExchange.option ||
-    isFetchingSearchResult.value ||
-    !searchResult.value.result.length ||
-    searchResult.value.err
-  ) {
+  if (!item.value.searchExchange.option || isFetchingSearchResult.value || !searchResult.value.result.length || searchResult.value.err) {
     return "";
   }
 
-  const image = APIStatic.find(
-    (ele) => ele.id === (searchResult.value as IExchangeResult).currency2,
-  )?.image;
+  const image = APIStatic.find((ele) => ele.id === (searchResult.value as IExchangeResult).currency2)?.image;
   return image ? `${import.meta.env.VITE_URL_BASE}${image}` : "";
 });
 
@@ -596,10 +474,7 @@ const {
   queryFn: ({ pageParam }) => {
     const startIndex = pageParam * item.value.fetchCount;
     const endIndex = Math.min(startIndex + item.value.fetchCount, searchResult.value.result.length);
-    const searchResultList = (searchResult.value as unknown as ISearchResult).result.slice(
-      startIndex,
-      endIndex,
-    );
+    const searchResultList = (searchResult.value as unknown as ISearchResult).result.slice(startIndex, endIndex);
     return fetchItem(searchResultList, searchResult.value.searchID.ID);
   },
   initialPageParam: 0,
@@ -643,9 +518,7 @@ const fetchResult = computed<IFetchResult[]>(() => {
       for (const key in countByFetchResult) {
         const [price, currency] = key.split("|") as [string, string];
         const numPrice = Number(price);
-        const fetchResultFind = fetchResult.find(
-          (e) => e.price === numPrice && e.currency === currency,
-        );
+        const fetchResultFind = fetchResult.find((e) => e.price === numPrice && e.currency === currency);
         if (fetchResultFind) {
           fetchResultFind.amount += countByFetchResult[key];
         } else {
@@ -682,34 +555,20 @@ const fetchResultSorted = computed(() => {
   if (props.divineToChaosOrExalted) {
     if (item.value.searchExchange.option) {
       return fetchResult.value.slice().sort((a, b) => {
-        const [aCurrencyCount, aItemCount] = (a.price as string).split("：").map(Number) as [
-          number,
-          number,
-        ];
+        const [aCurrencyCount, aItemCount] = (a.price as string).split("：").map(Number) as [number, number];
         const aPrice = aCurrencyCount / aItemCount;
-        const [bCurrencyCount, bItemCount] = (b.price as string).split("：").map(Number) as [
-          number,
-          number,
-        ];
+        const [bCurrencyCount, bItemCount] = (b.price as string).split("：").map(Number) as [number, number];
         const bPrice = bCurrencyCount / bItemCount;
-        const ca =
-          a.currency === "divine" ? aPrice * props.divineToChaosOrExalted : (aPrice as number);
-        const cb =
-          b.currency === "divine" ? bPrice * props.divineToChaosOrExalted : (bPrice as number);
+        const ca = a.currency === "divine" ? aPrice * props.divineToChaosOrExalted : (aPrice as number);
+        const cb = b.currency === "divine" ? bPrice * props.divineToChaosOrExalted : (bPrice as number);
         return ca - cb;
       });
     }
     return fetchResult.value.slice().sort((a, b) => {
       if (!["divine", secondCurrency].includes(a.currency)) return 1;
       if (!["divine", secondCurrency].includes(b.currency)) return -1;
-      const ca =
-        a.currency === "divine"
-          ? (a.price as number) * props.divineToChaosOrExalted
-          : (a.price as number);
-      const cb =
-        b.currency === "divine"
-          ? (b.price as number) * props.divineToChaosOrExalted
-          : (b.price as number);
+      const ca = a.currency === "divine" ? (a.price as number) * props.divineToChaosOrExalted : (a.price as number);
+      const cb = b.currency === "divine" ? (b.price as number) * props.divineToChaosOrExalted : (b.price as number);
       return ca - cb;
     });
   } else return fetchResult.value;
@@ -728,8 +587,7 @@ const searchExchangeState = computed<Config["searchExchangePrefer"]>({
     if (!item.value?.searchExchange?.option) return "none" as Config["searchExchangePrefer"];
     if (
       item.value.searchExchange.have.length === 2 &&
-      (item.value.searchExchange.have.includes("chaos") ||
-        item.value.searchExchange.have.includes("exalted")) &&
+      (item.value.searchExchange.have.includes("chaos") || item.value.searchExchange.have.includes("exalted")) &&
       item.value.searchExchange.have.includes("divine")
     )
       return "divine&(C or Ex)" as Config["searchExchangePrefer"];
@@ -763,10 +621,7 @@ const corruptComputed = computed<(typeof corruptOption)[number]["value"]>({
   },
 });
 watch(searchExchangeState, (value) => {
-  window.ipc.send(
-    IPC.UPDATE_CONFIG,
-    JSON.stringify({ searchExchangePrefer: value } satisfies Partial<Config>),
-  );
+  window.ipc.send(IPC.UPDATE_CONFIG, JSON.stringify({ searchExchangePrefer: value } satisfies Partial<Config>));
 });
 
 watch(
@@ -784,10 +639,7 @@ const emit = defineEmits<{
   "open-web-view": [extendUrl: string];
 }>();
 function openWebView() {
-  emit(
-    "open-web-view",
-    `${searchResult.value.searchID.type}/${props.leagueSelect}/${searchResult.value.searchID.ID}`,
-  );
+  emit("open-web-view", `${searchResult.value.searchID.type}/${props.leagueSelect}/${searchResult.value.searchID.ID}`);
 }
 function openBrowser() {
   window.open(

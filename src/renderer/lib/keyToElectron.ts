@@ -97,12 +97,7 @@ const keyMap = {
   Numpad8: "num8",
   Numpad9: "num9",
 };
-export function keyToElectron(
-  keyString: string,
-  altKey: boolean,
-  ctrlKey: boolean,
-  shiftKey: boolean,
-): string {
+export function keyToElectron(keyString: string, altKey: boolean, ctrlKey: boolean, shiftKey: boolean): string {
   keyString = keyMap[keyString as keyof typeof keyMap];
   if (altKey) keyString = "Alt+" + keyString;
   if (ctrlKey) keyString = "Ctrl+" + keyString;

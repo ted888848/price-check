@@ -20,10 +20,7 @@ interface IPCEventMap {
   getProxyPort: () => number;
 }
 export type Channel = keyof IPCEventMap;
-export type IPCListener<T extends Channel> = (
-  event: Electron.IpcRendererEvent,
-  listener: IPCEventMap[T],
-) => void;
+export type IPCListener<T extends Channel> = (event: Electron.IpcRendererEvent, listener: IPCEventMap[T]) => void;
 export type IpcArgs<T extends Channel> = Parameters<IPCEventMap[T]>;
 export type IpcReturn<T extends Channel> = ReturnType<IPCEventMap[T]>;
 export declare const channels: {

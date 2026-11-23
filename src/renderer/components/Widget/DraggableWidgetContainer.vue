@@ -7,16 +7,8 @@
   >
     <div class="w-100% center justify-between text-yellow-500">
       {{ title }}
-      <div
-        v-if="dragDisabled"
-        class="i-material-symbols:drag-pan text-lg cursor-pointer text-gray-400"
-        @pointerdown="dragDisabled = false"
-      />
-      <div
-        v-else
-        class="i-material-symbols:check-circle text-lg cursor-pointer! text-green-600"
-        @click="handleSavePosition"
-      />
+      <div v-if="dragDisabled" class="i-material-symbols:drag-pan text-lg cursor-pointer text-gray-400" @pointerdown="dragDisabled = false" />
+      <div v-else class="i-material-symbols:check-circle text-lg cursor-pointer! text-green-600" @click="handleSavePosition" />
     </div>
     <slot :dragDisabled="dragDisabled" />
   </div>

@@ -26,12 +26,7 @@
           {{ label }}
         </div>
       </template>
-      <ElOption
-        v-for="(option, index) in props.options"
-        :key="index"
-        :label="option[props.labelKey]"
-        :value="option"
-      >
+      <ElOption v-for="(option, index) in props.options" :key="index" :label="option[props.labelKey]" :value="option">
         <div v-if="props.centerLabel" class="text-center">
           {{ option[props.labelKey] }}
         </div>
@@ -42,12 +37,7 @@
 <script
   setup
   lang="ts"
-  generic="
-    T extends Record<string, any>,
-    ReducerReturn,
-    ValueKey extends keyof T | undefined = undefined,
-    Multiple extends boolean = false
-  "
+  generic="T extends Record<string, any>, ReducerReturn, ValueKey extends keyof T | undefined = undefined, Multiple extends boolean = false"
 >
 import { ElSelect, ElOption } from "element-plus";
 import { ref, watch } from "vue";
@@ -92,9 +82,7 @@ function getModelValue2SelectedValue(modelValue: TModelValue2 | undefined): Sele
 
   return (
     props.multiple
-      ? props.options.filter((item) =>
-          (modelValue as TModelValue[]).some((mValue) => hasSameValue(item, mValue)),
-        )
+      ? props.options.filter((item) => (modelValue as TModelValue[]).some((mValue) => hasSameValue(item, mValue)))
       : props.options.find((item) => hasSameValue(item, modelValue as TModelValue))
   ) as SelectValue;
 }

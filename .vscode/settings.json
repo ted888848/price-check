@@ -1,6 +1,4 @@
 {
-  "typescript.tsdk": "node_modules/typescript/lib",
-  "typescript.tsc.autoDetect": "off",
   "json.schemas": [
     {
       "fileMatch": ["/*electron-builder.json5", "/*electron-builder.json"],
@@ -93,15 +91,10 @@
     "configurations": [],
     "compounds": []
   },
-  "postman.settings.dotenv-detection-notification-visibility": false,
   "js/ts.tsdk.path": "node_modules/typescript/lib",
   "editor.defaultFormatter": "oxc.oxc-vscode",
   "editor.formatOnSave": true,
-  "[vue]": {
-    "editor.defaultFormatter": "oxc.oxc-vscode",
-    "editor.formatOnSave": true
-  },
-  "[typescript]": {
+  "[*]": {
     "editor.defaultFormatter": "oxc.oxc-vscode",
     "editor.formatOnSave": true
   }

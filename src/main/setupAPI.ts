@@ -86,24 +86,13 @@ function setupAPIItems(itemsJson: APIItems) {
   itemsJson.result.forEach((itemGroup) => {
     const groupID = itemGroup.id as keyof ParsedAPIitems;
     match(groupID)
-      .with(
-        "accessory",
-        "armour",
-        "flask",
-        "jewel",
-        "weapon",
-        "watchstones",
-        "heistequipment",
-        "heistmission",
-        "logbook",
-        (id) => {
-          APIitems[id] = {
-            id: itemGroup.id,
-            label: itemGroup.label,
-            entries: setupItemEntries(itemGroup.entries, heistReward),
-          };
-        },
-      )
+      .with("accessory", "armour", "flask", "jewel", "weapon", "watchstones", "heistequipment", "heistmission", "logbook", (id) => {
+        APIitems[id] = {
+          id: itemGroup.id,
+          label: itemGroup.label,
+          entries: setupItemEntries(itemGroup.entries, heistReward),
+        };
+      })
       .with("map", () => {
         APIitems[groupID] = {
           id: itemGroup.id,
@@ -184,9 +173,7 @@ function setupAPIMods(statsJson: APIStats) {
       .with("explicit", () => {
         APImods.forbiddenJewel = {
           label: statsGroup.label,
-          entries: statsGroup.entries.filter((ele) =>
-            /^若你在禁忌(烈焰|血肉)上有符合的詞綴，配置 #$/.test(ele.text),
-          ),
+          entries: statsGroup.entries.filter((ele) => /^若你在禁忌(烈焰|血肉)上有符合的詞綴，配置 #$/.test(ele.text)),
           type: "隨機",
         };
         APImods.explicit = {
@@ -309,12 +296,7 @@ async function getStatic(poeVersion: POEVersion = "1") {
 }
 
 export async function get1APIdata() {
-  const result = await Promise.allSettled([
-    getLeagues(),
-    getItems(),
-    getStatic(),
-    getStats() /*, getItemNameTranslation()*/,
-  ]);
+  const result = await Promise.allSettled([getLeagues(), getItems(), getStatic(), getStats() /*, getItemNameTranslation()*/]);
   let error: any;
   result.forEach((e) => {
     if (e.status === "rejected") {
@@ -326,12 +308,7 @@ export async function get1APIdata() {
 }
 
 export async function get2APIdata() {
-  const result = await Promise.allSettled([
-    getLeagues("2"),
-    getItems("2"),
-    getStatic("2"),
-    getStats("2") /*, getItemNameTranslation('2')*/,
-  ]);
+  const result = await Promise.allSettled([getLeagues("2"), getItems("2"), getStatic("2"), getStats("2") /*, getItemNameTranslation('2')*/]);
   let error: any;
   result.forEach((e) => {
     if (e.status === "rejected") {

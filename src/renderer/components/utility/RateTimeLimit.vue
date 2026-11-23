@@ -3,11 +3,7 @@
     <div>Rate Limit</div>
     <div>Search</div>
     <ul>
-      <li
-        v-for="(state, rule) in rateTimeLimitState.search"
-        :key="rule"
-        class="text-sm hover:cursor-default"
-      >
+      <li v-for="(state, rule) in rateTimeLimitState.search" :key="rule" class="text-sm hover:cursor-default">
         {{ rule }}:
         <ul>
           <li v-for="(item, index) in state" :key="index" class="text-xs hover:cursor-default">
@@ -21,11 +17,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import {
-  getRateTimeLimitState,
-  apiRateTimeLimitMax,
-  getRateLimiters,
-} from "@/renderer/lib/ratetimelimit";
+import { getRateTimeLimitState, apiRateTimeLimitMax, getRateLimiters } from "@/renderer/lib/ratetimelimit";
 const { rateTimeLimitState } = getRateTimeLimitState();
 const { ratetimelimiters } = getRateLimiters();
 console.log(ratetimelimiters.value);

@@ -1,10 +1,6 @@
 <template>
   <template v-for="widget in config?.widgets ?? []" :key="widget.id">
-    <RegexWidget
-      v-if="widget.type === 'regex' && shouldDisplayWidget(widget)"
-      :widget="widget"
-      @update:widget="handleUpdateWidget"
-    />
+    <RegexWidget v-if="widget.type === 'regex' && shouldDisplayWidget(widget)" :widget="widget" @update:widget="handleUpdateWidget" />
   </template>
 </template>
 <script setup lang="ts">

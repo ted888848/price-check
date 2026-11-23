@@ -16,11 +16,8 @@ export function loadAPIData(poeVersion?: POEVersion) {
   }
   if (poeVersion === "1") loadAPIPoe1Data();
   else loadAPIPoe2Data();
-  divineImage =
-    import.meta.env.VITE_URL_BASE + currencyImageUrl?.find((ele) => ele.id === "divine")?.image;
-  chaosOrExImage =
-    import.meta.env.VITE_URL_BASE +
-    currencyImageUrl?.find((ele) => ele.id === secondCurrency)?.image;
+  divineImage = import.meta.env.VITE_URL_BASE + currencyImageUrl?.find((ele) => ele.id === "divine")?.image;
+  chaosOrExImage = import.meta.env.VITE_URL_BASE + currencyImageUrl?.find((ele) => ele.id === secondCurrency)?.image;
 }
 
 function loadAPIPoe1Data() {

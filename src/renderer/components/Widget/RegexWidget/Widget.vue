@@ -1,10 +1,5 @@
 <template>
-  <DraggableWidgetContainer
-    :title="widget.name || 'Regex 快捷'"
-    :x="widget.x"
-    :y="widget.y"
-    @save-position="handleSavePosition"
-  >
+  <DraggableWidgetContainer :title="widget.name || 'Regex 快捷'" :x="widget.x" :y="widget.y" @save-position="handleSavePosition">
     <template v-slot="{ dragDisabled }">
       <RegexItem
         v-for="regex in widget.list"
@@ -14,12 +9,7 @@
         @delete:regex="handleDeleteRegex"
         :disabled="!dragDisabled"
       />
-      <RegexItem
-        @update:regex="handleUpdateRegex"
-        :empty="true"
-        :regex="{ regex: '', id: '' }"
-        :disabled="!dragDisabled"
-      />
+      <RegexItem @update:regex="handleUpdateRegex" :empty="true" :regex="{ regex: '', id: '' }" :disabled="!dragDisabled" />
     </template>
   </DraggableWidgetContainer>
 </template>

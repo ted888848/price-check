@@ -11,10 +11,7 @@
       class="flex-1"
     />
   </div>
-  <div
-    v-show="!((gemReplicaSelect?.text.startsWith('贗品') && gemReplicaSelect?.trans) ?? true)"
-    class="flex p-2 items-center justify-center"
-  >
+  <div v-show="!((gemReplicaSelect?.text.startsWith('贗品') && gemReplicaSelect?.trans) ?? true)" class="flex p-2 items-center justify-center">
     <span class="mx-1 text-white hover:cursor-default">寶石版本:</span>
     <MySelect
       v-model="gemTransSelect"
@@ -28,13 +25,7 @@
   </div>
   <div class="flex items-center justify-center py-1 select-none">
     <span class="mx-1 text-white">搜尋類型:</span>
-    <MySelect
-      v-model="searchOnlineType"
-      :options="searchOnlineTypeOptions"
-      label-key="label"
-      :reducer="(i) => i.value"
-      class="w-100px"
-    />
+    <MySelect v-model="searchOnlineType" :options="searchOnlineTypeOptions" label-key="label" :reducer="(i) => i.value" class="w-100px" />
   </div>
   <div v-if="!isSearching" class="my-2 justify-center flex text-xl">
     <button
@@ -76,10 +67,7 @@
   <span v-if="parseError" class="text-red-600 text-4xl text-center hover:cursor-default">
     {{ parseError }}
   </span>
-  <table
-    v-if="fetchResultSorted.length"
-    class="bg-blue-500 text-center text-white text-sm my-1 mx-5 w-1/2 self-center"
-  >
+  <table v-if="fetchResultSorted.length" class="bg-blue-500 text-center text-white text-sm my-1 mx-5 w-1/2 self-center">
     <thead class="">
       <tr class="border-b-2 border-red-500 text-base">
         <td class="hover:cursor-default">價格</td>
@@ -95,9 +83,7 @@
           'text-red-500 text-xl bg-indigo-600 font-bold': ele.amount === maxAmount!.amount,
         }"
       >
-        <td class="flex justify-center items-center">
-          {{ ele.price }}<img :src="ele.image" class="w-7 h-7" />
-        </td>
+        <td class="flex justify-center items-center">{{ ele.price }}<img :src="ele.image" class="w-7 h-7" /></td>
         <td>{{ ele.amount }}</td>
       </tr>
     </tbody>
@@ -105,10 +91,7 @@
   <span v-if="searchResult.err" class="text-red-600 text-4xl text-center hover:cursor-default">
     {{ searchResult.errData || "Fail" }}
   </span>
-  <span
-    v-if="searchResult.searchID?.ID"
-    class="text-white text-2xl text-center hover:cursor-default"
-  >
+  <span v-if="searchResult.searchID?.ID" class="text-white text-2xl text-center hover:cursor-default">
     共{{ searchResult.totalCount }}筆,顯示{{ fetchedCount }}筆
   </span>
   <div v-if="isSearching" class="text-8xl text-white my-5 text-center flex justify-center">
@@ -269,10 +252,7 @@ const {
   queryFn: ({ pageParam }) => {
     const startIndex = pageParam * 20;
     const endIndex = Math.min(startIndex + 20, searchResult.value.result.length);
-    const searchResultList = (searchResult.value as unknown as ISearchResult).result.slice(
-      startIndex,
-      endIndex,
-    );
+    const searchResultList = (searchResult.value as unknown as ISearchResult).result.slice(startIndex, endIndex);
     return fetchItem(searchResultList, searchResult.value.searchID.ID);
   },
   initialPageParam: 0,
@@ -306,9 +286,7 @@ const fetchResult = computed<IFetchResult[]>(() => {
     for (const key in countByFetchResult) {
       const [price, currency] = key.split("|") as [string, string];
       const numPrice = Number(price);
-      const fetchResultFind = fetchResult.find(
-        (e) => e.price === numPrice && e.currency === currency,
-      );
+      const fetchResultFind = fetchResult.find((e) => e.price === numPrice && e.currency === currency);
       if (fetchResultFind) {
         fetchResultFind.amount += countByFetchResult[key];
       } else {
@@ -329,9 +307,7 @@ const queryClient = useQueryClient();
 
 async function searchBtn(onlyChaosOrExalted = false) {
   if (isActive.value) return;
-  searchJSON.query.filters.trade_filters.filters.price.option = onlyChaosOrExalted
-    ? "chaos"
-    : undefined;
+  searchJSON.query.filters.trade_filters.filters.price.option = onlyChaosOrExalted ? "chaos" : undefined;
   queryClient.removeQueries({ queryKey: ["fetchItemHeist"] });
   queryClient.removeQueries({ queryKey: ["searchItemHeist"] });
   await refetchSearchItem();
@@ -343,14 +319,8 @@ const fetchResultSorted = computed(() => {
     return fetchResult.value.slice().sort((a, b) => {
       if (!["divine", secondCurrency].includes(a.currency)) return 1;
       if (!["divine", secondCurrency].includes(b.currency)) return -1;
-      const ca =
-        a.currency === "divine"
-          ? (a.price as number) * props.divineToChaosOrExalted
-          : (a.price as number);
-      const cb =
-        b.currency === "divine"
-          ? (b.price as number) * props.divineToChaosOrExalted
-          : (b.price as number);
+      const ca = a.currency === "divine" ? (a.price as number) * props.divineToChaosOrExalted : (a.price as number);
+      const cb = b.currency === "divine" ? (b.price as number) * props.divineToChaosOrExalted : (b.price as number);
       return ca - cb;
     });
   } else return fetchResult.value;

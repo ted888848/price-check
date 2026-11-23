@@ -1,9 +1,7 @@
 <template>
   <div class="flex flex-col pl-2">
     <div class="flex mt-5">
-      <label for="characterName" class="text-xl text-white mr-2 hover:cursor-default"
-        >角色名字:</label
-      >
+      <label for="characterName" class="text-xl text-white mr-2 hover:cursor-default">角色名字:</label>
       <input
         id="characterName"
         v-model="config.characterName"
@@ -22,13 +20,7 @@
     </div>
     <div class="flex mt-5 hover:cursor-pointer items-center gap-8px">
       <span class="text-xl text-white">以物易物優先使用:</span>
-      <MySelect
-        v-model="config.searchExchangePrefer"
-        class="min-w-150px"
-        :options="exchangeHave"
-        label-key="label"
-        :reducer="(i) => i.value"
-      />
+      <MySelect v-model="config.searchExchangePrefer" class="min-w-150px" :options="exchangeHave" label-key="label" :reducer="(i) => i.value" />
     </div>
     <div class="flex items-center py-1 select-none">
       <span class="mx-1 text-xl text-white">搜尋類型:</span>
@@ -40,17 +32,11 @@
         class="min-w-100px"
       />
     </div>
-    <div
-      class="flex items-center py-1 select-none"
-      @click="config.autoSearchStackableItems = !config.autoSearchStackableItems"
-    >
+    <div class="flex items-center py-1 select-none" @click="config.autoSearchStackableItems = !config.autoSearchStackableItems">
       <span class="mx-1 text-xl text-white">自動搜尋可堆疊物品</span>
       <CircleCheck :checked="config.autoSearchStackableItems ?? true" />
     </div>
-    <div
-      class="flex items-center py-1 select-none"
-      @click="config.enableAutoEnableUniqueMods = !config.enableAutoEnableUniqueMods"
-    >
+    <div class="flex items-center py-1 select-none" @click="config.enableAutoEnableUniqueMods = !config.enableAutoEnableUniqueMods">
       <span class="mx-1 text-xl text-white">自動啟用傳奇物品詞綴</span>
       <CircleCheck :checked="config.enableAutoEnableUniqueMods ?? false" />
     </div>

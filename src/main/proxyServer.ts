@@ -20,21 +20,13 @@ export class ProxyServer {
       const url = c.req.query("url");
       if (!url) return c.json({ error: "Missing url parameter" }, 400);
       const response: AxiosResponse = await GGCapi.post(url, data).catch((err) => err.response);
-      return c.json(
-        response.data,
-        response.status as ContentfulStatusCode,
-        response.headers as AxiosResponseHeaders,
-      );
+      return c.json(response.data, response.status as ContentfulStatusCode, response.headers as AxiosResponseHeaders);
     });
     this.app.get("/proxy", async (c) => {
       const url = c.req.query("url");
       if (!url) return c.json({ error: "Missing url parameter" }, 400);
       const response: AxiosResponse = await GGCapi.get(url).catch((err) => err.response);
-      return c.json(
-        response.data,
-        response.status as ContentfulStatusCode,
-        response.headers as AxiosResponseHeaders,
-      );
+      return c.json(response.data, response.status as ContentfulStatusCode, response.headers as AxiosResponseHeaders);
     });
     ipcMain.on(IPC.GET_PROXY_PORT, (e) => {
       e.returnValue = this.getPort();

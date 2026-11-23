@@ -1,8 +1,5 @@
 const decimalPattern = /[+-]?\d+(?:\.\d+)?/;
-const numberPattern = new RegExp(
-  `(${decimalPattern.source}(?:\\(${decimalPattern.source}-${decimalPattern.source}\\))?)`,
-  "g",
-);
+const numberPattern = new RegExp(`(${decimalPattern.source}(?:\\(${decimalPattern.source}-${decimalPattern.source}\\))?)`, "g");
 export const numberPatternWithNameGroup = new RegExp(
   `(?<value>${decimalPattern.source})(?:\\((?<lowerBound>${decimalPattern.source})-(?<upperBound>${decimalPattern.source})\\))?`,
 );

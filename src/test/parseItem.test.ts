@@ -7,10 +7,7 @@ import { itemTemplateRaw } from "./data/templateItems";
 let testData: any;
 
 async function loadPOE1Config() {
-  const dataFile = await readFile(
-    "C:\\Users\\zhou\\AppData\\Roaming\\price-check\\APIData.json",
-    "utf-8",
-  );
+  const dataFile = await readFile("C:\\Users\\zhou\\AppData\\Roaming\\price-check\\APIData.json", "utf-8");
   testData = JSON.parse(dataFile);
 }
 // 在載入完資料後才 import itemAnalyze

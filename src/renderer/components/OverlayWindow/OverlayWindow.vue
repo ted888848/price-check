@@ -1,9 +1,5 @@
 <template>
-  <div
-    v-show="overlayWindowShow"
-    class="absolute top-0 left-0 m-0 w-screen h-screen bg-gray-400 bg-opacity-30"
-    @click.self="closeOverlay"
-  >
+  <div v-show="overlayWindowShow" class="absolute top-0 left-0 m-0 w-screen h-screen bg-gray-400 bg-opacity-30" @click.self="closeOverlay">
     <button
       class="absolute top-10 left-10 bg-blue-600 hover:bg-gray-900 rounded-xl px-1 py-0.5"
       @click="(_event) => (settingWindowShow = !settingWindowShow)"
@@ -11,11 +7,7 @@
     >
       <div class="i-material-symbols:settings text-red-600 text-4xl" />
     </button>
-    <button
-      class="absolute top-28 left-10 bg-red-600 hover:bg-gray-900 rounded-xl px-1 py-0.5"
-      @click="reloadAPIdata"
-      title="重新載入 API 資料"
-    >
+    <button class="absolute top-28 left-10 bg-red-600 hover:bg-gray-900 rounded-xl px-1 py-0.5" @click="reloadAPIdata" title="重新載入 API 資料">
       <div class="i-material-symbols:refresh text-blue-600 text-4xl" />
     </button>
     <SettingWindow v-if="settingWindowShow" @close-setting-window="closeSettingWindow" />
