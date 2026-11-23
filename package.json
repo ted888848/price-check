@@ -12,10 +12,10 @@
   "main": "dist/main/index.js",
   "scripts": {
     "dev": "electron-vite dev --watch",
-    "build": "vue-tsc --noEmit && electron-vite build && electron-builder",
+    "build": "vue-tsc -b --noEmit && electron-vite build && electron-builder",
     "preview": "electron-vite preview",
     "buildP": "env $(cat .env.local | xargs) pnpm run build -p always",
-    "vuetsc": "vue-tsc --noEmit",
+    "vuetsc": "vue-tsc -b --noEmit",
     "test": " vitest --run",
     "ipc-type": "tsc ./src/ipc/index.ts --emitDeclarationOnly --declaration --outDir src/ipc",
     "type-check": "vue-tsc --noEmit",

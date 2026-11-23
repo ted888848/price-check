@@ -18,11 +18,11 @@ const tradeApi = axios.create({
 export interface ISearchJson {
   query: {
     type?:
-    | {
-      discriminator: string;
-      option: string;
-    }
-    | string;
+      | {
+          discriminator: string;
+          option: string;
+        }
+      | string;
     name?: string;
     filters: {
       trade_filters: {
@@ -241,9 +241,14 @@ export function getSearchJSON(item: ParsedItem) {
       max: item.quality.max,
     };
   }
-  if (item.elderMap || item.conquerorMap) {
-    searchJSON.query.stats[0].filters.push(item.elderMap! || item.conquerorMap!);
+
+  if (item.elderMap) {
+    searchJSON.query.stats[0].filters.push(item.elderMap);
   }
+  if (item.conquerorMap) {
+    searchJSON.query.stats[0].filters.push(item.conquerorMap);
+  }
+
   if (item.search6L) {
     searchJSON.query.filters.socket_filters = {
       disabled: false,
@@ -333,7 +338,7 @@ export function getSearchJSON(item: ParsedItem) {
   //3.27
   if (item.foulborn) {
     searchJSON.query.filters.misc_filters.filters.mutated = {
-      option: true
+      option: true,
     };
   }
 
@@ -407,7 +412,7 @@ function cleanupJSON(searchJson: ISearchJson) {
 }
 export interface ISearchResult {
   searchID: {
-    ID?: string;
+    ID: string;
     type: "search";
   };
   result: string[];
@@ -417,7 +422,7 @@ export interface ISearchResult {
 }
 export async function searchItem(searchJson: ISearchJson, league: string): Promise<ISearchResult> {
   const searchResult: ISearchResult = {
-    searchID: { type: "search" },
+    searchID: { type: "search", ID: "" },
     result: [],
     totalCount: 0,
     err: false,
@@ -521,7 +526,7 @@ export async function getDivineToChaosOrExalted(league: string) {
         (pre, curr) =>
           pre +
           data.result[curr].listing.offers[0].item.amount /
-          data.result[curr].listing.offers[0].exchange.amount,
+            data.result[curr].listing.offers[0].exchange.amount,
         chaosOrExalted,
       );
       chaosOrExalted /= temp.length;
@@ -536,7 +541,7 @@ export async function getDivineToChaosOrExalted(league: string) {
 }
 export interface IExchangeResult {
   searchID: {
-    ID?: string;
+    ID: string;
     type: "exchange";
   };
   result: IFetchResult[];
@@ -547,7 +552,7 @@ export interface IExchangeResult {
 }
 export async function searchExchange(item: ParsedItem, league: string): Promise<IExchangeResult> {
   const exchangeResult: IExchangeResult = {
-    searchID: { type: "exchange" },
+    searchID: { type: "exchange", ID: "" },
     result: [],
     totalCount: 0,
     err: false,
@@ -560,8 +565,8 @@ export async function searchExchange(item: ParsedItem, league: string): Promise<
       },
       have: item.onlyChaosOrExalted ? [secondCurrency] : item.searchExchange.have,
       want:
-        (item.searchExchange.want?.length ?? 0) > 0
-          ? item.searchExchange.want!
+        item.searchExchange.want && item.searchExchange.want.length > 0
+          ? item.searchExchange.want
           : [APIStatic.find((e) => e.text === item.baseType)?.id ?? ""],
     },
     sort: { have: "asc" },
@@ -601,7 +606,7 @@ export async function searchExchange(item: ParsedItem, league: string): Promise<
     exchangeResult.result.push({
       price,
       currency,
-      amount: tempResultCountBy[key]!,
+      amount: tempResultCountBy[key],
       image: `${import.meta.env.VITE_URL_BASE}${currencyImageUrl.find((ele) => ele.id === currency)?.image}`,
     });
   }

@@ -53,7 +53,8 @@ onMounted(() => {
 });
 const emit = defineEmits(["close-setting-window"]);
 function save() {
-  window.ipc.send(IPC.SET_CONFIG, JSON.stringify(config.value!));
+  if (!config.value) return;
+  window.ipc.send(IPC.SET_CONFIG, JSON.stringify(config.value));
   emit("close-setting-window");
 }
 function cancel() {

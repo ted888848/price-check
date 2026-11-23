@@ -352,7 +352,7 @@
         v-if="marketPrice.divine.amount !== null"
         :amount="marketPrice.divine.amount"
         :timestamp="marketPrice.divine.timestamp"
-        :item-image="currency2Img"
+        :item-image="itemImage"
         :currency-image="divineImage"
         type="divine"
         :divineToChaosOrExalted="divineToChaosOrExalted"
@@ -361,7 +361,7 @@
         v-if="marketPrice.exalted && marketPrice.exalted.amount !== null"
         :amount="marketPrice.exalted.amount"
         :timestamp="marketPrice.exalted.timestamp"
-        :item-image="currency2Img"
+        :item-image="itemImage"
         :currency-image="chaosOrExImage"
         type="chaosOrEx"
         :divineToChaosOrExalted="divineToChaosOrExalted"
@@ -370,7 +370,7 @@
         v-if="marketPrice.chaos && marketPrice.chaos.amount !== null"
         :amount="marketPrice.chaos.amount"
         :timestamp="marketPrice.chaos.timestamp"
-        :item-image="currency2Img"
+        :item-image="itemImage"
         :currency-image="chaosOrExImage"
         type="chaosOrEx"
         :divineToChaosOrExalted="divineToChaosOrExalted"
@@ -455,7 +455,7 @@ import { useInfiniteQuery, useQuery, useQueryClient } from "@tanstack/vue-query"
 import { getMarketPrice, marketQueryOption, type TMarketItemRate } from "@/renderer/lib/market";
 import MarketPrice from "../utility/MarketPrice.vue";
 import { match } from "ts-pattern";
-import { DOUBLE_CORRUPT_VALUE, NOT_MATCHED_ID } from "@/renderer/lib/const.ts";
+import { DOUBLE_CORRUPT_VALUE, NOT_MATCHED_ID } from "@/renderer/lib/const";
 const props = defineProps<{
   itemProp: ParsedItem;
   leagueSelect: string;
@@ -465,7 +465,6 @@ const props = defineProps<{
   prevSearch?: boolean;
 }>();
 const modTbodyToggle = ref(true);
-const currency2Img = ref("");
 const queryClient = useQueryClient();
 if (!props.prevSearch) {
   queryClient.removeQueries({ queryKey: ["searchItem"] });
@@ -474,6 +473,10 @@ if (!props.prevSearch) {
 
 const { remaining, isActive } = useMyCountdown();
 const item = ref(props.itemProp);
+const itemImage = computed(() => {
+  const image = APIStatic.find((ele) => ele.id === item.value.itemID)?.image;
+  return image ? `${import.meta.env.VITE_URL_BASE}${image}` : "";
+});
 if (process.env.NODE_ENV === "development") console.log(structuredClone(toRaw(item.value)));
 const undefinedUnique = item.value.isIdentify === false && item.value.raritySearch.label === "傳奇";
 
@@ -484,8 +487,6 @@ watch(
     const marketData = queryClient.getQueryData(marketQueryOption.queryKey);
     if (marketData) {
       marketPrice.value = getMarketPrice(item.value, marketData, props.leagueSelect);
-      const image = APIStatic.find((ele) => ele.id === item.value.itemID)?.image;
-      currency2Img.value = image ? `${import.meta.env.VITE_URL_BASE}${image}` : "";
     }
   },
   { immediate: true },
@@ -537,6 +538,21 @@ const {
     err: false,
   },
 });
+const currency2Img = computed(() => {
+  if (
+    !item.value.searchExchange.option ||
+    isFetchingSearchResult.value ||
+    !searchResult.value.result.length ||
+    searchResult.value.err
+  ) {
+    return "";
+  }
+
+  const image = APIStatic.find(
+    (ele) => ele.id === (searchResult.value as IExchangeResult).currency2,
+  )?.image;
+  return image ? `${import.meta.env.VITE_URL_BASE}${image}` : "";
+});
 
 const {
   data: searchItemFetchResult,
@@ -552,7 +568,7 @@ const {
       startIndex,
       endIndex,
     );
-    return fetchItem(searchResultList, searchResult.value.searchID.ID!);
+    return fetchItem(searchResultList, searchResult.value.searchID.ID);
   },
   initialPageParam: 0,
   getNextPageParam: (_lastPage, pages) => {
@@ -585,10 +601,6 @@ const fetchResult = computed<IFetchResult[]>(() => {
   if (item.value.searchExchange.option) {
     if (!searchResult.value.result || searchResult.value.result.length === 0) return [];
     if (!searchResult.value.err) {
-      const image = APIStatic.find(
-        (ele) => ele.id === (searchResult.value as IExchangeResult).currency2,
-      )!.image;
-      currency2Img.value = image ? `${import.meta.env.VITE_URL_BASE}${image}` : "";
       return (searchResult.value as IExchangeResult).result;
     }
   } else {
@@ -603,12 +615,12 @@ const fetchResult = computed<IFetchResult[]>(() => {
           (e) => e.price === numPrice && e.currency === currency,
         );
         if (fetchResultFind) {
-          fetchResultFind.amount += countByFetchResult[key]!;
+          fetchResultFind.amount += countByFetchResult[key];
         } else {
           fetchResult.push({
             price: numPrice,
             currency,
-            amount: countByFetchResult[key]!,
+            amount: countByFetchResult[key],
             image: `${import.meta.env.VITE_URL_BASE}${currencyImageUrl.find((ele) => ele.id === currency)?.image}`,
           });
         }
@@ -622,7 +634,6 @@ const fetchResult = computed<IFetchResult[]>(() => {
 async function searchBtn(onlyChaosOrExalted = false) {
   if (isActive.value) return;
   modTbodyToggle.value = true;
-  currency2Img.value = "";
   item.value.onlyChaosOrExalted = onlyChaosOrExalted;
   queryClient.removeQueries({ queryKey: ["fetchItem"] });
   queryClient.removeQueries({ queryKey: ["searchItem"] });

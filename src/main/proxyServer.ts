@@ -1,4 +1,4 @@
-import { GGCapi } from "@/lib/api";
+import { GGCapi } from "./lib/api";
 import { AxiosResponse, AxiosResponseHeaders } from "axios";
 import { ipcMain } from "electron";
 import IPC from "@/ipc";
@@ -18,6 +18,7 @@ export class ProxyServer {
     this.app.post("/proxy", async (c) => {
       const data = await c.req.json();
       const url = c.req.query("url");
+      if (!url) return c.json({ error: "Missing url parameter" }, 400);
       const response: AxiosResponse = await GGCapi.post(url, data).catch((err) => err.response);
       return c.json(
         response.data,
@@ -27,6 +28,7 @@ export class ProxyServer {
     });
     this.app.get("/proxy", async (c) => {
       const url = c.req.query("url");
+      if (!url) return c.json({ error: "Missing url parameter" }, 400);
       const response: AxiosResponse = await GGCapi.get(url).catch((err) => err.response);
       return c.json(
         response.data,
@@ -41,7 +43,7 @@ export class ProxyServer {
   getPort() {
     const address = this.server.address();
     if (typeof address === "string") return parseInt(address.split(":").at(1) as string, 10);
-    else return address.port;
+    else return address?.port;
   }
 }
 export const proxyServer: ProxyServer = new ProxyServer();

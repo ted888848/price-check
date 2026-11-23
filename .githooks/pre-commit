@@ -1,3 +1,4 @@
 #!/bin/sh
 set -e
+pnpm vuetsc
 pnpm lint --deny-warnings

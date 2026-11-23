@@ -273,7 +273,7 @@ const {
       startIndex,
       endIndex,
     );
-    return fetchItem(searchResultList, searchResult.value.searchID.ID!);
+    return fetchItem(searchResultList, searchResult.value.searchID.ID);
   },
   initialPageParam: 0,
   getNextPageParam: (_lastPage, pages) => {
@@ -310,12 +310,12 @@ const fetchResult = computed<IFetchResult[]>(() => {
         (e) => e.price === numPrice && e.currency === currency,
       );
       if (fetchResultFind) {
-        fetchResultFind.amount += countByFetchResult[key]!;
+        fetchResultFind.amount += countByFetchResult[key];
       } else {
         fetchResult.push({
           price: numPrice,
           currency,
-          amount: countByFetchResult[key]!,
+          amount: countByFetchResult[key],
           image: `${import.meta.env.VITE_URL_BASE}${currencyImageUrl.find((ele) => ele.id === currency)?.image}`,
         });
       }

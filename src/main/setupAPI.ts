@@ -1,4 +1,4 @@
-import { GGCapi } from "@/lib/api";
+import { GGCapi } from "./lib/api";
 import Store from "electron-store";
 import { app, session, dialog } from "electron"; //, shell
 import { autoUpdater } from "electron-updater";
@@ -368,7 +368,7 @@ autoUpdater.on("update-available", ({ version, releaseNotes }) => {
     title: "有新版本",
     type: "info",
     message: `有新版本 v${version}，並已經開始在背景下載\n
-    ${releaseNotes!.toString().replaceAll(/<[/]?(ul|li)>/g, "")}`,
+    ${releaseNotes?.toString().replaceAll(/<[/]?(ul|li)>/g, "")}`,
   });
 });
 autoUpdater.on("update-downloaded", () => {

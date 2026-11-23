@@ -1,5 +1,5 @@
 import type { AxiosResponseHeaders } from "axios";
-import { computed, ref, watch, type Ref } from "vue";
+import { computed, ref, shallowRef, watch, type Ref } from "vue";
 import { RateLimiter } from "@tanstack/pacer";
 import { useCountdown, useIntervalFn } from "@vueuse/core";
 
@@ -63,13 +63,13 @@ interface TRateTimeLimiters {
     account: TRateLimiter[];
   };
 }
-const ratetimelimiters = ref<TRateTimeLimiters>({});
 
-function createRateLimiter() {
+function createRateLimiters(): TRateTimeLimiters {
+  const limiters: TRateTimeLimiters = {};
   (Object.keys(apiRateTimeLimitMax) as unknown as (keyof TRateTimeLimitState)[]).forEach((type) => {
-    ratetimelimiters.value[type] ||= { ip: [], account: [] };
     (Object.keys(apiRateTimeLimitMax[type] || {}) as ("ip" | "account")[]).forEach((rule) => {
-      ratetimelimiters.value[type]![rule] = (apiRateTimeLimitMax[type]![rule] || []).map(
+      if (!limiters[type]) limiters[type] = { ip: [], account: [] };
+      limiters[type][rule] = (apiRateTimeLimitMax[type]?.[rule] || []).map(
         (ele) =>
           new RateLimiter(() => {}, {
             windowType: "sliding",
@@ -79,9 +79,10 @@ function createRateLimiter() {
       );
     });
   });
+  return limiters;
 }
-createRateLimiter();
-export function getRateLimiters() {
+const ratetimelimiters = shallowRef<TRateTimeLimiters>(createRateLimiters());
+export function getRateLimiters(): { ratetimelimiters: typeof ratetimelimiters } {
   return { ratetimelimiters };
 }
 
@@ -137,15 +138,16 @@ export function parseRateTimeLimit(header?: AxiosResponseHeaders) {
       const arr = header[`x-rate-limit-${rule}-state`].split(",");
 
       if (!rateTimeLimitState.value[type]) rateTimeLimitState.value[type] = {};
-      if (!rateTimeLimitState.value[type]![rule]) rateTimeLimitState.value[type]![rule] = [];
-      rateTimeLimitState.value[type]![rule] = [];
+      if (!rateTimeLimitState.value[type][rule]) rateTimeLimitState.value[type][rule] = [];
+      rateTimeLimitState.value[type][rule] = [];
       for (let i = 0; i < arr.length; i++) {
         const [times, inTime, timeout] = arr[i].split(":").map((e: string) => parseInt(e));
         const [maxTimes, maxInTime] = maxLimit[i].split(":").map((e: string) => parseInt(e));
-        if (rateTimeLimitState.value[type]![rule]) {
-          rateTimeLimitState.value[type]![rule].push({ times, window: inTime, timeout });
+        if (rateTimeLimitState.value[type][rule]) {
+          rateTimeLimitState.value[type][rule].push({ times, window: inTime, timeout });
         }
-        const limiter = ratetimelimiters.value[type]![rule][i];
+        if (!ratetimelimiters.value[type] || !ratetimelimiters.value[type][rule]) continue;
+        const limiter = ratetimelimiters.value[type][rule][i];
         if (limiter) {
           limiter.setOptions({
             window: maxInTime * 1000,
@@ -157,6 +159,7 @@ export function parseRateTimeLimit(header?: AxiosResponseHeaders) {
           }
           const nextWindow = limiter.getMsUntilNextWindow() / 1000;
           if (nextWindow > 0) {
+            console.log(nextWindow);
             startCountdown(nextWindow + 0.25);
           }
         }

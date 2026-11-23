@@ -3,12 +3,15 @@
   "plugins": [
     "typescript",
     "unicorn",
-    "oxc"
+    "oxc",
+    "vue"
   ],
   "categories": {
     "correctness": "error"
   },
-  "rules": {},
+  "rules": {
+    "typescript/no-non-null-assertion": "warn"
+  },
   "env": {
     "builtin": true
   }

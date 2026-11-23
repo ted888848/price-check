@@ -153,7 +153,7 @@ class ItemAnalyzer {
       this.itemParsed.isIdentify === false &&
       this.itemParsed.uniques.length === 1
     ) {
-      this.itemParsed.name = this.itemParsed.uniques[0]!.name;
+      this.itemParsed.name = this.itemParsed.uniques[0]?.name;
     }
     if (this.itemParsed.raritySearch.label === "傳奇" && this.itemParsed.name)
       this.itemParsed.autoSearch = true;
@@ -236,7 +236,7 @@ class ItemAnalyzer {
     });
 
     if (itemType === "技能寶石") {
-      this.itemParsed.baseType = section[0]!;
+      this.itemParsed.baseType = section[0];
       const transGemInfo = APIitems.gem.entries.find((ele) =>
         ele.trans?.some(({ text }) => text === this.itemParsed.baseType),
       );
@@ -255,7 +255,7 @@ class ItemAnalyzer {
         this.itemParsed.name = lastLine?.replace(this.itemParsed.baseType, "");
       }
     } else {
-      this.itemParsed.baseType = section.at(-1)!;
+      this.itemParsed.baseType = section.at(-1) ?? "";
     }
     section.pop();
     if (section.length > 0) {
@@ -275,9 +275,9 @@ class ItemAnalyzer {
   }
 
   private parseRarity(section: string[]) {
-    this.itemParsed.rarity = section[0]!.match(/稀有度: ([^\n]+)/)?.[1] ?? "";
+    this.itemParsed.rarity = section[0]?.match(/稀有度: ([^\n]+)/)?.[1] ?? "";
     if (this.itemParsed.type.text === "不滅之火餘燼") {
-      this.itemParsed.baseType = section[0]!;
+      this.itemParsed.baseType = section[0];
       return ParseResult.PARSE_SECTION_SUCC;
     }
     if (this.itemParsed.type.text === "臟器") return ParseResult.PARSE_SECTION_SUCC;
@@ -306,20 +306,20 @@ class ItemAnalyzer {
     section.forEach((line) => {
       let lineMatch: RegExpMatchArray | null;
       if ((lineMatch = line.match(/^等級: (\d+)/)))
-        this.itemParsed.requireLevel = parseInt(lineMatch[1]!);
+        this.itemParsed.requireLevel = parseInt(lineMatch[1]);
       else if ((lineMatch = line.match(/^智慧: (\d+)/)))
-        this.itemParsed.requireInt = parseInt(lineMatch[1]!);
+        this.itemParsed.requireInt = parseInt(lineMatch[1]);
       else if ((lineMatch = line.match(/^力量: (\d+)/)))
-        this.itemParsed.requireStr = parseInt(lineMatch[1]!);
+        this.itemParsed.requireStr = parseInt(lineMatch[1]);
       else if ((lineMatch = line.match(/^敏捷: (\d+)/)))
-        this.itemParsed.requireDex = parseInt(lineMatch[1]!);
+        this.itemParsed.requireDex = parseInt(lineMatch[1]);
     });
     return ParseResult.PARSE_SECTION_SUCC;
   }
 
   private parseSocket(section: string[]) {
     if (!section[0]?.startsWith("插槽")) return ParseResult.PARSE_SECTION_SKIP;
-    const sockets = section[0]!.replace(/R|G|B|W|S/g, "#");
+    const sockets = section[0].replace(/R|G|B|W|S/g, "#");
     if (sockets.indexOf("#-#-#-#-#-#") > -1) {
       this.itemParsed.search6L = true;
     } else if (
@@ -346,7 +346,7 @@ class ItemAnalyzer {
   private parseItemLevel(section: string[]) {
     const sectionMatch = section[0]?.match(/^物品等級: (\d+)/);
     if (!sectionMatch) return ParseResult.PARSE_SECTION_SKIP;
-    const il = parseInt(sectionMatch[1]!);
+    const il = parseInt(sectionMatch[1]);
     const maxModLevel = this.config.poeVersion === "1" ? 86 : 82;
     this.itemParsed.itemLevel = {
       min: il > maxModLevel ? maxModLevel : il,
@@ -561,7 +561,7 @@ class ItemAnalyzer {
         continue;
       }
       let j = i;
-      for (; j < section.length && !advanceLineReg.test(section[j]!); j++) {
+      for (; j < section.length && !advanceLineReg.test(section[j]); j++) {
         const line = section[j];
         if (!line) continue;
         let type = line?.match(/fractured|crafted|mutated/)?.[0];
@@ -684,7 +684,7 @@ class ItemAnalyzer {
           eleRes += (mod.value?.min ?? mod.value?.max ?? 0) * 3;
           flag = true;
         })
-        .otherwise(() => { });
+        .otherwise(() => {});
     });
     if (flag) {
       this.itemParsed.stats.push({
@@ -717,9 +717,9 @@ class ItemAnalyzer {
     this.itemSection[0]?.forEach((line) => {
       let lineMatch: RegExpMatchArray | null;
       if ((lineMatch = line.match(/品質: \+(\d+)%/))) {
-        this.itemParsed.quality = { min: parseInt(lineMatch[1]!), max: undefined, search: false };
+        this.itemParsed.quality = { min: parseInt(lineMatch[1]), max: undefined, search: false };
       } else if ((lineMatch = line.match(/物理傷害: (\d+)(?:-|\s到\s)(\d+)/))) {
-        this.itemParsed.phyDamage = { min: parseInt(lineMatch[1]!), max: parseInt(lineMatch[2]!) };
+        this.itemParsed.phyDamage = { min: parseInt(lineMatch[1]), max: parseInt(lineMatch[2]) };
       } else if (
         (lineMatch = line.match(
           /(?:元素|火焰|冰冷|閃電)傷害:(?: (\d+)(?:-|\s到\s)(\d+) \((?:augmented|fire|lightning|cold)\),?)(?: (\d+)(?:-|\s到\s)(\d+) \((?:augmented|fire|lightning|cold)\),?)?(?: (\d+)(?:-|\s到\s)(\d+) \((?:augmented|fire|lightning|cold)\))?/,
@@ -737,11 +737,11 @@ class ItemAnalyzer {
           }, 0),
         };
       } else if ((lineMatch = line.match(/暴擊率: (\d+\.?\d\d)%/))) {
-        this.itemParsed.critChance = parseFloat(lineMatch[1]!);
+        this.itemParsed.critChance = parseFloat(lineMatch[1]);
       } else if ((lineMatch = line.match(/每秒攻擊次數: (\d+\.?\d\d)/))) {
-        this.itemParsed.attackSpeed = parseFloat(lineMatch[1]!);
+        this.itemParsed.attackSpeed = parseFloat(lineMatch[1]);
       } else if ((lineMatch = line.match(/武器範圍: (\d+)/))) {
-        this.itemParsed.weaponArea = parseInt(lineMatch[1]!);
+        this.itemParsed.weaponArea = parseInt(lineMatch[1]);
       }
     });
     this.itemSection.shift();
@@ -767,13 +767,13 @@ class ItemAnalyzer {
     this.itemSection[0]?.forEach((line) => {
       let lineMatch: RegExpMatchArray | null;
       if ((lineMatch = line.match(/品質: \+(\d+)%/)))
-        this.itemParsed.quality.min = parseInt(lineMatch[1]!);
+        this.itemParsed.quality.min = parseInt(lineMatch[1]);
       else if ((lineMatch = line.match(/閃避值: (\d+)/)))
-        this.itemParsed.evasion = parseInt(lineMatch[1]!);
+        this.itemParsed.evasion = parseInt(lineMatch[1]);
       else if ((lineMatch = line.match(/護甲: (\d+)/)))
-        this.itemParsed.armour = parseInt(lineMatch[1]!);
+        this.itemParsed.armour = parseInt(lineMatch[1]);
       else if ((lineMatch = line.match(/能量護盾: (\d+)/)))
-        this.itemParsed.energyShield = parseInt(lineMatch[1]!);
+        this.itemParsed.energyShield = parseInt(lineMatch[1]);
     });
     this.itemSection.shift();
     this.parseAllfuns();
@@ -888,7 +888,7 @@ class ItemAnalyzer {
     if (this.itemParsed.name === "贗品．龍牙翱翔") {
       for (const section of this.itemSection) {
         for (let index = 0; index < section.length; index++) {
-          const match = section[index]!.match(/^全部 ([^\s]+) 寶石等級 \+3$/);
+          const match = section[index].match(/^全部 ([^\s]+) 寶石等級 \+3$/);
           if (match) section[index] = `全部 # 寶石等級 +${match[1]}`;
         }
       }
@@ -903,7 +903,7 @@ class ItemAnalyzer {
     }
     if (this.itemParsed.type.option === "memoryline") {
       this.itemParsed.stats.forEach((ele) => (ele.disabled = false));
-      if (this.itemParsed.itemLevel) this.itemParsed.itemLevel.search = false
+      if (this.itemParsed.itemLevel) this.itemParsed.itemLevel.search = false;
       this.itemParsed.autoSearch = true;
     }
   }
@@ -912,7 +912,7 @@ class ItemAnalyzer {
     this.itemParsed.autoSearch = true;
     const mapTier = this.itemParsed.baseType.match(/（階級 (\d{1,2})）/);
     if (mapTier)
-      this.itemParsed.mapTier = { min: parseInt(mapTier[1]!), max: undefined, search: true };
+      this.itemParsed.mapTier = { min: parseInt(mapTier[1]), max: undefined, search: true };
     if (mapTier && this.itemParsed.raritySearch.value !== "unique")
       this.itemParsed.type.searchByType = true;
     const mapHeader = this.itemSection[0];
@@ -968,9 +968,9 @@ class ItemAnalyzer {
     gemHeader.forEach((line) => {
       let lineMatch: RegExpMatchArray | null;
       if ((lineMatch = line.match(/等級: (\d+)/)))
-        this.itemParsed.gemLevel = { min: parseInt(lineMatch[1]!), max: undefined, search: true };
+        this.itemParsed.gemLevel = { min: parseInt(lineMatch[1]), max: undefined, search: true };
       else if ((lineMatch = line.match(/品質: \+(\d+)%/)))
-        this.itemParsed.quality = { min: parseInt(lineMatch[1]!), max: undefined, search: false };
+        this.itemParsed.quality = { min: parseInt(lineMatch[1]), max: undefined, search: false };
     });
     this.itemParsed.quality.search = !/啟蒙|賦予|增幅/.test(this.itemParsed.baseType);
     this.itemSection.shift();
@@ -1015,7 +1015,7 @@ class ItemAnalyzer {
     this.itemSection[0]?.forEach((line) => {
       const lineMatch = line.match(/品質: \+(\d+)%/);
       if (lineMatch)
-        this.itemParsed.quality = { min: parseInt(lineMatch[1]!), max: undefined, search: true };
+        this.itemParsed.quality = { min: parseInt(lineMatch[1]), max: undefined, search: true };
     });
     this.itemSection.shift();
     this.parseAllfuns();
@@ -1042,11 +1042,11 @@ class ItemAnalyzer {
     const factionSections = new Set<string[]>();
     for (const section of this.itemSection) {
       if (section.length >= 2) {
-        if (Object.keys(logbookTypes).includes(section[1]!)) {
+        if (Object.keys(logbookTypes).includes(section[1])) {
           if (!this.itemParsed.stats.find((e) => section[1] === e.text)) {
             this.itemParsed.stats.push({
               id: logbookTypes[section[1] as keyof typeof logbookTypes],
-              text: section[1]!,
+              text: section[1],
               disabled: true,
             });
           }
@@ -1250,7 +1250,7 @@ class ItemAnalyzer {
       return;
     }
     let enableAllStats = false;
-    if (/^禁忌(血肉|烈焰)$/.test(this.itemParsed.name!)) {
+    if (this.itemParsed.name && /^禁忌(血肉|烈焰)$/.test(this.itemParsed.name)) {
       enableAllStats = true;
     } else if (this.itemParsed.name === "逃脫不能") {
       enableAllStats = true;

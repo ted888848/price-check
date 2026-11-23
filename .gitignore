@@ -6,6 +6,7 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
+*.tsbuildinfo
 
 node_modules
 dist
@@ -26,4 +27,3 @@ release
 
 # lockfile
 yarn.lock
-setGithubToken.ps1
