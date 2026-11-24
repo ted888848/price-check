@@ -20,7 +20,7 @@ export function getStrReg(section: string[], type: string) {
       .replace(/__NUMBER__/g, "[+-]?(\\d+|#)(?:\\(-?\\d+--?\\d+\\))?")
       .replace(/減少|增加/, "(?:減少|增加)")
       .replace(/更多|更少/, "(?:更多|更少)");
-    retArr.push(new RegExp(`^${line}( \\(部分\\))?`));
+    retArr.push(new RegExp(`^${line}( \\(.+\\))?$`));
   });
   return retArr;
 }
@@ -28,8 +28,8 @@ export function getStrReg(section: string[], type: string) {
 export function getModMatchRegex(modLine: string) {
   return new RegExp(
     modLine
+      .replace(/ \(.+\)$/, "")
       .replace(/[+-]?#/g, numberPattern.source)
-      .replace(" (部分)", "")
       .replace(/減少|增加/, String.raw`(?:減少|增加)`)
       .replace(/更多|更少/, String.raw`(?:更多|更少)`),
   );
