@@ -20,16 +20,6 @@ export interface TMarketItemRate {
   divine: TMarketQuoteRate;
 }
 
-export const marketQueryOption = queryOptions({
-  queryKey: ["market-data"],
-  queryFn: async () => getLatestMarketData(),
-  refetchOnWindowFocus: false,
-  refetchOnReconnect: true,
-  refetchInterval: 60 * 10 * 1000 + 5000,
-  refetchIntervalInBackground: true,
-  retryDelay: 5000,
-  retry: 3,
-});
 export async function getLatestMarketData() {
   try {
     const res = await fetch(baseUrl);
@@ -44,6 +34,17 @@ export async function getLatestMarketData() {
     throw error;
   }
 }
+
+export const marketQueryOption = queryOptions({
+  queryKey: ["market-data"],
+  queryFn: async () => getLatestMarketData(),
+  refetchOnWindowFocus: false,
+  refetchOnReconnect: true,
+  refetchInterval: 60 * 10 * 1000 + 5000,
+  refetchIntervalInBackground: true,
+  retryDelay: 5000,
+  retry: 3,
+});
 
 export function getMarketPrice(itemParsed: ParsedItem, marketData: TCurrencyMarket, league: string) {
   if (!marketData[league]) return null;

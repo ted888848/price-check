@@ -88,11 +88,11 @@ class ItemAnalyzer {
       })
       .with({ option: P.string.startsWith("accessory") }, () => {
         this.findUnique("accessory");
-        this.parseOtherHaveMods();
+        this.parseAccessory();
       })
       .with({ option: P.string.startsWith("jewel") }, () => {
-        this.parseJewel();
         this.findUnique("jewel");
+        this.parseJewel();
       })
       .with({ option: P.string.startsWith("map") }, () => {
         this.findUnique("map");
@@ -103,12 +103,7 @@ class ItemAnalyzer {
           text: P.union("可堆疊通貨", "預兆", "地圖碎片", "遺鑰", "命運卡", "掘獄可堆疊有插槽通貨"),
         },
         () => {
-          const isBeastItem = this.parseBeastItem();
-          if (!isBeastItem) {
-            if (this.config.autoSearchStackableItems) this.itemParsed.autoSearch = true;
-            this.parseAllfuns();
-            searchExchange = true;
-          }
+          searchExchange = this.parseStackableCurrency();
         },
       )
       .with({ text: P.union("技能寶石", "輔助寶石") }, () => {
@@ -122,9 +117,6 @@ class ItemAnalyzer {
       })
       .with({ text: "聖物" }, () => {
         this.parseRelic();
-      })
-      .with({ text: "接肢" }, () => {
-        this.parseGraft();
       })
       .with({ text: "契約書" }, () => {
         this.findUnique("heistmission");
@@ -433,8 +425,8 @@ class ItemAnalyzer {
             const upperBound = (diffSign ? -1 : 1) * (upperBoundArr.reduce((pre, ele) => pre + Number(ele), 0) / upperBoundArr.length);
             tempArr.push({
               value: { [diffSign ? "max" : "min"]: minValue },
-              lowerBound,
-              upperBound,
+              lowerBound: Number.isNaN(lowerBound) ? undefined : lowerBound,
+              upperBound: Number.isNaN(upperBound) ? undefined : upperBound,
               ...baseOption,
             });
           } else {
@@ -481,7 +473,7 @@ class ItemAnalyzer {
 
   private parseExplicitMod(section: string[]) {
     if (!["魔法", "稀有", "傳奇"].includes(this.itemParsed.rarity)) return ParseResult.PARSE_SECTION_SKIP;
-    const explicitSection: string[] = [],
+    let explicitSection: string[] = [],
       fracturedSection: string[] = [],
       craftedSection: string[] = [],
       mutatedSection: string[] = [],
@@ -489,18 +481,20 @@ class ItemAnalyzer {
     let parsed = false;
     let tempAdvanceLine = "";
     const advanceLineReg = /{ .+ }/;
+    let isExplicitSection = false;
     for (let i = 0; i < section.length; i++) {
       const sectionLine = section[i];
       if (!sectionLine) continue;
       if (/^（.*）$/.test(sectionLine)) continue;
       if (advanceLineReg.test(sectionLine)) {
         tempAdvanceLine = sectionLine;
+        if (!isExplicitSection && sectionLine.match(/前綴|後綴|傳奇詞綴/)) isExplicitSection = true;
         continue;
       }
       let j = i;
       for (; j < section.length && !advanceLineReg.test(section[j]); j++) {
         const line = section[j];
-        if (!line) continue;
+        if (!line || line.match(/^(卓烙總督物品|吞噬天地物品)$/)) continue;
         let type = line?.match(/fractured|crafted|mutated/)?.[0];
         if (tempAdvanceLine) {
           type = tempAdvanceLine?.startsWith("{ 已破裂")
@@ -527,6 +521,7 @@ class ItemAnalyzer {
       i = j - 1;
       tempAdvanceLine = "";
     }
+    if (!isExplicitSection) return ParseResult.PARSE_SECTION_SKIP;
 
     if (craftedSection.length) parsed = this.parseMod(craftedSection, "crafted") === ParseResult.PARSE_SECTION_SUCC || parsed;
     if (fracturedSection.length) parsed = this.parseMod(fracturedSection, "fractured") === ParseResult.PARSE_SECTION_SUCC || parsed;
@@ -733,62 +728,7 @@ class ItemAnalyzer {
     this.itemParsed.autoSearch = true;
   }
 
-  // private parseForbiddenJewel(item: string[][]) {
-  //   this.itemParsed.autoSearch = true
-  //   for (const section of item) {
-  //     if (this.parseCorrupt(section) === ParseResult.PARSE_SECTION_SUCC) continue
-  //     const sectionMatch = section[0]!.match(/若禁忌(烈焰|血肉)上有符合的詞綴，配置 (.*)/)
-  //     if (sectionMatch) {
-  //       const type = sectionMatch[1]
-  //       const passive = sectionMatch[2]!
-  //       const matchStat = APImods.forbiddenJewel.entries.find(e => e.text.indexOf(type!) > -1)
-  //       const matchPassive = matchStat?.option?.options.find(e => e.text === passive)
-  //       this.itemParsed.stats.push({ id: matchStat!.id, text: matchStat!.text.replace('#', passive), value: { option: matchPassive?.id }, disabled: false })
-  //     }
-  //   }
-  // }
-
-  // private parseImpossibleEscape(item: string[][]) {
-  //   this.itemParsed.autoSearch = true
-  //   this.itemParsed.isCorrupt = true
-  //   outer:
-  //   for (const section of item) {
-  //     for (const line of section) {
-  //       const result = line.match(/天賦樹中在範圍(.+)內未連結的天賦仍然可以配置/)
-  //       if (result) {
-  //         const statDetail = APImods.explicit.mutiLines?.find(ele => ele.id === 'explicit.stat_2422708892')!
-  //         const matchOption = statDetail.option?.options.find(ele => ele.text === result[1])
-  //         this.itemParsed.stats.push({ id: statDetail.id, text: statDetail.text[0]!.replace('#', result[1]!), value: { option: matchOption?.id }, disabled: false })
-  //         break outer
-  //       }
-  //     }
-  //   }
-  // }
-
-  // private parseThreadOfHope(item: string[][]) {
-  //   const parseRangeMod = (section: string[]) => {
-  //     const mod = {
-  //       id: 'explicit.stat_3642528642',
-  //       text: '只會影響#範圍內的天賦',
-  //       type: 'explicit',
-  //       option: { options: [{ id: 1, text: '小' }, { id: 2, text: '中' }, { id: 3, text: '大' }, { id: 4, text: '非常大' }, { id: 5, text: '極大' }] }
-  //     }
-  //     const reg = new RegExp(`^${mod.text.replace('#', `(${mod.option.options.map(ele => ele.text).join('|')})`)}$`)
-  //     this.parseExplicitMod(section)
-  //     for (const line of section) {
-  //       const match = line.match(reg)
-  //       if (match) {
-  //         const matchOption = mod.option?.options.find(ele => ele.text === match[1])
-  //         this.itemParsed.stats.push({ id: mod.id, text: match[0], value: { option: matchOption?.id }, type: '隨機', disabled: false })
-  //         return ParseResult.PARSE_SECTION_SUCC
-  //       }
-  //     }
-  //     return ParseResult.PARSE_SECTION_SKIP
-  //   }
-  //   this.parseAllfuns([this.parseItemLevel.bind(this), this.parseCorrupt.bind(this), this.parseIdentify.bind(this), this.parseImplicitMod.bind(this), parseRangeMod])
-  // }
-
-  private parseOtherHaveMods() {
+  private parseAccessory() {
     if (this.itemParsed.name === "贗品．龍牙翱翔") {
       for (const section of this.itemSection) {
         for (let index = 0; index < section.length; index++) {
@@ -804,11 +744,6 @@ class ItemAnalyzer {
           ele.disabled = false;
         }
       });
-    }
-    if (this.itemParsed.type.option === "memoryline") {
-      this.itemParsed.stats.forEach((ele) => (ele.disabled = false));
-      if (this.itemParsed.itemLevel) this.itemParsed.itemLevel.search = false;
-      this.itemParsed.autoSearch = true;
     }
   }
 
@@ -848,7 +783,9 @@ class ItemAnalyzer {
     if (this.itemParsed.map_completion_reward) {
       this.itemSection = this.itemSection.filter((section) => !section[0]?.startsWith("怪物等級："));
     }
+
     this.parseAllfuns();
+
     if (this.itemParsed.map_completion_reward) this.itemParsed.stats.forEach((stat) => (stat.disabled = false));
     this.itemParsed.stats.forEach((stat) => {
       if (stat.type === "附魔") stat.disabled = false;
@@ -908,7 +845,7 @@ class ItemAnalyzer {
       if (lineMatch) this.itemParsed.quality = { min: parseInt(lineMatch[1]), max: undefined, search: true };
     });
     this.itemSection.shift();
-    this.parseAllfuns();
+    // this.parseAllfuns();
   }
 
   private parseLogbook() {
@@ -983,10 +920,6 @@ class ItemAnalyzer {
       return true;
     }
     return false;
-  }
-
-  private parseGraft() {
-    this.parseAllfuns();
   }
 
   private parseTimelessJewel() {
@@ -1184,6 +1117,16 @@ class ItemAnalyzer {
     });
     this.itemParsed.autoSearch = true;
     if (this.itemParsed.itemLevel) this.itemParsed.itemLevel.search = false;
+  }
+
+  private parseStackableCurrency() {
+    const isBeastItem = this.parseBeastItem();
+    if (!isBeastItem) {
+      if (this.config.autoSearchStackableItems) this.itemParsed.autoSearch = true;
+      this.parseAllfuns();
+      return true;
+    }
+    return false;
   }
 }
 

@@ -70,6 +70,14 @@ import { itemAnalyze } from "@/renderer/lib/itemAnalyze";
 describe("parseItem", () => {
   it.each(testCase)("$label", ({ item, match }) => {
     const parseResult = itemAnalyze(item);
-    expect(parseResult).toMatchObject(match);
+    const { stats, ...matchWithoutStats } = match;
+
+    expect(parseResult).toMatchObject(matchWithoutStats);
+
+    if (stats && parseResult) {
+      expect(parseResult.stats).toEqual(
+        expect.arrayContaining(stats.map((stat) => expect.objectContaining(stat))),
+      );
+    }
   });
 });

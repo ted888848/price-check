@@ -1,9 +1,9 @@
 {
   "characterName": "",
   "searchExchangePrefer": "divine&(C or Ex)",
-  "POESESSID": "7b7c51bfbdb25116e42eb3a545780f84",
+  "POESESSID": "",
   "searchTwoWeekOffline": false,
-  "priceCheckHotkey": "Ctrl+Z",
+  "priceCheckHotkey": "Ctrl+D",
   "settingHotkey": "Shift+Ctrl+Space",
   "shortcuts": [
     {
@@ -22,11 +22,6 @@
       "outputText": "/leave"
     },
     {
-      "hotkey": "F5",
-      "type": "type-in-chat",
-      "outputText": "/hideout"
-    },
-    {
       "hotkey": "Ctrl+`",
       "type": "type-in-chat",
       "outputText": "/oos"
@@ -35,9 +30,14 @@
       "hotkey": "F6",
       "type": "type-in-chat",
       "outputText": "/monastery"
+    },
+    {
+      "hotkey": "F5",
+      "type": "type-in-chat",
+      "outputText": "/hideout"
     }
   ],
-  "league": "遠古蜃景",
+  "league": "巫影密會",
   "poeVersion": "1",
   "searchOnlineType": "securable",
   "prevPriceCheckHotkey": "Shift+Ctrl+Z",
@@ -52,18 +52,15 @@
       "show": true,
       "list": [
         {
-          "regex": "更多攻擊|等級\\s20\\s的(增|元|快)",
-          "id": "1775655691530"
+          "regex": "詐欺|解咒\\s\\(等級\\s[123]|洞察力\\s\\(等級[12]",
+          "id": "1785599229861"
         },
         {
-          "regex": "\"!範圍技|被附|射.*元|大抗|回復|更少命|少.*格|非詛|護甲|盾恢\" !鑑定",
-          "id": "1775657432429"
-        },
-        {
-          "regex": "\"!物生|射.*元|外最|回復|復率|非詛|少.*格|目增加.*生|更少命|盾恢|害格|20% 元|不能格|90% 來|的防\"",
-          "id": "1775657440140"
+          "regex": "\"!元素異常|被偷|回復|盾恢\" \"稀有度: 稀有\"",
+          "id": "1795177614609"
         }
       ]
     }
-  ]
+  ],
+  "enableAutoEnableUniqueMods": true
 }

@@ -2,3 +2,4 @@
 set -e
 pnpm vuetsc
 pnpm lint --deny-warnings
+pnpm test --passWithNoTests

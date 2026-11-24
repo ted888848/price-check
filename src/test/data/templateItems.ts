@@ -5,7 +5,7 @@ interface TemplateItemsSchema {
   };
 }
 
-export const itemTemplateRaw = {
+export const itemTemplateRaw: TemplateItemsSchema = {
   普通頭盔: {
     source: `物品種類: 頭部
 稀有度: 普通
@@ -72,10 +72,14 @@ export const itemTemplateRaw = {
 --------
 物品等級: 85
 --------
-有 1 個深淵插槽 (implicit)
+{ 固定詞綴 }
+有 1 個深淵插槽 — 無法使用的值
+（只有深淵珠寶可以放置於深淵插槽中）
 --------
-+11% 閃電抗性
-增加 17% 藥劑生命恢復率
+{ 前綴 "刷新之"(階層：4)— 生命 }
+增加 17(17-22)% 藥劑生命恢復率
+{ 後綴 "雲朵之"(階層：8)— 元素,閃電,抗性 }
++11(6-11)% 閃電抗性
 `,
     match: {
       type: {
@@ -168,16 +172,25 @@ export const itemTemplateRaw = {
 --------
 物品等級: 84
 --------
-6% 攻擊傷害格擋率 (implicit)
-增加 10% 你技能的非詛咒光環效果 (implicit)
+{ 灼烙總督固定詞綴 (低階)— 光環 }
+增加 10(9-10)% 你技能的非詛咒光環效果
+{ 吞噬天地固定詞綴 (高階) }
+6% 攻擊傷害格擋率
 --------
-+335 點護甲
-增加 134% 護甲與能量護盾
-+77 最大能量護盾
-+20% 閃電抗性
-增加 15% 暈眩恢復和格擋恢復
+{ 前綴 "巨靈的"(階層：2)— 防禦,護甲,能量護盾 }
+增加 37(33-38)% 護甲與能量護盾
+增加 15(14-15)% 暈眩恢復和格擋恢復
+{ 前綴 "鼓舞的"(階層：2)— 防禦,護甲,能量護盾 }
+增加 97(92-100)% 護甲與能量護盾
+{ 前綴 "虔誠的"(階層：1)— 防禦,護甲,能量護盾 }
++335(301-375) 點護甲
++77(73-80) 最大能量護盾
+{ 後綴 "保護者之"(階層：2)— 物理 }
 7% 額外物理傷害減免
-當附近有稀有或傳奇敵人時，每秒回復 150 能量護盾 (crafted)
+{ 後綴 "暴風之"(階層：6)— 元素,閃電,抗性 }
++20(18-23)% 閃電抗性
+{ 已大師工藝 後綴 "工藝之"— 防禦,能量護盾 }
+當 6 公尺內的有稀有或傳奇敵人時，每秒回復 150 能量護盾
 卓烙總督物品
 吞噬天地物品
 `,
@@ -203,12 +216,15 @@ export const itemTemplateRaw = {
       stats: [
         {
           value: {
-            min: 6,
+            min: 10,
           },
-          id: "implicit.stat_2530372417",
-          text: "#% 攻擊傷害格擋率",
+          lowerBound: 9,
+          upperBound: 10,
+          id: "implicit.stat_1880071428",
+          text: "增加 #% 你技能的非詛咒光環效果",
           type: "固定",
           disabled: true,
+          searchWithEmptyValue: false,
         },
         {
           value: {
@@ -218,69 +234,87 @@ export const itemTemplateRaw = {
           text: "+#% 攻擊傷害格擋率",
           type: "固定",
           disabled: true,
+          searchWithEmptyValue: false,
         },
         {
           value: {
-            min: 10,
+            min: 6,
           },
-          id: "implicit.stat_1880071428",
-          text: "增加 #% 你技能的非詛咒光環效果",
+          id: "implicit.stat_2530372417",
+          text: "#% 攻擊傷害格擋率",
           type: "固定",
           disabled: true,
+          searchWithEmptyValue: false,
         },
         {
           value: {
             min: 150,
           },
           id: "crafted.stat_2238019079",
-          text: "當附近有稀有或傳奇敵人時，每秒回復 # 能量護盾",
+          text: "當 6 公尺內的有稀有或傳奇敵人時，每秒回復 # 能量護盾",
           type: "工藝",
           disabled: true,
+          searchWithEmptyValue: false,
         },
         {
           value: {
-            min: 335,
+            min: 37,
           },
-          id: "explicit.stat_3484657501",
-          text: "+# 點護甲 (部分)",
-          type: "隨機",
-          disabled: true,
-        },
-        {
-          value: {
-            min: 134,
-          },
+          lowerBound: 33,
+          upperBound: 38,
           id: "explicit.stat_3321629045",
           text: "增加 #% 護甲與能量護盾 (部分)",
           type: "隨機",
           disabled: true,
-        },
-        {
-          value: {
-            min: 77,
-          },
-          id: "explicit.stat_4052037485",
-          text: "+# 最大能量護盾 (部分)",
-          type: "隨機",
-          disabled: true,
-        },
-        {
-          value: {
-            min: 20,
-          },
-          id: "explicit.stat_1671376347",
-          text: "+#% 閃電抗性",
-          type: "隨機",
-          disabled: true,
+          searchWithEmptyValue: false,
         },
         {
           value: {
             min: 15,
           },
+          lowerBound: 14,
+          upperBound: 15,
           id: "explicit.stat_2511217560",
           text: "增加 #% 暈眩恢復和格擋恢復",
           type: "隨機",
           disabled: true,
+          searchWithEmptyValue: false,
+        },
+        {
+          value: {
+            min: 97,
+          },
+          lowerBound: 92,
+          upperBound: 100,
+          id: "explicit.stat_3321629045",
+          text: "增加 #% 護甲與能量護盾 (部分)",
+          type: "隨機",
+          disabled: true,
+          searchWithEmptyValue: false,
+        },
+        {
+          value: {
+            min: 335,
+          },
+          lowerBound: 301,
+          upperBound: 375,
+          id: "explicit.stat_3484657501",
+          text: "+# 點護甲 (部分)",
+          type: "隨機",
+          disabled: true,
+          searchWithEmptyValue: false,
+        },
+        {
+          value: {
+            min: 77,
+          },
+          lowerBound: 73,
+          upperBound: 80,
+          id: "explicit.stat_4052037485",
+          text: "+# 最大能量護盾 (部分)",
+          type: "隨機",
+          disabled: true,
+          searchWithEmptyValue: false,
         },
         {
           value: {
@@ -290,6 +324,19 @@ export const itemTemplateRaw = {
           text: "#% 額外物理傷害減免",
           type: "隨機",
           disabled: true,
+          searchWithEmptyValue: false,
+        },
+        {
+          value: {
+            min: 20,
+          },
+          lowerBound: 18,
+          upperBound: 23,
+          id: "explicit.stat_1671376347",
+          text: "+#% 閃電抗性",
+          type: "隨機",
+          disabled: true,
+          searchWithEmptyValue: false,
         },
         {
           id: "pseudo.pseudo_total_elemental_resistance",
@@ -335,14 +382,21 @@ export const itemTemplateRaw = {
 --------
 物品等級: 80
 --------
-+42 力量 (implicit)
+{ 固定詞綴— 能力  — 增加 20% }
++35(25-35) 力量
 --------
-+52 敏捷
-+19% 火焰抗性
-+16% 冰冷抗性
+{ 傳奇詞綴— 能力  — 增加 20% }
++44(30-50) 敏捷
+{ 傳奇詞綴— 元素,火焰,抗性 }
++19(15-25)% 火焰抗性
+{ 傳奇詞綴— 元素,冰冷,抗性 }
++16(15-25)% 冰冷抗性
+{ 傳奇詞綴 }
 魔法功能藥劑不能使用
+{ 傳奇詞綴 }
 魔法功能藥劑效果不能被移除
-最右邊4的魔法功能藥劑持續套用它的藥劑效果至你身上 (mutated)
+{ Foulborn Unique Modifier }
+最右邊4(2-4)的魔法功能藥劑持續套用它的藥劑效果至你身上
 --------
 權力的河流流過你的血管。
 `,
@@ -368,60 +422,77 @@ export const itemTemplateRaw = {
       stats: [
         {
           value: {
-            min: 42,
+            min: 35,
           },
+          lowerBound: 25,
+          upperBound: 35,
           id: "implicit.stat_4080418644",
           text: "+# 力量",
           type: "固定",
-          disabled: true,
+          disabled: false,
+          searchWithEmptyValue: true,
         },
         {
           value: {
-            min: 52,
+            min: 44,
           },
+          lowerBound: 30,
+          upperBound: 50,
           id: "explicit.stat_3261801346",
           text: "+# 敏捷",
           type: "隨機",
-          disabled: true,
+          disabled: false,
+          searchWithEmptyValue: true,
         },
         {
           value: {
             min: 19,
           },
+          lowerBound: 15,
+          upperBound: 25,
           id: "explicit.stat_3372524247",
           text: "+#% 火焰抗性",
           type: "隨機",
-          disabled: true,
+          disabled: false,
+          searchWithEmptyValue: true,
         },
         {
           value: {
             min: 16,
           },
+          lowerBound: 15,
+          upperBound: 25,
           id: "explicit.stat_4220027924",
           text: "+#% 冰冷抗性",
           type: "隨機",
-          disabled: true,
+          disabled: false,
+          searchWithEmptyValue: true,
         },
         {
           id: "explicit.stat_3986704288",
           text: "魔法功能藥劑不能使用",
           type: "隨機",
-          disabled: true,
+          disabled: false,
+          searchWithEmptyValue: true,
         },
         {
           id: "explicit.stat_344389721",
           text: "魔法功能藥劑效果不能被移除",
           type: "隨機",
-          disabled: true,
+          disabled: false,
+          searchWithEmptyValue: true,
         },
         {
           value: {
             min: 4,
           },
+          lowerBound: 2,
+          upperBound: 4,
           id: "explicit.stat_2651470813",
           text: "最右邊#的魔法功能藥劑持續套用它的藥劑效果至你身上",
           type: "穢生",
           disabled: false,
+          searchWithEmptyValue: false,
         },
         {
           id: "pseudo.pseudo_total_elemental_resistance",
@@ -451,8 +522,6 @@ export const itemTemplateRaw = {
   無法使用的細劍: {
     source: `物品種類: 細劍
 稀有度: 魔法
-你無法使用這項裝備，它的數值將被忽略
---------
 追憶之 升級的華麗細劍
 --------
 單手劍
@@ -471,9 +540,11 @@ export const itemTemplateRaw = {
 --------
 物品等級: 78
 --------
-此物品插槽中寶石品質 +6% (implicit)
+{ 固定詞綴— 寶石 }
+此物品插槽中寶石品質 +6(4-6)%
 --------
-此物品插槽中寶石品質 +8% (crafted)
+{ 已大師工藝 前綴 "升級的"— 寶石 }
+此物品插槽中寶石品質 +8(7-8)%
 --------
 追憶之物
 `,
@@ -556,18 +627,24 @@ export const itemTemplateRaw = {
 --------
 需求:
 等級: 60
-敏捷: 125
+敏捷: 125 (unmet)
 --------
 插槽: G B-G-G-G R 
 --------
 物品等級: 85
 --------
-附加 14 至 27 冰冷傷害
-附加 14 至 288 閃電傷害
-增加 21% 暴擊率
-每擊中一個敵人，獲得 18 生命
-增加 18% 敵人暈眩時間
-使用此武器的擊中 +46% 流血持續傷害加成
+{ 前綴 "電震的"(階層：4)— 傷害,元素,閃電,攻擊 }
+附加 14(14-20) 至 288(281-327) 閃電傷害
+{ 前綴 "冷凍的"(階層：9)— 傷害,元素,冰冷,攻擊 }
+附加 14(12-17) 至 27(26-30) 冰冷傷害
+{ 前綴 "尊師的"(階層：2)— 物理,攻擊,異常狀態 }
+使用此武器的擊中 +46(43-50)% 流血持續傷害加成
+{ 後綴 "暈眩之"(階層：4) }
+增加 18(16-20)% 敵人暈眩時間
+{ 後綴 "復生之"(階層：4)— 生命,攻擊 }
+每擊中一個敵人，獲得 18(15-18) 生命
+{ 後綴 "刺穿之"(階層：4)— 攻擊,暴擊 }
+增加 21(20-24)% 暴擊率
 --------
 尊師之物
 `,
@@ -699,7 +776,9 @@ export const itemTemplateRaw = {
 --------
 被輔助的技能造成 39% 更多範圍傷害
 被輔助的技能有 30% 更少範圍效果
-被輔助的技能增加 10% 範圍傷害
+
+來自品質的額外效果：
+被輔助的技能增加 10(0-10)% 範圍傷害
 --------
 這是一顆輔助寶石。它並不會為你的角色增加能力數值，但會強化與其連結的技能寶石。將其放置於物品上同樣顏色的插槽並連結想要強化的技能寶石。點擊右鍵從插槽中取出。
 `,
@@ -761,10 +840,14 @@ export const itemTemplateRaw = {
 252至378基礎副手物理傷害
 盾牌上每15護甲或閃避值增加8至12物理傷害
 到達最大衝鋒距離時，增加 75% 暈眩門檻降低
+（造成暈眩所需的傷害量代表暈眩門檻）
 最大衝擊距離擊中時造成 100% 更多傷害
-增加 132% 移動速度
+增加 109% 移動速度
+
+來自品質的額外效果：
+增加 23(0-20)% 移動速度
 --------
-將其放置於物品上同樣顏色的插槽來獲得這項技能。點擊右鍵從插槽中取出。
+將其放置於物品上的插槽來獲得這項技能。點擊右鍵從插槽中取出。
 --------
 已汙染
 `,
@@ -810,12 +893,11 @@ export const itemTemplateRaw = {
 稀有度: 通貨
 神聖石
 --------
-堆疊數量: 101 / 20
+堆疊數量: 1 / 20
 --------
 重置一件物品上隨機詞綴的數值
 --------
 右鍵點擊此物品，再左鍵點擊一件魔法、稀有或傳奇物品來使用。
-按住 Shift 點擊以分開堆疊
 `,
     match: {
       type: {
@@ -853,7 +935,7 @@ export const itemTemplateRaw = {
 曲空禮拜
 地圖（階級 16）
 --------
-物品數量: +61% (augmented)
+輿圖掉落物: +61% (augmented)
 物品稀有度: +36% (augmented)
 怪物群大小: +23% (augmented)
 --------
@@ -861,12 +943,16 @@ export const itemTemplateRaw = {
 --------
 怪物等級：83
 --------
-增加 29% 稀有怪物的數量
+{ 前綴 "裂化的"(階層：1) }
 怪物發射 2 額外投射物
-怪物造成 110% 額外物理傷害視為閃電
+{ 前綴 "導電的"(階層：1)— 傷害,物理,元素,閃電 }
+怪物造成 110(90-110)% 額外物理傷害視為閃電
+{ 前綴 "反抗者的"(階層：1) }
+增加 29(20-30)% 稀有怪物的數量
+{ 後綴 "耐久之"(階層：1) }
 怪物擊中時獲得 1 顆耐力球
 --------
-透過個人的地圖裝置來使用這張地圖以前往該地圖。每張地圖只能被使用一次。
+透過個人的地圖裝置來使用這張地圖以前往這個階級或更低的該地圖。每張地圖只能被使用一次。
 `,
     match: {
       type: {
@@ -890,62 +976,57 @@ export const itemTemplateRaw = {
       stats: [
         {
           value: {
-            min: 83,
-          },
-          id: "explicit.stat_284496119",
-          text: "怪物等級：#",
-          type: "隨機",
-          disabled: true,
-        },
-        {
-          disabled: true,
-          id: "explicit.stat_3126771445",
-          searchWithEmptyValue: undefined,
-          text: "增加 #% 稀有怪物的數量",
-          type: "隨機",
-          value: {
-            min: 29,
-          },
-        },
-        {
-          disabled: true,
-          id: "explicit.stat_1309819744",
-          searchWithEmptyValue: undefined,
-          text: "怪物發射 # 額外投射物",
-          type: "隨機",
-          value: {
             min: 2,
           },
+          id: "explicit.stat_1309819744",
+          text: "怪物發射 # 額外投射物",
+          type: "隨機",
+          disabled: true,
+          searchWithEmptyValue: false,
         },
         {
-          disabled: true,
-          id: "explicit.stat_3416853625",
-          searchWithEmptyValue: undefined,
-          text: "怪物造成 #% 額外物理傷害視為閃電",
-          type: "隨機",
           value: {
             min: 110,
           },
+          lowerBound: 90,
+          upperBound: 110,
+          id: "explicit.stat_3416853625",
+          text: "怪物造成 #% 額外物理傷害視為閃電",
+          type: "隨機",
+          disabled: true,
+          searchWithEmptyValue: false,
         },
         {
+          value: {
+            min: 29,
+          },
+          lowerBound: 20,
+          upperBound: 30,
+          id: "explicit.stat_3126771445",
+          text: "增加 #% 稀有怪物的數量",
+          type: "隨機",
           disabled: true,
+          searchWithEmptyValue: false,
+        },
+        {
+          value: {
+            min: 100,
+          },
           id: "explicit.stat_687813731",
-          searchWithEmptyValue: undefined,
           text: "怪物擊中時有 #% 機率獲得 1 顆耐力球",
           type: "隨機",
-          value: {
-            min: 100,
-          },
+          disabled: true,
+          searchWithEmptyValue: false,
         },
         {
-          disabled: true,
-          id: "explicit.stat_3707756896",
-          searchWithEmptyValue: undefined,
-          text: "怪物擊中時有 #% 機率獲得 1 顆耐力球",
-          type: "隨機",
           value: {
             min: 100,
           },
+          id: "explicit.stat_3707756896",
+          text: "怪物擊中時有 #% 機率獲得 1 顆耐力球",
+          type: "隨機",
+          disabled: true,
+          searchWithEmptyValue: false,
         },
       ],
       influences: [],
@@ -1018,13 +1099,20 @@ export const itemTemplateRaw = {
 物品等級: 83
 --------
 附加 8 個天賦 (enchant)
+（ 附加的天賦點不會被其它珠寶視為範圍內 ） (enchant)
+（ 所有附加的天賦點都為小型，除非有特條件 ） (enchant)
 2 個附加的天賦為珠寶插槽 (enchant)
 附加的小型天賦給予：法杖攻擊增加 12% 擊中和異常狀態傷害 (enchant)
+（天賦點不是指核心、專精、關鍵天賦或珠寶插槽，而是小的天賦點） (enchant)
 --------
-附加的小天賦給予：+3% 冰冷抗性
-1 個附加的天賦為武術英勇
-1 個附加的天賦為機會主義福斯雷
-1 個附加的天賦為惡毒穿刺
+{ 前綴 "顯著的"(階層：1)— 傷害,攻擊,暴擊 }
+1 個附加的天賦為機會主義福斯雷 — 無法使用的值
+{ 前綴 "顯著的"(階層：1)— 物理,攻擊,異常狀態 }
+1 個附加的天賦為惡毒穿刺 — 無法使用的值
+{ 後綴 "顯著之"(階層：1)— 傷害,攻擊,速度 }
+1 個附加的天賦為武術英勇 — 無法使用的值
+{ 後綴 "北方民族之"(階層：3)— 元素,冰冷,抗性 }
+附加的小天賦給予：+3(2-3)% 冰冷抗性
 --------
 放置於天賦樹已配置的巨型珠寶插槽中。附加的天賦點不與珠寶範圍互動。點擊右鍵從插槽中移除。
 `,
@@ -1105,6 +1193,71 @@ export const itemTemplateRaw = {
       searchOnlineType: "securable",
       fetchCount: 20,
       requireLevel: 54,
+    },
+  },
+  通牒雕刻命運卡: {
+    source: `物品種類: 其它
+稀有度: 通貨
+最後通牒雕刻
+--------
+挑戰: 站在符文上
+區域等級: 83
+需求獻祭: 鐵骨心腸 x2
+獎勵: 翻倍獻祭的命運卡
+--------
+極凍 IV
+(許多冰凍的膿瘡會持續出現冰緩你，當你靠近時迅速爆炸，若他們擊中冰凍)
+耗力圖騰
+(無敵的圖騰增強友方和敵人，更快速和強力的物理傷害加成，但使敵人每秒承受 10% 他們最大生命和能量護盾的物理傷害)
+縮小範圍
+(玩家有 60% 更少範圍效果和投射物速度)
+增益效果失效加速
+(玩家身上的增益效果失效加快 5 倍)
+魔力消耗的閃電傷害
+(承受 1000% 魔力消耗的閃電傷害)
+奸詐光環
+(你影響友方的光環同時影響敵人)
+抗性怪物
+(怪物 +50% 全部抗性)
+虹吸怪物
+(怪物擊中移除 10% 目前能量護盾和魔力)
+增加 20% 怪物傷害
+70% 更多怪物生命
+--------
+可以使用於個人地圖裝置以開啟前往試煉大師地盤的傳送門，並完成他的挑戰。挑戰開始時傳送門就會關閉。在檢視你的輿圖時，右鍵點擊此物品以定位其所在。
+`,
+    match: {
+      type: {
+        text: "其它",
+        searchByType: false,
+      },
+      baseType: "最後通牒雕刻",
+      raritySearch: {
+        label: "任何",
+      },
+      rarity: "通貨",
+      itemLevel: {
+        search: false,
+      },
+      isWeaponOrArmor: false,
+      isCorrupt: false,
+      stats: [],
+      influences: [],
+      quality: {
+        search: false,
+      },
+      autoSearch: true,
+      searchExchange: {
+        option: false,
+        have: ["divine", "chaos"],
+      },
+      searchOnlineType: "securable",
+      fetchCount: 20,
+      inscribed: {
+        requirementItem: "鐵骨心腸",
+        rewardItem: "翻倍獻祭的命運卡",
+        searchRequirementItem: true,
+      },
     },
   },
 } satisfies TemplateItemsSchema;
