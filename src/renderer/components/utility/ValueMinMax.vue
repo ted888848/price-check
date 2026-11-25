@@ -1,6 +1,6 @@
 <template>
   <div
-    class="flex p-2 items-center justify-center select-none"
+    class="flex items-center justify-center p-2 select-none"
     :class="{ 'opacity-30': !item.search }"
     @click="(_event) => (item.search = !item.search)"
   >
@@ -9,7 +9,7 @@
     </span>
     <input
       v-model.number="item.min"
-      class="w-8 appearance-none rounded bg-gray-400 text-center mx-1 font-bold"
+      class="mx-1 w-8 appearance-none rounded bg-gray-400 text-center font-bold"
       type="number"
       :disabled="!item.search"
       @dblclick="() => delete item.min"

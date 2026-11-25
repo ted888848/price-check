@@ -1,10 +1,10 @@
-import { GGCapi } from "./lib/api";
+import { serve, ServerType } from "@hono/node-server";
 import { AxiosResponse, AxiosResponseHeaders } from "axios";
 import { ipcMain } from "electron";
-import IPC from "@/ipc";
 import { Hono } from "hono";
-import { serve, ServerType } from "@hono/node-server";
 import { ContentfulStatusCode } from "hono/utils/http-status";
+import IPC from "@/ipc";
+import { GGCapi } from "./lib/api";
 
 export class ProxyServer {
   private app: Hono;

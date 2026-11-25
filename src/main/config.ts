@@ -1,8 +1,8 @@
-import Store, { Schema } from "electron-store";
 import { ipcMain, session } from "electron";
+import Store, { Schema } from "electron-store";
 import IPC from "@/ipc";
-import { registerShortcut, unRegisterShortcut } from "./shortcuts";
 import { win } from "./overlayWindow";
+import { registerShortcut, unRegisterShortcut } from "./shortcuts";
 const defaultStore: Config = {
   characterName: "",
   searchExchangePrefer: "divine&(C or Ex)",

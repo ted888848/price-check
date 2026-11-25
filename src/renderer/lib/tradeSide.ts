@@ -1,10 +1,10 @@
-import { APIStatic, currencyImageUrl } from "./APIdata";
-import { isUndefined, isNumber, countBy } from "lodash-es";
 import type { AxiosResponseHeaders } from "axios";
 import axios from "axios";
+import { isUndefined, isNumber, countBy } from "lodash-es";
+import { APIStatic, currencyImageUrl } from "./APIdata";
+import { DOUBLE_CORRUPT_VALUE, NOT_MATCHED_ID } from "./const";
 import { poeVersion, secondCurrency, tradeUrl } from "./index";
 import { parseRateTimeLimit, startCountdown } from "./ratetimelimit";
-import { DOUBLE_CORRUPT_VALUE, NOT_MATCHED_ID } from "./const";
 
 const tradeApi = axios.create({
   baseURL: `http://localhost:${window.proxyServer.getPort()}/proxy`,

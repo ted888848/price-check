@@ -1,41 +1,41 @@
 <template>
-    <div v-if="!props.isSearching" class="my-2 justify-center flex text-xl">
+  <div v-if="!props.isSearching" class="my-2 flex justify-center text-xl">
+    <button
+      class="mx-2 rounded bg-gray-500 px-1 text-white hover:bg-gray-400 disabled:cursor-default disabled:bg-gray-500 disabled:opacity-60"
+      :disabled="props.isActive"
+      @click="() => emit('search', false)"
+    >
+      Search
+    </button>
+    <button
+      class="mx-2 rounded bg-gray-500 px-1 text-white hover:bg-gray-400 disabled:cursor-default disabled:bg-gray-500 disabled:opacity-60"
+      :disabled="props.isActive"
+      @click="() => emit('search', true)"
+    >
+      Search{{ poeVersion === "2" ? "E" : "C" }}
+    </button>
+    <div v-if="props.showResultActions">
       <button
-        class="mx-2 bg-gray-500 text-white rounded px-1 hover:bg-gray-400 disabled:cursor-default disabled:opacity-60 disabled:bg-gray-500"
-        :disabled="props.isActive"
-        @click="() => emit('search', false)"
+        class="mx-2 rounded bg-green-400 px-1 text-black hover:bg-green-300 disabled:cursor-default disabled:bg-green-400 disabled:opacity-60"
+        :disabled="props.isActive || !props.hasNextPage"
+        @click="emit('fetch-more')"
       >
-        Search
+        在20筆
       </button>
       <button
-        class="mx-2 bg-gray-500 text-white rounded px-1 hover:bg-gray-400 disabled:cursor-default disabled:opacity-60 disabled:bg-gray-500"
-        :disabled="props.isActive"
-        @click="() => emit('search', true)"
+        class="mx-2 rounded bg-blue-800 px-4 text-white hover:bg-blue-700 disabled:cursor-default disabled:bg-blue-800 disabled:opacity-60"
+        @click="emit('open-browser')"
       >
-        Search{{ poeVersion === "2" ? "E" : "C" }}
-      </button>
-      <div v-if="props.showResultActions">
-        <button
-          class="mx-2 bg-green-400 text-black rounded px-1 hover:bg-green-300 disabled:cursor-default disabled:opacity-60 disabled:bg-green-400"
-          :disabled="props.isActive || !props.hasNextPage"
-          @click="emit('fetch-more')"
-        >
-          在20筆
-        </button>
-        <button
-          class="mx-2 bg-blue-800 text-white rounded px-4 hover:bg-blue-700 disabled:cursor-default disabled:opacity-60 disabled:bg-blue-800"
-          @click="emit('open-browser')"
-        >
-          B
-        </button>
-      </div>
-      <button
-        class="mx-2 bg-blue-800 text-white rounded px-4 hover:bg-blue-700 disabled:cursor-default disabled:opacity-60 disabled:bg-blue-800"
-        @click="emit('open-web-view')"
-      >
-        BV
+        B
       </button>
     </div>
+    <button
+      class="mx-2 rounded bg-blue-800 px-4 text-white hover:bg-blue-700 disabled:cursor-default disabled:bg-blue-800 disabled:opacity-60"
+      @click="emit('open-web-view')"
+    >
+      BV
+    </button>
+  </div>
 </template>
 
 <script setup lang="ts">

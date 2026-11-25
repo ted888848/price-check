@@ -1,5 +1,5 @@
 <template>
-  <table v-if="props.stats.length" class="bg-gray-700 text-center mt-1 text-white text-sm">
+  <table v-if="props.stats.length" class="mt-1 bg-gray-700 text-center text-sm text-white">
     <thead class="bg-green-600" @click="(_event) => emit('update:expanded', !props.expanded)">
       <tr class="text-lg">
         <td
@@ -41,7 +41,7 @@
           <CircleCheck :checked="!mod.disabled" />
         </td>
         <td
-          class="whitespace-nowrap text-lg font-semibold hover:cursor-default"
+          class="text-lg font-semibold whitespace-nowrap hover:cursor-default"
           :style="{ color: modTextColor(mod.type) }"
           @click="() => handleModClick(mod)"
         >
@@ -55,20 +55,20 @@
             v-if="isModHasValueField(mod)"
             v-model.number="mod.value.min"
             type="number"
-            class="w-8 appearance-none rounded bg-gray-400 text-center text-black font-bold"
+            class="w-8 appearance-none rounded bg-gray-400 text-center font-bold text-black"
             :class="{ 'opacity-20': mod.searchWithEmptyValue }"
             @dblclick="() => delete mod.value.min"
           />
         </td>
         <td class="cursor-pointer" @click="() => handleModValueToggleClick(mod)">
-          <span v-if="isModHasValueField(mod)" class="text-white font-bold"> - </span>
+          <span v-if="isModHasValueField(mod)" class="font-bold text-white"> - </span>
         </td>
         <td>
           <input
             v-if="isModHasValueField(mod)"
             v-model.number="mod.value.max"
             type="number"
-            class="w-8 appearance-none rounded bg-gray-400 text-center text-black font-bold"
+            class="w-8 appearance-none rounded bg-gray-400 text-center font-bold text-black"
             :class="{ 'opacity-20': mod.searchWithEmptyValue }"
             @dblclick="() => delete mod.value.max"
           />
@@ -79,9 +79,9 @@
 </template>
 
 <script setup lang="ts">
+import { ElTooltip } from "element-plus";
 import { isUndefined } from "lodash-es";
 import { match } from "ts-pattern";
-import { ElTooltip } from "element-plus";
 import { NOT_MATCHED_ID } from "@/renderer/lib/const";
 import CircleCheck from "../../../components/utility/CircleCheck.vue";
 

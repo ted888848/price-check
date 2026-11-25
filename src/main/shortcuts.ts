@@ -1,10 +1,10 @@
-import IPC from "@/ipc";
 import { globalShortcut, ipcMain } from "electron";
-import { toggleOverlay, togglePriceCheck } from "./overlayWindow";
-import { PoeWindow } from "./POEWindow";
+import { uIOhook, UiohookKey } from "uiohook-napi";
+import IPC from "@/ipc";
 import { getClipboard, withTemporaryClipboardText } from "./clipboard";
 import { config } from "./config";
-import { uIOhook, UiohookKey } from "uiohook-napi";
+import { toggleOverlay, togglePriceCheck } from "./overlayWindow";
+import { PoeWindow } from "./POEWindow";
 export function setupShortcut() {
   if (PoeWindow.isActive) {
     registerShortcut();

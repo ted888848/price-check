@@ -1,8 +1,8 @@
-import { GGCapi } from "./lib/api";
-import Store from "electron-store";
 import { app } from "electron"; //, shell
-import { config } from "./config";
+import Store from "electron-store";
 import { match } from "ts-pattern";
+import { config } from "./config";
+import { GGCapi } from "./lib/api";
 const store1 = new Store({
   name: "APIData",
 });

@@ -1,19 +1,19 @@
 <template>
-  <div class="flex flex-col pl-2 pt-4 gap-4 max-h-full">
-    <div class="text-white text-xl">Widget 設定</div>
-    <button class="w-fit px-3 py-1 rounded bg-amber-500 text-black" @click="addWidget">新增 Widget</button>
-    <div v-if="widgetCount > 0" class="flex flex-col gap-2 flex-1 min-h-0 overflow-y-auto">
+  <div class="flex max-h-full flex-col gap-4 pt-4 pl-2">
+    <div class="text-xl text-white">Widget 設定</div>
+    <button class="w-fit rounded bg-amber-500 px-3 py-1 text-black" @click="addWidget">新增 Widget</button>
+    <div v-if="widgetCount > 0" class="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto">
       <div
         v-for="(widget, index) in widgets"
         :key="widget.id"
-        class="flex items-center justify-between bg-slate-700 rounded px-3 py-2 gap-2 text-white"
+        class="flex items-center justify-between gap-2 rounded bg-slate-700 px-3 py-2 text-white"
       >
-        <div class="flex flex-col items-start text-sm gap-1 w-50%">
+        <div class="w-50% flex flex-col items-start gap-1 text-sm">
           <span>類型: {{ formatWidgetType(widget.type) }}</span>
           <label class="w-100% center gap-4px">
-            <span class="text-xs text-gray-300 text-nowrap">名稱</span>
+            <span class="text-xs text-nowrap text-gray-300">名稱</span>
             <input
-              class="mt-1 w-100% px-2 py-1 rounded bg-slate-800 text-white border border-slate-500"
+              class="w-100% mt-1 rounded border border-slate-500 bg-slate-800 px-2 py-1 text-white"
               :value="widget.name ?? ''"
               @input="updateWidgetName(widget.id, ($event.target as HTMLInputElement).value)"
               placeholder="Regex 快捷"
@@ -23,22 +23,22 @@
         </div>
         <div class="flex items-center gap-2">
           <button
-            class="px-2 py-1 rounded text-black"
+            class="rounded px-2 py-1 text-black"
             :class="widget.show ? 'bg-green-500' : 'bg-gray-500'"
             @click="toggleSingleWidgetVisible(widget.id)"
           >
             {{ widget.show ? "啟用中" : "停用中" }}
           </button>
-          <button class="px-2 py-1 rounded bg-violet-500 text-black" @click="togglePreview(widget.id)">
+          <button class="rounded bg-violet-500 px-2 py-1 text-black" @click="togglePreview(widget.id)">
             {{ previewWidgetId === widget.id ? "隱藏位置" : "顯示位置" }}
           </button>
           <button
-            class="px-2 py-1 rounded bg-sky-500 text-black disabled:opacity-60 disabled:cursor-not-allowed"
+            class="rounded bg-sky-500 px-2 py-1 text-black disabled:cursor-not-allowed disabled:opacity-60"
             @click="resetSingleWidgetPosition(widget.id, index)"
           >
             重製位置
           </button>
-          <button class="px-2 py-1 rounded bg-red-500 text-white" @click="deleteWidget(widget.id)">刪除</button>
+          <button class="rounded bg-red-500 px-2 py-1 text-white" @click="deleteWidget(widget.id)">刪除</button>
         </div>
       </div>
     </div>
@@ -47,8 +47,8 @@
 </template>
 
 <script setup lang="ts">
-import { customEvent } from "@/renderer/lib/customEvent";
 import { computed, onBeforeUnmount, ref } from "vue";
+import { customEvent } from "@/renderer/lib/customEvent";
 
 const config = defineModel<Config>("config", {
   required: true,

@@ -1,9 +1,9 @@
 import { Tray, Menu, app, nativeImage } from "electron";
-import { toggleOverlay, win } from "./overlayWindow";
+import SextantOrb128 from "../assets/SextantOrb128.ico?asset";
 import { checkForUpdate } from "./autoUpdate";
 import { updateState } from "./autoUpdate";
 import { config, updateConfig } from "./config";
-import SextantOrb128 from "../assets/SextantOrb128.ico?asset";
+import { toggleOverlay, win } from "./overlayWindow";
 
 let tray: Tray;
 export function buildTray() {

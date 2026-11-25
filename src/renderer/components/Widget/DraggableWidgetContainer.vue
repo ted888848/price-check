@@ -1,14 +1,14 @@
 <template>
   <div
-    class="fixed bg-slate-600 w-300px rounded p-8px flex flex-col gap-4px"
+    class="w-300px p-8px gap-4px fixed flex flex-col rounded bg-slate-600"
     :class="!dragDisabled && 'cursor-move! ' + $style['drag-able']"
     :style="{ left: position.x + 'px', top: position.y + 'px' }"
     ref="widgetContainer"
   >
     <div class="w-100% center justify-between text-yellow-500">
       {{ title }}
-      <div v-if="dragDisabled" class="i-material-symbols:drag-pan text-lg cursor-pointer text-gray-400" @pointerdown="dragDisabled = false" />
-      <div v-else class="i-material-symbols:check-circle text-lg cursor-pointer! text-green-600" @click="handleSavePosition" />
+      <div v-if="dragDisabled" class="i-material-symbols:drag-pan cursor-pointer text-lg text-gray-400" @pointerdown="dragDisabled = false" />
+      <div v-else class="i-material-symbols:check-circle cursor-pointer! text-lg text-green-600" @click="handleSavePosition" />
     </div>
     <slot :dragDisabled="dragDisabled" />
   </div>

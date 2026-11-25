@@ -1,5 +1,5 @@
-import { poeVersion } from ".";
 import { queryOptions } from "@tanstack/vue-query";
+import { poeVersion } from ".";
 import { APIStatic } from "./APIdata";
 const baseUrl = `${import.meta.env.VITE_MARKET_API_URL}/currency-exchange${poeVersion === "2" ? "/poe2" : ""}`;
 let lastMarketData: TCurrencyMarket | null = null;

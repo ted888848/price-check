@@ -1,7 +1,6 @@
-import { config } from "@/main/config";
 import axios from "axios";
-
 import { CreateAxiosDefaults } from "axios";
+import { config } from "@/main/config";
 
 const baseURL = `${import.meta.env.VITE_URL_BASE}/api/`;
 

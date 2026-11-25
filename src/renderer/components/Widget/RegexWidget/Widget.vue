@@ -15,9 +15,9 @@
 </template>
 
 <script setup lang="ts">
-import RegexItem from "./RegexItem.vue";
-import DraggableWidgetContainer from "../DraggableWidgetContainer.vue";
 import { toRaw } from "vue";
+import DraggableWidgetContainer from "../DraggableWidgetContainer.vue";
+import RegexItem from "./RegexItem.vue";
 const props = defineProps<{
   widget: TWidgetRegex;
 }>();

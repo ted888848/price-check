@@ -1,11 +1,11 @@
+import { join } from "path";
 import { BrowserWindow, ipcMain, nativeImage, shell } from "electron";
 import { OverlayController, OVERLAY_WINDOW_OPTS } from "electron-overlay-window";
-import { PoeWindow } from "./POEWindow";
-import IPC from "@/ipc";
-import { join } from "path";
-import { config } from "./config";
-import SextantOrb128 from "../assets/SextantOrb128.ico?asset";
 import { match } from "ts-pattern";
+import IPC from "@/ipc";
+import SextantOrb128 from "../assets/SextantOrb128.ico?asset";
+import { config } from "./config";
+import { PoeWindow } from "./POEWindow";
 export let win: BrowserWindow;
 let isOverlayOpen: boolean;
 export async function createWindow() {

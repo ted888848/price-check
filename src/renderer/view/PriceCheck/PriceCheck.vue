@@ -1,28 +1,28 @@
 <template>
   <div
     v-show="windowShowHide"
-    class="absolute top-0 left-0 w-screen h-screen priceCheckRoot bg-gray-400 bg-opacity-25 flex"
+    class="priceCheckRoot bg-opacity-25 absolute top-0 left-0 flex h-screen w-screen bg-gray-400"
     @click.self="closePriceCheck"
   >
     <webview v-show="isWebViewOpen" v-if="enableWebView" ref="webViewRef" class="flex-1" :src="webViewSrc" />
-    <div ref="priceCheckDiv" class="bg-gray-900 priceCheck h-full flex flex-col" :style="priceCheckPos" :class="{ absolute: !isWebViewOpen }">
-      <div class="bg-gray-800 flex justify-between max-h-9 items-center">
-        <div class="flex justify-start mr-auto ml-1 flex-1">
+    <div ref="priceCheckDiv" class="priceCheck flex h-full flex-col bg-gray-900" :style="priceCheckPos" :class="{ absolute: !isWebViewOpen }">
+      <div class="flex max-h-9 items-center justify-between bg-gray-800">
+        <div class="mr-auto ml-1 flex flex-1 justify-start">
           <MySelect v-model="currentPriceCheck" :options="priceCheckOptions" label-key="label" :reducer="(i) => i.value" class="w-100px" />
         </div>
-        <div class="flex justify-center flex-1">
-          <div class="relative exaltedImg">
-            <img :src="divineImage" class="w-8 h-8" />
-            <ul v-if="divineToChaosOrEx" class="exaltedImgTooltip invisible bg-gray-700 z-10 text-center absolute text-white rounded">
-              <li v-for="line in divineToChaosDec" :key="line.e" class="flex px-2 min-w-max text-xl">{{ line.e }} : {{ line.c }}</li>
+        <div class="flex flex-1 justify-center">
+          <div class="exaltedImg relative">
+            <img :src="divineImage" class="h-8 w-8" />
+            <ul v-if="divineToChaosOrEx" class="exaltedImgTooltip invisible absolute z-10 rounded bg-gray-700 text-center text-white">
+              <li v-for="line in divineToChaosDec" :key="line.e" class="flex min-w-max px-2 text-xl">{{ line.e }} : {{ line.c }}</li>
             </ul>
           </div>
-          <span class="text-white text-2xl">:{{ divineToChaosOrEx }}</span>
-          <img :src="chaosOrExImage" class="w-8 h-8 hover:cursor-pointer" />
+          <span class="text-2xl text-white">:{{ divineToChaosOrEx }}</span>
+          <img :src="chaosOrExImage" class="h-8 w-8 hover:cursor-pointer" />
         </div>
-        <div class="flex justify-end mr-1 ml-auto flex-1">
+        <div class="mr-1 ml-auto flex flex-1 justify-end">
           <button class="text-white hover:text-red-500" @click="closePriceCheck">
-            <div class="i-material-symbols:add-circle-rounded text-3xl rotate-45" />
+            <div class="i-material-symbols:add-circle-rounded rotate-45 text-3xl" />
           </button>
         </div>
       </div>
@@ -61,17 +61,17 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, nextTick, onBeforeMount, onMounted } from "vue";
-import { range } from "lodash-es";
-import IPC from "@/ipc";
-import { itemAnalyze } from "@/renderer/lib/itemAnalyze";
-import { leagues, divineImage, chaosOrExImage } from "@/renderer/lib/APIdata";
-import NormalPriceCheck from "./NormalPriceCheck.vue";
-import HeistPriceCheck from "./HeistPriceCheck.vue";
-import { leagueSelectRef, secondCurrency, tradeUrl } from "@/renderer/lib";
-import MySelect from "../../components/utility/MySelect.vue";
 import { useQuery } from "@tanstack/vue-query";
+import { range } from "lodash-es";
+import { ref, computed, nextTick, onBeforeMount, onMounted } from "vue";
+import IPC from "@/ipc";
+import { leagueSelectRef, secondCurrency, tradeUrl } from "@/renderer/lib";
+import { leagues, divineImage, chaosOrExImage } from "@/renderer/lib/APIdata";
+import { itemAnalyze } from "@/renderer/lib/itemAnalyze";
 import { getMarketPrice, marketQueryOption } from "@/renderer/lib/market";
+import MySelect from "../../components/utility/MySelect.vue";
+import HeistPriceCheck from "./HeistPriceCheck.vue";
+import NormalPriceCheck from "./NormalPriceCheck.vue";
 const isWebViewOpen = ref(false);
 const prevSearch = ref(false);
 const priceCheckPos = ref({

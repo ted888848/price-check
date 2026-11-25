@@ -1,5 +1,10 @@
 <template>
-  <input class="text-black rounded text-center caret-transparent placeholder-black" :placeholder="hotkey" @keydown.prevent @keyup="handelKeydown" />
+  <input
+    class="rounded bg-white text-center text-black placeholder-black caret-transparent"
+    :placeholder="hotkey"
+    @keydown.prevent
+    @keyup="handelKeydown"
+  />
 </template>
 <script setup lang="ts">
 import { keyToElectron } from "@/renderer/lib/keyToElectron";

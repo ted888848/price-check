@@ -6,8 +6,8 @@
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref, toRaw } from "vue";
 import IPC from "@/ipc";
-import RegexWidget from "./RegexWidget/Widget.vue";
 import { customEvent, type MyCustomEventMap } from "@/renderer/lib/customEvent";
+import RegexWidget from "./RegexWidget/Widget.vue";
 const config = ref<Config>();
 const previewWidgetId = ref<string | null>(null);
 const props = defineProps<{

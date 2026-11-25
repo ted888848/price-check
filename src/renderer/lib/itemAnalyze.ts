@@ -1,10 +1,10 @@
-import IPC from "@/ipc";
-import { APIitems, APImods, APIStatic } from "./APIdata";
-import { isPOE2, poeVersion, secondCurrency } from ".";
-import { getModMatchRegex, getStrReg, hasPossibilityReg, numberPatternWithNameGroup } from "./regex";
-import { match, P } from "ts-pattern";
-import { defaultItemParsed, NOT_MATCHED_ID, rarityOptions, typeTrans } from "./const";
 import { countBy, isUndefined } from "lodash-es";
+import { match, P } from "ts-pattern";
+import IPC from "@/ipc";
+import { isPOE2, poeVersion, secondCurrency } from ".";
+import { APIitems, APImods, APIStatic } from "./APIdata";
+import { defaultItemParsed, NOT_MATCHED_ID, rarityOptions, typeTrans } from "./const";
+import { getModMatchRegex, getStrReg, hasPossibilityReg, numberPatternWithNameGroup } from "./regex";
 enum ParseResult {
   PARSE_SECTION_FAIL,
   PARSE_SECTION_SUCC,

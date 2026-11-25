@@ -1,7 +1,7 @@
-import type { IpcArgs, IPCListener, IpcReturn } from "@/ipc";
-import type { Channel } from "@/ipc";
 import { contextBridge, ipcRenderer } from "electron";
 import Store from "electron-store";
+import type { IpcArgs, IPCListener, IpcReturn } from "@/ipc";
+import type { Channel } from "@/ipc";
 export const ipc = {
   send<C extends Channel>(channel: C, ...args: IpcArgs<C>): void {
     return ipcRenderer.send(channel, ...args);

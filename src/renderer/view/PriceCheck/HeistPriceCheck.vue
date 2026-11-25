@@ -1,5 +1,5 @@
 <template>
-  <div class="flex p-2 items-center justify-center">
+  <div class="flex items-center justify-center p-2">
     <span class="mx-1 text-white hover:cursor-default">物品:</span>
     <MySelect
       v-model="gemReplicaSelect"
@@ -11,7 +11,7 @@
       class="flex-1"
     />
   </div>
-  <div v-show="!((gemReplicaSelect?.text.startsWith('贗品') && gemReplicaSelect?.trans) ?? true)" class="flex p-2 items-center justify-center">
+  <div v-show="!((gemReplicaSelect?.text.startsWith('贗品') && gemReplicaSelect?.trans) ?? true)" class="flex items-center justify-center p-2">
     <span class="mx-1 text-white hover:cursor-default">寶石版本:</span>
     <MySelect
       v-model="gemTransSelect"
@@ -46,23 +46,23 @@
     :is-active="isActive"
     :remaining="remaining"
   />
-  <span v-if="parseError" class="text-red-600 text-4xl text-center hover:cursor-default">
+  <span v-if="parseError" class="text-center text-4xl text-red-600 hover:cursor-default">
     {{ parseError }}
   </span>
 </template>
 
 <script setup lang="ts">
-import { computed, reactive, ref, watch, watchEffect } from "vue";
-import { countBy, maxBy } from "lodash-es";
-import { searchItem, fetchItem, selectOptions } from "@/renderer/lib/tradeSide";
-import { currencyImageUrl, heistReward as gemReplicaOptions } from "@/renderer/lib/APIdata";
-import type { ISearchResult, ISearchJson, IFetchResult } from "@/renderer/lib/tradeSide";
-import { secondCurrency, tradeUrl } from "@/renderer/lib";
-import MySelect from "../../components/utility/MySelect.vue";
-import SearchFunctions from "./components/SearchFunctions.vue";
-import PriceResultTable from "./components/PriceResultTable.vue";
-import { useMyCountdown } from "@/renderer/lib/ratetimelimit";
 import { useInfiniteQuery, useQuery, useQueryClient } from "@tanstack/vue-query";
+import { countBy, maxBy } from "lodash-es";
+import { computed, reactive, ref, watch, watchEffect } from "vue";
+import { secondCurrency, tradeUrl } from "@/renderer/lib";
+import { currencyImageUrl, heistReward as gemReplicaOptions } from "@/renderer/lib/APIdata";
+import { useMyCountdown } from "@/renderer/lib/ratetimelimit";
+import { searchItem, fetchItem, selectOptions } from "@/renderer/lib/tradeSide";
+import type { ISearchResult, ISearchJson, IFetchResult } from "@/renderer/lib/tradeSide";
+import MySelect from "../../components/utility/MySelect.vue";
+import PriceResultTable from "./components/PriceResultTable.vue";
+import SearchFunctions from "./components/SearchFunctions.vue";
 const props = defineProps<{
   itemProp: ParsedItem;
   leagueSelect: string;

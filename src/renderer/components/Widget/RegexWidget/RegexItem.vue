@@ -1,27 +1,28 @@
 <template>
-  <div class="w-100% min-w-0 center gap-4px">
+  <div class="w-100% center gap-4px min-w-0">
     <input
-      class="flex-1 min-w-0 text-start"
+      class="min-w-0 flex-1 text-start"
+      :class="{ 'bg-white': isEditing }"
       v-if="isEditing"
       v-model="inputValue"
       :disabled="props.disabled"
       ref="inputRef"
       @keydown="handleKeydown"
     />
-    <div class="relative flex-1 min-w-0" v-else @mouseenter="handleMouseEnter" @mouseleave="handleMouseLeave">
-      <button class="w-full min-w-0 text-start text-white text-nowrap text-ellipsis overflow-hidden" @click="handleClick">
+    <div class="relative min-w-0 flex-1 rounded hover:bg-gray-800" v-else @mouseenter="handleMouseEnter" @mouseleave="handleMouseLeave">
+      <button class="w-full min-w-0 overflow-hidden text-start text-nowrap text-ellipsis text-white" @click="handleClick">
         {{ regex.regex }}
       </button>
       <div
         v-if="isTooltipVisible"
-        class="pointer-events-none absolute left-50% top-full text-nowrap z-10 mt-1 rounded bg-gray-900 px-2 py-1 translate-x-[-50%] text-sm text-white shadow-lg"
+        class="left-50% pointer-events-none absolute top-full z-10 mt-1 translate-x-[-50%] rounded bg-gray-900 px-2 py-1 text-sm text-nowrap text-white shadow-lg"
       >
         {{ regex.regex }}
       </div>
     </div>
-    <div class="i-material-symbols:edit text-xl cursor-pointer text-green-600" v-if="!isEditing" @click="handleEdit" />
-    <div class="i-material-symbols:check-circle text-xl cursor-pointer text-green-600" v-else @click="handleSave" />
-    <div class="i-material-symbols:delete-rounded text-xl cursor-pointer text-red-600" v-if="!props.empty" @click="handleDelete" />
+    <div class="i-material-symbols:edit cursor-pointer text-xl text-green-600" v-if="!isEditing" @click="handleEdit" />
+    <div class="i-material-symbols:check-circle cursor-pointer text-xl text-green-600" v-else @click="handleSave" />
+    <div class="i-material-symbols:delete-rounded cursor-pointer text-xl text-red-600" v-if="!props.empty" @click="handleDelete" />
   </div>
 </template>
 <script setup lang="ts">
@@ -65,6 +66,7 @@ onBeforeUnmount(() => {
 
 function handleEdit() {
   if (props.disabled) return;
+  inputValue.value = props.regex.regex;
   isTooltipVisible.value = false;
   isEditing.value = true;
   nextTick(() => {
@@ -85,7 +87,7 @@ function handleSave() {
     regex: inputValue.value,
   });
   if (props.empty) {
-    newRegexItem.id = new Date().getTime().toString();
+    newRegexItem.id = crypto.randomUUID();
     isEditing.value = true;
     inputValue.value = "";
     if (!newRegexItem.regex.trim()) return;
@@ -104,4 +106,9 @@ function handleKeydown(event: KeyboardEvent) {
     handleSave();
   }
 }
+
+window.ipc.on(IPC.POE_ACTIVE, () => {
+  if (!isEditing.value) return;
+  isEditing.value = false;
+});
 </script>

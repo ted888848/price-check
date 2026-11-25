@@ -9,7 +9,7 @@
       class="mx-4px"
     />
     <div
-      class="text-xl text-white my-1 text-center center gap-8px"
+      class="center gap-8px my-1 text-center text-xl text-white"
       @click="() => (item.type.searchByType = Boolean(!item.type.searchByType && item.type.option))"
     >
       <span v-if="item.name && !item.elderMap && !item.conquerorMap">{{ item.name }}</span>
@@ -29,21 +29,21 @@
       </div>
     </div>
 
-    <div class="text-white text-center flex justify-between px-2">
+    <div class="flex justify-between px-2 text-center text-white">
       <span :style="{ visibility: item.pDPS ? 'visible' : 'hidden' }" class="w-40">PDps: {{ item.pDPS }}</span>
       <span v-if="item.type.text" class="flex-1" :class="{ 'text-3xl': item.type.searchByType }">
         {{ item.type.text }}
       </span>
       <span :style="{ visibility: item.eDPS ? 'visible' : 'hidden' }" class="w-40">EDps: {{ item.eDPS }}</span>
     </div>
-    <div v-if="item.map_completion_reward" class="text-white center px-2">
+    <div v-if="item.map_completion_reward" class="center px-2 text-white">
       <span class="flex-1">
         {{ item.map_completion_reward }}
       </span>
     </div>
-    <div v-if="item.inscribed" class="text-white center px-2">
+    <div v-if="item.inscribed" class="center px-2 text-white">
       <div
-        class="flex-1 flex flex-col"
+        class="flex flex-1 flex-col"
         :class="{ 'text-red-500': !item.inscribed.searchRequirementItem }"
         @click="
           () => {
@@ -53,29 +53,29 @@
         "
       >
         獻祭: {{ item.inscribed.requirementItem }}
-        <span v-if="item.inscribed.rewardItem?.startsWith('翻倍獻祭的')" class="text-yellow-500 text-xs"> 目前沒有辦法顯示該筆是x1還是x4翻倍 </span>
+        <span v-if="item.inscribed.rewardItem?.startsWith('翻倍獻祭的')" class="text-xs text-yellow-500"> 目前沒有辦法顯示該筆是x1還是x4翻倍 </span>
       </div>
       <span class="flex-1"> 獎勵: {{ item.inscribed.rewardItem }} </span>
     </div>
-    <div class="mx-0 bg-blue-900 grid grid-cols-3 select-none">
-      <div v-if="!item.searchExchange.option" class="flex p-2 items-center justify-center">
+    <div class="mx-0 grid grid-cols-3 bg-blue-900 select-none">
+      <div v-if="!item.searchExchange.option" class="flex items-center justify-center p-2">
         <span class="mx-1 text-white hover:cursor-default">汙染:</span>
         <MySelect v-model="corruptComputed" :options="corruptOption" label-key="label" :reducer="(i) => i.value" class="flex-1" />
       </div>
-      <div v-if="!item.searchExchange.option && !item.type.text.endsWith('技能寶石')" class="flex p-2 items-center justify-center select-none">
+      <div v-if="!item.searchExchange.option && !item.type.text.endsWith('技能寶石')" class="flex items-center justify-center p-2 select-none">
         <span class="mx-1 text-white hover:cursor-default">已鑑定:</span>
         <MySelect v-model="item.isIdentify" :options="generalOption" label-key="label" :reducer="(i) => i.value" class="flex-1" />
       </div>
-      <div v-if="item.searchExchange.option" class="select-none col-start-2 center p-2">
+      <div v-if="item.searchExchange.option" class="center col-start-2 p-2 select-none">
         <span class="mx-1 text-white hover:cursor-default">使用:</span>
         <MySelect v-model="searchExchangeState" :options="exchangeHave" label-key="label" :reducer="(i) => i.value" class="flex-1" />
       </div>
       <div v-if="!item.searchExchange.option" class="flex items-center justify-center">
-        <ValueMinMax v-if="item.gemLevel" v-model="item.gemLevel" class="flex p-2 items-center justify-center"> 寶石等級: </ValueMinMax>
-        <ValueMinMax v-else-if="item.mapTier" v-model="item.mapTier" class="flex p-2 items-center justify-center"> 地圖階級: </ValueMinMax>
-        <ValueMinMax v-else-if="item.itemLevel" v-model="item.itemLevel" class="flex p-2 items-center justify-center"> 物品等級: </ValueMinMax>
+        <ValueMinMax v-if="item.gemLevel" v-model="item.gemLevel" class="flex items-center justify-center p-2"> 寶石等級: </ValueMinMax>
+        <ValueMinMax v-else-if="item.mapTier" v-model="item.mapTier" class="flex items-center justify-center p-2"> 地圖階級: </ValueMinMax>
+        <ValueMinMax v-else-if="item.itemLevel" v-model="item.itemLevel" class="flex items-center justify-center p-2"> 物品等級: </ValueMinMax>
       </div>
-      <ValueMinMax v-if="!item.searchExchange.option" v-model="item.quality" class="flex p-2 items-center justify-center"> 品質: </ValueMinMax>
+      <ValueMinMax v-if="!item.searchExchange.option" v-model="item.quality" class="flex items-center justify-center p-2"> 品質: </ValueMinMax>
       <div v-if="item.blightedMap" class="flex items-center justify-center">
         <span class="mx-1 text-white hover:cursor-default">凋落圖</span>
       </div>
@@ -89,10 +89,10 @@
       </div>
       <div
         v-else-if="item.isWeaponOrArmor || ['項鍊', '戒指', '腰帶', '箭袋'].includes(item.type.text)"
-        class="flex col-span-2 items-center justify-center select-none"
+        class="col-span-2 flex items-center justify-center select-none"
       >
         <span class="mx-1 text-white hover:cursor-default">勢力:</span>
-        <div class="flex-grow mx-1">
+        <div class="mx-1 flex-grow">
           <MySelect
             v-model="item.influences"
             :options="influencesOptions"
@@ -156,7 +156,7 @@
         <span class="mx-1 text-white">穢生:</span>
         <CircleCheck :have-undefined="true" :checked="item.foulborn ?? false" />
       </div>
-      <ValueMinMax v-if="item.socketCount" v-model="item.socketCount" class="flex p-2 items-center justify-center"> 插槽: </ValueMinMax>
+      <ValueMinMax v-if="item.socketCount" v-model="item.socketCount" class="flex items-center justify-center p-2"> 插槽: </ValueMinMax>
     </div>
 
     <ModTable :stats="item.stats" :expanded="modTbodyToggle" @update:expanded="modTbodyToggle = $event" />
@@ -171,7 +171,7 @@
       @open-browser="openBrowser"
       @open-web-view="openWebView"
     />
-    <div v-if="marketPrice" class="text-white text-18px text-center my-1 flex-col center gap-2px">
+    <div v-if="marketPrice" class="text-18px center gap-2px my-1 flex-col text-center text-white">
       <div class="text-16px">市場價:</div>
       <MarketPrice
         v-if="marketPrice.divine.amount !== null"
@@ -214,30 +214,30 @@
       :remaining="remaining"
     />
   </template>
-  <span v-if="parseError" class="text-red-600 text-4xl text-center hover:cursor-default">
+  <span v-if="parseError" class="text-center text-4xl text-red-600 hover:cursor-default">
     {{ parseError }}
   </span>
 </template>
 
 <script setup lang="ts">
+import { useInfiniteQuery, useQuery, useQueryClient } from "@tanstack/vue-query";
 import { countBy, maxBy } from "lodash-es";
 import { computed, ref, nextTick, watch, onUnmounted, toRaw } from "vue";
-import { getSearchJSON, searchItem, fetchItem, searchExchange, selectOptions } from "@/renderer/lib/tradeSide";
 import IPC from "@/ipc";
-import { APIStatic, divineImage, chaosOrExImage, currencyImageUrl } from "@/renderer/lib/APIdata";
-import CircleCheck from "../../components/utility/CircleCheck.vue";
-import ValueMinMax from "../../components/utility/ValueMinMax.vue";
-import type { ISearchResult, IExchangeResult, IFetchResult } from "@/renderer/lib/tradeSide";
 import { secondCurrency, tradeUrl } from "@/renderer/lib";
-import MySelect from "../../components/utility/MySelect.vue";
-import { useMyCountdown } from "@/renderer/lib/ratetimelimit";
-import { useInfiniteQuery, useQuery, useQueryClient } from "@tanstack/vue-query";
-import { getMarketPrice, marketQueryOption, type TMarketItemRate } from "@/renderer/lib/market";
-import MarketPrice from "../../components/utility/MarketPrice.vue";
-import ModTable from "./components/ModTable.vue";
-import SearchFunctions from "./components/SearchFunctions.vue";
-import PriceResultTable from "./components/PriceResultTable.vue";
+import { APIStatic, divineImage, chaosOrExImage, currencyImageUrl } from "@/renderer/lib/APIdata";
 import { DOUBLE_CORRUPT_VALUE } from "@/renderer/lib/const";
+import { getMarketPrice, marketQueryOption, type TMarketItemRate } from "@/renderer/lib/market";
+import { useMyCountdown } from "@/renderer/lib/ratetimelimit";
+import { getSearchJSON, searchItem, fetchItem, searchExchange, selectOptions } from "@/renderer/lib/tradeSide";
+import type { ISearchResult, IExchangeResult, IFetchResult } from "@/renderer/lib/tradeSide";
+import CircleCheck from "../../components/utility/CircleCheck.vue";
+import MarketPrice from "../../components/utility/MarketPrice.vue";
+import MySelect from "../../components/utility/MySelect.vue";
+import ValueMinMax from "../../components/utility/ValueMinMax.vue";
+import ModTable from "./components/ModTable.vue";
+import PriceResultTable from "./components/PriceResultTable.vue";
+import SearchFunctions from "./components/SearchFunctions.vue";
 const props = defineProps<{
   itemProp: ParsedItem;
   leagueSelect: string;

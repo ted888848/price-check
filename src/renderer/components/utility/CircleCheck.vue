@@ -1,7 +1,7 @@
 <template>
-  <div v-if="props.checked === true" class="i-material-symbols:check-circle-rounded text-green-600 text-xl" />
-  <div v-else-if="props.checked === 'indeterminate'" class="i-material-symbols:check-circle-rounded text-yellow-500 text-xl" />
-  <div v-else class="i-material-symbols:add-circle-rounded text-red-600 text-xl rotate-45" />
+  <div v-if="props.checked === true" class="i-material-symbols:check-circle-rounded text-xl text-green-600" />
+  <div v-else-if="props.checked === 'indeterminate'" class="i-material-symbols:check-circle-rounded text-xl text-yellow-500" />
+  <div v-else class="i-material-symbols:add-circle-rounded rotate-45 text-xl text-red-600" />
 </template>
 
 <script setup lang="ts">

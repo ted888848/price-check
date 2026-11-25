@@ -4,12 +4,12 @@
 </template>
 
 <script setup lang="ts">
-import OverlayWindow from "./view/OverlayWindow/OverlayWindow.vue";
-import PriceCheck from "./view/PriceCheck/PriceCheck.vue";
+import { useQuery } from "@tanstack/vue-query";
 import { useTemplateRef } from "vue";
 import { loadAPIData } from "./lib/APIdata";
-import { useQuery } from "@tanstack/vue-query";
 import { marketQueryOption } from "./lib/market";
+import OverlayWindow from "./view/OverlayWindow/OverlayWindow.vue";
+import PriceCheck from "./view/PriceCheck/PriceCheck.vue";
 const priceCheckRef = useTemplateRef("priceCheck");
 const reloadLeagues = () => {
   priceCheckRef.value?.loadLeagues();

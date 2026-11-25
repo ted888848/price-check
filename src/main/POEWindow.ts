@@ -1,6 +1,6 @@
-import { OverlayController } from "electron-overlay-window";
 import { EventEmitter } from "events";
 import type { BrowserWindow } from "electron";
+import { OverlayController } from "electron-overlay-window";
 interface TEventMap {
   poeActiveChange: [boolean];
 }

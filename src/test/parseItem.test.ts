@@ -1,7 +1,7 @@
-import { beforeAll, describe, expect, it, vi } from "vitest";
 import { readFile } from "node:fs/promises";
-import config from "./data/appConfig.json";
+import { beforeAll, describe, expect, it, vi } from "vitest";
 import IPC from "@/ipc";
+import config from "./data/appConfig.json";
 import { itemTemplateRaw } from "./data/templateItems";
 // 先載入資料
 let testData: any;

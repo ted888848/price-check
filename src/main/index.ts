@@ -1,12 +1,12 @@
 "use strict";
 import { app, dialog, ipcMain, session } from "electron";
-import { setupShortcut } from "./shortcuts";
-import { createWindow } from "./overlayWindow";
-import { setupTray } from "./tray";
-import { getPOEApiData } from "./setupAPI";
+import IPC from "@/ipc";
 import { checkForUpdate } from "./autoUpdate";
 import { setupConfig } from "./config";
-import IPC from "@/ipc";
+import { createWindow } from "./overlayWindow";
+import { getPOEApiData } from "./setupAPI";
+import { setupShortcut } from "./shortcuts";
+import { setupTray } from "./tray";
 import "./proxyServer";
 const isDevelopment = process.env.NODE_ENV !== "production";
 

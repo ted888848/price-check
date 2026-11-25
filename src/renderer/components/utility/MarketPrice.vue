@@ -1,9 +1,9 @@
 <template>
   <div v-if="props.amount !== null" class="center gap-2px">
-    <img :src="props.currencyImage" class="flex-shrink-0 w-20px h-20px" />
+    <img :src="props.currencyImage" class="w-20px h-20px flex-shrink-0" />
     <span v-if="props.amount < 1"> 1：{{ priceFormatter(1 / props.amount) }} </span>
     <span v-else> {{ priceFormatter(props.amount) }}：1 </span>
-    <img v-if="props.itemImage" :src="props.itemImage" class="w-7 h-7" />
+    <img v-if="props.itemImage" :src="props.itemImage" class="h-7 w-7" />
     &nbsp;({{ getTimesAgo(props.timestamp) }})
   </div>
 </template>

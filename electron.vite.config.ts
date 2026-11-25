@@ -1,6 +1,6 @@
+import vue from "@vitejs/plugin-vue";
 // import { rmSync } from 'node:fs'
 import { defineConfig } from "electron-vite";
-import vue from "@vitejs/plugin-vue";
 import UnoCSS from "unocss/vite";
 import ElementPlus from "unplugin-element-plus/vite";
 
