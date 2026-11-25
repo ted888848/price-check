@@ -5,7 +5,8 @@
     "correctness": "error"
   },
   "rules": {
-    "typescript/no-non-null-assertion": "warn"
+    "typescript/no-non-null-assertion": "warn",
+    "no-console": ["warn", { "allow": ["warn", "error"] }]
   },
   "env": {
     "builtin": true

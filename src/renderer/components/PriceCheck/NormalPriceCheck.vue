@@ -394,6 +394,7 @@ const itemImage = computed(() => {
   const image = APIStatic.find((ele) => ele.id === item.value.itemID)?.image;
   return image ? `${import.meta.env.VITE_URL_BASE}${image}` : "";
 });
+// oxlint-disable-next-line no-console
 if (process.env.NODE_ENV === "development") console.log(structuredClone(toRaw(item.value)));
 const undefinedUnique = item.value.isIdentify === false && item.value.raritySearch.label === "傳奇";
 

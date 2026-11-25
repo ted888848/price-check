@@ -427,6 +427,7 @@ export async function searchItem(searchJson: ISearchJson, league: string): Promi
     err: false,
   };
   searchJson = cleanupJSON(searchJson);
+  // oxlint-disable-next-line no-console
   if (process.env.NODE_ENV === "development") console.log(searchJson);
   await tradeApi
     .post("", searchJson, { params: { url: `${tradeUrl}/search/${league}` } })

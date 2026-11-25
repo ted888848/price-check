@@ -186,7 +186,7 @@ window.ipc.on(IPC.PRICE_CHECK_SHOW, (_e, clip: string, pos: string, prev: boolea
     } catch (e) {
       item.value = {} as ParsedItem;
       parseError.value = (e as Error).message;
-      console.log(e);
+      console.error(e);
     }
   } else {
     currentPriceCheck.value = lastPriceCheckTab.value;

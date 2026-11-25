@@ -23,7 +23,7 @@ export function registerShortcut() {
   globalShortcut.register(config.priceCheckHotkey, () => {
     getClipboard()
       .then((clip) => togglePriceCheck(clip))
-      .catch((err) => console.log(err));
+      .catch((err) => console.error(err));
     uIOhook.keyTap(UiohookKey.C, [UiohookKey.Ctrl]);
   });
   globalShortcut.register(config.settingHotkey, () => {

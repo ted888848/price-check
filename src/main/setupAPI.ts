@@ -42,7 +42,7 @@ function setupItemEntries(itemArray: APIItem["entries"], heistReward: HeistRewar
       itemBaseType.push(tempItem);
     });
   } catch (e) {
-    console.log(e);
+    console.error(e);
   }
   return itemBaseType;
 }
@@ -313,7 +313,7 @@ export async function get2APIdata() {
   result.forEach((e) => {
     if (e.status === "rejected") {
       error = e.reason;
-      console.log(error);
+      console.error(error);
     }
   });
   store1.set("APIVersion", app.getVersion());
@@ -376,8 +376,8 @@ autoUpdater.on("update-not-available", () => {
 export async function checkForUpdate() {
   if ((await session.defaultSession?.getCacheSize()) >>> 20 >= 30) {
     //大於30MB
-    session.defaultSession.clearCache().catch((err) => console.log(err));
-    session.defaultSession.clearCodeCaches({}).catch((err) => console.log(err));
+    session.defaultSession.clearCache().catch((err) => console.error(err));
+    session.defaultSession.clearCodeCaches({}).catch((err) => console.error(err));
   }
   updateState.label = "檢查更新中";
   updateState.canClick = false;

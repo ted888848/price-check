@@ -156,7 +156,6 @@ export function parseRateTimeLimit(header?: AxiosResponseHeaders) {
           }
           const nextWindow = limiter.getMsUntilNextWindow() / 1000;
           if (nextWindow > 0) {
-            console.log(nextWindow);
             startCountdown(nextWindow + 0.25);
           }
         }

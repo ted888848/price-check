@@ -42,7 +42,6 @@ function reloadAPIdata() {
       if (status) {
         emit("reloadLeagues");
         loadAPIData();
-        console.log("API reloaded");
       } else {
         console.error(error);
       }
