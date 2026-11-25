@@ -44,8 +44,8 @@
 </template>
 <script setup lang="ts">
 import { selectOptions } from "@/renderer/lib/tradeSide";
-import MySelect from "../utility/MySelect.vue";
-import CircleCheck from "../utility/CircleCheck.vue";
+import MySelect from "../../components/utility/MySelect.vue";
+import CircleCheck from "../../components/utility/CircleCheck.vue";
 const { exchangeHave, searchOnlineTypeOptions } = selectOptions;
 const config = defineModel<Config>("config", {
   required: true,

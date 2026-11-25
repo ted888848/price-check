@@ -43,7 +43,7 @@ import { onMounted, ref } from "vue";
 import IPC from "@/ipc";
 import SettingPriceCheck from "./SettingPriceCheck.vue";
 import SettingShortcut from "./SettingShortcut.vue";
-import WidgetsSetting from "../Widget/Settings/WidgetsSetting.vue";
+import WidgetsSetting from "../../components/Widget/Settings/WidgetsSetting.vue";
 const config = ref<Config>();
 onMounted(() => {
   config.value = window.ipc.sendSync(IPC.GET_CONFIG);

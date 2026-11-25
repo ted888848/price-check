@@ -36,6 +36,7 @@
     "@types/node": "^26.6.4",
     "@unocss/preset-icons": "^66.10.5",
     "@unocss/preset-uno": "^66.10.5",
+    "@unocss/preset-wind4": "^66.13.0",
     "@unocss/reset": "^66.10.5",
     "@vitejs/plugin-vue": "^6.0.9",
     "@vue/tsconfig": "^0.9.1",

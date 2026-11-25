@@ -27,78 +27,27 @@
     <span class="mx-1 text-white">搜尋類型:</span>
     <MySelect v-model="searchOnlineType" :options="searchOnlineTypeOptions" label-key="label" :reducer="(i) => i.value" class="w-100px" />
   </div>
-  <div v-if="!isSearching" class="my-2 justify-center flex text-xl">
-    <button
-      class="mx-2 bg-gray-500 text-white rounded px-1 hover:bg-gray-400 disabled:cursor-default disabled:opacity-60 disabled:bg-gray-500"
-      :disabled="isActive"
-      @click="() => searchBtn(false)"
-    >
-      Search
-    </button>
-    <button
-      class="mx-2 bg-gray-500 text-white rounded px-1 hover:bg-gray-400 disabled:cursor-default disabled:opacity-60 disabled:bg-gray-500"
-      :disabled="isActive"
-      @click="() => searchBtn(true)"
-    >
-      Search2
-    </button>
-    <div v-if="searchResult.err || searchResult.searchID.ID">
-      <button
-        class="mx-2 bg-green-400 text-black rounded px-1 hover:bg-green-300 disabled:cursor-default disabled:opacity-60 disabled:bg-green-400"
-        :disabled="isActive || !hasNextPage"
-        @click="fetchMore"
-      >
-        在20筆
-      </button>
-      <button
-        class="mx-2 bg-blue-800 text-white rounded px-4 hover:bg-blue-700 disabled:cursor-default disabled:opacity-60 disabled:bg-blue-800"
-        @click="openBrowser"
-      >
-        B
-      </button>
-    </div>
-    <button
-      class="mx-2 bg-blue-800 text-white rounded px-4 hover:bg-blue-700 disabled:cursor-default disabled:opacity-60 disabled:bg-blue-800"
-      @click="openWebView"
-    >
-      BV
-    </button>
-  </div>
+  <SearchFunctions
+    :is-searching="isSearching"
+    :is-active="isActive"
+    :show-result-actions="Boolean(searchResult.err || searchResult.searchID.ID)"
+    :has-next-page="Boolean(hasNextPage)"
+    @search="searchBtn"
+    @fetch-more="fetchMore"
+    @open-browser="openBrowser"
+    @open-web-view="openWebView"
+  />
+  <PriceResultTable
+    :results="fetchResultSorted"
+    :max-amount="maxAmount"
+    :search-result="searchResult"
+    :fetched-count="fetchedCount"
+    :is-searching="isSearching"
+    :is-active="isActive"
+    :remaining="remaining"
+  />
   <span v-if="parseError" class="text-red-600 text-4xl text-center hover:cursor-default">
     {{ parseError }}
-  </span>
-  <table v-if="fetchResultSorted.length" class="bg-blue-500 text-center text-white text-sm my-1 mx-5 w-1/2 self-center">
-    <thead class="">
-      <tr class="border-b-2 border-red-500 text-base">
-        <td class="hover:cursor-default">價格</td>
-        <td class="hover:cursor-default">數量</td>
-      </tr>
-    </thead>
-    <tbody class="">
-      <tr
-        v-for="ele in fetchResultSorted"
-        :key="`${ele.price}|${ele.currency}`"
-        class="border-b-2 border-gray-600"
-        :class="{
-          'text-red-500 text-xl bg-indigo-600 font-bold': ele.amount === maxAmount!.amount,
-        }"
-      >
-        <td class="flex justify-center items-center">{{ ele.price }}<img :src="ele.image" class="w-7 h-7" /></td>
-        <td>{{ ele.amount }}</td>
-      </tr>
-    </tbody>
-  </table>
-  <span v-if="searchResult.err" class="text-red-600 text-4xl text-center hover:cursor-default">
-    {{ searchResult.errData || "Fail" }}
-  </span>
-  <span v-if="searchResult.searchID?.ID" class="text-white text-2xl text-center hover:cursor-default">
-    共{{ searchResult.totalCount }}筆,顯示{{ fetchedCount }}筆
-  </span>
-  <div v-if="isSearching" class="text-8xl text-white my-5 text-center flex justify-center">
-    <div class="i-svg-spinners:tadpole" />
-  </div>
-  <span v-if="isActive" class="text-white bg-red-600 text-xl text-center my-2 hover:cursor-default"
-    >API次數限制 {{ remaining.toFixed(1) }} 秒後再回來
   </span>
 </template>
 
@@ -109,7 +58,9 @@ import { searchItem, fetchItem, selectOptions } from "@/renderer/lib/tradeSide";
 import { currencyImageUrl, heistReward as gemReplicaOptions } from "@/renderer/lib/APIdata";
 import type { ISearchResult, ISearchJson, IFetchResult } from "@/renderer/lib/tradeSide";
 import { secondCurrency, tradeUrl } from "@/renderer/lib";
-import MySelect from "../utility/MySelect.vue";
+import MySelect from "../../components/utility/MySelect.vue";
+import SearchFunctions from "./components/SearchFunctions.vue";
+import PriceResultTable from "./components/PriceResultTable.vue";
 import { useMyCountdown } from "@/renderer/lib/ratetimelimit";
 import { useInfiniteQuery, useQuery, useQueryClient } from "@tanstack/vue-query";
 const props = defineProps<{

@@ -5,5 +5,7 @@
   "useTabs": false,
   "semi": true,
   "trailingComma": "all",
-  "ignorePatterns": ["dist/**", "node_modules/**", "release/**", "demo/**"]
+  "ignorePatterns": ["dist/**", "node_modules/**", "release/**", "demo/**"],
+  "sortImports": true,
+  "sortTailwindcss": true
 }

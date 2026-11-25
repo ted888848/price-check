@@ -1,9 +1,10 @@
 "use strict";
-import { app, dialog, ipcMain } from "electron";
+import { app, dialog, ipcMain, session } from "electron";
 import { setupShortcut } from "./shortcuts";
 import { createWindow } from "./overlayWindow";
 import { setupTray } from "./tray";
-import { checkForUpdate, getPOEApiData } from "./setupAPI";
+import { getPOEApiData } from "./setupAPI";
+import { checkForUpdate } from "./autoUpdate";
 import { setupConfig } from "./config";
 import IPC from "@/ipc";
 import "./proxyServer";
@@ -31,19 +32,29 @@ app.on("window-all-closed", () => {
   }
 });
 
+const openApiDataErrorDialog = (error: any) => {
+  const detailMessage = error instanceof Error ? (error?.stack ?? error.message) : error;
+  dialog.showMessageBox({
+    title: "讀取API資料錯誤",
+    message: "請稍後重新讀取API資料",
+    detail: detailMessage,
+    type: "error",
+  });
+};
+
 app.on("ready", async () => {
+  if ((await session.defaultSession?.getCacheSize()) >>> 20 >= 30) {
+    //大於30MB
+    session.defaultSession.clearCache().catch((err) => console.error(err));
+    session.defaultSession.clearCodeCaches({}).catch((err) => console.error(err));
+  }
   setupConfig();
   setupTray();
+  await checkForUpdate();
   try {
-    await checkForUpdate();
+    await getPOEApiData();
   } catch (error: any) {
-    const detailMessage = error instanceof Error ? (error?.stack ?? error.message) : error;
-    dialog.showMessageBox({
-      title: "讀取API資料錯誤",
-      message: "請稍後重新讀取API資料",
-      detail: detailMessage,
-      type: "error",
-    });
+    openApiDataErrorDialog(error);
   }
   await createWindow();
   setupShortcut();
@@ -55,13 +66,7 @@ app.on("ready", async () => {
         status: true,
       };
     } catch (error: any) {
-      const detailMessage = error instanceof Error ? (error?.stack ?? error.message) : error;
-      dialog.showMessageBox({
-        title: "讀取API資料錯誤",
-        message: "請稍後重新讀取API資料",
-        detail: detailMessage,
-        type: "error",
-      });
+      openApiDataErrorDialog(error);
       return {
         status: false,
         error,

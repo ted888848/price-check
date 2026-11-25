@@ -2,7 +2,7 @@
   <div v-show="overlayWindowShow" class="absolute top-0 left-0 m-0 w-screen h-screen bg-gray-400 bg-opacity-30" @click.self="closeOverlay">
     <button
       class="absolute top-10 left-10 bg-blue-600 hover:bg-gray-900 rounded-xl px-1 py-0.5"
-      @click="(_event) => (settingWindowShow = !settingWindowShow)"
+      @click="(_) => (settingWindowShow = !settingWindowShow)"
       title="設定"
     >
       <div class="i-material-symbols:settings text-red-600 text-4xl" />
@@ -18,8 +18,8 @@
 import { onMounted, onUnmounted, ref } from "vue";
 import IPC from "@/ipc";
 import { loadAPIData } from "@/renderer/lib/APIdata";
-import SettingWindow from "@/renderer/components/SettingWindow/SettingWindow.vue";
-import Widgets from "../Widget/Widgets.vue";
+import SettingWindow from "@/renderer/view/SettingWindow/SettingWindow.vue";
+import Widgets from "../../components/Widget/Widgets.vue";
 const overlayWindowShow = ref(false);
 function closeOverlay() {
   overlayWindowShow.value = false;

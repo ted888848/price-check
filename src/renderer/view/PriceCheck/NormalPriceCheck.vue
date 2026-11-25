@@ -36,12 +36,12 @@
       </span>
       <span :style="{ visibility: item.eDPS ? 'visible' : 'hidden' }" class="w-40">EDps: {{ item.eDPS }}</span>
     </div>
-    <div v-if="item.map_completion_reward" class="text-white text-center flex justify-center px-2">
+    <div v-if="item.map_completion_reward" class="text-white center px-2">
       <span class="flex-1">
         {{ item.map_completion_reward }}
       </span>
     </div>
-    <div v-if="item.inscribed" class="text-white text-center flex justify-center px-2">
+    <div v-if="item.inscribed" class="text-white center px-2">
       <div
         class="flex-1 flex flex-col"
         :class="{ 'text-red-500': !item.inscribed.searchRequirementItem }"
@@ -66,7 +66,7 @@
         <span class="mx-1 text-white hover:cursor-default">已鑑定:</span>
         <MySelect v-model="item.isIdentify" :options="generalOption" label-key="label" :reducer="(i) => i.value" class="flex-1" />
       </div>
-      <div v-if="item.searchExchange.option" class="center p-2 select-none col-start-2">
+      <div v-if="item.searchExchange.option" class="select-none col-start-2 center p-2">
         <span class="mx-1 text-white hover:cursor-default">使用:</span>
         <MySelect v-model="searchExchangeState" :options="exchangeHave" label-key="label" :reducer="(i) => i.value" class="flex-1" />
       </div>
@@ -159,129 +159,18 @@
       <ValueMinMax v-if="item.socketCount" v-model="item.socketCount" class="flex p-2 items-center justify-center"> 插槽: </ValueMinMax>
     </div>
 
-    <table v-if="item.stats.length" class="bg-gray-700 text-center mt-1 text-white text-sm">
-      <thead class="bg-green-600" @click="(_event) => (modTbodyToggle = !modTbodyToggle)">
-        <tr class="text-lg">
-          <td
-            class="w-6 text-center hover:cursor-default"
-            @click="
-              (e) => {
-                e.stopPropagation();
-                item.stats.forEach((mod) => handleModClick(mod));
-              }
-            "
-          >
-            查
-          </td>
-          <td class="w-14 text-center hover:cursor-default">種類</td>
-          <td class="text-center hover:cursor-default">詞綴</td>
-          <td class="w-11 text-center hover:cursor-default">最小</td>
-          <td
-            class="w-3 text-center hover:cursor-default"
-            @click="
-              (e) => {
-                e.stopPropagation();
-                const firstHaveEmptyValue = item.stats.find((mod) => !isUndefined(mod.searchWithEmptyValue));
-                if (!firstHaveEmptyValue) return;
-                const nextState = !firstHaveEmptyValue.searchWithEmptyValue;
-                item.stats.forEach((mod) => (mod.searchWithEmptyValue = nextState));
-              }
-            "
-          >
-            <ElTooltip content="可以點擊'-'設定是否搜尋最大最小值" placement="top">
-              <div class="i-material-symbols:info-outline size-4" />
-            </ElTooltip>
-          </td>
-          <td class="w-11 text-center hover:cursor-default">最大</td>
-        </tr>
-      </thead>
-      <tbody v-show="modTbodyToggle" class="modsTbody" style="">
-        <tr v-for="(mod, index) in item.stats" :key="mod.id + index" class="border-b-2 border-gray-400">
-          <td class="text-base" @click="() => handleModClick(mod)">
-            <CircleCheck :checked="!mod.disabled" />
-          </td>
-          <td
-            class="whitespace-nowrap text-lg font-semibold hover:cursor-default"
-            :style="{ color: modTextColor(mod.type) }"
-            @click="() => handleModClick(mod)"
-          >
-            {{ mod.type }}
-          </td>
-          <td @click="() => handleModClick(mod)">
-            <div class="text-center whitespace-pre-line">{{ mod.text }}</div>
-          </td>
-          <td>
-            <input
-              v-if="mod.value && !mod.value.option"
-              v-model.number="mod.value.min"
-              type="number"
-              class="w-8 appearance-none rounded bg-gray-400 text-center text-black font-bold"
-              :class="{ 'opacity-20': mod.searchWithEmptyValue }"
-              @dblclick="() => delete mod.value!.min"
-            />
-          </td>
-          <td
-            class="cursor-pointer"
-            @click="
-              () => {
-                if (!(mod.value && !mod.value.option)) return;
-                mod.searchWithEmptyValue = !mod.searchWithEmptyValue;
-              }
-            "
-          >
-            <span v-if="mod.value && !mod.value.option" class="text-white font-bold"> - </span>
-          </td>
-          <td>
-            <input
-              v-if="mod.value && !mod.value.option"
-              v-model.number="mod.value.max"
-              type="number"
-              class="w-8 appearance-none rounded bg-gray-400 text-center text-black font-bold"
-              :class="{ 'opacity-20': mod.searchWithEmptyValue }"
-              @dblclick="() => delete mod.value!.max"
-            />
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <ModTable :stats="item.stats" :expanded="modTbodyToggle" @update:expanded="modTbodyToggle = $event" />
 
-    <div v-if="!isSearching" class="my-2 justify-center flex text-xl">
-      <button
-        class="mx-2 bg-gray-500 text-white rounded px-1 hover:bg-gray-400 disabled:cursor-default disabled:opacity-60 disabled:bg-gray-500"
-        :disabled="isActive"
-        @click="() => searchBtn(false)"
-      >
-        Search
-      </button>
-      <button
-        class="mx-2 bg-gray-500 text-white rounded px-1 hover:bg-gray-400 disabled:cursor-default disabled:opacity-60 disabled:bg-gray-500"
-        :disabled="isActive"
-        @click="() => searchBtn(true)"
-      >
-        Search{{ poeVersion === "2" ? "E" : "C" }}
-      </button>
-      <div v-if="searchResult.err || searchResult.searchID.ID">
-        <button
-          class="mx-2 bg-green-400 text-black rounded px-1 hover:bg-green-300 disabled:cursor-default disabled:opacity-60 disabled:bg-green-400"
-          :disabled="isActive || !hasNextPage"
-          @click="fetchMore"
-        >
-          在20筆
-        </button>
-        <button
-          class="mx-2 bg-blue-800 text-white rounded px-4 hover:bg-blue-700 disabled:cursor-default disabled:opacity-60 disabled:bg-blue-800"
-          @click="openBrowser"
-        >
-          B
-        </button>
-      </div>
-      <button
-        class="mx-2 bg-blue-800 text-white rounded px-4 hover:bg-blue-700 disabled:cursor-default disabled:opacity-60 disabled:bg-blue-800"
-        @click="openWebView"
-      >
-        BV
-      </button>
-    </div>
+    <SearchFunctions
+      :is-searching="isSearching"
+      :is-active="isActive"
+      :show-result-actions="Boolean(searchResult.err || searchResult.searchID.ID)"
+      :has-next-page="Boolean(hasNextPage)"
+      @search="searchBtn"
+      @fetch-more="fetchMore"
+      @open-browser="openBrowser"
+      @open-web-view="openWebView"
+    />
     <div v-if="marketPrice" class="text-white text-18px text-center my-1 flex-col center gap-2px">
       <div class="text-16px">市場價:</div>
       <MarketPrice
@@ -312,43 +201,18 @@
         :divineToChaosOrExalted="divineToChaosOrExalted"
       />
     </div>
-    <table v-if="fetchResultSorted.length" class="bg-blue-500 text-center text-white text-sm my-1 mx-5 w-1/2 self-center">
-      <thead class="">
-        <tr class="border-b-2 border-red-500 text-base">
-          <td class="hover:cursor-default">價格</td>
-          <td class="hover:cursor-default">數量</td>
-        </tr>
-      </thead>
-      <tbody class="">
-        <tr
-          v-for="ele in fetchResultSorted"
-          :key="`${ele.price}|${ele.currency}`"
-          class="border-b-2 border-gray-600"
-          :class="{
-            'text-yellow-400 text-xl bg-indigo-700 font-bold': ele.amount === maxAmount?.amount,
-            'text-yellow-300 bg-indigo-500': secondMaxAmount?.amount !== maxAmount?.amount && ele.amount === secondMaxAmount?.amount,
-          }"
-        >
-          <td v-if="item.searchExchange.option" class="flex justify-center items-center">
-            <img :src="ele.image" class="w-7 h-7" />{{ ele.price }}<img :src="currency2Img" class="w-7 h-7" />
-          </td>
-          <td v-else class="flex justify-center items-center">{{ ele.price }}<img :src="ele.image" class="w-7 h-7" /></td>
-          <td>{{ ele.amount }}</td>
-        </tr>
-      </tbody>
-    </table>
-    <span v-if="searchResult.err" class="text-red-600 text-4xl text-center hover:cursor-default">
-      {{ searchResult.errData || "Fail" }}
-    </span>
-    <span v-if="searchResult.searchID?.ID" class="text-white text-2xl text-center hover:cursor-default">
-      共{{ searchResult.totalCount }}筆,顯示{{ fetchedCount }}筆
-    </span>
-    <div v-if="isSearching" class="text-8xl text-white my-5 text-center flex justify-center">
-      <div class="i-svg-spinners:tadpole" />
-    </div>
-    <span v-if="isActive" class="text-white bg-red-600 text-xl text-center my-2 hover:cursor-default">
-      API次數限制 {{ remaining.toFixed(1) }} 秒後再回來
-    </span>
+    <PriceResultTable
+      :results="fetchResultSorted"
+      :max-amount="maxAmount"
+      :second-max-amount="secondMaxAmount"
+      :is-exchange="Boolean(item.searchExchange.option)"
+      :currency2-image="currency2Img"
+      :search-result="searchResult"
+      :fetched-count="fetchedCount"
+      :is-searching="isSearching"
+      :is-active="isActive"
+      :remaining="remaining"
+    />
   </template>
   <span v-if="parseError" class="text-red-600 text-4xl text-center hover:cursor-default">
     {{ parseError }}
@@ -356,23 +220,24 @@
 </template>
 
 <script setup lang="ts">
-import { countBy, isUndefined, maxBy } from "lodash-es";
+import { countBy, maxBy } from "lodash-es";
 import { computed, ref, nextTick, watch, onUnmounted, toRaw } from "vue";
 import { getSearchJSON, searchItem, fetchItem, searchExchange, selectOptions } from "@/renderer/lib/tradeSide";
 import IPC from "@/ipc";
 import { APIStatic, divineImage, chaosOrExImage, currencyImageUrl } from "@/renderer/lib/APIdata";
-import CircleCheck from "../utility/CircleCheck.vue";
-import ValueMinMax from "../utility/ValueMinMax.vue";
+import CircleCheck from "../../components/utility/CircleCheck.vue";
+import ValueMinMax from "../../components/utility/ValueMinMax.vue";
 import type { ISearchResult, IExchangeResult, IFetchResult } from "@/renderer/lib/tradeSide";
-import { poeVersion, secondCurrency, tradeUrl } from "@/renderer/lib";
-import MySelect from "../utility/MySelect.vue";
+import { secondCurrency, tradeUrl } from "@/renderer/lib";
+import MySelect from "../../components/utility/MySelect.vue";
 import { useMyCountdown } from "@/renderer/lib/ratetimelimit";
 import { useInfiniteQuery, useQuery, useQueryClient } from "@tanstack/vue-query";
 import { getMarketPrice, marketQueryOption, type TMarketItemRate } from "@/renderer/lib/market";
-import MarketPrice from "../utility/MarketPrice.vue";
-import { match } from "ts-pattern";
-import { DOUBLE_CORRUPT_VALUE, NOT_MATCHED_ID } from "@/renderer/lib/const";
-import { ElTooltip } from "element-plus";
+import MarketPrice from "../../components/utility/MarketPrice.vue";
+import ModTable from "./components/ModTable.vue";
+import SearchFunctions from "./components/SearchFunctions.vue";
+import PriceResultTable from "./components/PriceResultTable.vue";
+import { DOUBLE_CORRUPT_VALUE } from "@/renderer/lib/const";
 const props = defineProps<{
   itemProp: ParsedItem;
   leagueSelect: string;
@@ -419,18 +284,6 @@ const {
   exchangeHave,
   searchOnlineTypeOptions,
 } = selectOptions;
-function modTextColor(type?: string) {
-  return match(type)
-    .with("固定", () => "#346beb")
-    .with("附魔", () => "#41e635")
-    .with("破裂", () => "#eba536")
-    .with("隨機", () => "red")
-    .with("偽屬性", () => "#9936eb")
-    .with("穢生", () => "#8B4513")
-    .with("未知", () => "gray")
-    .otherwise(() => "white");
-}
-
 const {
   data: searchResult,
   isFetching: isFetchingSearchResult,
@@ -668,14 +521,8 @@ function handleKeydown(e: KeyboardEvent) {
   }
 }
 
-function handleModClick(mod: ItemStat) {
-  if (mod.id === NOT_MATCHED_ID) return;
-  mod.disabled = !mod.disabled;
-}
 window.addEventListener("keydown", handleKeydown);
 onUnmounted(() => {
   window.removeEventListener("keydown", handleKeydown);
 });
 </script>
-
-<style></style>

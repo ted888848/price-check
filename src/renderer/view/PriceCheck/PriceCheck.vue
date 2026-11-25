@@ -69,7 +69,7 @@ import { leagues, divineImage, chaosOrExImage } from "@/renderer/lib/APIdata";
 import NormalPriceCheck from "./NormalPriceCheck.vue";
 import HeistPriceCheck from "./HeistPriceCheck.vue";
 import { leagueSelectRef, secondCurrency, tradeUrl } from "@/renderer/lib";
-import MySelect from "../utility/MySelect.vue";
+import MySelect from "../../components/utility/MySelect.vue";
 import { useQuery } from "@tanstack/vue-query";
 import { getMarketPrice, marketQueryOption } from "@/renderer/lib/market";
 const isWebViewOpen = ref(false);
@@ -218,10 +218,6 @@ input::-webkit-inner-spin-button {
   -webkit-appearance: none;
   appearance: none;
   margin: 0;
-}
-
-tbody.modsTbody > tr > td {
-  padding: 5px 1px;
 }
 
 .exaltedImg:hover .exaltedImgTooltip {

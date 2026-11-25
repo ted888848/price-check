@@ -33,7 +33,7 @@
 </template>
 
 <script setup lang="ts">
-import KeyInput from "../utility/KeyInput.vue";
+import KeyInput from "../../components/utility/KeyInput.vue";
 const config = defineModel<Config>("config", {
   required: true,
 });

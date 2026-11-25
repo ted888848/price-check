@@ -1,7 +1,7 @@
 import { Tray, Menu, app, nativeImage } from "electron";
 import { toggleOverlay, win } from "./overlayWindow";
-import { checkForUpdate } from "./setupAPI";
-import { updateState } from "./setupAPI";
+import { checkForUpdate } from "./autoUpdate";
+import { updateState } from "./autoUpdate";
 import { config, updateConfig } from "./config";
 import SextantOrb128 from "../assets/SextantOrb128.ico?asset";
 

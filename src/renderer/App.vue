@@ -4,8 +4,8 @@
 </template>
 
 <script setup lang="ts">
-import OverlayWindow from "@/renderer/components/OverlayWindow/OverlayWindow.vue";
-import PriceCheck from "@/renderer/components/PriceCheck/PriceCheck.vue";
+import OverlayWindow from "./view/OverlayWindow/OverlayWindow.vue";
+import PriceCheck from "./view/PriceCheck/PriceCheck.vue";
 import { useTemplateRef } from "vue";
 import { loadAPIData } from "./lib/APIdata";
 import { useQuery } from "@tanstack/vue-query";

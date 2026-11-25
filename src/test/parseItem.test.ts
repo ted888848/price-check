@@ -75,9 +75,7 @@ describe("parseItem", () => {
     expect(parseResult).toMatchObject(matchWithoutStats);
 
     if (stats && parseResult) {
-      expect(parseResult.stats).toEqual(
-        expect.arrayContaining(stats.map((stat) => expect.objectContaining(stat))),
-      );
+      expect(parseResult.stats).toEqual(expect.arrayContaining(stats.map((stat) => expect.objectContaining(stat))));
     }
   });
 });
