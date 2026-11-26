@@ -1,33 +1,12 @@
 <template>
   <table v-if="props.stats.length" class="mt-1 bg-gray-700 text-center text-sm text-white">
-    <thead class="bg-green-600" @click="(_event) => emit('update:expanded', !props.expanded)">
+    <thead class="bg-green-600" @click="() => emit('update:expanded', !props.expanded)">
       <tr class="text-lg">
-        <td
-          class="w-6 text-center hover:cursor-default"
-          @click="
-            (e) => {
-              e.stopPropagation();
-              props.stats.forEach((mod) => handleModClick(mod));
-            }
-          "
-        >
-          查
-        </td>
+        <td class="w-6 text-center hover:cursor-default" @click="handleToggleAllModEnable">查</td>
         <td class="w-14 text-center hover:cursor-default">種類</td>
         <td class="text-center hover:cursor-default">詞綴</td>
         <td class="w-11 text-center hover:cursor-default">最小</td>
-        <td
-          class="w-3 text-center hover:cursor-default"
-          @click="
-            (e) => {
-              e.stopPropagation();
-              const firstHaveEmptyValue = props.stats.find((mod) => !isUndefined(mod.searchWithEmptyValue));
-              if (!firstHaveEmptyValue) return;
-              const nextState = !firstHaveEmptyValue.searchWithEmptyValue;
-              props.stats.forEach((mod) => (mod.searchWithEmptyValue = nextState));
-            }
-          "
-        >
+        <td class="w-3 text-center hover:cursor-default" @click="handleToggleAllModValueClick">
           <ElTooltip content="可以點擊'-'設定是否搜尋最大最小值" placement="top">
             <div class="i-material-symbols:info-outline size-4" />
           </ElTooltip>
@@ -37,17 +16,17 @@
     </thead>
     <tbody v-show="props.expanded" class="modsTbody" style="">
       <tr v-for="(mod, index) in props.stats" :key="mod.id + index" class="border-b-2 border-gray-400">
-        <td class="text-base" @click="() => handleModClick(mod)">
+        <td class="text-base" @click="() => handleToggleModEnable(mod)">
           <CircleCheck :checked="!mod.disabled" />
         </td>
         <td
           class="text-lg font-semibold whitespace-nowrap hover:cursor-default"
           :style="{ color: modTextColor(mod.type) }"
-          @click="() => handleModClick(mod)"
+          @click="() => handleToggleModEnable(mod)"
         >
           {{ mod.type }}
         </td>
-        <td @click="() => handleModClick(mod)">
+        <td @click="() => handleToggleModEnable(mod)">
           <div class="text-center whitespace-pre-line">{{ mod.text }}</div>
         </td>
         <td>
@@ -60,7 +39,7 @@
             @dblclick="() => delete mod.value.min"
           />
         </td>
-        <td class="cursor-pointer" @click="() => handleModValueToggleClick(mod)">
+        <td class="cursor-pointer" @click="() => handleToggleModValueClick(mod)">
           <span v-if="isModHasValueField(mod)" class="font-bold text-white"> - </span>
         </td>
         <td>
@@ -109,14 +88,30 @@ function isModHasValueField(mod: ParsedItem["stats"][number]): mod is ParsedItem
   return !!mod.value && !mod.value.option;
 }
 
-function handleModClick(mod: ParsedItem["stats"][number]) {
-  if (mod.id === NOT_MATCHED_ID) return;
+function handleToggleModEnable(mod: ParsedItem["stats"][number]) {
+  if (mod.id.startsWith(NOT_MATCHED_ID)) return;
   mod.disabled = !mod.disabled;
 }
 
-function handleModValueToggleClick(mod: ParsedItem["stats"][number]) {
+function handleToggleAllModEnable(e: MouseEvent) {
+  e.stopPropagation();
+  const firstEnabledMod = props.stats.find((mod) => !mod.disabled);
+  if (!firstEnabledMod) return;
+  const nextState = !firstEnabledMod.disabled;
+  props.stats.forEach((mod) => (mod.disabled = nextState));
+}
+
+function handleToggleModValueClick(mod: ParsedItem["stats"][number]) {
   if (!(mod.value && !mod.value.option)) return;
   mod.searchWithEmptyValue = !mod.searchWithEmptyValue;
+}
+
+function handleToggleAllModValueClick(e: MouseEvent) {
+  e.stopPropagation();
+  const firstHaveEmptyValue = props.stats.find((mod) => !isUndefined(mod.searchWithEmptyValue));
+  if (!firstHaveEmptyValue) return;
+  const nextState = !firstHaveEmptyValue.searchWithEmptyValue;
+  props.stats.forEach((mod) => (mod.searchWithEmptyValue = nextState));
 }
 </script>
 

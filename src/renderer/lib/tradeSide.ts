@@ -288,7 +288,7 @@ export function getSearchJSON(item: ParsedItem) {
     searchJSON.query.filters.trade_filters.filters.price.option = secondCurrency;
   }
   for (const stat of item.stats) {
-    if (stat.id === NOT_MATCHED_ID) continue;
+    if (stat.id.startsWith(NOT_MATCHED_ID)) continue;
     if (item.isIdentify === false && stat.type && ["隨機", "穢生"].includes(stat.type)) continue;
     const isSearchWithEmptyValue = stat.searchWithEmptyValue;
     const { searchWithEmptyValue: _searchWithEmptyValue, ...otherStat } = stat;

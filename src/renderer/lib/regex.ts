@@ -4,6 +4,7 @@ export const numberPatternWithNameGroup = new RegExp(
   `(?<value>${decimalPattern.source})(?:\\((?<lowerBound>${decimalPattern.source})-(?<upperBound>${decimalPattern.source})\\))?`,
 );
 export const hasPossibilityReg = /(有 \+?#% 機率)/;
+export const diffSignReg = /(增加|減少|更多|更少)/;
 export function getStrReg(section: string[], type: string) {
   const retArr: RegExp[] = [];
   section.forEach((line) => {
@@ -18,7 +19,7 @@ export function getStrReg(section: string[], type: string) {
       .replace(/((?:（|\()(.+?-.+?)(?:）|\)))/, "($1)?")
       .replace(/幸運|不幸/, "(?:幸運|不幸)")
       .replace(/__NUMBER__/g, "[+-]?(\\d+|#)(?:\\(-?\\d+--?\\d+\\))?")
-      .replace(/減少|增加/, "(?:減少|增加)")
+      .replace(/增加|減少/, "(?:增加|減少)")
       .replace(/更多|更少/, "(?:更多|更少)");
     retArr.push(new RegExp(`^${line}( \\(.+\\))?$`));
   });
@@ -30,7 +31,7 @@ export function getModMatchRegex(modLine: string) {
     modLine
       .replace(/ \(.+\)$/, "")
       .replace(/[+-]?#/g, numberPattern.source)
-      .replace(/減少|增加/, String.raw`(?:減少|增加)`)
+      .replace(/增加|減少/, String.raw`(?:增加|減少)`)
       .replace(/更多|更少/, String.raw`(?:更多|更少)`),
   );
 }

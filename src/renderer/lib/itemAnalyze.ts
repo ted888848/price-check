@@ -4,7 +4,7 @@ import IPC from "@/ipc";
 import { isPOE2, poeVersion, secondCurrency } from ".";
 import { APIitems, APImods, APIStatic } from "./APIdata";
 import { defaultItemParsed, NOT_MATCHED_ID, rarityOptions, typeTrans } from "./const";
-import { getModMatchRegex, getStrReg, hasPossibilityReg, numberPatternWithNameGroup } from "./regex";
+import { diffSignReg, getModMatchRegex, getStrReg, hasPossibilityReg, numberPatternWithNameGroup } from "./regex";
 enum ParseResult {
   PARSE_SECTION_FAIL,
   PARSE_SECTION_SUCC,
@@ -321,14 +321,15 @@ class ItemAnalyzer {
   private needFilterRegional(matchMods: ParsedAPIMod["entries"]) {
     if (!this.itemParsed.isWeaponOrArmor) return false;
     if (!matchMods.find((ele) => ele.text.endsWith(" (部分)"))) return false;
+    const defenseTypeReg = /閃避|護甲|能量護盾|保護/;
     if (
       this.itemParsed.type.option?.startsWith("armour") &&
       this.itemParsed.type.option !== "armour.quiver" &&
-      matchMods.some((ele) => /閃避|護甲|能量護盾|保護/.test(ele.text))
+      matchMods.some((ele) => defenseTypeReg.test(ele.text))
     )
       return true;
 
-    if (this.itemParsed.type.option?.startsWith("weapon") && !matchMods.some((ele) => /閃避|護甲|能量護盾|保護/.test(ele.text))) return true;
+    if (this.itemParsed.type.option?.startsWith("weapon") && !matchMods.some((ele) => defenseTypeReg.test(ele.text))) return true;
     return false;
   }
   private parseMod(section: string[], type: keyof ParsedAPIMods | "mutated" | "rune") {
@@ -344,44 +345,44 @@ class ItemAnalyzer {
     for (let index = 0; index < regSection.length; index++) {
       const line = regSection[index];
       try {
-        let matchMods = APImods[modType]?.entries.filter(
+        let matchAPIMods = APImods[modType]?.entries.filter(
           (mod) => line.test(mod.text) || line.test(mod.text.replace(hasPossibilityReg, "")) || line.test(mod.text.split("\n").at(0) ?? ""),
         );
-        if (!matchMods?.length) {
+        if (!matchAPIMods?.length) {
           notMatchMods.push({
             text: cleanSection[index],
             type: "未知",
             disabled: true,
-            id: NOT_MATCHED_ID,
+            id: `${NOT_MATCHED_ID}_${index}`,
           });
         }
-        if (!matchMods || !matchMods.length) continue;
-        if (matchMods.length > 1) {
-          matchMods = matchMods.filter((mod) => !mod.text.endsWith("(古典)"));
-          if (this.needFilterRegional(matchMods)) {
-            matchMods = matchMods.filter((mod) => mod.text.endsWith(" (部分)"));
+        if (!matchAPIMods || !matchAPIMods.length) continue;
+        if (matchAPIMods.length > 1) {
+          matchAPIMods = matchAPIMods.filter((mod) => !mod.text.endsWith(" (古典)"));
+          if (this.needFilterRegional(matchAPIMods)) {
+            matchAPIMods = matchAPIMods.filter((mod) => mod.text.endsWith(" (部分)"));
           } else {
-            matchMods = matchMods.filter((mod) => !mod.text.endsWith(" (部分)"));
-            const sectionSign = Array.from(cleanSection[index]?.match(/增加|減少|更多|更少/g) ?? []).join("");
+            matchAPIMods = matchAPIMods.filter((mod) => !mod.text.endsWith(" (部分)"));
+            const sectionSign = Array.from(cleanSection[index]?.match(new RegExp(diffSignReg, "g")) ?? []).join("");
             if (sectionSign) {
-              matchMods = matchMods.filter((mod) => Array.from(mod.text.match(/增加|減少|更多|更少/g) ?? []).join("") === sectionSign);
+              matchAPIMods = matchAPIMods.filter((mod) => Array.from(mod.text.match(new RegExp(diffSignReg, "g")) ?? []).join("") === sectionSign);
             }
           }
         }
 
-        matchMods = matchMods.filter((mod) => {
+        matchAPIMods = matchAPIMods.filter((mod) => {
           const modMultiLine = mod.text.split("\n");
           const modMultiLineLength = modMultiLine.length;
           const regSectionMultiLines = regSection.slice(index, index + modMultiLineLength);
           if (regSectionMultiLines.length !== modMultiLineLength) return false;
           return regSectionMultiLines.every(
             (regSectionMultiLine, mi) =>
-              regSectionMultiLine.test(modMultiLine[mi] ?? "") || regSectionMultiLine.test(modMultiLine[mi]?.replace(hasPossibilityReg, "") ?? ""),
+              regSectionMultiLine.test(modMultiLine[mi]) || regSectionMultiLine.test(modMultiLine[mi].replace(hasPossibilityReg, "")),
           );
         });
 
-        matchMods.forEach((_matchMod) => {
-          const matchMod = structuredClone(_matchMod);
+        matchAPIMods.forEach((matchModRaw) => {
+          const matchMod = structuredClone(matchModRaw);
           const matchModMultiLineLength = matchMod.text.split("\n").length;
           const matchReg = getModMatchRegex(matchMod.text);
           let regGroup = cleanSection
@@ -399,7 +400,7 @@ class ItemAnalyzer {
           const isSearchWithEmptyValue =
             this.config.enableAutoEnableUniqueMods &&
             this.itemParsed.raritySearch.value === "unique" &&
-            matchMods.length === 1 &&
+            matchAPIMods.length === 1 &&
             (type === "explicit" || type === "implicit");
           const baseOption: ItemStat = {
             ...matchMod,
@@ -408,7 +409,7 @@ class ItemAnalyzer {
             searchWithEmptyValue: isSearchWithEmptyValue,
           };
           if (regGroup?.length) {
-            const diffSign = matchMod.text.match(/減少|增加|更多|更少/)?.[0] !== cleanSection[index]?.match(/減少|增加|更多|更少/)?.[0];
+            const diffSign = matchMod.text.match(diffSignReg)?.[0] !== cleanSection[index]?.match(diffSignReg)?.[0];
             let valueArr: string[] = [],
               lowerBoundArr: string[] = [],
               upperBoundArr: string[] = [];
